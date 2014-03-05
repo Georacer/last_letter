@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<robot name="plane">
+	<link name="base_link">
+		<visual>
+			<geometry>
+				<mesh filename="package://uav_model/urdf/skywalker.dae"/>
+			</material>
+		</visual>
+	</link>
+
+</robot>
+

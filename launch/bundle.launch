@@ -1,0 +1,11 @@
+<!-- Top-Level launch file for bundled launching /-->
+
+<launch>
+
+	<!-- Launch the simulator /-->
+	<include file="$(find uav_model)/launch/simulation.launch" />
+
+	<!-- Launch the visualizers /-->
+	<include file="$(find uav_model)/launch/visualization.launch" />	
+
+</launch>
