@@ -1,3 +1,0 @@
-geometry_msgs/Vector3 speeds
----
-float64 alpha #in radians
