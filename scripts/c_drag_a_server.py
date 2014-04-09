@@ -3,7 +3,7 @@
 import rospy
 from math import pow
 from math import pi
-from uav_model.srv import *
+from last_letter.srv import *
 
 
 def calc_drag(req):

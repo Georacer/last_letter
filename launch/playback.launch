@@ -2,16 +2,17 @@
 
 <launch>
 
-	<node pkg="rosbag" name="player" type="play" args="--clock --loop /home/george/.ros/UAV_recording.bag"/>
+	<node pkg="rosbag" name="player" type="play" args="--clock --loop /home/georgezp/.ros/UAV_recording.bag"/>
 
 	<!-- Transformations broadcaster /-->
 	<group>
-		<node pkg="uav_model" type="plane_publisher" name="broadcaster" />
+		<node pkg="last_letter" type="plane_publisher" name="broadcaster" />
 	</group>
 
 	<!-- Initialization of the visualization parameters -->
 	<group>
-		<param name="robot_description" command="cat $(find uav_model)urdf/skywalker.urdf" />
+		<!--param name="robot_description" command="cat $(find uav_model)urdf/skywalker.urdf" /-->
+		<param name="robot_description" command="cat $(find last_letter)urdf/skywalker.urdf" />
 	</group>
 
 	<!-- Plotting nodes -->

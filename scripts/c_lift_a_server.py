@@ -6,7 +6,7 @@ from math import exp
 from math import sin
 from math import cos
 from math import copysign
-from uav_model.srv import *
+from last_letter.srv import *
 
 
 def calc_lift(req):

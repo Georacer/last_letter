@@ -7,7 +7,7 @@ from math import sqrt
 from math import atan2
 from math import asin
 from math import pow
-from uav_model.srv import *
+from last_letter.srv import *
 
 
 def calc_air_data_callback(req):

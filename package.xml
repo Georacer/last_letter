@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>uav_model</name>
+  <name>last_letter</name>
   <version>0.0.1</version>
-  <description>The uav_model package</description>
+  <description>The last_letter package</description>
 
   <maintainer email="g.zogopoulos@otenet.gr">George Zogopoulos Papaliakos</maintainer>
 
@@ -16,7 +16,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/uav_model</url> -->
+  <!-- <url type="website">http://wiki.ros.org/last_letter</url> -->
 
 
   <!-- The *_depend tags are used to specify dependencies -->
@@ -34,11 +34,12 @@
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
-	<build_depend>message_generation</build_depend>
+  <build_depend>message_generation</build_depend>
+  <build_depend>mathutils</build_depend>  
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
-  <run_depend>std_msgs</run_depend>
-
+  <run_depend>std_msgs</run_depend>  
+  <run_depend>mathutils</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

@@ -1,0 +1,26 @@
+<!-- Replay of last simulation for visualization/inspection purposes /-->
+
+<launch>
+
+	<node pkg="rosbag" name="player" type="play" args="--clock --loop /home/georgezp/.ros/UAV_recording.bag"/>
+
+	<!-- Transformations broadcaster /-->
+	<group>
+		<node pkg="Last_Letter" type="plane_publisher" name="broadcaster" />
+	</group>
+
+	<!-- Initialization of the visualization parameters -->
+	<group>
+		<!--param name="robot_description" command="cat $(find uav_model)urdf/skywalker.urdf" /-->
+		<param name="robot_description" command="cat $(find Last_Letter)urdf/skywalker.urdf" />
+	</group>
+
+	<!-- Plotting nodes -->
+	<!--node pkg="rqt_console" name="debugger" type="rqt_console" /-->
+	<!-- node pkg="rqt_plot" type="rqt_plot" name="plot_states" args="/sim/states/pose/pose/position/z" /-->
+	<!--node pkg="rqt_plot" type="rqt_plot" name="plot_states" args="/sim/wrenchStamped/wrench/force/x" /-->
+	<!--node pkg="rqt_plot" type="rqt_plot" name="plot_euler" args="/sim/euler/y,/sim/states/twist/twist/linear/x" /-->
+	<!--node pkg="rqt_plot" type="rqt_plot" name="plot_euler" args="/sim/euler/x,/sim/euler/y,/sim/euler/z" /-->
+	<node pkg="rviz" type="rviz" name="rviz" /> <!-- args="-d $(find uav_model)/assets/visOptions.vcg/-->"
+
+</launch>

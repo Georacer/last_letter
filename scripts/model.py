@@ -5,13 +5,13 @@ import numpy as NP
 import tf.transformations
 import rosbag
 from math import cos, sin, tan
-from uav_model.msg import inputs as inputType
+from last_letter.msg import inputs as inputType
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import WrenchStamped
 from geometry_msgs.msg import Vector3, Point
 from geometry_msgs.msg import Quaternion
 from geometry_msgs.msg import TransformStamped
-from uav_model.srv import *
+from last_letter.srv import *
 
 
 class model:
@@ -21,7 +21,7 @@ class model:
 		self.tprev = rospy.Time.now()
 		self.kinematics.header.stamp = self.tprev
 		self.kinematics.pose.pose.position = Point(0.0, 0.0, -300.0) #initial position
-		self.kinematics.pose.pose.orientation = Quaternion(0.0, 0.0, 0.0, 0.0) #initial orientation 
+		self.kinematics.pose.pose.orientation = Quaternion(0.0, 0.0, 0.0, 1.0) #initial orientation 
 		self.kinematics.twist.twist.linear = Vector3(20.0, 0.0, 0.0) #initial velocity
 		self.kinematics.twist.twist.angular = Vector3(0.0, 0.0, 0.0) #initial angular rotation
 		self.input = [0, 0, 0, 0]
@@ -57,7 +57,6 @@ class model:
 	def record(self):
 		bag.write('record.bag',self.kinematics)
 		bag.write('recrod.bag',self.dynamics)
-		#rospy.loginfo('wrote to bag') #
 
 	#access and store control inputs in the model object
 	def getInput(self,inputs):
@@ -82,25 +81,10 @@ class model:
 		#Create speed derivatives
 		m = rospy.get_param('airframe/m')
 		(fx, fy, fz) = (self.dynamics.wrench.force.x, self.dynamics.wrench.force.y, self.dynamics.wrench.force.z)
-		#rospy.loginfo(m)#
-		#rospy.loginfo('point 1')#
-		#rospy.loginfo(u)#
-		#rospy.loginfo(v)#
-		#rospy.loginfo(w)#
-		#rospy.loginfo(p)#
-		#rospy.loginfo(q)#
-		#rospy.loginfo(r)#
-		#rospy.loginfo(r*v-q*w)#
-		#rospy.loginfo(q*w-r*u)#
-		#rospy.loginfo(q*u-p*v)#
 
 		mat2 = 1.0/m*NP.matrix([[fx], [fy], [fz]]) #Linear Acceleration
 		mat1 = NP.matrix([[r*v-q*w],[p*w-r*u],[q*u-p*v]]) #Corriolis Acceleration
 		
-		#rospy.loginfo('point 2')#
-		#rospy.loginfo(mat1)#
-		#rospy.loginfo('point 3')#
-		#rospy.loginfo(mat2)#
 		(udot, vdot, wdot) = mat1 + mat2
 		udot = udot.item(0)
 		vdot = vdot.item(0)
@@ -186,20 +170,18 @@ if __name__ == '__main__':
 	#bag = rosbag.Bag('record.bag','w')
 	try:
 		rospy.init_node('simNode')
-		#rospy.loginfo('node up')
+		rospy.loginfo('SimNode up')
 		spinner = rospy.Rate(simRate)
-		#rospy.loginfo('spinner up')
+		rospy.loginfo('Spinner initialized')
 		modelObj = model()
-		#rospy.loginfo('model up')
+		rospy.loginfo('Initialized model')
 		rospy.sleep(0.2); #wait for nodes to get initialized
 		while not rospy.is_shutdown():
-			#rospy.loginfo('before step')#
 			modelObj.step()
-			#rospy.loginfo('after step')#
 			spinner.sleep()
-			#modelObj.record()			
+			#modelObj.record() #Enable selective topic recording			
 	except rospy.ROSInterruptException:
-		#bag.close()
+		#bag.close() #Enable with .record() use
 		pass	
 
 

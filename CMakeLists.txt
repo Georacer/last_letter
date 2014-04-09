@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(uav_model)
+project(last_letter)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 	geometry_msgs
 	message_generation
 	tf
+	mathutils
 )
 
 ## System dependencies are found with CMake's conventions
@@ -88,7 +89,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES uav_model
+#  LIBRARIES last_letter
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -105,20 +106,40 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(uav_model
-#   src/${PROJECT_NAME}/uav_model.cpp
+# add_library(last_letter
+#   src/${PROJECT_NAME}/last_letter.cpp
 # )
 
 ## Declare a cpp executable
 	add_executable(plane_publisher src/state_publisher.cpp)
-# add_executable(uav_model_node src/uav_model_node.cpp)
+	add_executable(calc_air_data_server src/calc_air_data_server.cpp)
+	add_executable(calc_force_server src/calc_force_server.cpp)
+	add_executable(c_lift_a_server src/c_lift_a_server.cpp)
+	add_executable(c_drag_a_server src/c_drag_a_server.cpp)
+	add_executable(calc_torque_server src/calc_torque_server.cpp)
+	add_executable(quat2euler src/quat2euler.cpp)
+	add_executable(model src/model.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 	add_dependencies(plane_publisher ${catkin_EXPORTED_TARGETS})
+	add_dependencies(calc_air_data_server ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(calc_force_server ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(c_lift_a_server ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(c_drag_a_server ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(calc_torque_server ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(quat2euler ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(model ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(plane_publisher ${catkin_LIBRARIES})
+	target_link_libraries(calc_air_data_server ${catkin_LIBRARIES})
+	target_link_libraries(calc_force_server ${catkin_LIBRARIES})
+	target_link_libraries(c_lift_a_server ${catkin_LIBRARIES})
+	target_link_libraries(c_drag_a_server ${catkin_LIBRARIES})
+	target_link_libraries(calc_torque_server ${catkin_LIBRARIES})
+	target_link_libraries(quat2euler ${catkin_LIBRARIES})
+	target_link_libraries(model ${catkin_LIBRARIES})
 
 #############
 ## Install ##
@@ -135,7 +156,7 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS uav_model uav_model_node
+# install(TARGETS last_letter last_letter_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -160,7 +181,7 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_uav_model.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_last_letter.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

@@ -3,9 +3,9 @@
 <launch>
 
 	<!-- Launch the simulator /-->
-	<include file="$(find uav_model)/launch/simulation.launch" />
+	<include file="$(find last_letter)/launch/simulationCpp.launch" />
 
 	<!-- Launch the visualizers /-->
-	<include file="$(find uav_model)/launch/visualization.launch" />	
+	<include file="$(find last_letter)/launch/visualization.launch" />	
 
 </launch>
