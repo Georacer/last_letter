@@ -19,24 +19,16 @@ class ModelPlane
 	nav_msgs::Odometry kinematics;
 	geometry_msgs::WrenchStamped dynamics;
 	ros::NodeHandle nh;
-	ros::Subscriber subInp;
+	//ros::Subscriber subInp;
 	ros::Publisher pubState;
 	ros::Publisher pubWrench;
 	ros::Time tprev;
-	//ros::Duration timeDiff;
 	double dt;
 	//last_letter::inputs input;
 	double input[4];
 	ros::ServiceClient forceClient, torqueClient;
 	
-	void getInput(last_letter::inputs inputMsg)
-	{
-		//input = inputMsg.inputs; //does not work
-		input[0] = inputMsg.inputs[0];
-		input[1] = inputMsg.inputs[1];
-		input[2] = inputMsg.inputs[2];
-		input[3] = inputMsg.inputs[3];
-	}
+
 	
 	geometry_msgs::Vector3 getForce(nav_msgs::Odometry states, double input[4])
 	{
@@ -70,42 +62,43 @@ class ModelPlane
 	
 	void diffEq(void)
 	{
-		tf::Vector3 tempVect;
-		//tf::Quaternion quat = kinematics.pose.pose.orientation;
-		tf::Quaternion quat = tf::Quaternion(kinematics.pose.pose.orientation.x, kinematics.pose.pose.orientation.y, kinematics.pose.pose.orientation.z, kinematics.pose.pose.orientation.w);
-		//quat.x = kinematics.pose.pose.orientation->x;
-		//quat.y = &kinematics.pose.pose.orientation.y;
-		//quat.z = (&kinematics).pose.pose.orientation.z;
-		//quat.w = kinematics.pose.pose.orientation.w;
+		//variables declaration
+		geometry_msgs::Vector3 tempVect;
+		double R[9];
+		geometry_msgs::Vector3 euler;
+		double phi, theta, psi;
+		
+		//create transformation matrix
+		quat2rotmtx (kinematics.pose.pose.orientation, R);			
 		
 		//create angles, linear speeds, angular speeds
-		double phi, theta, psi;
-		tf::Matrix3x3(quat).getEulerYPR(psi, theta, phi);
+		quat2euler (kinematics.pose.pose.orientation, &euler);
+		phi = euler.x;
+		theta = euler.y;
+		psi = euler.z;			
 		double u = kinematics.twist.twist.linear.x;
 		double v = kinematics.twist.twist.linear.y;
-		double w = kinematics.twist.twist.linear.z;
+		double w = kinematics.twist.twist.linear.z;		
 		double p = kinematics.twist.twist.angular.x;
 		double q = kinematics.twist.twist.angular.y;
-		double r = kinematics.twist.twist.angular.z;
+		double r = kinematics.twist.twist.angular.z;		
 		
 		//create position derivatives
-		tf::Matrix3x3 R = tf::Matrix3x3(quat);
-		double pndot, pedot, pddot;
-		tempVect = tf::Vector3(kinematics.twist.twist.linear.x, kinematics.twist.twist.linear.y, kinematics.twist.twist.linear.z);
-		tf::Vector3 posDot = R*tempVect;
-		//tf::Vector3 posDot = R*kinematics.twist.twist.linear;
+		geometry_msgs::Vector3 posDot = R*kinematics.twist.twist.linear;
 		
 		//create speed derivatives
 		double mass;
 		ros::param::getCached("airframe/m",mass);
-		tempVect = tf::Vector3(dynamics.wrench.force.x, dynamics.wrench.force.y, dynamics.wrench.force.z);
-		tf::Vector3 linearForces = tempVect*(1.0/mass); //linear acceleration
-		tf::Vector3 corriolisForces = tf::Vector3(r*v-q*w, p*w-r*u, q*u-p*v);
-		tf::Vector3 speedDot = linearForces + corriolisForces;
+		geometry_msgs::Vector3 linearForces = (1.0/mass)*dynamics.wrench.force;
+		geometry_msgs::Vector3 corriolisForces;
+		corriolisForces.x = r*v-q*w;
+		corriolisForces.y = p*w-r*u;
+		corriolisForces.z = q*u-p*v;
+		geometry_msgs::Vector3 speedDot = linearForces + corriolisForces;
 		
 		//create angular derivatives
-		tempVect = tf::Vector3(kinematics.twist.twist.angular.x, kinematics.twist.twist.angular.y, kinematics.twist.twist.angular.z);
-		tf::Vector3 angleDot = tf::Matrix3x3(1, sin(phi)*tan(theta), cos(phi)*tan(theta), 0, cos(phi), -sin(phi), 0, sin(phi)/cos(theta), cos(phi)/cos(theta))*tempVect;
+		double rotmtx[9] = {1, sin(phi)*tan(theta), cos(phi)*tan(theta), 0, cos(phi), -sin(phi), 0, sin(phi)/cos(theta), cos(phi)/cos(theta)};
+		geometry_msgs::Vector3 angleDot = rotmtx*kinematics.twist.twist.angular;
 		
 		//create rate derivatives
 		double j_x, j_y, j_z, j_xz;
@@ -125,36 +118,35 @@ class ModelPlane
 		double l = dynamics.wrench.torque.x;
 		double m = dynamics.wrench.torque.y;
 		double n = dynamics.wrench.torque.z;				
-		tf::Vector3 rate1 = tf::Vector3(G1*p*q-G2*q*r , G5*p*r-G6*(pow(p,2)-pow(r,2)) , G7*p*q-G1*q*r);
-		tf::Vector3 rate2 = tf::Vector3(G3*l+G4*n , 1/j_y*m , G4*l+G8*n);
-		tf::Vector3 rateDot = rate1 + rate2;
+
+		geometry_msgs::Vector3 rate1, rate2;
+		rate1.x = G1*p*q-G2*q*r;
+		rate1.y = G5*p*r-G6*(pow(p,2)-pow(r,2));
+		rate1.z = G7*p*q-G1*q*r;
+		rate2.x = G3*l+G4*n;
+		rate2.y = 1/j_y*m;
+		rate2.z = G4*l+G8*n;
+		geometry_msgs::Vector3 rateDot = rate1 + rate2;
 		
 		//integrate quantities using forward Euler
-		kinematics.pose.pose.position.x = kinematics.pose.pose.position.x + posDot.x()*dt;
-		kinematics.pose.pose.position.y = kinematics.pose.pose.position.y + posDot.y()*dt;
-		kinematics.pose.pose.position.z = kinematics.pose.pose.position.z + posDot.z()*dt;
+		kinematics.pose.pose.position.x = kinematics.pose.pose.position.x + posDot.x*dt;
+		kinematics.pose.pose.position.y = kinematics.pose.pose.position.y + posDot.y*dt;
+		kinematics.pose.pose.position.z = kinematics.pose.pose.position.z + posDot.z*dt;
 		
-		kinematics.twist.twist.linear.x = kinematics.twist.twist.linear.x + speedDot.x()*dt;
-		kinematics.twist.twist.linear.y = kinematics.twist.twist.linear.y + speedDot.y()*dt;
-		kinematics.twist.twist.linear.z = kinematics.twist.twist.linear.z + speedDot.z()*dt;
+		tempVect = dt*speedDot;
+		kinematics.twist.twist.linear = kinematics.twist.twist.linear + tempVect;
 		
-		tf::Vector3 angles = tf::Vector3(phi, theta, psi);
-		angles = angles + angleDot*dt;
-		quat.setEuler(angles.z(), angles.y(), angles.x());
-		kinematics.pose.pose.orientation.x = quat[0];
-		kinematics.pose.pose.orientation.y = quat[1];
-		kinematics.pose.pose.orientation.z = quat[2];
-		kinematics.pose.pose.orientation.w = quat[3];
-		//kinematics.pose.pose.orientation = quat;
+		tempVect = dt*angleDot;
+		euler = euler + tempVect;
+		euler2quat(euler, &kinematics.pose.pose.orientation);
 		
-		kinematics.twist.twist.angular.x = kinematics.twist.twist.angular.x + rateDot.x()*dt;
-		kinematics.twist.twist.angular.y = kinematics.twist.twist.angular.y + rateDot.y()*dt;		
-		kinematics.twist.twist.angular.z = kinematics.twist.twist.angular.z + rateDot.z()*dt;
-		//kinematics.twist.twist.angular = kinematics.twist.twist.angular + rateDot*dt;
+		tempVect = dt*rateDot;
+		kinematics.twist.twist.angular = kinematics.twist.twist.angular + tempVect;
+
 	}
 	
 	public:
-	ModelPlane (void)
+	ModelPlane (ros::NodeHandle n)
 	{
 		kinematics.header.frame_id = "bodyFrame";
 		tprev = ros::Time::now();
@@ -176,8 +168,8 @@ class ModelPlane
 		input[1] = 0;
 		input[2] = 0;
 		input[3] = 0;
-		dynamics.header.frame_id = "boydFrame";
-		subInp = nh.subscribe("/sim/input",1,&ModelPlane::getInput, this);
+		dynamics.header.frame_id = "bodyFrame";
+		ros::Subscriber subInp = n.subscribe("sim/input",1,&ModelPlane::getInput, this);
 		pubState = nh.advertise<nav_msgs::Odometry>("/sim/states",1000);
 		pubWrench = nh.advertise<geometry_msgs::WrenchStamped>("/sim/wrenchStamped",1000);
 		forceClient = nh.serviceClient<last_letter::calc_force>("calc_force");
@@ -197,7 +189,18 @@ class ModelPlane
 		diffEq();
 		pubState.publish(kinematics);
 		pubWrench.publish(dynamics);
+		//ROS_INFO("In Step");
 	}
+	
+	void getInput(last_letter::inputs inputMsg)
+	{
+		input[0] = inputMsg.inputs[0];
+		input[1] = inputMsg.inputs[1];
+		input[2] = inputMsg.inputs[2];
+		input[3] = inputMsg.inputs[3];
+		ROS_INFO("Model- a:%g, e:%g, t:%g, r:%g",input[0], input[1], input[2], input[3]);
+	}	
+	
 };
 
 
@@ -210,8 +213,8 @@ int main(int argc, char **argv)
 	ros::Rate spinner(simRate);
 	ROS_INFO("simNode up");
 	ros::Duration(5).sleep(); //wait for other nodes to get raised
-	ModelPlane aerosonde;
-
+	ModelPlane aerosonde(n);	
+	//ros::Subscriber subInp = n.subscribe("/sim/input",1,&ModelPlane::getInput, &aerosonde);
 	
 	while (ros::ok())
 	{

@@ -39,6 +39,7 @@ bool calc_force_callback(last_letter::calc_force::Request &req, last_letter::cal
 	double deltae = inputs[1];
 	double deltat = inputs[2];
 	double deltar = inputs[3];
+	ROS_INFO("Force- e: %g, a: %g, t:%g, r:%g",deltaa, deltae, deltat, deltar);
 	
 	//request lift and drag alpha-coefficients from the corresponding server
 	last_letter::c_lift_a liftService;

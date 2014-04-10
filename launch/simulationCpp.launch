@@ -27,16 +27,17 @@
 		<node pkg="last_letter" name="euler_translator" type="quat2euler" />
 	</group>
 
-	<!-- Transformations broadcaster /-->
+	<!-- Transformations broadcaster -->
 	<group>
 		<node pkg="last_letter" type="plane_publisher" name="broadcaster" />
 	</group>
 
-<?ignore
-	<node pkg="joy" type="joy_node" name="joystick" output="screen" >
-		<param name="dev" value="/dev/input/js1" />
-	</node>
-
-?>
-
+	<!-- Input nodes -->
+	<group>
+		<node pkg="joy" type="joy_node" name="joystick" output="screen" >
+			<param name="dev" value="/dev/input/js0" />
+		</node>
+		<node pkg="last_letter" name="joy2chan" type="joy2chan" />
+	</group>
+	
 </launch>

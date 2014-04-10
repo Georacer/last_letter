@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>last_letter</name>
-  <version>0.0.1</version>
+  <version>0.2.0</version>
   <description>The last_letter package</description>
 
   <maintainer email="g.zogopoulos@otenet.gr">George Zogopoulos Papaliakos</maintainer>
@@ -35,7 +35,8 @@
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>message_generation</build_depend>
-  <build_depend>mathutils</build_depend>  
+  <build_depend>mathutils</build_depend>
+  <build_depend>joy</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>  
