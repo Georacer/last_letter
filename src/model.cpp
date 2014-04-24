@@ -1,5 +1,7 @@
 #include "model.hpp"
 
+static double _spp[contactN]={0.0};
+
 //////////////////////////
 // Define ModelPlane class
 //////////////////////////
@@ -204,6 +206,96 @@
 		return result;
 	}
 	
+	//////////////////
+	//Ground dynamics
+	geometry_msgs::Wrench ModelPlane::groundDynamics(geometry_msgs::Quaternion quat)
+	{
+	
+		double Reb[9];
+		quat2rotmtx(quat, Reb);
+		
+		double kspring = 8000.0;
+		double mspring = 250.0;
+		double kfriction = 0.01;
+		double len=-0.02;
+
+		int i,j;	
+		double cpi_up[contactN*3];
+		double cpi_down[contactN*3];
+		double helipos[3], normVe;
+
+		bool contact = false;
+		double spd[contactN];
+
+		geometry_msgs::Wrench temp, totalE, totalB;
+
+
+		geometry_msgs::Vector3 dx[contactN],we,vpoint,Ve;
+
+		Ve=Reb*kinematics.twist.twist.linear;
+
+		temp.force = 0.0*temp.force;
+		temp.torque = 0.0*temp.torque;
+		totalE.force = 0.0*temp.force;
+		totalE.torque = 0.0*temp.torque;
+		totalB.force = 0.0*temp.force;
+		totalB.torque = 0.0*temp.torque;
+
+		helipos[0]=kinematics.pose.pose.position.x;
+		helipos[1]=kinematics.pose.pose.position.y;
+		helipos[2]=kinematics.pose.pose.position.z;
+
+		multi_mtx_mtx_3Xn(Reb,contactpoints,cpi_up,contactN);
+
+		for (i=0;i<3;i++) {
+			for (j=0;j<contactN;j++) {
+				cpi_up[contactN*i+j] +=helipos[i];
+				cpi_down[contactN*i+j]=cpi_up[contactN*i+j];
+			}
+		}
+
+		we = Reb*kinematics.twist.twist.angular;
+		for (i=0;i<contactN;i++) {
+			cpi_down[i+2*contactN]-=len;
+			dx[i].x = (cpi_up[i]-helipos[0]);
+			dx[i].y = (cpi_up[i+contactN]-helipos[1]);
+			dx[i].z = (cpi_up[i+2*contactN]-helipos[2]);
+
+			spd[i]=(len-(cpi_up[i+2*contactN]-cpi_down[i+2*contactN])-_spp[i])/dt;
+			_spp[i]=len-(cpi_up[i+2*contactN]-cpi_down[i+2*contactN]);
+
+			if (cpi_down[i+2*contactN]>0) {
+				cpi_down[i+2*contactN]=0;
+				contact=true;
+				vector3_cross(we,dx[i], &vpoint);
+				vpoint = Ve+vpoint;			
+				normVe = sqrt(vpoint.x*vpoint.x+vpoint.y*vpoint.y+vpoint.z*vpoint.z);
+				if (normVe<=0.001)
+					normVe=0.001;
+
+				temp.force.z = kspring*(len-cpi_up[i+2*contactN])-mspring*vpoint.z*abs(vpoint.z)+10.0*spd[i];
+				temp.force.x = -kfriction*abs(temp.force.z)*vpoint.x;
+				temp.force.y = -kfriction*abs(temp.force.z)*vpoint.y;
+				temp.force.x = max(-1000.0,min(temp.force.x,1000.0));
+				temp.force.y = max(-1000.0,min(temp.force.y,1000.0));
+				temp.force.z = max(-1000.0,min(temp.force.z,1000.0));
+
+				totalE.force = totalE.force + temp.force;
+
+				vector3_cross(dx[i],temp.force, &temp.torque);
+				totalE.torque = totalE.torque + temp.torque;
+
+			}
+		}
+
+		if (contact) {
+			totalB.force= Reb/totalE.force;	
+			totalB.torque= Reb/totalE.torque;
+		}
+
+		return totalB;			
+	}	
+	
 	/////////////////////////////////////////
 	//Aerodynamc angles/ airspeed calculation
 	geometry_msgs::Vector3 ModelPlane::getAirData (geometry_msgs::Vector3 speeds)
@@ -345,12 +437,12 @@
 		kinematics.header.stamp = tprev;
 		kinematics.pose.pose.position.x = 0;
 		kinematics.pose.pose.position.y = 0;
-		kinematics.pose.pose.position.z = -300;
+		kinematics.pose.pose.position.z = -2;
 		kinematics.pose.pose.orientation.x = 0;
 		kinematics.pose.pose.orientation.y = 0;
 		kinematics.pose.pose.orientation.z = 0;
 		kinematics.pose.pose.orientation.w = 1;
-		kinematics.twist.twist.linear.x = 10;
+		kinematics.twist.twist.linear.x = 0;
 		kinematics.twist.twist.linear.y = 0;
 		kinematics.twist.twist.linear.z = 0;
 		kinematics.twist.twist.angular.x = 0;
@@ -365,9 +457,31 @@
 		subInp = n.subscribe("/sim/input",1,&ModelPlane::getInput, this);
 		pubState = n.advertise<nav_msgs::Odometry>("/sim/states",1000);
 		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("/sim/wrenchStamped",1000);
-		//Create service clients
-		//forceClient = n.serviceClient<last_letter::calc_force>("calc_force");
-		//torqueClient = n.serviceClient<last_letter::calc_torque>("calc_torque");
+		
+		//Define contact points
+		contactpoints[0]=0.162; //x1
+		contactpoints[1]=0.162; //x2
+		contactpoints[2]=-0.8639; //x3 
+		contactpoints[3]=-0.0832; //x4
+		contactpoints[4]=-0.0832; //x5
+		contactpoints[5]=0.3785; //x6
+		contactpoints[6]=-0.9328; //x7
+
+		contactpoints[7]=-0.2324; //y1
+		contactpoints[8]=0.2324; //y2
+		contactpoints[9]=0.0; //y3
+		contactpoints[10]=0.9671; //y4
+		contactpoints[11]=-0.9671; //y5
+		contactpoints[12]=0.0; //y6
+		contactpoints[13]=0.0; //y7
+
+		contactpoints[14]=0.2214; //z1
+		contactpoints[15]=0.2214; //z2
+		contactpoints[16]=0.0522; //z3
+		contactpoints[17]=-0.1683; //z4
+		contactpoints[18]=-0.1683; //z5
+		contactpoints[19]=0.017; //z6
+		contactpoints[20]=-0.2196; //z7
 		
 	}
 	
@@ -389,6 +503,11 @@
 		//calclulate body force/torques
 		dynamics.wrench.force = getForce(kinematics, input);
 		dynamics.wrench.torque = getTorque(kinematics, input);
+		//add ground dynamics
+		groundDynamicsVect = groundDynamics(kinematics.pose.pose.orientation);
+		dynamics.wrench.force = dynamics.wrench.force + groundDynamicsVect.force;
+		dynamics.wrench.torque = dynamics.wrench.torque + groundDynamicsVect.torque;
+				
 		//make a simulation step
 		diffEq();
 		//publish results

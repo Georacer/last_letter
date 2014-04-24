@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
+#include "geometry_msgs/Wrench.h"
 #include "geometry_msgs/WrenchStamped.h"
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Quaternion.h"
@@ -9,6 +10,8 @@
 
 #include "mathutils/utls.hpp"
 #include "last_letter/inputs.h"
+
+#define contactN 7
 
 using namespace std;
 
@@ -23,6 +26,7 @@ class ModelPlane
 	//Variables
 	nav_msgs::Odometry kinematics;
 	geometry_msgs::WrenchStamped dynamics;
+	geometry_msgs::Wrench groundDynamicsVect;
 	ros::Subscriber subInp;
 	ros::Publisher pubState;
 	ros::Publisher pubWrench;
@@ -30,6 +34,7 @@ class ModelPlane
 	ros::Duration durTemp;
 	double dt;
 	double input[4];
+	double contactpoints[contactN*3];	
 	
 	
 	///////////
@@ -55,6 +60,9 @@ class ModelPlane
 	
 	//Calculate Torques
 	geometry_msgs::Vector3 getTorque(nav_msgs::Odometry states, double inputs[4]);
+	
+	//Calculate Ground Forces and Torques
+	geometry_msgs::Wrench groundDynamics(geometry_msgs::Quaternion quat);
 	
 	//Extract air data (airspeed, alpha, beta)
 	geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);				
