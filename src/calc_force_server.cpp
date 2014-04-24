@@ -40,7 +40,6 @@ bool calc_force_callback(last_letter::calc_force::Request &req, last_letter::cal
 	double deltae = inputs[1];
 	double deltat = inputs[2];
 	double deltar = inputs[3];
-	ROS_INFO("Force- e: %g, a: %g, t:%g, r:%g",deltaa, deltae, deltat, deltar);
 	
 	//request lift and drag alpha-coefficients from the corresponding server
 	last_letter::c_lift_a liftService;
@@ -107,9 +106,18 @@ bool calc_force_callback(last_letter::calc_force::Request &req, last_letter::cal
 	double r = states.twist.twist.angular.z;		
 	
 	//calculate gravity force
-	double gx = -m*g*sin(theta);
-	double gy = m*g*cos(theta)*sin(phi);
-	double gz = m*g*cos(theta)*cos(phi);
+	double Reb[9];
+	quat2rotmtx(quat,Reb);	
+	geometry_msgs::Vector3 gravVect;
+	gravVect.z = m*g;
+	geometry_msgs::Vector3 gravForce = Reb/gravVect;
+	//quat_vector3_rotate(quat, gravVect, &gravForce);
+	double gx = gravForce.x;
+	double gy = gravForce.y;
+	double gz = gravForce.z;		
+	//double gx = -m*g*sin(theta);
+	//double gy = m*g*cos(theta)*sin(phi);
+	//double gz = m*g*cos(theta)*cos(phi);
 	
 	//calculate aerodynamic force
 	double qbar = 1.0/2.0*rho*pow(airspeed,2)*s; //Calculate dynamic pressure

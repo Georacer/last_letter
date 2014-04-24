@@ -16,6 +16,7 @@
 using namespace std;
 
 
+// Define ModelPlane class
 class ModelPlane
 {
 	public:
@@ -25,6 +26,7 @@ class ModelPlane
 	ros::Publisher pubState;
 	ros::Publisher pubWrench;
 	ros::Time tprev;
+	ros::Duration durTemp;
 	double dt;
 	double input[4];
 	ros::ServiceClient forceClient, torqueClient;
@@ -63,27 +65,14 @@ class ModelPlane
 	{
 		//variables declaration
 		geometry_msgs::Vector3 tempVect;
-		double R[9];
-		geometry_msgs::Vector3 euler;
-		double phi, theta, psi;
+		geometry_msgs::Quaternion quat = kinematics.pose.pose.orientation;		
+		double Reb[9];
 		
 		//create transformation matrix
-		quat2rotmtx (kinematics.pose.pose.orientation, R);			
-		
-		//create angles, linear speeds, angular speeds
-		quat2euler (kinematics.pose.pose.orientation, &euler);
-		phi = euler.x;
-		theta = euler.y;
-		psi = euler.z;			
-		double u = kinematics.twist.twist.linear.x;
-		double v = kinematics.twist.twist.linear.y;
-		double w = kinematics.twist.twist.linear.z;		
-		double p = kinematics.twist.twist.angular.x;
-		double q = kinematics.twist.twist.angular.y;
-		double r = kinematics.twist.twist.angular.z;	
+		quat2rotmtx (kinematics.pose.pose.orientation, Reb);			
 		
 		//create position derivatives
-		geometry_msgs::Vector3 posDot = R*kinematics.twist.twist.linear;
+		geometry_msgs::Vector3 posDot = Reb*kinematics.twist.twist.linear;
 		
 		//create speed derivatives
 		double mass;
@@ -91,9 +80,6 @@ class ModelPlane
 		geometry_msgs::Vector3 linearAcc = (1.0/mass)*dynamics.wrench.force;
 		geometry_msgs::Vector3 corriolisAcc;
 		vector3_cross(-kinematics.twist.twist.angular, kinematics.twist.twist.linear, &corriolisAcc);
-		//corriolisForces.x = r*v-q*w;
-		//corriolisForces.y = p*w-r*u;
-		//corriolisForces.z = q*u-p*v;
 		geometry_msgs::Vector3 speedDot = linearAcc + corriolisAcc;		
 		
 		//create angular derivatives
@@ -103,7 +89,7 @@ class ModelPlane
 		wquat.y = kinematics.twist.twist.angular.y*0.5*dt;
 		wquat.z = kinematics.twist.twist.angular.z*0.5*dt;				
 		
-		//create rate derivatives
+		//create angular rate derivatives
 		double j_x, j_y, j_z, j_xz;
 		ros::param::getCached("airframe/j_x",j_x);
 		ros::param::getCached("airframe/j_y",j_y);
@@ -113,25 +99,6 @@ class ModelPlane
 		double J[9] = {j_x, 0, -j_xz, 0, j_y, 0, -j_xz, 0, j_z};
 		double Jinv[9] = {j_z/G, 0, j_xz/G, 0, 1/j_y, 0, j_xz/G, 0, j_x/G};
 
-		/*double G1 = j_xz*(j_x-j_y+j_z)/G;
-		double G2 = (j_z*(j_z-j_y)+pow(j_xz,2))/G;
-		double G3 = j_z/G;
-		double G4 = j_xz/G;
-		double G5 = (j_z-j_x)/j_y;
-		double G6 = j_xz/j_y;
-		double G7 = ((j_x-j_y)*j_x+pow(j_xz,2))/G;
-		double G8 = j_x/G;
-		double l = dynamics.wrench.torque.x;
-		double m = dynamics.wrench.torque.y;
-		double n = dynamics.wrench.torque.z;*/				
-
-		/*geometry_msgs::Vector3 rate1, rate2;
-		rate1.x = G1*p*q-G2*q*r;
-		rate1.y = G5*p*r-G6*(pow(p,2)-pow(r,2));
-		rate1.z = G7*p*q-G1*q*r;
-		rate2.x = G3*l+G4*n;
-		rate2.y = 1/j_y*m;
-		rate2.z = G4*l+G8*n;*/
 		vector3_cross(kinematics.twist.twist.angular, J*kinematics.twist.twist.angular, &tempVect);
 		tempVect = -tempVect+dynamics.wrench.torque;
 		geometry_msgs::Vector3 rateDot = Jinv*tempVect;
@@ -144,18 +111,18 @@ class ModelPlane
 		tempVect = dt*speedDot;
 		kinematics.twist.twist.linear = kinematics.twist.twist.linear + tempVect;
 		
-		geometry_msgs::Quaternion quat = kinematics.pose.pose.orientation;
 		quat_product(quat,wquat,&kinematics.pose.pose.orientation);
 		quat_normalize(&kinematics.pose.pose.orientation);		
 		
 		tempVect = dt*rateDot;
 		kinematics.twist.twist.angular = kinematics.twist.twist.angular + tempVect;
 
-	}
-	
+	}	
 
+	//Constructor
 	ModelPlane (ros::NodeHandle n)
 	{
+		//Initialize states
 		kinematics.header.frame_id = "bodyFrame";
 		tprev = ros::Time::now();
 		kinematics.header.stamp = tprev;
@@ -177,9 +144,11 @@ class ModelPlane
 		input[2] = 0;
 		input[3] = 0;
 		dynamics.header.frame_id = "bodyFrame";
+		//Subscribe and advertize
 		subInp = n.subscribe("/sim/input",1,&ModelPlane::getInput, this);
 		pubState = n.advertise<nav_msgs::Odometry>("/sim/states",1000);
 		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("/sim/wrenchStamped",1000);
+		//Create service clients
 		forceClient = n.serviceClient<last_letter::calc_force>("calc_force");
 		torqueClient = n.serviceClient<last_letter::calc_torque>("calc_torque");
 		
@@ -187,14 +156,17 @@ class ModelPlane
 	
 	void step(void)
 	{
-		dt = (ros::Time::now() - tprev).toSec();
+		durTemp = (ros::Time::now() - tprev);
+		dt = durTemp.toSec();
 		tprev = ros::Time::now();
 		kinematics.header.stamp = tprev;
 		
 		//calclulate body force/torques
 		dynamics.wrench.force = getForce(kinematics, input);
 		dynamics.wrench.torque = getTorque(kinematics, input);
+		//make a simulation step
 		diffEq();
+		//publish results
 		pubState.publish(kinematics);
 		pubWrench.publish(dynamics);
 	}
@@ -202,11 +174,11 @@ class ModelPlane
 
 	void getInput(last_letter::inputs inputMsg)
 	{
+		//Convert PPM to -1/1 ranges (0/1 for throttle)
 		input[0] = (inputMsg.inputs[0]-1500)/500;
 		input[1] = -(inputMsg.inputs[1]-1500)/500;
 		input[2] = (inputMsg.inputs[2]-1000)/1000;
 		input[3] = -(inputMsg.inputs[3]-1500)/500;
-		ROS_INFO("Model- a:%g, e:%g, t:%g, r:%g",input[0], input[1], input[2], input[3]);
 	}
 	
 };
@@ -215,21 +187,28 @@ int main(int argc, char **argv)
 {
 	int simRate;
 	ros::param::getCached("/simRate",simRate); //frame rate in Hz
+	
 	ros::init(argc, argv, "simNode");
 	ros::NodeHandle n;
 	ros::Rate spinner(simRate);
 	ROS_INFO("simNode up");
+	
 	ModelPlane aerosonde(n);
 	ros::Duration(5).sleep(); //wait for other nodes to get raised	
 	aerosonde.tprev = ros::Time::now();
-	//ros::Duration(1/simRate).sleep();
 	spinner.sleep();
 	
-	while (ros::ok() && !isnan(aerosonde.kinematics.twist.twist.linear.x))
+	while (ros::ok())
 	{
 		aerosonde.step();
 		ros::spinOnce();
 		spinner.sleep();
+
+		/*if (isnan(aerosonde.kinematics.twist.twist.linear.x))
+		{		
+			ROS_FATAL("State NAN!");
+			break;
+		}*/
 	}
 	
 	return 0;

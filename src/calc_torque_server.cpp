@@ -117,16 +117,10 @@ bool calc_torque_callback(last_letter::calc_torque::Request &req, last_letter::c
 	double m = ma + mm;
 	double n = na + nm;
 	
-	/*ROS_INFO("G: %g, %g, %g, N:%g",gx, gy, gz, sqrt(gx*gx+gy*gy+gz*gz));	
-	ROS_INFO("A: %g, %g, %g, N:%g",ax, ay, az, sqrt(ax*ax+ay*ay+az*az));	
-	ROS_INFO("T: %g, %g, %g, N:%g",tx, ty, tz, sqrt(tx*tx+ty*ty+tz*tz));
-	ROS_INFO("F: %g, %g, %g",fx, fy, fz);*/
-	
 	res.torque.x = l;
 	res.torque.y = m;
 	res.torque.z = n;
 	
-	//ROS_INFO("end of service"); //***
 	return true;
 }
 
