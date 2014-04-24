@@ -10,6 +10,7 @@
 //#include "LinearMath/btMatrix3x3.h"
 #include <cstdlib>
 #include <math.h>
+#include "mathutils/utls.hpp"
 
 ros::ServiceClient airDataClient, liftClient, dragClient;
 
@@ -92,15 +93,13 @@ bool calc_force_callback(last_letter::calc_force::Request &req, last_letter::cal
 	double c_z_deltae = -c_drag_deltae*sin(alpha)-c_lift_deltae*cos(alpha);
 	
 	//read orientation and convert to Euler angles
-	tf::Quaternion quat = tf::Quaternion(states.pose.pose.orientation.x, states.pose.pose.orientation.y, states.pose.pose.orientation.z, states.pose.pose.orientation.w);
-	if ( isnan(quat.length()) || (abs(quat.length())<0.9) ){ //check for invalid quaternion
-		quat = tf::Quaternion(0, 0, 0, 1);
-	}
-	//quat.normalize();
-	//ROS_INFO("Quaterion: %g, %g, %g, %g, len: %g",quat[0], quat[1], quat[2], quat[3], quat.length()); //***
+	geometry_msgs::Quaternion quat = states.pose.pose.orientation;
+	geometry_msgs::Vector3 eulerVect;
 	double phi,theta,psi;
-	tf::Matrix3x3(quat).getEulerYPR(psi, theta, phi);
-	//ROS_INFO("RPY: %g, %g, %g",phi, theta, psi); //***
+	quat2euler(quat, &eulerVect);
+	phi = eulerVect.x;
+	theta = eulerVect.y;
+	psi = eulerVect.z;
 	
 	//read angular rates
 	double p = states.twist.twist.angular.x;
@@ -111,7 +110,6 @@ bool calc_force_callback(last_letter::calc_force::Request &req, last_letter::cal
 	double gx = -m*g*sin(theta);
 	double gy = m*g*cos(theta)*sin(phi);
 	double gz = m*g*cos(theta)*cos(phi);
-	//ROS_INFO("m=%g, g=%g",m,g);
 	
 	//calculate aerodynamic force
 	double qbar = 1.0/2.0*rho*pow(airspeed,2)*s; //Calculate dynamic pressure
@@ -139,16 +137,10 @@ bool calc_force_callback(last_letter::calc_force::Request &req, last_letter::cal
 	double fy = gy+ay+ty;
 	double fz = gz+az+tz;
 	
-	/*ROS_INFO("G: %g, %g, %g, N:%g",gx, gy, gz, sqrt(gx*gx+gy*gy+gz*gz));	
-	ROS_INFO("A: %g, %g, %g, N:%g",ax, ay, az, sqrt(ax*ax+ay*ay+az*az));	
-	ROS_INFO("T: %g, %g, %g, N:%g",tx, ty, tz, sqrt(tx*tx+ty*ty+tz*tz));
-	ROS_INFO("F: %g, %g, %g",fx, fy, fz);*/
-	
 	res.force.x = fx;
 	res.force.y = fy;
 	res.force.z = fz;
-	
-	//ROS_INFO("end of service"); //***
+
 	return true;
 }
 

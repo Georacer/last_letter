@@ -136,7 +136,7 @@ include_directories(
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(plane_publisher ${catkin_LIBRARIES})
 	target_link_libraries(calc_air_data_server ${catkin_LIBRARIES})
-	target_link_libraries(calc_force_server ${catkin_LIBRARIES})
+	target_link_libraries(calc_force_server mathutils ${catkin_LIBRARIES})
 	target_link_libraries(c_lift_a_server ${catkin_LIBRARIES})
 	target_link_libraries(c_drag_a_server ${catkin_LIBRARIES})
 	target_link_libraries(calc_torque_server ${catkin_LIBRARIES})

@@ -39,7 +39,7 @@ def planeParams():
 	rospy.set_param('airframe/alpha_stall', 0.4712)
 	rospy.set_param('airframe/eps', 0.1592)
 	rospy.set_param('airframe/c_drag_p', 0.0437)
-	rospy.set_param('airframe/c_n_deltar', -0.032)
+	rospy.set_param('airframe/c_n_deltar', -0.08)
 	rospy.set_param('airframe/c_y_0', 0)
 	rospy.set_param('airframe/c_l_0', 0)
 	rospy.set_param('airframe/c_n_0', 0)
@@ -47,16 +47,16 @@ def planeParams():
 	rospy.set_param('airframe/c_l_b', -0.12)
 	rospy.set_param('airframe/c_n_b', 0.25)
 	rospy.set_param('airframe/c_y_p', 0)
-	rospy.set_param('airframe/c_l_p', -0.26)
+	rospy.set_param('airframe/c_l_p', -1.0)
 	rospy.set_param('airframe/c_n_p', 0.022)
 	rospy.set_param('airframe/c_y_r', 0)
 	rospy.set_param('airframe/c_l_r', 0.14)
 	rospy.set_param('airframe/c_n_r', -0.35)
 	rospy.set_param('airframe/c_y_deltaa', 0)
 	rospy.set_param('airframe/c_l_deltaa', 0.08)
-	rospy.set_param('airframe/c_n_deltaa', 0.06)
+	rospy.set_param('airframe/c_n_deltaa', 0.006)
 	rospy.set_param('airframe/c_y_deltar', 0.17)
-	rospy.set_param('airframe/c_l_deltar', 0.105)
+	rospy.set_param('airframe/c_l_deltar', 0.005)
 
 #Airframe Propulsion Parameters
 def motorParams():
