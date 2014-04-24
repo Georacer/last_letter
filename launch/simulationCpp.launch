@@ -12,11 +12,6 @@
 
 	<!-- Initialization of the services -->
 	<group>
-		<node pkg="last_letter" name="c_lift_a_server" type="c_lift_a_server" />
-		<node pkg="last_letter" name="c_drag_a_server" type="c_drag_a_server" />
-		<node pkg="last_letter" name="calc_air_data_server" type="calc_air_data_server" />
-		<node pkg="last_letter" name="calc_force_server" type="calc_force_server" output="screen" />
-		<node pkg="last_letter" name="calc_torque_server" type="calc_torque_server" output="screen" />
 	</group>
 	
 	<!-- Raising core nodes -->

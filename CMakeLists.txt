@@ -88,7 +88,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
 #  LIBRARIES last_letter
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
@@ -100,9 +100,9 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+	include
+	${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -112,11 +112,6 @@ include_directories(
 
 ## Declare a cpp executable
 	add_executable(plane_publisher src/state_publisher.cpp)
-	add_executable(calc_air_data_server src/calc_air_data_server.cpp)
-	add_executable(calc_force_server src/calc_force_server.cpp)
-	add_executable(c_lift_a_server src/c_lift_a_server.cpp)
-	add_executable(c_drag_a_server src/c_drag_a_server.cpp)
-	add_executable(calc_torque_server src/calc_torque_server.cpp)
 	add_executable(quat2euler src/quat2euler.cpp)
 	add_executable(model src/model.cpp)
 	add_executable(joy2chan src/joy2chan.cpp)
@@ -124,22 +119,12 @@ include_directories(
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 	add_dependencies(plane_publisher ${catkin_EXPORTED_TARGETS})
-	add_dependencies(calc_air_data_server ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(calc_force_server ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(c_lift_a_server ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(c_drag_a_server ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(calc_torque_server ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(quat2euler ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(model ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)	
 
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(plane_publisher ${catkin_LIBRARIES})
-	target_link_libraries(calc_air_data_server ${catkin_LIBRARIES})
-	target_link_libraries(calc_force_server mathutils ${catkin_LIBRARIES})
-	target_link_libraries(c_lift_a_server ${catkin_LIBRARIES})
-	target_link_libraries(c_drag_a_server ${catkin_LIBRARIES})
-	target_link_libraries(calc_torque_server ${catkin_LIBRARIES})
 	target_link_libraries(quat2euler ${catkin_LIBRARIES})
 	target_link_libraries(model mathutils ${catkin_LIBRARIES})
 	target_link_libraries(joy2chan ${catkin_LIBRARIES})
