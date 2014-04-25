@@ -8,7 +8,7 @@ import rospy
 
 #World Parameters
 def worldParams():
-	rospy.set_param('simRate', 100)
+	rospy.set_param('simRate', 1000)
 	rospy.set_param('world/rho', 1.2682) #Air density
 	rospy.set_param('world/oswald', 0.9)
 	rospy.set_param('world/g',9.81)

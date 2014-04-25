@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>last_letter</name>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <description>The last_letter package</description>
 
   <maintainer email="g.zogopoulos@otenet.gr">George Zogopoulos Papaliakos</maintainer>

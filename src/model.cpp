@@ -8,11 +8,11 @@ static double _spp[contactN]={0.0};
 
 	////////////////////////////////////
 	//Force calculation in the body axes
-	geometry_msgs::Vector3 ModelPlane::getForce(nav_msgs::Odometry states, double inputs[4])
+	geometry_msgs::Vector3 ModelPlane::getForce(last_letter::SimStates states, double inputs[4])
 	{
 	
 		//request air data from getAirData
-		geometry_msgs::Vector3 airData = getAirData(states.twist.twist.linear);
+		geometry_msgs::Vector3 airData = getAirData(states.velocity.linear);
 		double airspeed = airData.x;
 		double alpha = airData.y;
 		double beta = airData.z;
@@ -63,12 +63,12 @@ static double _spp[contactN]={0.0};
 		double c_z_deltae = -c_drag_deltae*sin(alpha)-c_lift_deltae*cos(alpha);
 	
 		//read orientation
-		geometry_msgs::Quaternion quat = states.pose.pose.orientation;
+		geometry_msgs::Quaternion quat = states.pose.orientation;
 	
 		//read angular rates
-		double p = states.twist.twist.angular.x;
-		double q = states.twist.twist.angular.y;
-		double r = states.twist.twist.angular.z;		
+		double p = states.velocity.angular.x;
+		double q = states.velocity.angular.y;
+		double r = states.velocity.angular.z;		
 	
 		//calculate gravity force
 		double Reb[9];
@@ -101,6 +101,7 @@ static double _spp[contactN]={0.0};
 		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
 		double ty = 0;
 		double tz = 0;
+		states.rotorspeed[0] = k_motor*deltat;
 
 		//Sum forces
 		double fx = gx+ax+tx;
@@ -117,11 +118,11 @@ static double _spp[contactN]={0.0};
 
 	/////////////////////////////////////
 	//Torque calculation in the body axes
-	geometry_msgs::Vector3 ModelPlane::getTorque(nav_msgs::Odometry states, double inputs[4])
+	geometry_msgs::Vector3 ModelPlane::getTorque(last_letter::SimStates states, double inputs[4])
 	{
 
 		//request air data from getAirData
-		geometry_msgs::Vector3 airData = getAirData(states.twist.twist.linear);
+		geometry_msgs::Vector3 airData = getAirData(states.velocity.linear);
 		double airspeed = airData.x;
 		double alpha = airData.y;
 		double beta = airData.z;
@@ -168,9 +169,9 @@ static double _spp[contactN]={0.0};
 		ros::param::getCached("/motor/k_omega",k_omega);
 	
 		//read angular rates
-		double p = states.twist.twist.angular.x;
-		double q = states.twist.twist.angular.y;
-		double r = states.twist.twist.angular.z;
+		double p = states.velocity.angular.x;
+		double q = states.velocity.angular.y;
+		double r = states.velocity.angular.z;
 	
 		//calculate aerodynamic torque
 		double qbar = 1.0/2.0*rho*pow(airspeed,2)*s; //Calculate dynamic pressure
@@ -232,7 +233,7 @@ static double _spp[contactN]={0.0};
 
 		geometry_msgs::Vector3 dx[contactN],we,vpoint,Ve;
 
-		Ve=Reb*kinematics.twist.twist.linear;
+		Ve=Reb*states.velocity.linear;
 
 		temp.force = 0.0*temp.force;
 		temp.torque = 0.0*temp.torque;
@@ -241,9 +242,9 @@ static double _spp[contactN]={0.0};
 		totalB.force = 0.0*temp.force;
 		totalB.torque = 0.0*temp.torque;
 
-		helipos[0]=kinematics.pose.pose.position.x;
-		helipos[1]=kinematics.pose.pose.position.y;
-		helipos[2]=kinematics.pose.pose.position.z;
+		helipos[0]=states.pose.position.x;
+		helipos[1]=states.pose.position.y;
+		helipos[2]=states.pose.position.z;
 
 		multi_mtx_mtx_3Xn(Reb,contactpoints,cpi_up,contactN);
 
@@ -254,7 +255,7 @@ static double _spp[contactN]={0.0};
 			}
 		}
 
-		we = Reb*kinematics.twist.twist.angular;
+		we = Reb*states.velocity.angular;
 		for (i=0;i<contactN;i++) {
 			cpi_down[i+2*contactN]-=len;
 			dx[i].x = (cpi_up[i]-helipos[0]);
@@ -373,29 +374,30 @@ static double _spp[contactN]={0.0};
 	{
 		//variables declaration
 		geometry_msgs::Vector3 tempVect;
-		geometry_msgs::Quaternion quat = kinematics.pose.pose.orientation;		
+		geometry_msgs::Quaternion quat = states.pose.orientation;		
 		double Reb[9];
 		
 		//create transformation matrix
-		quat2rotmtx (kinematics.pose.pose.orientation, Reb);			
+		quat2rotmtx (states.pose.orientation, Reb);			
 		
 		//create position derivatives
-		geometry_msgs::Vector3 posDot = Reb*kinematics.twist.twist.linear;
+		geometry_msgs::Vector3 posDot = Reb*states.velocity.linear;
 		
 		//create speed derivatives
 		double mass;
 		ros::param::getCached("airframe/m",mass);
 		geometry_msgs::Vector3 linearAcc = (1.0/mass)*dynamics.wrench.force;
 		geometry_msgs::Vector3 corriolisAcc;
-		vector3_cross(-kinematics.twist.twist.angular, kinematics.twist.twist.linear, &corriolisAcc);
-		geometry_msgs::Vector3 speedDot = linearAcc + corriolisAcc;		
+		vector3_cross(-states.velocity.angular, states.velocity.linear, &corriolisAcc);
+		geometry_msgs::Vector3 speedDot = linearAcc + corriolisAcc;
+		states.acceleration.linear = linearAcc;	
 		
 		//create angular derivatives
 		geometry_msgs::Quaternion wquat;
 		wquat.w = 1.0;
-		wquat.x = kinematics.twist.twist.angular.x*0.5*dt;
-		wquat.y = kinematics.twist.twist.angular.y*0.5*dt;
-		wquat.z = kinematics.twist.twist.angular.z*0.5*dt;				
+		wquat.x = states.velocity.angular.x*0.5*dt;
+		wquat.y = states.velocity.angular.y*0.5*dt;
+		wquat.z = states.velocity.angular.z*0.5*dt;				
 		
 		//create angular rate derivatives
 		double j_x, j_y, j_z, j_xz;
@@ -407,23 +409,24 @@ static double _spp[contactN]={0.0};
 		double J[9] = {j_x, 0, -j_xz, 0, j_y, 0, -j_xz, 0, j_z};
 		double Jinv[9] = {j_z/G, 0, j_xz/G, 0, 1/j_y, 0, j_xz/G, 0, j_x/G};
 
-		vector3_cross(kinematics.twist.twist.angular, J*kinematics.twist.twist.angular, &tempVect);
+		vector3_cross(states.velocity.angular, J*states.velocity.angular, &tempVect);
 		tempVect = -tempVect+dynamics.wrench.torque;
 		geometry_msgs::Vector3 rateDot = Jinv*tempVect;
+		states.acceleration.angular = rateDot;
 		
 		//integrate quantities using forward Euler
-		kinematics.pose.pose.position.x = kinematics.pose.pose.position.x + posDot.x*dt;
-		kinematics.pose.pose.position.y = kinematics.pose.pose.position.y + posDot.y*dt;
-		kinematics.pose.pose.position.z = kinematics.pose.pose.position.z + posDot.z*dt;
+		states.pose.position.x = states.pose.position.x + posDot.x*dt;
+		states.pose.position.y = states.pose.position.y + posDot.y*dt;
+		states.pose.position.z = states.pose.position.z + posDot.z*dt;
 		
 		tempVect = dt*speedDot;
-		kinematics.twist.twist.linear = kinematics.twist.twist.linear + tempVect;
+		states.velocity.linear = states.velocity.linear + tempVect;
 		
-		quat_product(quat,wquat,&kinematics.pose.pose.orientation);
-		quat_normalize(&kinematics.pose.pose.orientation);		
+		quat_product(quat,wquat,&states.pose.orientation);
+		quat_normalize(&states.pose.orientation);		
 		
 		tempVect = dt*rateDot;
-		kinematics.twist.twist.angular = kinematics.twist.twist.angular + tempVect;
+		states.velocity.angular = states.velocity.angular + tempVect;
 
 	}	
 	
@@ -432,22 +435,24 @@ static double _spp[contactN]={0.0};
 	ModelPlane::ModelPlane (ros::NodeHandle n)
 	{
 		//Initialize states
-		kinematics.header.frame_id = "bodyFrame";
+		states.header.frame_id = "bodyFrame";
 		tprev = ros::Time::now();
-		kinematics.header.stamp = tprev;
-		kinematics.pose.pose.position.x = 0;
-		kinematics.pose.pose.position.y = 0;
-		kinematics.pose.pose.position.z = -2;
-		kinematics.pose.pose.orientation.x = 0;
-		kinematics.pose.pose.orientation.y = 0;
-		kinematics.pose.pose.orientation.z = 0;
-		kinematics.pose.pose.orientation.w = 1;
-		kinematics.twist.twist.linear.x = 0;
-		kinematics.twist.twist.linear.y = 0;
-		kinematics.twist.twist.linear.z = 0;
-		kinematics.twist.twist.angular.x = 0;
-		kinematics.twist.twist.angular.y = 0;
-		kinematics.twist.twist.angular.z = 0;
+		states.header.stamp = tprev;
+		states.pose.position.x = 0;
+		states.pose.position.y = 0;
+		states.pose.position.z = -2;
+		states.pose.orientation.x = 0;
+		states.pose.orientation.y = 0;
+		states.pose.orientation.z = 0;
+		states.pose.orientation.w = 1;
+		states.velocity.linear.x = 0;
+		states.velocity.linear.y = 0;
+		states.velocity.linear.z = 0;
+		states.velocity.angular.x = 0;
+		states.velocity.angular.y = 0;
+		states.velocity.angular.z = 0;
+		states.rotorspeed.clear();
+		states.rotorspeed.push_back((double) 0);
 		input[0] = 0;
 		input[1] = 0;
 		input[2] = 0;
@@ -455,7 +460,7 @@ static double _spp[contactN]={0.0};
 		dynamics.header.frame_id = "bodyFrame";
 		//Subscribe and advertize
 		subInp = n.subscribe("/sim/input",1,&ModelPlane::getInput, this);
-		pubState = n.advertise<nav_msgs::Odometry>("/sim/states",1000);
+		pubState = n.advertise<last_letter::SimStates>("/sim/states",1000);
 		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("/sim/wrenchStamped",1000);
 		
 		//Define contact points
@@ -498,32 +503,32 @@ static double _spp[contactN]={0.0};
 		durTemp = (ros::Time::now() - tprev);
 		dt = durTemp.toSec();
 		tprev = ros::Time::now();
-		kinematics.header.stamp = tprev;
+		states.header.stamp = tprev;
 		
 		//calclulate body force/torques
-		dynamics.wrench.force = getForce(kinematics, input);
-		dynamics.wrench.torque = getTorque(kinematics, input);
+		dynamics.wrench.force = getForce(states, input);
+		dynamics.wrench.torque = getTorque(states, input);
 		//add ground dynamics
-		groundDynamicsVect = groundDynamics(kinematics.pose.pose.orientation);
+		groundDynamicsVect = groundDynamics(states.pose.orientation);
 		dynamics.wrench.force = dynamics.wrench.force + groundDynamicsVect.force;
 		dynamics.wrench.torque = dynamics.wrench.torque + groundDynamicsVect.torque;
 				
 		//make a simulation step
 		diffEq();
 		//publish results
-		pubState.publish(kinematics);
+		pubState.publish(states);
 		pubWrench.publish(dynamics);
 	}
 	
 	/////////////////////////////////////////////////
 	//convert uS PPM values to control surface inputs
-	void ModelPlane::getInput(last_letter::inputs inputMsg)
+	void ModelPlane::getInput(last_letter::SimPWM inputMsg)
 	{
 		//Convert PPM to -1/1 ranges (0/1 for throttle)
-		input[0] = (inputMsg.inputs[0]-1500)/500;
-		input[1] = -(inputMsg.inputs[1]-1500)/500;
-		input[2] = (inputMsg.inputs[2]-1000)/1000;
-		input[3] = -(inputMsg.inputs[3]-1500)/500;
+		input[0] = (double)(inputMsg.value[0]-1500)/500;
+		input[1] = (double)-(inputMsg.value[1]-1500)/500;
+		input[2] = (double)(inputMsg.value[2]-1000)/1000;
+		input[3] = (double)-(inputMsg.value[3]-1500)/500;
 	}
 	
 ///////////////
@@ -531,30 +536,32 @@ static double _spp[contactN]={0.0};
 ///////////////
 int main(int argc, char **argv)
 {
-	int simRate;
-	ros::param::getCached("/simRate",simRate); //frame rate in Hz
-	
+
 	ros::init(argc, argv, "simNode");
 	ros::NodeHandle n;
+		
+	ros::Duration(3).sleep();
+	double simRate;	
+	ros::param::get("/simRate",simRate); //frame rate in Hz	
 	ros::Rate spinner(simRate);
-	ROS_INFO("simNode up");
 	
 	ModelPlane aerosonde(n);
-	ros::Duration(5).sleep(); //wait for other nodes to get raised
+	ros::Duration(3).sleep(); //wait for other nodes to get raised
 	aerosonde.tprev = ros::Time::now();
 	spinner.sleep();
+	ROS_INFO("simNode up");	
 	
-	while (ros::ok())
+	while (n.ok())
 	{
 		aerosonde.step();
 		ros::spinOnce();
 		spinner.sleep();
 
-		/*if (isnan(aerosonde.kinematics.twist.twist.linear.x))
+		if (isnan(aerosonde.states.velocity.linear.x))
 		{		
 			ROS_FATAL("State NAN!");
 			break;
-		}*/
+		}
 	}
 	
 	return 0;

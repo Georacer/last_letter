@@ -7,11 +7,12 @@
 #include <cstdlib>
 #include <math.h>
 
+#include "last_letter/SimStates.h"
 ros::Publisher pub;
 
-void translate_callback(nav_msgs::Odometry Odo)
+void translate_callback(last_letter::SimStates Odo)
 {
-	tf::Quaternion quat = tf::Quaternion(Odo.pose.pose.orientation.x, Odo.pose.pose.orientation.y, Odo.pose.pose.orientation.z, Odo.pose.pose.orientation.w);
+	tf::Quaternion quat = tf::Quaternion(Odo.pose.orientation.x, Odo.pose.orientation.y, Odo.pose.orientation.z, Odo.pose.orientation.w);
 	if ( isnan(quat.length()) || (abs(quat.length())<0.9) ){ //check for invalid quaternion
 		quat = tf::Quaternion(0, 0, 0, 1);
 	}

@@ -6,7 +6,9 @@
 #include <tf/transform_broadcaster.h>
 #include <sensor_msgs/JointState.h>
 
-void broadcast(const nav_msgs::Odometry& states){
+#include "last_letter/SimStates.h"
+
+void broadcast(const last_letter::SimStates& states){
 	static tf::TransformBroadcaster broadcaster;
 	tf::Transform statesTf;
 	tf::Transform groundCamera;
@@ -18,8 +20,8 @@ void broadcast(const nav_msgs::Odometry& states){
 	//statesTf.transform.
 	//statesTf.header.stamp = states.header.stamp;
 	//statesTf.child_frame_id="base_link";
-	statesTf.setOrigin( tf::Vector3(states.pose.pose.position.x, states.pose.pose.position.y, states.pose.pose.position.z));
-	statesTf.setRotation( tf::Quaternion(states.pose.pose.orientation.x,states.pose.pose.orientation.y,states.pose.pose.orientation.z,states.pose.pose.orientation.w));
+	statesTf.setOrigin( tf::Vector3(states.pose.position.x, states.pose.position.y, states.pose.position.z));
+	statesTf.setRotation( tf::Quaternion(states.pose.orientation.x,states.pose.orientation.y,states.pose.orientation.z,states.pose.orientation.w));
 	broadcaster.sendTransform(tf::StampedTransform(statesTf, states.header.stamp, "map", "base_link"));
 
 	groundCamera.setOrigin(tf::Vector3(0,0,0));

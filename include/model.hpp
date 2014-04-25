@@ -10,6 +10,8 @@
 
 #include "mathutils/utls.hpp"
 #include "last_letter/inputs.h"
+#include "last_letter/SimStates.h"
+#include "last_letter/SimPWM.h"
 
 #define contactN 7
 
@@ -24,7 +26,7 @@ class ModelPlane
 	public:
 	///////////
 	//Variables
-	nav_msgs::Odometry kinematics;
+	last_letter::SimStates states;
 	geometry_msgs::WrenchStamped dynamics;
 	geometry_msgs::Wrench groundDynamicsVect;
 	ros::Subscriber subInp;
@@ -47,7 +49,7 @@ class ModelPlane
 	~ModelPlane ();
 	
 	//Input callback
-	void getInput(last_letter::inputs inputMsg);
+	void getInput(last_letter::SimPWM inputMsg);
 	
 	//Simulation step
 	void step(void);
@@ -56,10 +58,10 @@ class ModelPlane
 	void diffEq(void);
 	
 	//Calculate Forces
-	geometry_msgs::Vector3 getForce(nav_msgs::Odometry states, double inputs[4]);
+	geometry_msgs::Vector3 getForce(last_letter::SimStates states, double inputs[4]);
 	
 	//Calculate Torques
-	geometry_msgs::Vector3 getTorque(nav_msgs::Odometry states, double inputs[4]);
+	geometry_msgs::Vector3 getTorque(last_letter::SimStates states, double inputs[4]);
 	
 	//Calculate Ground Forces and Torques
 	geometry_msgs::Wrench groundDynamics(geometry_msgs::Quaternion quat);
