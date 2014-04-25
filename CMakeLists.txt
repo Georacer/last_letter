@@ -115,20 +115,20 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-	add_executable(plane_publisher src/state_publisher.cpp)
+	add_executable(uav_publisher src/state_publisher.cpp)
 	add_executable(quat2euler src/quat2euler.cpp)
 	add_executable(model src/model.cpp)
 	add_executable(joy2chan src/joy2chan.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-	add_dependencies(plane_publisher ${catkin_EXPORTED_TARGETS})
+	add_dependencies(uav_publisher ${catkin_EXPORTED_TARGETS})
 	add_dependencies(quat2euler ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(model ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)	
 
 ## Specify libraries to link a library or executable target against
-	target_link_libraries(plane_publisher ${catkin_LIBRARIES})
+	target_link_libraries(uav_publisher ${catkin_LIBRARIES})
 	target_link_libraries(quat2euler ${catkin_LIBRARIES})
 	target_link_libraries(model mathutils ${catkin_LIBRARIES})
 	target_link_libraries(joy2chan ${catkin_LIBRARIES})

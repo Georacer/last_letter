@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "joystick_node");
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("joy",1,joy2chan);
-	pub = n.advertise<last_letter::SimPWM>("sim/input",1);
+	pub = n.advertise<last_letter::SimPWM>("input",1);
 	ros::spin();
 }
 

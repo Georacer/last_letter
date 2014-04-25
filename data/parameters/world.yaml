@@ -1,0 +1,6 @@
+
+#Global Parameters for the world model
+/world/rho: 1.2682 #Air density
+/world/oswald: 0.9
+/world/g: 9.81
+/world/groundTemp: 25

@@ -4,35 +4,48 @@
 
 	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
 
-	<!-- Initialization of the parameters -->
+	<!-- Initialization of parameters -->
 	<group>	
 		<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
-		<node pkg="last_letter" name="parameters" type="AerosondeParameters.py" />
+		<rosparam command="load" file="$(find last_letter)data/parameters/world.yaml" />
 	</group>
 
-	<!-- Initialization of the services -->
+	<!-- Initialization of services -->
 	<group>
 	</group>
 	
-	<!-- Raising core nodes -->
-	<group>
-		<node pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag /sim/states /sim/wrenchStamped /sim/input"/>
-		<node if="$(arg clockSim)" name="clock" pkg="last_letter" type="clock.py" />
-		<node pkg="last_letter" name="plane_model" type="model" output="screen"/>
-		<node pkg="last_letter" name="euler_translator" type="quat2euler" />
-	</group>
+	<!-- Place an upright camera transform broadcaster-->
+	<node pkg="tf" type="static_transform_publisher" name="NED2GrCamera" args="0.0 0.0 0.0 0.0 0.0 3.14 map ground_camera 1" />	
 
-	<!-- Transformations broadcaster -->
-	<group>
-		<node pkg="last_letter" type="plane_publisher" name="broadcaster" />
-	</group>
+	<!-- First UAV Group -->
+	<arg name="uav_name" value="fw1"/>	
+	<group ns="$(arg uav_name)">
+		
+		<!-- Initialization of the parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/aerosonde.yaml" />	
+		
+		<!-- Raising core nodes -->
+		<group>
+			<node pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag states wrenchStamped input"/>
+			<node if="$(arg clockSim)" name="clock" pkg="last_letter" type="clock.py" />
+			<node pkg="last_letter" name="plane_model" type="model" output="screen"/>
+			<!--node pkg="last_letter" name="euler_translator" type="quat2euler" /-->
+		</group>
 
-	<!-- Input nodes -->
-	<group>
-		<node pkg="joy" type="joy_node" name="joystick" output="screen" >
-			<param name="dev" value="/dev/input/js0" />
-		</node>
-		<node pkg="last_letter" name="joy2chan" type="joy2chan" />
+		<!-- Transformations broadcaster -->
+		<group>
+			<node pkg="tf" type="static_transform_publisher" name="body2Cockpit" args="0.0 0.0 0.0 0.0 0.0 3.14 base_link plane_camera 10" />		
+			<node pkg="last_letter" type="uav_publisher" name="broadcaster" />
+		</group>
+
+		<!-- Input nodes -->
+		<group>
+			<node pkg="joy" type="joy_node" name="joystick" output="screen" >
+				<param name="dev" value="/dev/input/js0" />
+			</node>
+			<node pkg="last_letter" name="joy2chan" type="joy2chan" />
+		</group>
+	
 	</group>
 	
 </launch>
