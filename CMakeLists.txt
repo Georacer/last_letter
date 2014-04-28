@@ -12,7 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
 	geometry_msgs
 	message_generation
 	tf
-	mathutils
+	uav_utils
 )
 
 ## System dependencies are found with CMake's conventions
@@ -50,21 +50,17 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 	add_message_files(FILES
-		inputs.msg
 		Accelerations.msg
 		SimPWM.msg
 		SimServos.msg
 		SimStates.msg
 		Geoid.msg
+		Environment.msg
 	)
 
 ## Generate services in the 'srv' folder
 	add_service_files(DIRECTORY srv FILES
-		c_lift_a.srv
-		c_drag_a.srv
-		calc_force.srv
-		calc_torque.srv
-		calc_air_data.srv
+		#calc_air_data.srv
 	)
 
 ## Generate actions in the 'action' folder
@@ -119,19 +115,22 @@ include_directories(
 	add_executable(quat2euler src/quat2euler.cpp)
 	add_executable(model src/model.cpp)
 	add_executable(joy2chan src/joy2chan.cpp)
+	add_executable(environment src/environment.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 	add_dependencies(uav_publisher ${catkin_EXPORTED_TARGETS})
 	add_dependencies(quat2euler ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(model ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)	
+	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(environment ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(uav_publisher ${catkin_LIBRARIES})
 	target_link_libraries(quat2euler ${catkin_LIBRARIES})
-	target_link_libraries(model mathutils ${catkin_LIBRARIES})
+	target_link_libraries(model utils ${catkin_LIBRARIES})
 	target_link_libraries(joy2chan ${catkin_LIBRARIES})
+	target_link_libraries(environment utils ${catkin_LIBRARIES})	
 
 #############
 ## Install ##

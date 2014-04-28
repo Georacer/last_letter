@@ -9,7 +9,6 @@
 #include <math.h>
 
 #include "mathutils/utls.hpp"
-#include "last_letter/inputs.h"
 #include "last_letter/SimStates.h"
 #include "last_letter/SimPWM.h"
 

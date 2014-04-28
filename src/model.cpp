@@ -54,27 +54,6 @@ static double _spp[contactN]={0.0};
 		if(!ros::param::getCached("motor/c_prop", c_prop)) {ROS_FATAL("Invalid parameters for -c_prop- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("motor/k_motor", k_motor)) {ROS_FATAL("Invalid parameters for -k_motor- in param server!"); ros::shutdown();}
 		
-		
-		/*ros::param::getCached("/world/rho",rho);
-		ros::param::getCached("/world/g",g);
-		ros::param::getCached("airframe/m",m);
-		ros::param::getCached("airframe/c_lift_q",c_lift_q);
-		ros::param::getCached("airframe/c_lift_deltae",c_lift_deltae);
-		ros::param::getCached("airframe/c_drag_q",c_drag_q);
-		ros::param::getCached("airframe/c_drag_deltae",c_drag_deltae);
-		ros::param::getCached("airframe/c",c);
-		ros::param::getCached("airframe/b",b);
-		ros::param::getCached("airframe/s",s);
-		ros::param::getCached("airframe/c_y_0",c_y_0);
-		ros::param::getCached("airframe/c_y_b",c_y_b);
-		ros::param::getCached("airframe/c_y_p",c_y_p);
-		ros::param::getCached("airframe/c_y_r",c_y_r);
-		ros::param::getCached("airframe/c_y_deltaa",c_y_deltaa);
-		ros::param::getCached("airframe/c_y_deltar",c_y_deltar);
-		ros::param::getCached("motor/s_prop",s_prop);
-		ros::param::getCached("motor/c_prop",c_prop);
-		ros::param::getCached("motor/k_motor",k_motor);*/
-	
 		//convert coefficients to the body frame
 		double c_x_a = -c_drag_a*cos(alpha)-c_lift_a*sin(alpha);
 		double c_x_q = -c_drag_q*cos(alpha)-c_lift_q*sin(alpha);
@@ -189,29 +168,6 @@ static double _spp[contactN]={0.0};
 		if(!ros::param::getCached("motor/k_t_p", k_t_p)) {ROS_FATAL("Invalid parameters for -k_t_p- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("motor/k_omega", k_omega)) {ROS_FATAL("Invalid parameters for -k_omega- in param server!"); ros::shutdown();}
 			
-		/*ros::param::getCached("/world/rho",rho);
-		ros::param::getCached("airframe/c",c);
-		ros::param::getCached("airframe/b",b);
-		ros::param::getCached("airframe/s",s);	
-		ros::param::getCached("airframe/c_l_0",c_l_0);
-		ros::param::getCached("airframe/c_l_b",c_l_b);
-		ros::param::getCached("airframe/c_l_p",c_l_p);
-		ros::param::getCached("airframe/c_l_r",c_l_r);
-		ros::param::getCached("airframe/c_l_deltaa",c_l_deltaa);
-		ros::param::getCached("airframe/c_l_deltar",c_l_deltar);
-		ros::param::getCached("airframe/c_m_0",c_m_0);
-		ros::param::getCached("airframe/c_m_a",c_m_a);
-		ros::param::getCached("airframe/c_m_q",c_m_q);
-		ros::param::getCached("airframe/c_m_deltae",c_m_deltae);
-		ros::param::getCached("airframe/c_n_0",c_n_0);
-		ros::param::getCached("airframe/c_n_b",c_n_b);
-		ros::param::getCached("airframe/c_n_p",c_n_p);
-		ros::param::getCached("airframe/c_n_r",c_n_r);
-		ros::param::getCached("airframe/c_n_deltaa",c_n_deltaa);
-		ros::param::getCached("airframe/c_n_deltar",c_n_deltar);
-		ros::param::getCached("motor/k_t_p",k_t_p);
-		ros::param::getCached("motor/k_omega",k_omega);*/
-	
 		//read angular rates
 		double p = states.velocity.angular.x;
 		double q = states.velocity.angular.y;
@@ -387,11 +343,6 @@ static double _spp[contactN]={0.0};
 		if(!ros::param::getCached("airframe/c_lift_0", c_lift_0)) {ROS_FATAL("Invalid parameters for -c_lift_0- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_lift_a", c_lift_a)) {ROS_FATAL("Invalid parameters for -c_lift_a- in param server!"); ros::shutdown();}
 		
-		/*ros::param::getCached("airframe/mcoeff",M);
-		ros::param::getCached("airframe/alpha_stall",alpha0);
-		ros::param::getCached("airframe/c_lift_0",c_lift_0);
-		ros::param::getCached("airframe/c_lift_a",c_lift_a);*/
-	
 		double sigmoid = ( 1+exp(-M*(alpha-alpha0))+exp(M*(alpha+alpha0)) ) / (1+exp(-M*(alpha-alpha0))) / (1+exp(M*(alpha+alpha0)));
 		double linear = (1-sigmoid) * (c_lift_0 + c_lift_a*alpha); //Lift at small AoA
 		double flatPlate = sigmoid*(2*copysign(1,alpha)*pow(sin(alpha),2)*cos(alpha)); //Lift beyond stall
@@ -412,12 +363,6 @@ static double _spp[contactN]={0.0};
 		if(!ros::param::getCached("airframe/b", b)) {ROS_FATAL("Invalid parameters for -b- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/s", S)) {ROS_FATAL("Invalid parameters for -s- in param server!"); ros::shutdown();}
 		
-		/*ros::param::getCached("airframe/c_drag_p",c_drag_p);
-		ros::param::getCached("airframe/c_lift_0",c_lift_0);
-		ros::param::getCached("airframe/c_lift_a",c_lift_a);
-		ros::param::getCached("/world/oswald",oswald);
-		ros::param::getCached("airframe/b",b);
-		ros::param::getCached("airframe/s",S);*/
 		AR = pow(b,2)/S;
 		double c_drag_a = c_drag_p + pow(c_lift_0+c_lift_a*alpha,2)/(M_PI*oswald*AR);
 
@@ -463,11 +408,7 @@ static double _spp[contactN]={0.0};
 		if(!ros::param::getCached("airframe/j_y", j_y)) {ROS_FATAL("Invalid parameters for -j_y- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/j_z", j_z)) {ROS_FATAL("Invalid parameters for -j_z- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/j_xz", j_xz)) {ROS_FATAL("Invalid parameters for -j_xz- in param server!"); ros::shutdown();}
-		
-		/*ros::param::getCached("airframe/j_x",j_x);
-		ros::param::getCached("airframe/j_y",j_y);
-		ros::param::getCached("airframe/j_z",j_z);
-		ros::param::getCached("airframe/j_xz",j_xz);*/
+
 		double G = j_x*j_z-pow(j_xz,2);	
 		double J[9] = {j_x, 0, -j_xz, 0, j_y, 0, -j_xz, 0, j_z};
 		double Jinv[9] = {j_z/G, 0, j_xz/G, 0, 1/j_y, 0, j_xz/G, 0, j_x/G};
@@ -490,6 +431,9 @@ static double _spp[contactN]={0.0};
 		
 		tempVect = dt*rateDot;
 		states.velocity.angular = states.velocity.angular + tempVect;
+		
+		//Update Geoid stuff -- To update!
+		states.geoid.altitude = -states.pose.position.z;
 
 	}	
 	
@@ -543,22 +487,13 @@ static double _spp[contactN]={0.0};
 		states.velocity.angular.y=temp[1];
 		states.velocity.angular.z=temp[2];					
 		
-		/*states.pose.position.x = 0;
-		states.pose.position.y = 0;
-		states.pose.position.z = -2;
-		states.pose.orientation.x = 0;
-		states.pose.orientation.y = 0;
-		states.pose.orientation.z = 0;
-		states.pose.orientation.w = 1;
-		states.velocity.linear.x = 0;
-		states.velocity.linear.y = 0;
-		states.velocity.linear.z = 0;
-		states.velocity.angular.x = 0;
-		states.velocity.angular.y = 0;
-		states.velocity.angular.z = 0;*/
-		
 		states.rotorspeed.clear();
 		states.rotorspeed.push_back((double) 0);
+		
+		states.geoid.latitude = 45.542;
+		states.geoid.longitude = 0.0;
+		states.geoid.altitude = 0.0;
+		
 		input[0] = 0;
 		input[1] = 0;
 		input[2] = 0;
@@ -646,24 +581,24 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "simNode");
 	ros::NodeHandle n;
 		
-	ros::Duration(3).sleep();
+	ros::Duration(3).sleep(); //wait for other nodes to get raised
 	double simRate;	
 	ros::param::get("simRate",simRate); //frame rate in Hz	
 	ros::Rate spinner(simRate);
 	
-	ModelPlane aerosonde(n);
-	ros::Duration(3).sleep(); //wait for other nodes to get raised
-	aerosonde.tprev = ros::Time::now();
+	ModelPlane uav(n);
+	//ros::Duration(3).sleep(); 
+	uav.tprev = ros::Time::now();
 	spinner.sleep();
 	ROS_INFO("simNode up");	
 	
-	while (n.ok())
+	while (ros::ok())
 	{
-		aerosonde.step();
+		uav.step();
 		ros::spinOnce();
 		spinner.sleep();
 
-		if (isnan(aerosonde.states.velocity.linear.x))
+		if (isnan(uav.states.velocity.linear.x))
 		{		
 			ROS_FATAL("State NAN!");
 			break;

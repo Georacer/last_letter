@@ -3,4 +3,9 @@
 /world/rho: 1.2682 #Air density
 /world/oswald: 0.9
 /world/g: 9.81
-/world/groundTemp: 25
+/world/groundTemp: 25 #in Celsius
+/world/groundPres: 1013.25 #in mBar
+/world/windRef: 4.0 #in m/s
+/world/windRefAlt: 10 #in m
+/world/windDir: 90.0 #in degrees
+/world/surfSmooth: 0.28 #rural environment

@@ -29,6 +29,7 @@
 			<node pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag states wrenchStamped input"/>
 			<node if="$(arg clockSim)" name="clock" pkg="last_letter" type="clock.py" />
 			<node pkg="last_letter" name="plane_model" type="model" output="screen"/>
+			<node pkg="last_letter" name="environment_model" type="environment" output="screen"/>			
 			<!--node pkg="last_letter" name="euler_translator" type="quat2euler" /-->
 		</group>
 

@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 
-#include <last_letter/inputs.h>
 #include "last_letter/SimPWM.h"
 
 ros::Publisher pub;
@@ -23,7 +22,13 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("joy",1,joy2chan);
 	pub = n.advertise<last_letter::SimPWM>("input",1);
-	ros::spin();
+	
+	while (ros::ok())
+	{
+		ros::spin();
+	}
+	
+	return 0;
 }
 
 
