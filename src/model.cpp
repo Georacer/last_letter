@@ -6,6 +6,111 @@ static double _spp[contactN]={0.0};
 // Define ModelPlane class
 //////////////////////////
 
+	///////////////////
+	//Class Constructor
+	ModelPlane::ModelPlane (ros::NodeHandle n)
+	{
+		XmlRpc::XmlRpcValue list;
+		double temp[4];
+		int i;
+		
+		//Initialize states
+		states.header.frame_id = "bodyFrame";
+		tprev = ros::Time::now();
+		states.header.stamp = tprev;
+		
+		if(!ros::param::getCached("init/position", list)) {ROS_FATAL("Invalid parameters for -init/position- in param server!"); ros::shutdown();}
+		for (i = 0; i < list.size(); ++i) {
+			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+			temp[i]=list[i];
+		}
+		states.pose.position.x=temp[0];
+		states.pose.position.y=temp[1];
+		states.pose.position.z=temp[2];
+		
+		if(!ros::param::getCached("init/orientation", list)) {ROS_FATAL("Invalid parameters for -init/orientation- in param server!"); ros::shutdown();}
+		for (i = 0; i < list.size(); ++i) {
+			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+			temp[i]=list[i];
+		}
+		states.pose.orientation.x=temp[0];
+		states.pose.orientation.y=temp[1];
+		states.pose.orientation.z=temp[2];
+		states.pose.orientation.w=temp[3];	
+		
+		if(!ros::param::getCached("init/velLin", list)) {ROS_FATAL("Invalid parameters for -init/velLin- in param server!"); ros::shutdown();}
+		for (i = 0; i < list.size(); ++i) {
+			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+			temp[i]=list[i];
+		}
+		states.velocity.linear.x=temp[0];
+		states.velocity.linear.y=temp[1];
+		states.velocity.linear.z=temp[2];
+		
+		if(!ros::param::getCached("init/velAng", list)) {ROS_FATAL("Invalid parameters for -init/velAng- in param server!"); ros::shutdown();}
+		for (i = 0; i < list.size(); ++i) {
+			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+			temp[i]=list[i];
+		}
+		states.velocity.angular.x=temp[0];
+		states.velocity.angular.y=temp[1];
+		states.velocity.angular.z=temp[2];					
+		
+		states.rotorspeed.clear();
+		states.rotorspeed.push_back((double) 0);
+		
+		states.geoid.latitude = 45.542;
+		states.geoid.longitude = 0.0;
+		states.geoid.altitude = 0.0;
+		
+		input[0] = 0;
+		input[1] = 0;
+		input[2] = 0;
+		input[3] = 0;
+		dynamics.header.frame_id = "bodyFrame";
+		
+		//Initialize environment
+		environment.wind.x = 0;
+		environment.wind.y = 0;
+		environment.wind.z = 0;
+		if(!ros::param::getCached("/world/rho", environment.density)) {ROS_FATAL("Invalid parameters for -/world/rho- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/world/groundPres", environment.pressure)) {ROS_FATAL("Invalid parameters for -/world/groundPress- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/world/groundTemp", environment.temperature)) {ROS_FATAL("Invalid parameters for -/world/groundTemp- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/world/g", environment.gravity)) {ROS_FATAL("Invalid parameters for -/world/g- in param server!"); ros::shutdown();}
+		
+		//Subscribe and advertize
+		subInp = n.subscribe("input",1,&ModelPlane::getInput, this);
+		subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this);
+		pubState = n.advertise<last_letter::SimStates>("states",1000);
+		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("wrenchStamped",1000);
+		
+		//Define contact points
+		contactpoints[0]=0.162; //x1
+		contactpoints[1]=0.162; //x2
+		contactpoints[2]=-0.8639; //x3 
+		contactpoints[3]=-0.0832; //x4
+		contactpoints[4]=-0.0832; //x5
+		contactpoints[5]=0.3785; //x6
+		contactpoints[6]=-0.9328; //x7
+
+		contactpoints[7]=-0.2324; //y1
+		contactpoints[8]=0.2324; //y2
+		contactpoints[9]=0.0; //y3
+		contactpoints[10]=0.9671; //y4
+		contactpoints[11]=-0.9671; //y5
+		contactpoints[12]=0.0; //y6
+		contactpoints[13]=0.0; //y7
+
+		contactpoints[14]=0.2214; //z1
+		contactpoints[15]=0.2214; //z2
+		contactpoints[16]=0.0522; //z3
+		contactpoints[17]=-0.1683; //z4
+		contactpoints[18]=-0.1683; //z5
+		contactpoints[19]=0.017; //z6
+		contactpoints[20]=-0.2196; //z7
+		
+	}
+	
 	////////////////////////////////////
 	//Force calculation in the body axes
 	geometry_msgs::Vector3 ModelPlane::getForce(last_letter::SimStates states, double inputs[4])
@@ -34,8 +139,11 @@ static double _spp[contactN]={0.0};
 		double c_y_0,c_y_b,c_y_p,c_y_r,c_y_deltaa,c_y_deltar;
 		double s_prop,c_prop,k_motor;
 	
-		if(!ros::param::getCached("/world/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}	
-		if(!ros::param::getCached("/world/g", g)) {ROS_FATAL("Invalid parameters for -g- in param server!"); ros::shutdown();}	
+		//if(!ros::param::getCached("/world/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}	
+		//if(!ros::param::getCached("/world/g", g)) {ROS_FATAL("Invalid parameters for -g- in param server!"); ros::shutdown();}	
+		rho = environment.density;
+		g = environment.gravity;
+		
 		if(!ros::param::getCached("airframe/m", m)) {ROS_FATAL("Invalid parameters for -m- in param server!"); ros::shutdown();}			
 		if(!ros::param::getCached("airframe/c_lift_q", c_lift_q)) {ROS_FATAL("Invalid parameters for -c_lift_q- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_lift_deltae", c_lift_deltae)) {ROS_FATAL("Invalid parameters for -c_lift_deltae- in param server!"); ros::shutdown();}
@@ -145,7 +253,9 @@ static double _spp[contactN]={0.0};
 		double c_n_0, c_n_b, c_n_p, c_n_r, c_n_deltaa, c_n_deltar;
 		double k_t_p, k_omega;
 	
-		if(!ros::param::getCached("/world/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}	
+		//if(!ros::param::getCached("/world/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}
+		rho = environment.density;
+
 		if(!ros::param::getCached("airframe/c", c)) {ROS_FATAL("Invalid parameters for -c- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/b", b)) {ROS_FATAL("Invalid parameters for -b- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/s", s)) {ROS_FATAL("Invalid parameters for -s- in param server!"); ros::shutdown();}
@@ -301,9 +411,9 @@ static double _spp[contactN]={0.0};
 	//Aerodynamc angles/ airspeed calculation
 	geometry_msgs::Vector3 ModelPlane::getAirData (geometry_msgs::Vector3 speeds)
 	{
-		double u = speeds.x-wind.x;
-		double v = speeds.y-wind.y;
-		double w = speeds.z-wind.z;
+		double u = speeds.x-environment.wind.x;
+		double v = speeds.y-environment.wind.y;
+		double w = speeds.z-environment.wind.z;
 
 		double airspeed = sqrt(pow(u,2)+pow(v,2)+pow(w,2));
 		double alpha = atan2(w,u);
@@ -437,113 +547,6 @@ static double _spp[contactN]={0.0};
 
 	}	
 	
-	///////////////////
-	//Class Constructor
-	ModelPlane::ModelPlane (ros::NodeHandle n)
-	{
-		XmlRpc::XmlRpcValue list;
-		double temp[4];
-		int i;
-		
-		//Initialize states
-		states.header.frame_id = "bodyFrame";
-		tprev = ros::Time::now();
-		states.header.stamp = tprev;
-		
-		if(!ros::param::getCached("init/position", list)) {ROS_FATAL("Invalid parameters for -init/position- in param server!"); ros::shutdown();}
-		for (i = 0; i < list.size(); ++i) {
-			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-			temp[i]=list[i];
-		}
-		states.pose.position.x=temp[0];
-		states.pose.position.y=temp[1];
-		states.pose.position.z=temp[2];
-		
-		if(!ros::param::getCached("init/orientation", list)) {ROS_FATAL("Invalid parameters for -init/orientation- in param server!"); ros::shutdown();}
-		for (i = 0; i < list.size(); ++i) {
-			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-			temp[i]=list[i];
-		}
-		states.pose.orientation.x=temp[0];
-		states.pose.orientation.y=temp[1];
-		states.pose.orientation.z=temp[2];
-		states.pose.orientation.w=temp[3];	
-		
-		if(!ros::param::getCached("init/velLin", list)) {ROS_FATAL("Invalid parameters for -init/velLin- in param server!"); ros::shutdown();}
-		for (i = 0; i < list.size(); ++i) {
-			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-			temp[i]=list[i];
-		}
-		states.velocity.linear.x=temp[0];
-		states.velocity.linear.y=temp[1];
-		states.velocity.linear.z=temp[2];
-		
-		if(!ros::param::getCached("init/velAng", list)) {ROS_FATAL("Invalid parameters for -init/velAng- in param server!"); ros::shutdown();}
-		for (i = 0; i < list.size(); ++i) {
-			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-			temp[i]=list[i];
-		}
-		states.velocity.angular.x=temp[0];
-		states.velocity.angular.y=temp[1];
-		states.velocity.angular.z=temp[2];					
-		
-		states.rotorspeed.clear();
-		states.rotorspeed.push_back((double) 0);
-		
-		states.geoid.latitude = 45.542;
-		states.geoid.longitude = 0.0;
-		states.geoid.altitude = 0.0;
-		
-		input[0] = 0;
-		input[1] = 0;
-		input[2] = 0;
-		input[3] = 0;
-		dynamics.header.frame_id = "bodyFrame";
-		
-		//Initialize environment
-		wind.x = 0;
-		wind.y = 0;
-		wind.z = 0;
-		
-		//Subscribe and advertize
-		subInp = n.subscribe("input",1,&ModelPlane::getInput, this);
-		subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this);
-		pubState = n.advertise<last_letter::SimStates>("states",1000);
-		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("wrenchStamped",1000);
-		
-		//Define contact points
-		contactpoints[0]=0.162; //x1
-		contactpoints[1]=0.162; //x2
-		contactpoints[2]=-0.8639; //x3 
-		contactpoints[3]=-0.0832; //x4
-		contactpoints[4]=-0.0832; //x5
-		contactpoints[5]=0.3785; //x6
-		contactpoints[6]=-0.9328; //x7
-
-		contactpoints[7]=-0.2324; //y1
-		contactpoints[8]=0.2324; //y2
-		contactpoints[9]=0.0; //y3
-		contactpoints[10]=0.9671; //y4
-		contactpoints[11]=-0.9671; //y5
-		contactpoints[12]=0.0; //y6
-		contactpoints[13]=0.0; //y7
-
-		contactpoints[14]=0.2214; //z1
-		contactpoints[15]=0.2214; //z2
-		contactpoints[16]=0.0522; //z3
-		contactpoints[17]=-0.1683; //z4
-		contactpoints[18]=-0.1683; //z5
-		contactpoints[19]=0.017; //z6
-		contactpoints[20]=-0.2196; //z7
-		
-	}
-	
-	//////////////////
-	//Class destructor
-	ModelPlane::~ModelPlane ()
-	{
-	}
-	
 	///////////////////////////////////////
 	//Make one step of the plane simulation
 	void ModelPlane::step(void)
@@ -581,9 +584,15 @@ static double _spp[contactN]={0.0};
 	
 	/////////////////////////////////////////////////
 	//Store environmental values
-	void ModelPlane::getEnvironment(last_letter::Environment environment)
+	void ModelPlane::getEnvironment(last_letter::Environment envUpdate)
 	{
-		wind = environment.wind;
+		environment = envUpdate;
+	}	
+	
+	//////////////////
+	//Class destructor
+	ModelPlane::~ModelPlane ()
+	{
 	}
 	
 ///////////////
