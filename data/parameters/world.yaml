@@ -13,5 +13,6 @@
 /world/surfSmooth: 0.28 #rural environment
 /world/Dryden/Lu: 200.0
 /world/Dryden/Lw: 50.0
-/world/Dryden/sigmau: 212
-/world/Dryden/sigmaw: 140
+/world/Dryden/sigmau: 212.0
+/world/Dryden/sigmaw: 140.0
+/world/Dryden/use: 0.0 #produce turbulence 0/1

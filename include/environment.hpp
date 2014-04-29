@@ -20,6 +20,7 @@ class environmentModel
 	last_letter::SimStates states;
 	double dt, simRate;
 	ros::Time tprev;
+	double allowTurbulence;
 	
 	double g; //Acceleration of gravity at 45.542 deg latitude, m/s**s
 	double Rd; //Gas constant for dry air, J/kg K

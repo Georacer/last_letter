@@ -15,6 +15,7 @@ ros::Publisher pub;
 		int i;
 		ros::param::get("simRate",simRate); //frame rate in Hz
 		dt = 1.0/simRate;
+		if(!ros::param::getCached("/world/Dryden/use", allowTurbulence)) {ROS_FATAL("Invalid parameters for -/world/Dryden/use- in param server!"); ros::shutdown();}
 		
 		//initialize atmosphere stuff
 		if(!ros::param::getCached("/world/groundTemp", T0)) {ROS_FATAL("Invalid parameters for -/world/groundTemp- in param server!"); ros::shutdown();}
@@ -104,21 +105,24 @@ ros::Publisher pub;
 		airspeed = airspeed - wind;
 		Va = sqrt(pow(airspeed.x,2)+pow(airspeed.y,2)+pow(airspeed.z,2));
 		
-		input = (((double)rand()) / (RAND_MAX) - 0.5); //turbulence u-component
+		if (allowTurbulence)
+		{		
+			input = (((double)rand()) / (RAND_MAX) - 0.5); //turbulence u-component
 		
-		windDistU = windDistU*(1-Va/Lu*dt) + sigmau*sqrt(2*Va/Lu)*dt*input;
+			windDistU = windDistU*(1-Va/Lu*dt) + sigmau*sqrt(2*Va/Lu)*dt*input;
 		
-		input = (((double)rand()) / (RAND_MAX) - 0.5); //turbulence v-component
-		temp[0] = windDistV[0];
-		temp[1] = windDistV[1];
-		windDistV[1] = -pow(Va/Lu,2)*dt*temp[0] + temp[1] + sigmau*sqrt(3*Va/Lu)*Va/(sqrt(3)*Lu)*dt*input;
-		windDistV[0] = (1.0-2.0*Va/Lu*dt)*temp[0] + dt*temp[1] + sigmau*sqrt(3*Va/Lu)*dt*input;
+			input = (((double)rand()) / (RAND_MAX) - 0.5); //turbulence v-component
+			temp[0] = windDistV[0];
+			temp[1] = windDistV[1];
+			windDistV[1] = -pow(Va/Lu,2)*dt*temp[0] + temp[1] + sigmau*sqrt(3*Va/Lu)*Va/(sqrt(3)*Lu)*dt*input;
+			windDistV[0] = (1.0-2.0*Va/Lu*dt)*temp[0] + dt*temp[1] + sigmau*sqrt(3*Va/Lu)*dt*input;
 		
-		input = ((double)rand() / (RAND_MAX) - 0.5); //turbulence w-component
-		temp[0] = windDistW[0];
-		temp[1] = windDistW[1];
-		windDistW[1] = -pow(Va/Lw,2)*dt*temp[0] + temp[1] + sigmaw*sqrt(3*Va/Lw)*Va/(sqrt(3)*Lw)*dt*input;
-		windDistW[0] = (1.0-2.0*Va/Lw*dt)*temp[0] + dt*temp[1] + sigmaw*sqrt(3*Va/Lw)*dt*input;
+			input = ((double)rand() / (RAND_MAX) - 0.5); //turbulence w-component
+			temp[0] = windDistW[0];
+			temp[1] = windDistW[1];
+			windDistW[1] = -pow(Va/Lw,2)*dt*temp[0] + temp[1] + sigmaw*sqrt(3*Va/Lw)*Va/(sqrt(3)*Lw)*dt*input;
+			windDistW[0] = (1.0-2.0*Va/Lw*dt)*temp[0] + dt*temp[1] + sigmaw*sqrt(3*Va/Lw)*dt*input;
+		}
 		
 		environment.wind = Reb/wind; //Rotate bias wind in body axes
 		
