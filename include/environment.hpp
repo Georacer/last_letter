@@ -18,6 +18,8 @@ class environmentModel
 	public:
 	last_letter::Environment environment;
 	last_letter::SimStates states;
+	double dt, simRate;
+	ros::Time tprev;
 	
 	double g; //Acceleration of gravity at 45.542 deg latitude, m/s**s
 	double Rd; //Gas constant for dry air, J/kg K
@@ -38,6 +40,9 @@ class environmentModel
 	double grav_temp;
 	double windRef, windRefAlt, windDir, surfSmooth, kwind;
 	geometry_msgs::Vector3 wind;
+	double Lu, Lw, sigmau, sigmaw;
+	double windDistU;
+	double windDistV[2], windDistW[2];
 	
 	/////////////
 	//Constructor

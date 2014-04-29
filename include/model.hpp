@@ -11,6 +11,7 @@
 #include "mathutils/utls.hpp"
 #include "last_letter/SimStates.h"
 #include "last_letter/SimPWM.h"
+#include "last_letter/Environment.h"
 
 #define contactN 7
 
@@ -28,14 +29,16 @@ class ModelPlane
 	last_letter::SimStates states;
 	geometry_msgs::WrenchStamped dynamics;
 	geometry_msgs::Wrench groundDynamicsVect;
-	ros::Subscriber subInp;
+	last_letter::Environment environment;
+	geometry_msgs::Vector3 wind;
+	ros::Subscriber subInp, subEnv;
 	ros::Publisher pubState;
 	ros::Publisher pubWrench;
 	ros::Time tprev;
 	ros::Duration durTemp;
 	double dt;
 	double input[4];
-	double contactpoints[contactN*3];	
+	double contactpoints[contactN*3];
 	
 	
 	///////////
@@ -74,6 +77,8 @@ class ModelPlane
 	//Calculate drag coefficient from alpha
 	double dragCoeff (double alpha);
 	
+	//Store environmental values
+	void getEnvironment(last_letter::Environment environment);
 };
 	
 			

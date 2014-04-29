@@ -301,9 +301,9 @@ static double _spp[contactN]={0.0};
 	//Aerodynamc angles/ airspeed calculation
 	geometry_msgs::Vector3 ModelPlane::getAirData (geometry_msgs::Vector3 speeds)
 	{
-		double u = speeds.x;
-		double v = speeds.y;
-		double w = speeds.z;
+		double u = speeds.x-wind.x;
+		double v = speeds.y-wind.y;
+		double w = speeds.z-wind.z;
 
 		double airspeed = sqrt(pow(u,2)+pow(v,2)+pow(w,2));
 		double alpha = atan2(w,u);
@@ -499,8 +499,15 @@ static double _spp[contactN]={0.0};
 		input[2] = 0;
 		input[3] = 0;
 		dynamics.header.frame_id = "bodyFrame";
+		
+		//Initialize environment
+		wind.x = 0;
+		wind.y = 0;
+		wind.z = 0;
+		
 		//Subscribe and advertize
 		subInp = n.subscribe("input",1,&ModelPlane::getInput, this);
+		subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this);
 		pubState = n.advertise<last_letter::SimStates>("states",1000);
 		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("wrenchStamped",1000);
 		
@@ -570,6 +577,13 @@ static double _spp[contactN]={0.0};
 		input[1] = (double)-(inputMsg.value[1]-1500)/500;
 		input[2] = (double)(inputMsg.value[2]-1000)/1000;
 		input[3] = (double)-(inputMsg.value[3]-1500)/500;
+	}
+	
+	/////////////////////////////////////////////////
+	//Store environmental values
+	void ModelPlane::getEnvironment(last_letter::Environment environment)
+	{
+		wind = environment.wind;
 	}
 	
 ///////////////
