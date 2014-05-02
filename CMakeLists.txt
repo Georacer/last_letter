@@ -56,6 +56,13 @@ find_package(catkin REQUIRED COMPONENTS
 		SimStates.msg
 		Geoid.msg
 		Environment.msg
+		SimSensor.msg
+		SimSensor3.msg
+		SimBarometer.msg
+		SimGPS.msg
+		SimSat.msg
+		SimSats.msg
+		DOP.msg
 	)
 
 ## Generate services in the 'srv' folder

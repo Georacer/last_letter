@@ -1,0 +1,18 @@
+#Generic Parameters
+/environment/rho: 1.2250 #Air density
+/environment/oswald: 0.9
+
+#Parameters for the atmoshpere model
+/environment/groundTemp: 25 #in Celsius
+/environment/groundPres: 1013.25 #in mBar
+
+#Parameters for the wind model
+/environment/windRef: 0.0 #in m/s
+/environment/windRefAlt: 10 #in m
+/environment/windDir: 0.0 #in degrees
+/environment/surfSmooth: 0.28 #rural environment
+/environment/Dryden/Lu: 200.0
+/environment/Dryden/Lw: 50.0
+/environment/Dryden/sigmau: 212.0
+/environment/Dryden/sigmaw: 140.0
+/environment/Dryden/use: 0.0 #produce turbulence 0/1

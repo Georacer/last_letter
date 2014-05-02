@@ -1,7 +1,5 @@
 #include "environment.hpp"
 
-ros::Publisher pub;
-
 ///////////////////
 //Environment Class
 //Based on Aerocalc: http://www.kilohotel.com/python/aerocalc/
@@ -13,40 +11,31 @@ ros::Publisher pub;
 	environmentModel::environmentModel()
 	{
 		int i;
-		ros::param::get("simRate",simRate); //frame rate in Hz
+
+		grav0 = last_letter::Geoid::EARTH_grav;
+		ros::param::get("sim/rate",simRate); //frame rate in Hz
 		dt = 1.0/simRate;
-		if(!ros::param::getCached("/world/Dryden/use", allowTurbulence)) {ROS_FATAL("Invalid parameters for -/world/Dryden/use- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/Dryden/use", allowTurbulence)) {ROS_FATAL("Invalid parameters for -/environment/Dryden/use- in param server!"); ros::shutdown();}
 		
 		//initialize atmosphere stuff
-		if(!ros::param::getCached("/world/groundTemp", T0)) {ROS_FATAL("Invalid parameters for -/world/groundTemp- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/groundTemp", T0)) {ROS_FATAL("Invalid parameters for -/environment/groundTemp- in param server!"); ros::shutdown();}
 		T0 += 274.15;
-		if(!ros::param::getCached("/world/groundPres", P0)) {ROS_FATAL("Invalid parameters for -/world/groundPres- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/g", g)) {ROS_FATAL("Invalid parameters for -/world/g- in param server!"); ros::shutdown();}
-		Rd = 287.05307;
-		L0 = -6.5;
-		if(!ros::param::getCached("/world/rho", Rho0)) {ROS_FATAL("Invalid parameters for -/world/rho- in param server!"); ros::shutdown();}
-		//initialize gravity calculations
-		R_earth = 6378137.0;
-		f_earth = 1.0/298.257223563;
-		e_earth = sqrt(2.0*f_earth - f_earth*f_earth);
-		RP_earth = R_earth*(1.0-e_earth*e_earth);
-		omega_earth = 7.292115e-5;
-		grav_const = 3.986004418e14;
-		grav_earth =  9.7803267714;
-		Re = 6378137.0;
-		grav_temp = (2.0/R_earth)*(1.0+f_earth+(omega_earth*omega_earth)*(R_earth*R_earth)*RP_earth/grav_const);
+		if(!ros::param::getCached("/environment/groundPres", P0)) {ROS_FATAL("Invalid parameters for -/environment/groundPres- in param server!"); ros::shutdown();}
+		
+		if(!ros::param::getCached("/environment/rho", Rho0)) {ROS_FATAL("Invalid parameters for -/environment/rho- in param server!"); ros::shutdown();}
+		
 		//Initialize bias wind engine
-		if(!ros::param::getCached("/world/windRef", windRef)) {ROS_FATAL("Invalid parameters for -/world/windRef- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/windRefAlt", windRefAlt)) {ROS_FATAL("Invalid parameters for -/world/windRefAlt- in param server!"); ros::shutdown();}			
-		if(!ros::param::getCached("/world/windDir", windDir)) {ROS_FATAL("Invalid parameters for -/world/windDir- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/surfSmooth", surfSmooth)) {ROS_FATAL("Invalid parameters for -/world/surfSmooth- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/windRef", windRef)) {ROS_FATAL("Invalid parameters for -/environment/windRef- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/windRefAlt", windRefAlt)) {ROS_FATAL("Invalid parameters for -/environment/windRefAlt- in param server!"); ros::shutdown();}			
+		if(!ros::param::getCached("/environment/windDir", windDir)) {ROS_FATAL("Invalid parameters for -/environment/windDir- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/surfSmooth", surfSmooth)) {ROS_FATAL("Invalid parameters for -/environment/surfSmooth- in param server!"); ros::shutdown();}
 		windDir = windDir*M_PI/180; //convert to rad
 		kwind = windRef/pow(windRefAlt,surfSmooth);
 		//Initialize turbulence engine
-		if(!ros::param::getCached("/world/Dryden/Lu", Lu)) {ROS_FATAL("Invalid parameters for -/world/Dryden/Lu- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/Dryden/Lw", Lw)) {ROS_FATAL("Invalid parameters for -/world/Dryden/Lw- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/Dryden/sigmau", sigmau)) {ROS_FATAL("Invalid parameters for -/world/Dryden/sigmau- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/Dryden/sigmaw", sigmaw)) {ROS_FATAL("Invalid parameters for -/world/Dryden/sigmaw- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/Dryden/Lu", Lu)) {ROS_FATAL("Invalid parameters for -/environment/Dryden/Lu- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/Dryden/Lw", Lw)) {ROS_FATAL("Invalid parameters for -/environment/Dryden/Lw- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/Dryden/sigmau", sigmau)) {ROS_FATAL("Invalid parameters for -/environment/Dryden/sigmau- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/Dryden/sigmaw", sigmaw)) {ROS_FATAL("Invalid parameters for -/environment/Dryden/sigmaw- in param server!"); ros::shutdown();}
 		windDistU = 0;
 		for (i=0;i<2;i++)
 		{
@@ -61,14 +50,18 @@ ros::Publisher pub;
 	//Read input states and publish environment data
 	void environmentModel::callback(const last_letter::SimStates::ConstPtr& InpStates)
 	{
+		//if (firstcall)
+		//	dt=1.0/simRate;
+	
 		states = *InpStates;
-		calcTemp(); //Run 1st		
+		calcTemp(); //Run 1st
+		calcGrav();		
 		calcWind();
 		calcDens();
 		calcPres();
 		calcGrav();
 		environment.header.stamp = ros::Time::now();
-		pub.publish(environment);
+		env_pub.publish(environment);
 		dt = (ros::Time::now() - tprev).toSec();
 		tprev = ros::Time::now();
 
@@ -143,7 +136,7 @@ ros::Publisher pub;
 	void environmentModel::calcDens()
 	{
 		double Hb = 0, Tb = T0, Pb = P0, L = L0;
-		double alt2pressRatio = (Pb / P0) * pow(1 - (L / Tb) * (states.geoid.altitude/1000.0 - Hb), ((1000 * g) / (Rd * L))); //Corrected to 1 - (L/...)
+		double alt2pressRatio = (Pb / P0) * pow(1 - (L / Tb) * (states.geoid.altitude/1000.0 - Hb), ((1000.0 * grav0) / (Rd * L))); //Corrected to 1 - (L/...)
 		double alt2tempRatio =  environment.temperature / T0;
 		double density = Rho0 * alt2pressRatio  / alt2tempRatio;	
 		environment.density = density;
@@ -155,7 +148,7 @@ ros::Publisher pub;
 	{
 		double pressure;
 		double Hb = 0, Tb = T0, Pb = P0, L = L0;
-		pressure = Pb * pow(1 - (L / Tb) * (states.geoid.altitude/1000.0 - Hb), ((1000 * g) / (Rd * L))); //Corrected to 1 - (L/...)
+		pressure = Pb * pow(1 - (L / Tb) * (states.geoid.altitude/1000.0 - Hb), ((1000.0 * grav0) / (Rd * L))); //Corrected to 1 - (L/...)
 		environment.pressure = pressure;
 	}
 
@@ -171,9 +164,9 @@ ros::Publisher pub;
 	void environmentModel::calcGrav()
 	{
 		double slat2 = pow(sin(M_PI/180*states.geoid.latitude),2);
-		double Re2 = pow(R_earth,2);
+		double Re2 = pow(last_letter::Geoid::EARTH_radius,2);
 
-		double grav0 = g * (1.0+0.00193185138639 * slat2) / sqrt(1.0-0.00669437999013 *slat2);
+		grav0 = last_letter::Geoid::EARTH_grav * (1.0+0.00193185138639 * slat2) / sqrt(1.0-0.00669437999013 *slat2);
 		double gravity = grav0 * (1.0 - grav_temp * states.geoid.altitude + 3.0 *(pow(states.geoid.altitude,2)/Re2) );
 		environment.gravity = gravity;
 	}
@@ -189,32 +182,19 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "environmentNode");
 	ros::NodeHandle n;
 	
-	last_letter::SimStates states;
 	environmentModel env;
 	
 	ros::Subscriber sub = n.subscribe("states",1,&environmentModel::callback, &env);	
-	pub = n.advertise<last_letter::Environment>("environment",1000);
+	env.env_pub = n.advertise<last_letter::Environment>("environment",1);
 	
 	ros::Duration(3).sleep(); //wait for other nodes to get raised
-	double simRate;	
-	ros::param::get("simRate",simRate); //frame rate in Hz	
-	ros::Rate spinner(simRate);
+	//double simRate;	
+	//ros::param::get("sim ",simRate); //frame rate in Hz	
+	//ros::Rate spinner(simRate);
 	
 	ROS_INFO("environmentNode up");	
 	env.tprev = ros::Time::now();
-	spinner.sleep();
-	
-	while (ros::ok())
-	{
-		ros::spinOnce();
-		spinner.sleep();
-
-		if (isnan(states.velocity.linear.x))
-		{		
-			ROS_FATAL("State NAN! in environmentNode");
-			break;
-		}
-	}
+	ros::spin();
 	
 	return 0;
 	

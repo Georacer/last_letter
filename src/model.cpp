@@ -73,10 +73,11 @@ static double _spp[contactN]={0.0};
 		environment.wind.x = 0;
 		environment.wind.y = 0;
 		environment.wind.z = 0;
-		if(!ros::param::getCached("/world/rho", environment.density)) {ROS_FATAL("Invalid parameters for -/world/rho- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/groundPres", environment.pressure)) {ROS_FATAL("Invalid parameters for -/world/groundPress- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/groundTemp", environment.temperature)) {ROS_FATAL("Invalid parameters for -/world/groundTemp- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/g", environment.gravity)) {ROS_FATAL("Invalid parameters for -/world/g- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/rho", environment.density)) {ROS_FATAL("Invalid parameters for -/environment/rho- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/groundPres", environment.pressure)) {ROS_FATAL("Invalid parameters for -/environment/groundPress- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/groundTemp", environment.temperature)) {ROS_FATAL("Invalid parameters for -/environment/groundTemp- in param server!"); ros::shutdown();}
+		//if(!ros::param::getCached("/environment/g", environment.gravity)) {ROS_FATAL("Invalid parameters for -/environment/g- in param server!"); ros::shutdown();}
+		environment.gravity = 9.81;
 		
 		//Subscribe and advertize
 		subInp = n.subscribe("input",1,&ModelPlane::getInput, this);
@@ -139,8 +140,8 @@ static double _spp[contactN]={0.0};
 		double c_y_0,c_y_b,c_y_p,c_y_r,c_y_deltaa,c_y_deltar;
 		double s_prop,c_prop,k_motor;
 	
-		//if(!ros::param::getCached("/world/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}	
-		//if(!ros::param::getCached("/world/g", g)) {ROS_FATAL("Invalid parameters for -g- in param server!"); ros::shutdown();}	
+		//if(!ros::param::getCached("/environment/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}	
+		//if(!ros::param::getCached("/environment/g", g)) {ROS_FATAL("Invalid parameters for -g- in param server!"); ros::shutdown();}	
 		rho = environment.density;
 		g = environment.gravity;
 		
@@ -253,7 +254,7 @@ static double _spp[contactN]={0.0};
 		double c_n_0, c_n_b, c_n_p, c_n_r, c_n_deltaa, c_n_deltar;
 		double k_t_p, k_omega;
 	
-		//if(!ros::param::getCached("/world/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}
+		//if(!ros::param::getCached("/environment/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}
 		rho = environment.density;
 
 		if(!ros::param::getCached("airframe/c", c)) {ROS_FATAL("Invalid parameters for -c- in param server!"); ros::shutdown();}
@@ -469,7 +470,7 @@ static double _spp[contactN]={0.0};
 		if(!ros::param::getCached("airframe/c_drag_p", c_drag_p)) {ROS_FATAL("Invalid parameters for -c_drag_p- in param server!"); ros::shutdown();}	
 		if(!ros::param::getCached("airframe/c_lift_0", c_lift_0)) {ROS_FATAL("Invalid parameters for -c_lift_0- in param server!"); ros::shutdown();}	
 		if(!ros::param::getCached("airframe/c_lift_a", c_lift_a)) {ROS_FATAL("Invalid parameters for -c_lift_a- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("/world/oswald", oswald)) {ROS_FATAL("Invalid parameters for -oswald- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("/environment/oswald", oswald)) {ROS_FATAL("Invalid parameters for -oswald- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/b", b)) {ROS_FATAL("Invalid parameters for -b- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/s", S)) {ROS_FATAL("Invalid parameters for -s- in param server!"); ros::shutdown();}
 		
