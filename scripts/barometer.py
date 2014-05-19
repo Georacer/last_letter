@@ -39,17 +39,6 @@ class Barometer():
 		self.bar_true=1013.25
 		self.temp=25.0
 
-		M=0.0289644;
-		ro=8.31447;
-		pp = np.random.normal(0,50,1)
-		self.P0=1000+pp[0]
-
-		pp = np.random.normal(0,10,1)
-		T0=298.15+pp[0]
-
-
-		self.k1=M/(ro*T0);
-
 		self.pub = rospy.Publisher(name, SimBarometer)
 		self.states_sub = rospy.Subscriber("states",SimStates,self.StatesCallback)
 		self.atm_sub = rospy.Subscriber("environment",Environment,self.EnvironmentCallback)
@@ -58,7 +47,8 @@ class Barometer():
 		self.realnew=False
 		
 		#Thermal Chracteristics
-		self.thermalMass = ThermalRise(name)
+		self.thermalMass = ThermalRise(name)	
+		rospy.loginfo("\tg.Loading Thermal Chracteristics")
 		self.airspeed = 0.0
 		self.temp=25.0
 
@@ -66,12 +56,11 @@ class Barometer():
 		Reb = quat2Reb(states.pose.orientation)
 		bar_noise = np.random.normal(0,self.std_coeff,1)
 		barpos = states.pose.position.z+np.dot(Reb[2][0:3],self.cp)
-		#self.measurement.pressure=((self.P0)*exp(-self.k1*_grav*(barpos))+bar_noise[0])+0.001*states.rotorspeed[0]/(barpos*barpos);
+		
 		self.measurement.pressure = self.bar_true
-
 		self.measurement.pressure = saturation(floor(self.measurement.pressure/self.resolution)*self.resolution,self.minvalue, self.maxvalue)
 
-		self.tempOffset = self.thermalMass.step(self.airspeed)
+		self.tempOffset = self.thermalMass.step(self.airspeed,self.dt)
 		self.measurement.temperature = self.temp + self.tempOffset
 
 
@@ -83,7 +72,8 @@ class Barometer():
 		self.bar_true=data.pressure
 		self.grav=data.gravity
 		self.temp=data.temperature
-		self.airspeed = np.sqrt(pow(self.real.velocity.linear.x - data.wind.x,2) + pow(self.real.velocity.linear.y - data.wind.y,2) + pow(self.real.velocity.linear.z - data.wind.z,2))
+		if self.realnew:
+			self.airspeed = np.sqrt(pow(self.real.velocity.linear.x - data.wind.x,2) + pow(self.real.velocity.linear.y - data.wind.y,2) + pow(self.real.velocity.linear.z - data.wind.z,2))
 			
 
 ###################################################################################################	

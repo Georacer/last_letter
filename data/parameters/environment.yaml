@@ -7,7 +7,7 @@
 /environment/groundPres: 1013.25 #in mBar
 
 #Parameters for the wind model
-/environment/windRef: 0.0 #in m/s
+/environment/windRef: 4.0 #in m/s
 /environment/windRefAlt: 10 #in m
 /environment/windDir: 0.0 #in degrees
 /environment/surfSmooth: 0.28 #rural environment
@@ -15,4 +15,4 @@
 /environment/Dryden/Lw: 50.0
 /environment/Dryden/sigmau: 212.0
 /environment/Dryden/sigmaw: 140.0
-/environment/Dryden/use: 0.0 #produce turbulence 0/1
+/environment/Dryden/use: 1.0 #produce turbulence 0/1

@@ -9,7 +9,7 @@ Gyroscope/std_coeff: [0.1, 0.001, 0.0001]
 
 #b) Accelerometer
 Accelerometer/rate: 200.0 #Hz
-Accelerometer/resolution: 0.00012 #g
+Accelerometer/resolution: 0.000122 #g
 Accelerometer/max: 4.0 #g
 Accelerometer/CP: [0.0, 0.0, 0.1] #meters
 Accelerometer/std_coeff: [0.013, 0.0013, 0.0001] #g
@@ -19,12 +19,21 @@ Accelerometer/kAir: 0.06 #Relation between airspeed and thermal resistance
 Accelerometer/kCov: 1.0 #Relation between coverage and thermal resistance
 Accelerometer/DeltaT: 10 #Expected nominal temperature rise at steady state and no airspeed
 Accelerometer/Tr: 300 #Temperature rise time constant, in seconds
+# Noise Characteristics
+Accelerometer/scaleBias: 0.03 #in units
+Accelerometer/scaleThermal: 0.0002 #in units
+Accelerometer/offsetBias: 0.785 #in m/s2
+Accelerometer/offsetThermal: 0.0084 #in m/s2
+Accelerometer/RWPSD: 0.00392 #in m/s2
 
 #c) Magnetometer
 Magnetometer/rate: 75.0 #Hz
 Magnetometer/resolution: 0.092 #nT
 Magnetometer/CP: [0.0, 0.0, 0.1] #meters
 Magnetometer/std_coeff: 200 #nT
+# Noise Characteristics
+Accelerometer/scaleBias: 0.05 #in units
+Accelerometer/scaleThermal: 0.003 #in units
 
 #d) Barometer
 Barometer/rate: 50.0 #Hz

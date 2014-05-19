@@ -43,6 +43,8 @@ class Altimeter():
 		
 		#Thermal Chracteristics
 		self.thermalMass = ThermalRise(name)
+		rospy.loginfo("\tg.Loading Thermal Chracteristics")
+		
 		self.airspeed = 0.0
 		self.temp=25.0
 
@@ -64,7 +66,7 @@ class Altimeter():
 		self.measurement.value +=rf_noise[0]
 		self.measurement.value = max(self.minvalue,floor(self.measurement.value/self.resolution)*self.resolution)
 		
-		self.tempOffset = self.thermalMass.step(self.airspeed)
+		self.tempOffset = self.thermalMass.step(self.airspeed,self.dt)
 		self.measurement.temperature = self.temp + self.tempOffset
 
 
@@ -75,7 +77,8 @@ class Altimeter():
 	def EnvironmentCallback(self,data):
 		self.grav=data.gravity
 		self.temp=data.temperature
-		self.airspeed = np.sqrt(pow(self.real.velocity.linear.x - data.wind.x,2) + pow(self.real.velocity.linear.y - data.wind.y,2) + pow(self.real.velocity.linear.z - data.wind.z,2))
+		if self.realnew:
+			self.airspeed = np.sqrt(pow(self.real.velocity.linear.x - data.wind.x,2) + pow(self.real.velocity.linear.y - data.wind.y,2) + pow(self.real.velocity.linear.z - data.wind.z,2))
 
 			
 

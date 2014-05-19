@@ -33,13 +33,12 @@ class Magnetometer():
 		self.std_coeff = rospy.get_param(name+'/std_coeff', 0.1)
 		rospy.loginfo("\td.noise coeff: %.3f",self.std_coeff)
 
-		iT=1.0/120.0
-		self.ad = np.exp(iT*self.dt)
-		self.bd = -iT*np.exp(-iT*self.dt)+iT
+		#Noise Characteristics
+		self.bs = np.random.normal(0,rospy.get_param(name+'/scaleBias', 0.03)/3,3)
+		self.ks = np.random.normal(0,rospy.get_param(name+'/scaleThermal', 0.002)/3,3)
 		self.bias=Vector3()
 		self.randomwalk=Vector3()
-		self.noise_main=Vector3()
-		self.Vib=Vector3()
+		self.scale = Vector3()
 		
 		self.measurement = SimSensor3()
 		self.temp=25.0
@@ -53,6 +52,7 @@ class Magnetometer():
 		
 		#Thermal Chracteristics
 		self.thermalMass = ThermalRise(name)
+		rospy.loginfo("\te.Loading Thermal Chracteristics")
 		self.airspeed = 0.0
 
 	def iterate(self,states):
@@ -61,10 +61,14 @@ class Magnetometer():
 		Mb,dec=getMag(states.geoid.latitude,states.geoid.longitude,states.geoid.altitude,Reb)
 
 		nm_noise = np.random.normal(0,self.std_coeff,3)
+		
+		self.scale.x = self.bs[0] + self.ks[0] * (self.temp - 298.15)
+		self.scale.y = self.bs[1] + self.ks[1] * (self.temp - 298.15)
+		self.scale.z = self.bs[2] + self.ks[2] * (self.temp - 298.15)
 
-		self.measurement.axis.x=Mb.x+nm_noise[0]
-		self.measurement.axis.y=Mb.y+nm_noise[1]
-		self.measurement.axis.z=Mb.z+nm_noise[2]
+		self.measurement.axis.x=(1+self.scale.x)*Mb.x+nm_noise[0]
+		self.measurement.axis.y=(1+self.scale.y)*Mb.y+nm_noise[1]
+		self.measurement.axis.z=(1+self.scale.z)*Mb.z+nm_noise[2]
 
 		self.measurement.axis.x = floor(self.measurement.axis.x/self.precision)*self.precision
 		self.measurement.axis.y = floor(self.measurement.axis.y/self.precision)*self.precision
@@ -72,19 +76,8 @@ class Magnetometer():
 
 		self.measurement.temperature = self.temp
 		
-		self.tempOffset = self.thermalMass.step(self.airspeed)
+		self.tempOffset = self.thermalMass.step(self.airspeed,self.dt)
 		self.measurement.temperature = self.temp + self.tempOffset
-
-
-		#euler=quat2euler(states.pose.orientation)
-		#phi = euler.x		
-		#theta = euler.y
-		#psi = euler.z
-
-		#Hx = self.measurement.axis.x*np.cos(theta)+self.measurement.axis.y*np.sin(phi)*np.sin(theta)+self.measurement.axis.z*np.cos(phi)*np.sin(theta)
-		#Hy = self.measurement.axis.y*np.cos(phi)-self.measurement.axis.z*np.sin(phi)
-
-		#print -psi*180.0/pi+atan2(-Hy,Hx)*180.0/pi+dec
 
 
 	def StatesCallback(self,data):
@@ -93,7 +86,8 @@ class Magnetometer():
 
 	def EnvironmentCallback(self,data):
 		self.temp=data.temperature
-		self.airspeed = np.sqrt(pow(self.real.velocity.linear.x - data.wind.x,2) + pow(self.real.velocity.linear.y - data.wind.y,2) + pow(self.real.velocity.linear.z - data.wind.z,2))
+		if self.realnew:
+			self.airspeed = np.sqrt(pow(self.real.velocity.linear.x - data.wind.x,2) + pow(self.real.velocity.linear.y - data.wind.y,2) + pow(self.real.velocity.linear.z - data.wind.z,2))
 			
 
 ###################################################################################################	

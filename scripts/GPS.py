@@ -11,38 +11,13 @@ import datetime
 from geometry_msgs.msg import Vector3, Vector3Stamped
 import numpy as np
 from numpy.linalg import inv, lstsq
-from utils import saturation, quat2Reb, Vector2Array, quat2euler, ECEF2lla, lla2ECEF, vectornorm
+from utils import saturation, quat2Reb, Vector2Array, quat2euler, ECEF2lla, lla2ECEF, vectornorm, block_diag
 from math import floor, exp, atan2, pi, sqrt, sin, cos
-from last_letter.msg import SimStates, SimGPS, SimSats
+from last_letter.msg import SimStates, SimGPS, SimSats, Geoid
 
-lspeed=299792458.0
-_grav=9.81
+_earth_E = sqrt(2.0*Geoid.EARTH_flattening - Geoid.EARTH_flattening*Geoid.EARTH_flattening)
 
-def block_diag(*arrs):
-    """Create a new diagonal matrix from the provided arrays.
-
-    Parameters
-    ----------
-    a, b, c, ... : ndarray
-        Input arrays.
-
-    Returns
-    -------
-    D : ndarray
-        Array with a, b, c, ... on the diagonal.
-
-    """
-    arrs = [np.asarray(a) for a in arrs]
-    shapes = np.array([a.shape for a in arrs])
-    out = np.zeros(np.sum(shapes, axis=0))
-
-    r, c = 0, 0
-    for i, (rr, cc) in enumerate(shapes):
-        out[r:r + rr, c:c + cc] = arrs[i]
-        r += rr
-        c += cc
-    return out
-		
+lspeed=299792458.0		
 
 ####################### subfunctions #############################################################
 def chunks(l, n):
@@ -69,7 +44,7 @@ class GPSsensor():
 		self.cp =  np.array(rospy.get_param(name+'/CP', [0.0, 0.0, 0.0])).reshape(3,1)
 		rospy.loginfo("\tc.position: [%.2f,%.2f,%.2f]", self.cp[0],self.cp[1],self.cp[2])
 
-		self.precision =  np.array(rospy.get_param(name+'/precision', [3e-9, 1e-2, 1e-1, 1e-1, 1e-1])).reshape(5,1)# np.array([3e-9, 1e-2, 1e-1, 1e-1, 1e-1]).reshape(5,1)
+		self.resolution =  np.array(rospy.get_param(name+'/resolution', [3e-9, 1e-2, 1e-1, 1e-1, 1e-1])).reshape(5,1)# np.array([3e-9, 1e-2, 1e-1, 1e-1, 1e-1]).reshape(5,1)
 
 		self.cbias =  rospy.get_param(name+'/clock_bias', 1.2)
 		rospy.loginfo("\td.clock bias: %.2f sec",self.cbias)
@@ -79,7 +54,7 @@ class GPSsensor():
 		
 		self.measurement = SimGPS()
 
-		self.sat_glonass, self.sat_sbas, self.sat_gpsop =  self.get_satellites()
+		self.sat_sbas, self.sat_gpsop =  self.get_satellites()
 
 		self.pub = rospy.Publisher(name, SimGPS)
 		self.states_sub = rospy.Subscriber("states",SimStates,self.StatesCallback)
@@ -119,18 +94,18 @@ class GPSsensor():
 		self.Jx =  block_diag(Jacobx,Jacobx,Jacobx,Jacobx)
 		
 	def get_satellites(self):
-    		GLONASS='http://celestrak.com/NORAD/elements/glo-ops.txt'
+    		#GLONASS='http://celestrak.com/NORAD/elements/glo-ops.txt'
     		SBAS = 'http://celestrak.com/NORAD/elements/sbas.txt'
 		GPSO = 'http://www.celestrak.com/NORAD/elements/gps-ops.txt'
     
-		rospy.loginfo("[GPS] Get Glonass Sat. data") 
-    		r = urlopen(GLONASS).read()
-    		data = r.split('\r\n')
+		#rospy.loginfo("[GPS] Get Glonass Sat. data") 
+    		#r = urlopen(GLONASS).read()
+    		#data = r.split('\r\n')
 
-    		sat_glonass = []
-    		for tle in chunks(data, 3):
-			if len(tle)==3:
-				sat_glonass.append(ephem.readtle(str(tle[0]), str(tle[1]), str(tle[2])))
+    		#sat_glonass = []
+    		#for tle in chunks(data, 3):
+		#	if len(tle)==3:
+		#		sat_glonass.append(ephem.readtle(str(tle[0]), str(tle[1]), str(tle[2])))
 
 		rospy.loginfo("[GPS] Get SBAS Sat. data") 
    		r = urlopen(SBAS).read()
@@ -151,14 +126,14 @@ class GPSsensor():
 			if len(tle)==3:
 		 		sat_gosop.append(ephem.readtle(str(tle[0]), str(tle[1]), str(tle[2])))
 		
-    		return sat_glonass,sat_sbas,sat_gosop
+    		return sat_sbas,sat_gosop
 
 	def getVisible(self,pos,sat):
 		for iss in sat:
 			iss.compute(self.place)
 			bad=abs(np.random.normal(0,3000,1))
 			if float(repr(iss.alt)) > 15.0*pi/180.0 and float(repr(iss.alt))<pi/2.0 and not bad>=9900:
-				possat=lla2ECEF(iss.sublat,iss.sublong,iss.elevation)
+				possat=lla2ECEF(iss.sublat,iss.sublong,iss.elevation,Geoid.EARTH_radius,_earth_E)
 				self.sats.sat[self.sats.visible].position.x = possat.x
 				self.sats.sat[self.sats.visible].position.y = possat.y
 				self.sats.sat[self.sats.visible].position.z = possat.z
@@ -272,7 +247,7 @@ class GPSsensor():
      		     	      -sl,    cl,     0.0,    
                               -cf*cl, -cf*sl, -sf  ]).reshape(3,3)
 
-		self.measurement.latitude, self.measurement.longitude, self.measurement.altitude = ECEF2lla(Vector3(self.Kstates[0],self.Kstates[2],self.Kstates[4]))
+		self.measurement.latitude, self.measurement.longitude, self.measurement.altitude = ECEF2lla(Vector3(self.Kstates[0],self.Kstates[2],self.Kstates[4]),Geoid. EARTH_radius,_earth_E)
 		
 		speedE = np.array([self.Kstates[1],self.Kstates[3],self.Kstates[5]]).reshape(3,)
 		#print RNe
@@ -294,19 +269,19 @@ class GPSsensor():
 
 		self.measurement.header.stamp=rospy.Time.now()
 		
-		self.measurement.latitude = floor(self.measurement.latitude/self.precision[0])*self.precision[0]
-		self.measurement.longitude = floor(self.measurement.longitude/self.precision[0])*self.precision[0] 
-		self.measurement.altitude = floor(self.measurement.altitude/self.precision[1])*self.precision[1]
+		self.measurement.latitude = floor(self.measurement.latitude/self.resolution[0])*self.resolution[0]
+		self.measurement.longitude = floor(self.measurement.longitude/self.resolution[0])*self.resolution[0] 
+		self.measurement.altitude = floor(self.measurement.altitude/self.resolution[1])*self.resolution[1]
 
-		self.measurement.speed = floor(self.measurement.speed/self.precision[2])*self.precision[2]/1.94384449
-		self.measurement.vspeed = floor(self.measurement.vspeed/self.precision[2])*self.precision[2]
-		self.measurement.course = floor(self.measurement.course/self.precision[3])*self.precision[3]
+		self.measurement.speed = floor(self.measurement.speed/self.resolution[2])*self.resolution[2]/1.94384449
+		self.measurement.vspeed = floor(self.measurement.vspeed/self.resolution[2])*self.resolution[2]
+		self.measurement.course = floor(self.measurement.course/self.resolution[3])*self.resolution[3]
 
-		self.measurement.dop.g = floor(self.measurement.dop.g/self.precision[4])*self.precision[4]
-		self.measurement.dop.p = floor(self.measurement.dop.p/self.precision[4])*self.precision[4]
-		self.measurement.dop.h = floor(self.measurement.dop.h/self.precision[4])*self.precision[4]
-		self.measurement.dop.v = floor(self.measurement.dop.v/self.precision[4])*self.precision[4]
-		self.measurement.dop.t = floor(self.measurement.dop.t/self.precision[4])*self.precision[4]
+		self.measurement.dop.g = floor(self.measurement.dop.g/self.resolution[4])*self.resolution[4]
+		self.measurement.dop.p = floor(self.measurement.dop.p/self.resolution[4])*self.resolution[4]
+		self.measurement.dop.h = floor(self.measurement.dop.h/self.resolution[4])*self.resolution[4]
+		self.measurement.dop.v = floor(self.measurement.dop.v/self.resolution[4])*self.resolution[4]
+		self.measurement.dop.t = floor(self.measurement.dop.t/self.resolution[4])*self.resolution[4]
 		
 		
 		self.pub.publish(self.measurement)
@@ -346,7 +321,7 @@ class GPSsensor():
 		self.place.elevation = states.geoid.altitude
 		self.place.date = datetime.datetime.now()
 
-		pos = lla2ECEF(self.place.lat,self.place.long,self.place.elevation)
+		pos = lla2ECEF(self.place.lat,self.place.long,self.place.elevation,Geoid. EARTH_radius,_earth_E)
 
 		self.sats.visible=0
 
