@@ -31,7 +31,7 @@
 			<node if="$(arg clockSim)" name="clock" pkg="last_letter" type="clock.py" />
 			<node pkg="last_letter" name="plane_model" type="model" output="screen"/>
 			<node pkg="last_letter" name="environment_model" type="environment" output="screen"/>			
-			<node pkg="last_letter" name="euler_translator" type="quat2euler"/>
+			<node pkg="last_letter" name="euler_translator" type="quat2euler" output="screen"/>
 		</group>
 		
 		<!-- Raising sensor nodes -->
