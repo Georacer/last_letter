@@ -11,6 +11,107 @@ from PyQt4 import QtGui, QtCore
 from rqt_plot.rosplot import ROSData
 from std_msgs.msg import Float32
 
+namespace = '' #To be implemented
+
+class DashboardGrid(QtGui.QWidget):
+	def __init__(self):
+	        super(DashboardGrid, self).__init__()        
+       		self.setFixedSize(600, 900)
+       		self.setWindowTitle('UAV Dashboard')
+       		self.setAutoFillBackground(True)
+       		self.line1 = QtGui.QHBoxLayout()
+       		self.column1 = QtGui.QVBoxLayout()
+       		self.column2 = QtGui.QVBoxLayout()
+       		#Yaw gauge
+		topic = "/fw1/euler/z"
+		length=360.0
+		end_angle=270.0
+		min=-180.0
+		max=180.0
+		main_points=8
+		warning=[]
+		danger=[]
+		description='Yaw'
+		multiplier=''
+       		units='degrees'
+       		self.gaugeYaw = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+       		#Roll gauge
+		topic = "/fw1/euler/x"
+		length=360.0
+		end_angle=-90.0
+		min=-180.0
+		max=180.0
+		main_points=24
+		warning=[(-90, -60), (60, 90)]
+		danger=[(-180, -90), (90, 180)]
+		description='Roll'
+		multiplier=''
+       		units='degrees'
+       		self.gaugeRoll = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+       		#Pitch gauge
+		topic = "/fw1/euler/y"
+		length=180.0
+		end_angle=90.0
+		min=-90.0
+		max=90.0
+		main_points=13
+		warning=[(-60, -30), (30, 60)]
+		danger=[(-90, -60), (60, 90)]
+		description='Pitch'
+		multiplier=''
+       		units='degrees'
+       		self.gaugePitch = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+       		#Airspeed gauge
+		topic = "/fw1/states/velocity/linear/x" #To be fixed
+		length=300.0
+		end_angle=-60.0
+		min=0.0
+		max=40.0
+		main_points=5
+		warning=[(10, 13), (25, 30)]
+		danger=[(0, 10), (30, 40)]
+		description='Airspeed'
+		multiplier=''
+       		units='m/s'
+       		self.gaugeAirspeed = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+       		#Climb gauge
+		topic = "/fw1/states/velocity/linear/z" #To be fixed
+		length=180.0
+		end_angle=90.0
+		min=-20.0
+		max=20.0
+		main_points=9
+		warning=[(-15, -10), (10, 15)]
+		danger=[(-20, -15), (15, 20)]
+		description='Climb Rate'
+		multiplier=''
+       		units='m/s'
+       		self.gaugeClimb = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+       		#Altitude gauge
+		topic = "/fw1/states/geoid/altitude"
+		length=360.0
+		end_angle=-90.0
+		min=0.0
+		max=100.0
+		main_points=10
+		warning=[(5, 10)]
+		danger=[(0, 5)]
+		description='Geometric Altitude'
+		multiplier=''
+       		units='m'
+       		self.gaugeAltitude = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+       		
+       		self.column1.addWidget(self.gaugeYaw)
+       		self.column1.addWidget(self.gaugeRoll)
+       		self.column1.addWidget(self.gaugePitch)
+       		self.column2.addWidget(self.gaugeAirspeed)
+       		self.column2.addWidget(self.gaugeClimb)
+       		self.column2.addWidget(self.gaugeAltitude)
+       		self.line1.addLayout(self.column1)
+       		self.line1.addLayout(self.column2)
+       		self.setLayout(self.line1)
+       		
+#By Fadi
 class GaugeSimple(QtGui.QWidget):
     ''' Gauge pointer movement:
         minimum->maximum values: clockwise rotation
@@ -21,7 +122,6 @@ class GaugeSimple(QtGui.QWidget):
         super(GaugeSimple, self).__init__()
 
         self.setFixedSize(300, 300)
-        self.move(300, 200)
         self.setWindowTitle('A Magnificent Gauge')
         self.setAutoFillBackground(True)
         self.redraw_interval = 40
@@ -33,10 +133,11 @@ class GaugeSimple(QtGui.QWidget):
         self.min = min
         self.curr_value = min
         self.max = max
-        self.start_angle = (end_angle + length) % 360
-        self.end_angle = end_angle % 360
         self.length = length
         self.main_points = main_points
+        self.start_angle = (end_angle + length) % 360
+        self.end_angle = end_angle % 360
+
         self.gauge_ticks = []
         self.bounding_rect = QtCore.QRectF(25.0, 25.0, 250.0, 250.0)
         self.center = QtCore.QPointF(150.0, 150.0)
@@ -98,15 +199,20 @@ class GaugeSimple(QtGui.QWidget):
             return metrics.width(text)
             
         #Main points
+        divisor = self.main_points
         if self.start_angle != self.end_angle:
-            angle_step = self.length/(self.main_points-1)
-            value_step = abs(self.max-self.min)/(self.main_points-1)
-            op = add if self.start_angle > self.end_angle else sub
-        else:
-            angle_step = self.length/self.main_points
-            value_step = abs(self.max-self.min)/self.main_points
-            op = add
-
+        #    angle_step = self.length/(self.main_points-1)
+        #    value_step = abs(self.max-self.min)/(self.main_points-1)
+        #    op = sub
+        #else:
+        #    angle_step = self.length/self.main_points
+        #    value_step = abs(self.max-self.min)/self.main_points
+        #    op = sub
+		divisor -= 1
+		
+	angle_step = self.length/divisor
+	value_step = abs(self.max-self.min)/divisor
+	
         #Gauge main line(the circular path)
         #Safe zones
         zones = map(self.val2deg_tuple, self.detect_safe_zones())
@@ -138,7 +244,7 @@ class GaugeSimple(QtGui.QWidget):
 
         for i in xrange(self.main_points):
             #Find the point on the curve
-            angle = op(self.start_angle, i*angle_step)
+            angle = self.start_angle -i*angle_step
             value = self.min + i*value_step
             p = QtGui.QPainterPath()
             p.arcMoveTo(self.bounding_rect, angle)
@@ -150,11 +256,15 @@ class GaugeSimple(QtGui.QWidget):
             y_text = y*0.8 + self.center.y()*0.2 #- (text_width('W')/2)*math.cos(math.radians(angle))
             
             #And create the path
-            new = QtGui.QPainterPath()
-            new.moveTo(x_new, y_new)
-            new.lineTo(x, y)
+            #new = QtGui.QPainterPath()
+            #new.moveTo(x_new, y_new)
+            #new.lineTo(x, y)
+            tick_path = QtGui.QPainterPath()
+            tick_path.moveTo(x_new, y_new)
+            tick_path.lineTo(x, y)
 
-            self.gauge_ticks.append([QtCore.QPointF(x_text, y_text), value, new])
+            #self.gauge_ticks.append([QtCore.QPointF(x_text, y_text), value, new])
+            self.gauge_ticks.append([QtCore.QPointF(x_text, y_text), value, tick_path])
 
     def val2deg(self, value):
         return self.length*((value-self.min)/abs(self.max-self.min))
@@ -165,7 +275,8 @@ class GaugeSimple(QtGui.QWidget):
     def update_plot(self):
         dump, value = self._rosdata.next()
         #print value
-        self.set_gauge(value.pop())
+        if len(value)>0:
+	        self.set_gauge(value.pop())
         self.update_plot_timer.start(self.redraw_interval)
 
     def set_gauge(self, value):
@@ -258,12 +369,12 @@ class GaugeSimple(QtGui.QWidget):
         QtGui.QWidget.paintEvent(self, event)
 
 
-class Gauge(Plugin):
+class Dashboard(Plugin):
 
     def __init__(self, context):
-        super(Gauge, self).__init__(context)
+        super(Dashboard, self).__init__(context)
         # Give QObjects reasonable names
-        self.setObjectName('Gauge')
+        self.setObjectName('Dashboard')
 
         # Process standalone plugin command-line arguments
         from argparse import ArgumentParser
@@ -277,42 +388,23 @@ class Gauge(Plugin):
             print 'arguments: ', args
             print 'unknowns: ', unknowns
 
-        # Create QWidget
-        topic = "/HUD/data"
-        length=300.0
-        end_angle=300.0
-        min=0.0
-        max=1000.0
-        main_points=11
-        warning=[(100, 200)]
-        danger=[(0, 100)]
-        description='Very important description'
-        multiplier='e-2'
-        units='m/s'
-        self._widget = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, description, multiplier, units)
-        #temp = ROSData(topic,rospy.get_time())
-        #dump, value = temp.next()
-        
-        #self.pub = rospy.Publisher("/temp", Float32, latch=True)
-	#self.pub.publish(value)
-	#self._widget.set_gauge(value.pop())
-	
+	self._layout = DashboardGrid()
         # Get path to UI file which is a sibling of this file
         # in this example the .ui and .py file are in the same folder
         ##ui_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'MyPlugin.ui')
         # Extend the widget with all attributes and children from UI file
         ##loadUi(ui_file, self._widget)
         # Give QObjects reasonable names
-        self._widget.setObjectName('MyPluginUi')
+        self._layout.setObjectName('MyPluginUi')
         # Show _widget.windowTitle on left-top of each plugin (when 
         # it's set in _widget). This is useful when you open multiple 
         # plugins at once. Also if you open multiple instances of your 
         # plugin at once, these lines add number to make it easy to 
         # tell from pane to pane.
         if context.serial_number() > 1:
-            self._widget.setWindowTitle(self._widget.windowTitle() + (' (%d)' % context.serial_number()))
+            self._layout.setWindowTitle(self._layout.windowTitle() + (' (%d)' % context.serial_number()))
         # Add widget to the user interface
-        context.add_widget(self._widget)
+        context.add_widget(self._layout)
 
     def shutdown_plugin(self):
         # TODO unregister all publishers here

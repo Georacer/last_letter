@@ -21,9 +21,9 @@ void translate_callback(last_letter::SimStates Odo)
 	double phi,theta,psi;
 	tf::Matrix3x3(quat).getEulerYPR(psi, theta, phi);
 	geometry_msgs::Vector3 eulerVec;
-	eulerVec.x = phi;
-	eulerVec.y = theta;
-	eulerVec.z = psi;
+	eulerVec.x = phi*180/M_PI;
+	eulerVec.y = theta*180/M_PI;
+	eulerVec.z = psi*180/M_PI;
 	pub.publish(eulerVec);
 }
 
@@ -31,8 +31,8 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "quat2euler");
 	ros::NodeHandle n;
-	ros::Subscriber sub = n.subscribe("/sim/states", 1000, translate_callback);
-	pub = n.advertise<geometry_msgs::Vector3>("/sim/euler", 1000);
+	ros::Subscriber sub = n.subscribe("states", 1000, translate_callback);
+	pub = n.advertise<geometry_msgs::Vector3>("euler", 1000);
 	ROS_INFO("quat2euler ready");
 	ros::spin();
 	
