@@ -1,0 +1,15 @@
+<pre class="code">
+<span class="srcline"><span class="lineno"><a href="39,1"> 1</a></span><span class="line"><span class="keyword">function</span> [ <span class="var type1" id="S2T54U3">dq</span> ] = quat_rotation_custom( <span class="var type1" id="S3T55U6">f</span> )</span></span>
+<span class="srcline"><span class="lineno"><a href="39,2"> 2</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="39,3"> 3</a></span><span class="line"><span class="comment">%quat_rotation_custom finds the quaternion corresponding to the given rotation vector</span></span></span>
+<span class="srcline"><span class="lineno"><a href="39,4"> 4</a></span><span class="line">coder.inline(<span class="string">'never'</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="39,5"> 5</a></span><span class="line"><span class="comment">%#codegen</span></span></span>
+<span class="srcline"><span class="lineno"><a href="39,6"> 6</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="39,7"> 7</a></span><span class="line"><span class="keyword">if</span> <span class="mxinfo" id="T13:U3"><span class="mxinfo" id="T3:U4">norm(<span class="var type1" id="S3T55U18">f</span>)</span>==<span class="mxinfo" id="T3:U6">0</span></span></span></span>
+<span class="srcline"><span class="lineno"><a href="39,8"> 8</a></span><span class="line">    <span class="mxinfo" id="T54:U7"><span class="var type1" id="S2T54U22">dq</span> = <span class="mxinfo" id="T23:U9"><span class="mxinfo" id="T79:U10">[<span class="mxinfo" id="T3:U11">1</span> <span class="mxinfo" id="T3:U12">0</span> <span class="mxinfo" id="T3:U13">0</span> <span class="mxinfo" id="T3:U14">0</span>]</span>'</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="39,9"> 9</a></span><span class="line"><span class="keyword">else</span></span></span>
+<span class="srcline"><span class="lineno"><a href="39,10">10</a></span><span class="line">    <span class="mxinfo" id="T54:U15"><span class="var type1" id="S2T54U33">dq</span> = <span class="mxinfo" id="T102:U17">[<span class="mxinfo" id="T3:U18">cos(<span class="mxinfo" id="T3:U19">norm(<span class="mxinfo" id="T55:U20">0.5*<span class="var type1" id="S3T55U42">f</span></span>)</span>)</span>; <span class="mxinfo" id="T103:U22">(<span class="mxinfo" id="T55:U23"><span class="var type1" id="S3T55U47">f</span>/<span class="mxinfo" id="T3:U25">norm(<span class="var type1" id="S3T55U50">f</span>)</span></span>)*<span class="mxinfo" id="T3:U27">sin(<span class="mxinfo" id="T3:U28">norm(<span class="mxinfo" id="T55:U29">0.5*<span class="var type1" id="S3T55U58">f</span></span>)</span>)</span>'</span>]</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="39,11">11</a></span><span class="line"><span class="keyword">end</span></span></span>
+<span class="srcline"><span class="lineno"><a href="39,12">12</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="39,13">13</a></span><span class="line"><span class="keyword">end</span></span></span>
+</pre>

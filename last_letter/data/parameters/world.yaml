@@ -1,0 +1,18 @@
+
+#Global Parameters for the world model
+/world/rho: 1.2250 #Air density
+/world/oswald: 0.9
+/world/g: 9.80665
+#Parameters for the atmoshpere model
+/world/groundTemp: 25 #in Celsius
+/world/groundPres: 1013.25 #in mBar
+#Parameters for the wind model
+/world/windRef: 4.0 #in m/s
+/world/windRefAlt: 10 #in m
+/world/windDir: 0.0 #in degrees
+/world/surfSmooth: 0.28 #rural environment
+/world/Dryden/Lu: 200.0
+/world/Dryden/Lw: 50.0
+/world/Dryden/sigmau: 212.0
+/world/Dryden/sigmaw: 140.0
+/world/Dryden/use: 0.0 #produce turbulence 0/1

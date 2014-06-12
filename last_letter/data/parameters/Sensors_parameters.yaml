@@ -1,0 +1,73 @@
+#Sensors' Model Parameters------------------------------------
+
+#a) Gyroscope
+Gyroscope/rate: 190.0 #Hz
+Gyroscope/resolution: 0.000305278 #rad/s
+Gyroscope/max: 8.72 #rad/s
+Gyroscope/CP: [0.0, 0.0, 0.1] #meters
+Gyroscope/std_coeff: [0.1, 0.001, 0.0001]
+
+#b) Accelerometer
+Accelerometer/rate: 200.0 #Hz
+Accelerometer/resolution: 0.000122 #g
+Accelerometer/max: 4.0 #g
+Accelerometer/CP: [0.0, 0.0, 0.1] #meters
+Accelerometer/std_coeff: [0.013, 0.0013, 0.0001] #g
+# Thermal Characteristics
+Accelerometer/ThermalPower: 10.0 #Thermal power originating from the sensor and its environment, NOT USED
+Accelerometer/kAir: 0.06 #Relation between airspeed and thermal resistance
+Accelerometer/kCov: 1.0 #Relation between coverage and thermal resistance
+Accelerometer/DeltaT: 10 #Expected nominal temperature rise at steady state and no airspeed
+Accelerometer/Tr: 300 #Temperature rise time constant, in seconds
+# Noise Characteristics
+Accelerometer/scaleBias: 0.03 #in units
+Accelerometer/scaleThermal: 0.0002 #in units
+Accelerometer/offsetBias: 0.785 #in m/s2
+Accelerometer/offsetThermal: 0.0084 #in m/s2
+Accelerometer/RWPSD: 0.00392 #in m/s2
+
+#c) Magnetometer
+Magnetometer/rate: 75.0 #Hz
+Magnetometer/resolution: 0.092 #nT
+Magnetometer/CP: [0.0, 0.0, 0.1] #meters
+Magnetometer/std_coeff: 200 #nT
+# Noise Characteristics
+Accelerometer/scaleBias: 0.05 #in units
+Accelerometer/scaleThermal: 0.003 #in units
+
+#d) Barometer
+Barometer/rate: 50.0 #Hz
+Barometer/resolution: 0.012 #mbar
+Barometer/max: 1200.0 #mbar
+Barometer/min: 10.0 #mbar
+Barometer/CP: [0.0, 0.0, 0.1] #meters
+Barometer/std_coeff: 0.01 #mbar
+
+#e) Altimeter
+Altimeter/rate: 50.0 #Hz
+Altimeter/resolution: 0.00018 #meters
+Altimeter/max: 6.0 #meters
+Altimeter/min: 0.3 #meters
+Altimeter/CP: [0.0, 0.0, 0.1] #meters
+Altimeter/std_coeff: 0.001 #meters
+
+#f) AltimeterIR
+AltimeterIR/rate: 50.0 #Hz
+AltimeterIR/resolution: 0.0001 #meters
+AltimeterIR/max: 0.8 #meters
+AltimeterIR/min: 0.1 #meters
+AltimeterIR/CP: [0.1, 0.0, 0.05] #meters
+AltimeterIR/std_coeff: 0.001 #meters
+
+#g) GPS
+GPS/rate: 10.0 #Hz
+GPS/maxrate: 10.0 #Hz
+GPS/CP: [-0.1, 0.0, -0.1] #meters
+GPS/resolution: [0.000000001, 0.01, 0.1, 0.1, 0.1] #rad, m, knots, deg, dop
+GPS/clock_bias: 0.001 #sec
+GPS/std_coeff: 2.0 #m
+
+#h) Camera
+Camera/rate: 30.0 #Hz
+Camera/position: [0.0, 0.0, 0.0] #m
+Camera/orientation: [0.0, -90.0, 0.0] #deg

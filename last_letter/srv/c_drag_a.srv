@@ -1,0 +1,3 @@
+float64 alpha #in radians
+---
+float64 c_drag_a

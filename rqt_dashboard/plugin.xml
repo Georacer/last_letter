@@ -1,0 +1,20 @@
+<library path="src">
+  <class name="Gauge" type="rqt_dashboard.dashboard.Gauge" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      Circular gauge to display float variables.
+    </description>
+    <qtgui>
+      <group>
+        <label>Visualization</label>
+      </group>
+      <!-- optional grouping...
+      <group>
+        <label>Subgroup</label>
+      </group>
+      -->
+      <label>Gauge</label>
+      <icon type="theme">appointment-soon</icon>
+      <statustip>Functional?</statustip>
+    </qtgui>
+  </class>
+</library>

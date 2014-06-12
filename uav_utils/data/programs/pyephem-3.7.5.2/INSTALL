@@ -1,0 +1,77 @@
+
+                               PyEphem
+                          Installation Notes
+
+
+PyEphem provides an "ephem" Python module that can perform many
+astronomical computations.  You can find the most recent version at
+
+   http://rhodesmill.org/pyephem/
+
+The computation routines behind PyEphem are from the "XEphem" program
+by Elwood Charles Downey (ecdowney@ClearSkyInstitute.com), available
+from http://www.clearskyinstitute.com/xephem/.  See the COPYING file
+in this directory for licensing information.
+
+INSTALLING
+
+If you have installed the Python "distribute" package (or the ancient
+and outdated "setuptools") and "pip" on your system, then you can
+install PyEphem simply by typing:
+
+        pip install pyephem
+
+If for some reason you cannot install "pip", then "distribute" by itself
+offers an installer that you can use this way:
+
+        easy_install pyephem
+
+Alternately, if you are on a Windows machine, look at the PyEphem web
+site and you should find prominent links to an auto-install tool for
+Windows.
+
+If, instead, you want to build and install the module yourself, you
+only need Python, your C compiler, and the standard Python distutils.
+You can run the setup.py script in this directory to build or install
+the package.  Typically, entering
+
+	python setup.py install
+
+(which you will probably need to do as root, unless you have Python
+installed in your home directory) will both build and install the
+module.
+
+You can use PyEphem in your Python programs by calling:
+
+	import ephem
+
+or perhaps something more like:
+
+	from ephem import Mars, Jupiter, Date
+
+if you know what parts of "ephem" you want to use and you are tired of
+putting "ephem." in front of all the names.
+
+TESTING
+
+Using the new "unittest" module in Python 2.7, you can run the PyEphem
+test suite this way:
+
+    $ python -m unittest discover
+
+On older versions of Python you can separately install the backported
+"unittest2" module and use its "unit2" command line to run the tests:
+
+    $ unit2 discover ephem
+
+DOCUMENTATION
+
+See the "doc" directory inside of the module for documentation, or
+visit the web site at http://rhodesmill.org/pyephem and try starting
+with the "Quick Reference" to learn how PyEphem works.
+
+AUTHOR
+
+Brandon Craig Rhodes
+brandon@rhodesmill.org
+http://rhodesmill.org/brandon

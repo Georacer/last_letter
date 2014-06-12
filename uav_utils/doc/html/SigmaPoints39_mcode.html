@@ -1,0 +1,18 @@
+<pre class="code">
+<span class="srcline"><span class="lineno"><a href="26,1"> 1</a></span><span class="line"><span class="comment">%% SigmaPoints -- sigma point sampling function</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,2"> 2</a></span><span class="line"><span class="comment">% Inputs -----------------------------</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,3"> 3</a></span><span class="line"><span class="comment">%     x    : state vector mean</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,4"> 4</a></span><span class="line"><span class="comment">%     P    : state vector covariance</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,5"> 5</a></span><span class="line"><span class="comment">%     c    : UKF paramater</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,6"> 6</a></span><span class="line"><span class="comment">% Outputs ----------------------------</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,7"> 7</a></span><span class="line"><span class="comment">%     X : sigma points matrix</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,8"> 8</a></span><span class="line"><span class="comment">%%</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,9"> 9</a></span><span class="line"><span class="keyword">function</span> <span class="var type1" id="S2T46U3">X</span> = SigmaPoints(<span class="mxinfo" id="T5:U2"><span class="var type1" id="S2T5U6">X</span></span>,<span class="var type1" id="S3T6U7">x</span>,<span class="var type1" id="S4T7U8">P</span>,<span class="var type1" id="S5T3U9">c</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="26,10">10</a></span><span class="line"><span class="comment">%#codegen</span></span></span>
+<span class="srcline"><span class="lineno"><a href="26,11">11</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="26,12">12</a></span><span class="line">coder.inline(<span class="string">'never'</span>)</span></span>
+<span class="srcline"><span class="lineno"><a href="26,13">13</a></span><span class="line"></span></span>
+<span class="srcline"><span class="lineno"><a href="26,14">14</a></span><span class="line"><span class="mxinfo" id="T7:U7"><span class="var type1" id="S7T7U18">A</span> = <span class="mxinfo" id="T7:U9"><span class="var type1" id="S5T3U20">c</span>*<span class="mxinfo" id="T7:U11"><span class="mxinfo" id="T7:U12">chol(<span class="var type1" id="S4T7U24">P</span>)</span>'</span></span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="26,15">15</a></span><span class="line"><span class="mxinfo" id="T7:U14"><span class="var type1" id="S9T7U27">Y</span> = <span class="mxinfo" id="T7:U16"><span class="var type1" id="S3T6U29">x</span>(<span class="mxinfo" id="T74:U18">:</span>,<span class="mxinfo" id="T75:U19">ones(1,numel(<span class="var type1" id="S3T6U36">x</span>))</span>)</span></span>;</span></span>
+<span class="srcline"><span class="lineno"><a href="26,16">16</a></span><span class="line"><span class="mxinfo" id="T46:U21"><span class="var type1" id="S2T46U39">X</span> = <span class="mxinfo" id="T76:U23">[<span class="var type1" id="S3T6U42">x</span> <span class="mxinfo" id="T7:U25"><span class="var type1" id="S9T7U44">Y</span>+<span class="var type1" id="S7T7U45">A</span></span> <span class="mxinfo" id="T7:U28"><span class="var type1" id="S9T7U47">Y</span>-<span class="var type1" id="S7T7U48">A</span></span>]</span></span>;</span></span>
+</pre>

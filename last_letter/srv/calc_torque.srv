@@ -1,0 +1,4 @@
+nav_msgs/Odometry states
+float64[4] inputs
+---
+geometry_msgs/Vector3 torque
