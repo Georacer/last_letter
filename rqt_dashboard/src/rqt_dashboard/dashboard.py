@@ -117,7 +117,7 @@ class GaugeSimple(QtGui.QWidget):
         minimum->maximum values: clockwise rotation
         maximum value > minimum-value
     '''
-    def __init__(self, topic='/HUD', length=300.0, end_angle=300.0, min=0.0, max=1000.0, main_points=11,
+    def __init__(self, topic='/HUD', length=300.0, end_angle=300.0, min=0.0, max=100.0, main_points=11,
                  warning=[], danger=[], multiplier='', units='', description=''):
         super(GaugeSimple, self).__init__()
 
@@ -137,6 +137,7 @@ class GaugeSimple(QtGui.QWidget):
         self.main_points = main_points
         self.start_angle = (end_angle + length) % 360
         self.end_angle = end_angle % 360
+        self.is_circle = self.start_angle == self.end_angle
 
         self.gauge_ticks = []
         self.bounding_rect = QtCore.QRectF(25.0, 25.0, 250.0, 250.0)
@@ -201,13 +202,6 @@ class GaugeSimple(QtGui.QWidget):
         #Main points
         divisor = self.main_points
         if self.start_angle != self.end_angle:
-        #    angle_step = self.length/(self.main_points-1)
-        #    value_step = abs(self.max-self.min)/(self.main_points-1)
-        #    op = sub
-        #else:
-        #    angle_step = self.length/self.main_points
-        #    value_step = abs(self.max-self.min)/self.main_points
-        #    op = sub
 		divisor -= 1
 		
 	angle_step = self.length/divisor
@@ -252,13 +246,9 @@ class GaugeSimple(QtGui.QWidget):
             x_new = x*0.9 + self.center.x()*0.1
             y_new = y*0.9 + self.center.y()*0.1
 
-            x_text = x*0.8 + self.center.x()*0.2 #- (text_width(str(value))/2.0)*(0.5+0.8*math.cos(math.radians(angle)))
-            y_text = y*0.8 + self.center.y()*0.2 #- (text_width('W')/2)*math.cos(math.radians(angle))
-            
-            #And create the path
-            #new = QtGui.QPainterPath()
-            #new.moveTo(x_new, y_new)
-            #new.lineTo(x, y)
+            x_text = x*0.8 + self.center.x()*0.2 - (text_width(str(round(value, 1)))-10)/2
+            y_text = y*0.8 + self.center.y()*0.2 + 4
+
             tick_path = QtGui.QPainterPath()
             tick_path.moveTo(x_new, y_new)
             tick_path.lineTo(x, y)
@@ -281,10 +271,10 @@ class GaugeSimple(QtGui.QWidget):
 
     def set_gauge(self, value):
         #Clamp between [min, max]
-        value = max(min(value, self.max), self.min)
+        self.curr_value = round(max(min(value, self.max), self.min),1)
 
         p = QtGui.QPainterPath()
-        p.arcMoveTo(self.bounding_rect, self.start_angle-self.val2deg(value))
+        p.arcMoveTo(self.bounding_rect, self.start_angle-self.val2deg(self.curr_value))
         x, y = p.currentPosition().x(), p.currentPosition().y()
 
         self.gauge_line = QtGui.QPainterPath()
@@ -356,15 +346,16 @@ class GaugeSimple(QtGui.QWidget):
 
         #Draw the paths
         painter.setPen(self.ui_color_tick)
-        for path in self.gauge_ticks:
-            painter.drawText(path[0], str(int(path[1])))
-            painter.drawPath(path[2])
+        for i, path in enumerate(self.gauge_ticks):
+        	if not (self.is_circle and i == (len(self.gauge_ticks))):
+			painter.drawText(path[0], str(int(path[1])))
+		painter.drawPath(path[2])
 
         #Draw the text labels
-        painter.drawText(QtCore.QPointF(self.center.x()-center_text(str(self.curr_value)), 250.0), str(self.curr_value))
-        painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.multiplier), 250.0+self.margin), self.multiplier)
-        painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.units), 250.0+self.margin*2), self.units)
-        painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.description), 250.0+self.margin*3), self.description)
+        painter.drawText(QtCore.QPointF(self.center.x()-center_text(str(self.curr_value)), self.center.y()-40), str(self.curr_value))
+        painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.multiplier), self.center.y()+20+self.margin), self.multiplier)
+        painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.units), self.center.y()+20+self.margin*2), self.units)
+        painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.description), self.center.y()+20+self.margin*3), self.description)
 
         QtGui.QWidget.paintEvent(self, event)
 
