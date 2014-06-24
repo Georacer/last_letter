@@ -18,8 +18,8 @@ void translate_callback(last_letter::SimStates Odo)
 		ROS_ERROR("quaternion length is NaN");
 	}
 	if (abs(quat.length())<0.9) {
-		ROS_ERROR("quaternion too short");
-		ROS_INFO("Quaterion: %g, %g, %g, %g, len: %g",quat[0], quat[1], quat[2], quat[3], quat.length());
+//		ROS_ERROR("quaternion too short");
+//		ROS_INFO("Quaterion: %g, %g, %g, %g, len: %g",quat[0], quat[1], quat[2], quat[3], quat.length());
 		quat.normalize();
 	}	
 	double phi,theta,psi;

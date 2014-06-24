@@ -19,5 +19,6 @@
 	<!--node pkg="rqt_plot" type="rqt_plot" name="plot_euler" args="/sim/euler/y,/sim/states/twist/twist/linear/x" /-->
 	<!--node pkg="rqt_plot" type="rqt_plot" name="plot_euler" args="/sim/euler/x,/sim/euler/y,/sim/euler/z" /-->
 	<node pkg="rviz" type="rviz" name="rviz" /> <!-- args="-d $(find uav_model)/assets/visOptions.vcg/-->"
+	<node pkg="rqt_gui" type="rqt_gui" name="Dasboard" args="--perspective-file $(find rqt_dashboard)/UAV_dashboard.perspective" />
 
 </launch>

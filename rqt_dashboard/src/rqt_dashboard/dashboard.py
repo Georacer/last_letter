@@ -68,8 +68,8 @@ class DashboardGrid(QtGui.QWidget):
 		min=0.0
 		max=40.0
 		main_points=5
-		warning=[(10, 13), (25, 30)]
-		danger=[(0, 10), (30, 40)]
+		warning=[(13, 15), (25, 30)]
+		danger=[(0, 13), (30, 40)]
 		description='Airspeed'
 		multiplier=''
        		units='m/s'
@@ -379,6 +379,7 @@ class Dashboard(Plugin):
             print 'arguments: ', args
             print 'unknowns: ', unknowns
 
+	rospy.sleep(5.)
 	self._layout = DashboardGrid()
         # Get path to UI file which is a sibling of this file
         # in this example the .ui and .py file are in the same folder
