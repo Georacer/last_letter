@@ -432,10 +432,6 @@ static double _spp[contactN]={0.0};
 			beta = atan2(v,u);
 		}
 	
-		airspeed = airspeed;
-		alpha = alpha;
-		beta = beta;
-
 		geometry_msgs::Vector3 result;
 		result.x = airspeed;
 		result.y = alpha;

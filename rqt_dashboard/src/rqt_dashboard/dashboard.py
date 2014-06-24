@@ -23,7 +23,7 @@ class DashboardGrid(QtGui.QWidget):
        		self.column1 = QtGui.QVBoxLayout()
        		self.column2 = QtGui.QVBoxLayout()
        		#Yaw gauge
-		topic = "/fw1/euler/z"
+		topic = "/fw1/dashboard/euler/z"
 		length=360.0
 		end_angle=270.0
 		min=-180.0
@@ -36,7 +36,7 @@ class DashboardGrid(QtGui.QWidget):
        		units='degrees'
        		self.gaugeYaw = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
        		#Roll gauge
-		topic = "/fw1/euler/x"
+		topic = "/fw1/dashboard/euler/x"
 		length=360.0
 		end_angle=-90.0
 		min=-180.0
@@ -49,7 +49,7 @@ class DashboardGrid(QtGui.QWidget):
        		units='degrees'
        		self.gaugeRoll = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
        		#Pitch gauge
-		topic = "/fw1/euler/y"
+		topic = "/fw1/dashboard/euler/y"
 		length=180.0
 		end_angle=90.0
 		min=-90.0
@@ -62,7 +62,7 @@ class DashboardGrid(QtGui.QWidget):
        		units='degrees'
        		self.gaugePitch = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
        		#Airspeed gauge
-		topic = "/fw1/states/velocity/linear/x" #To be fixed
+		topic = "/fw1/dashboard/airspeed"
 		length=300.0
 		end_angle=-60.0
 		min=0.0
@@ -75,20 +75,20 @@ class DashboardGrid(QtGui.QWidget):
        		units='m/s'
        		self.gaugeAirspeed = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
        		#Climb gauge
-		topic = "/fw1/states/velocity/linear/z" #To be fixed
+		topic = "/fw1/dashboard/climbRate"
 		length=180.0
 		end_angle=90.0
-		min=-20.0
-		max=20.0
-		main_points=9
-		warning=[(-15, -10), (10, 15)]
-		danger=[(-20, -15), (15, 20)]
+		min=-10.0
+		max=10.0
+		main_points=5
+		warning=[(-6, -4), (4, 6)]
+		danger=[(-10, -6), (6, 10)]
 		description='Climb Rate'
 		multiplier=''
        		units='m/s'
        		self.gaugeClimb = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
        		#Altitude gauge
-		topic = "/fw1/states/geoid/altitude"
+		topic = "/fw1/dashboard/altitude"
 		length=360.0
 		end_angle=-90.0
 		min=0.0
