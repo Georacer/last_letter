@@ -16,12 +16,13 @@ namespace = '' #To be implemented
 class DashboardGrid(QtGui.QWidget):
 	def __init__(self):
 	        super(DashboardGrid, self).__init__()        
-       		self.setFixedSize(600, 900)
+       		self.setFixedSize(900, 900)
        		self.setWindowTitle('UAV Dashboard')
        		self.setAutoFillBackground(True)
        		self.line1 = QtGui.QHBoxLayout()
        		self.column1 = QtGui.QVBoxLayout()
        		self.column2 = QtGui.QVBoxLayout()
+       		self.column3 = QtGui.QVBoxLayout()
        		#Yaw gauge
 		topic = "/fw1/dashboard/euler/z"
 		length=360.0
@@ -78,11 +79,11 @@ class DashboardGrid(QtGui.QWidget):
 		topic = "/fw1/dashboard/climbRate"
 		length=180.0
 		end_angle=90.0
-		min=-10.0
-		max=10.0
-		main_points=5
-		warning=[(-6, -4), (4, 6)]
-		danger=[(-10, -6), (6, 10)]
+		min=-15.0
+		max=15.0
+		main_points=7
+		warning=[(-10, -5), (5, 10)]
+		danger=[(-15, -10), (10, 15)]
 		description='Climb Rate'
 		multiplier=''
        		units='m/s'
@@ -100,6 +101,32 @@ class DashboardGrid(QtGui.QWidget):
 		multiplier=''
        		units='m'
        		self.gaugeAltitude = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+       		#Alpha gauge
+		topic = "/fw1/dashboard/alpha"
+		length=180.0
+		end_angle=90.0
+		min=-90.0
+		max=90.0
+		main_points=13
+		warning=[(-60, -30), (30, 60)]
+		danger=[(-90, -60), (60, 90)]
+		description='Angle of Attack'
+		multiplier=''
+       		units='degrees'
+       		self.gaugeAlpha = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+       		#Beta gauge
+		topic = "/fw1/dashboard/beta"
+		length=180.0
+		end_angle= 0.0
+		min=-90.0
+		max=90.0
+		main_points=13
+		warning=[(-60, -30), (30, 60)]
+		danger=[(-90, -60), (60, 90)]
+		description='Angle of Sideslip'
+		multiplier=''
+       		units='degrees'
+       		self.gaugeBeta = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
        		
        		self.column1.addWidget(self.gaugeYaw)
        		self.column1.addWidget(self.gaugeRoll)
@@ -107,8 +134,11 @@ class DashboardGrid(QtGui.QWidget):
        		self.column2.addWidget(self.gaugeAirspeed)
        		self.column2.addWidget(self.gaugeClimb)
        		self.column2.addWidget(self.gaugeAltitude)
+       		self.column3.addWidget(self.gaugeAlpha)
+       		self.column3.addWidget(self.gaugeBeta)
        		self.line1.addLayout(self.column1)
        		self.line1.addLayout(self.column2)
+       		self.line1.addLayout(self.column3)
        		self.setLayout(self.line1)
        		
 #By Fadi
@@ -132,6 +162,7 @@ class GaugeSimple(QtGui.QWidget):
 	
         self.min = min
         self.curr_value = min
+        self.value_uncap = 0
         self.max = max
         self.length = length
         self.main_points = main_points
@@ -264,9 +295,10 @@ class GaugeSimple(QtGui.QWidget):
         
     def update_plot(self):
         dump, value = self._rosdata.next()
+        self.value_uncap = round(value.pop(),1)
         #print value
         if len(value)>0:
-	        self.set_gauge(value.pop())
+		self.set_gauge(self.value_uncap)
         self.update_plot_timer.start(self.redraw_interval)
 
     def set_gauge(self, value):
@@ -352,7 +384,7 @@ class GaugeSimple(QtGui.QWidget):
 		painter.drawPath(path[2])
 
         #Draw the text labels
-        painter.drawText(QtCore.QPointF(self.center.x()-center_text(str(self.curr_value)), self.center.y()-40), str(self.curr_value))
+        painter.drawText(QtCore.QPointF(self.center.x()-center_text(str(self.value_uncap)), self.center.y()-40), str(self.value_uncap))
         painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.multiplier), self.center.y()+20+self.margin), self.multiplier)
         painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.units), self.center.y()+20+self.margin*2), self.units)
         painter.drawText(QtCore.QPointF(self.center.x()-center_text(self.description), self.center.y()+20+self.margin*3), self.description)
