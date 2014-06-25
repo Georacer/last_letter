@@ -63,7 +63,7 @@ class ModelPlane
 	geometry_msgs::Vector3 getForce(last_letter::SimStates states, double inputs[4]);
 	
 	//Calculate Torques
-	geometry_msgs::Vector3 getTorque(last_letter::SimStates states, double inputs[4]);
+	geometry_msgs::Vector3 getTorque(last_letter::SimStates states, geometry_msgs::Vector3 forces, double inputs[4]);
 	
 	//Calculate Ground Forces and Torques
 	geometry_msgs::Wrench groundDynamics(geometry_msgs::Quaternion quat);

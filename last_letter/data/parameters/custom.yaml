@@ -5,13 +5,16 @@
 simRate: 1000
 
 #Initial State
-init/position: [0.0, 0.0, -300.0] #NED frame
+init/position: [0.0, 0.0, -1000.0] #NED frame
 init/orientation: [0.0, 0.0, 0.0, 1.0] #NED frame
 init/velLin: [20.0, 0.0, 0.0] #body frame
 init/velAng: [0.0, 0.0, 0.0] #body frame
 
 #Airframe Aerodynamic Parameters
 airframe/m: 13.5
+airframe/col_x: -0.05
+airframe/col_y: 0.0
+airframe/col_z: 0.0
 airframe/j_x: 0.8244
 airframe/j_y: 1.135
 airframe/j_z: 1.759
@@ -19,10 +22,10 @@ airframe/j_xz: 0.1204
 airframe/s: 0.55
 airframe/b: 2.8956
 airframe/c: 0.18994
-airframe/c_lift_0: 0.28
+airframe/c_lift_0: 1.5
 airframe/c_drag_0: 0.03
 airframe/c_m_0: -0.02338
-airframe/c_lift_a: 3.45
+airframe/c_lift_a: 5.0
 airframe/c_drag_a: 0.3
 airframe/c_m_a: -0.38
 airframe/c_lift_q: 0

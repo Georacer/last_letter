@@ -177,18 +177,18 @@ static double _spp[contactN]={0.0};
 		//read angular rates
 		double p = states.velocity.angular.x;
 		double q = states.velocity.angular.y;
-		double r = states.velocity.angular.z;		
+		double r = states.velocity.angular.z;
 	
 		//calculate gravity force
 		double Reb[9];
-		quat2rotmtx(quat,Reb);	
+		quat2rotmtx(quat,Reb);
 		geometry_msgs::Vector3 gravVect;
 		gravVect.z = m*g;
 		geometry_msgs::Vector3 gravForce = Reb/gravVect;
 		//quat_vector3_rotate(quat, gravVect, &gravForce);
 		double gx = gravForce.x;
 		double gy = gravForce.y;
-		double gz = gravForce.z;		
+		double gz = gravForce.z;
 	
 		//calculate aerodynamic force
 		double qbar = 1.0/2.0*rho*pow(airspeed,2)*s; //Calculate dynamic pressure
@@ -227,7 +227,7 @@ static double _spp[contactN]={0.0};
 
 	/////////////////////////////////////
 	//Torque calculation in the body axes
-	geometry_msgs::Vector3 ModelPlane::getTorque(last_letter::SimStates states, double inputs[4])
+	geometry_msgs::Vector3 ModelPlane::getTorque(last_letter::SimStates states, geometry_msgs::Vector3 forces, double inputs[4])
 	{
 
 		//request air data from getAirData
@@ -253,10 +253,14 @@ static double _spp[contactN]={0.0};
 		double c_m_0, c_m_a, c_m_q, c_m_deltae;
 		double c_n_0, c_n_b, c_n_p, c_n_r, c_n_deltaa, c_n_deltar;
 		double k_t_p, k_omega;
+		double col_x, col_y, col_z;
 	
 		//if(!ros::param::getCached("/environment/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}
 		rho = environment.density;
 
+		if(!ros::param::getCached("airframe/col_x", col_x)) {ROS_FATAL("Invalid parameters for -col_x- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airframe/col_y", col_y)) {ROS_FATAL("Invalid parameters for -col_y- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airframe/col_z", col_z)) {ROS_FATAL("Invalid parameters for -col_z- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c", c)) {ROS_FATAL("Invalid parameters for -c- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/b", b)) {ROS_FATAL("Invalid parameters for -b- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/s", s)) {ROS_FATAL("Invalid parameters for -s- in param server!"); ros::shutdown();}
@@ -304,11 +308,16 @@ static double _spp[contactN]={0.0};
 		double lm = -k_t_p*pow(k_omega*deltat,2);
 		double mm = 0;
 		double nm = 0;
-	
+		
+		//calculate cog torque, r x F, where r is the distance of CoL from CoG
+		double lg = col_y*forces.z - col_z*forces.y;
+		double mg = -col_x*forces.z + col_z*forces.x;
+		double ng = -col_y*forces.x + col_x*forces.y;
+		
 		//Sum torques
-		double l = la + lm;
-		double m = ma + mm;
-		double n = na + nm;
+		double l = la + lm + lg;
+		double m = ma + mm + mg;
+		double n = na + nm + ng;
 	
 		geometry_msgs::Vector3 result;
 		result.x = l;
@@ -555,7 +564,7 @@ static double _spp[contactN]={0.0};
 		
 		//calclulate body force/torques
 		dynamics.wrench.force = getForce(states, input);
-		dynamics.wrench.torque = getTorque(states, input);
+		dynamics.wrench.torque = getTorque(states, dynamics.wrench.force, input);
 		//add ground dynamics
 		groundDynamicsVect = groundDynamics(states.pose.orientation);
 		dynamics.wrench.force = dynamics.wrench.force + groundDynamicsVect.force;
