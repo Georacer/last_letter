@@ -247,7 +247,7 @@ static double _spp[contactN]={0.0};
 		double c_drag_a = dragCoeff(alpha);
 
 		//read from parameter server
-		double rho;
+		double rho, g, mass;
 		double c,b,s;
 		double c_l_0, c_l_b, c_l_p, c_l_r, c_l_deltaa, c_l_deltar;
 		double c_m_0, c_m_a, c_m_q, c_m_deltae;
@@ -257,6 +257,7 @@ static double _spp[contactN]={0.0};
 	
 		//if(!ros::param::getCached("/environment/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}
 		rho = environment.density;
+		g = environment.gravity;
 
 		if(!ros::param::getCached("airframe/col_x", col_x)) {ROS_FATAL("Invalid parameters for -col_x- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/col_y", col_y)) {ROS_FATAL("Invalid parameters for -col_y- in param server!"); ros::shutdown();}
@@ -282,6 +283,7 @@ static double _spp[contactN]={0.0};
 		if(!ros::param::getCached("airframe/c_n_deltar", c_n_deltar)) {ROS_FATAL("Invalid parameters for -c_n_deltar- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("motor/k_t_p", k_t_p)) {ROS_FATAL("Invalid parameters for -k_t_p- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("motor/k_omega", k_omega)) {ROS_FATAL("Invalid parameters for -k_omega- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airframe/m", mass)) {ROS_FATAL("Invalid parameters for -m- in param server!"); ros::shutdown();}			
 			
 		//read angular rates
 		double p = states.velocity.angular.x;
@@ -310,7 +312,16 @@ static double _spp[contactN]={0.0};
 		double nm = 0;
 		
 		//calculate cog torque, r x F, where r is the distance of CoL from CoG
-		double lg = col_y*forces.z - col_z*forces.y;
+		geometry_msgs::Quaternion quat = states.pose.orientation;
+		double Reb[9];
+		quat2rotmtx(quat,Reb);
+		geometry_msgs::Vector3 gravVect;
+		gravVect.z = mass*g;
+		geometry_msgs::Vector3 gravForce = Reb/gravVect;
+		forces.x = forces.x - gravForce.x;
+		forces.y = forces.y - gravForce.y;
+		forces.z = forces.z - gravForce.z;
+		double lg = col_y*forces.z - col_z*forces.y; //Must remove gravity from forces
 		double mg = -col_x*forces.z + col_z*forces.x;
 		double ng = -col_y*forces.x + col_x*forces.y;
 		
@@ -410,7 +421,7 @@ static double _spp[contactN]={0.0};
 		}
 
 		if (contact) {
-			totalB.force= Reb/totalE.force;	
+			totalB.force= Reb/totalE.force;
 			totalB.torque= Reb/totalE.torque;
 		}
 
@@ -619,7 +630,7 @@ int main(int argc, char **argv)
 	//ros::Duration(3).sleep(); 
 	uav.tprev = ros::Time::now();
 	spinner.sleep();
-	ROS_INFO("simNode up");	
+	ROS_INFO("simNode up");
 	
 	while (ros::ok())
 	{

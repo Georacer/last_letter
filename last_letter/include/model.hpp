@@ -69,7 +69,7 @@ class ModelPlane
 	geometry_msgs::Wrench groundDynamics(geometry_msgs::Quaternion quat);
 	
 	//Extract air data (airspeed, alpha, beta)
-	geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);				
+	geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);
 	
 	//Calculate lift coefficient from alpha
 	double liftCoeff (double alpha);
@@ -80,5 +80,3 @@ class ModelPlane
 	//Store environmental values
 	void getEnvironment(last_letter::Environment environment);
 };
-	
-			

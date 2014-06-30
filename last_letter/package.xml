@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>last_letter</name>
-  <version>0.3.1</version>
+  <version>0.4.0</version>
   <description>The last_letter package</description>
 
   <maintainer email="gzogop@mail.ntua.gr">George Zogopoulos Papaliakos</maintainer>
@@ -42,6 +42,7 @@
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>  
   <run_depend>uav_utils</run_depend>
+  <run_depend>joy</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

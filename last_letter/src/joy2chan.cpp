@@ -13,7 +13,7 @@ void joy2chan(sensor_msgs::Joy joyMsg)
 	channels.value[2] = (unsigned int)((joyMsg.axes[3]+1)*500+ 1000);
 	channels.value[3] = (unsigned int)(-joyMsg.axes[2]*500+ 1500);
 	channels.header.stamp = ros::Time::now();
-	pub.publish(channels);			
+	pub.publish(channels);
 }
 
 int main(int argc, char **argv)
@@ -30,5 +30,3 @@ int main(int argc, char **argv)
 	
 	return 0;
 }
-
-
