@@ -55,7 +55,7 @@ static double _spp[contactN]={0.0};
 		}
 		states.velocity.angular.x=temp[0];
 		states.velocity.angular.y=temp[1];
-		states.velocity.angular.z=temp[2];					
+		states.velocity.angular.z=temp[2];
 		
 		states.rotorspeed.clear();
 		states.rotorspeed.push_back((double) 0);

@@ -5,7 +5,8 @@ import sys
 import rospy
 from geometry_msgs.msg import Vector3, Vector3Stamped
 import numpy as np
-from utils import saturation, quat2Reb, Vector2Array, ThermalRise
+from uav_utils import ThermalRise
+from mathutils import saturation, quat2Reb, Vector2Array
 from math import floor, exp
 from last_letter.msg import SimStates, SimSensor3, Environment
 

@@ -37,14 +37,14 @@
 		</group>
 		
 		<!-- Raising sensor nodes -->
-		<group>
-			<node pkg="last_letter" name="Accelerometer" type="accelerometer.py" output="screen"/>
-			<node pkg="last_letter" name="Altimeter" type="altimeter.py" output="screen"/>
-			<node pkg="last_letter" name="Barometer" type="barometer.py" output="screen"/>
-			<node pkg="last_letter" name="Gyroscope" type="gyroscope.py" output="screen"/>
-			<node pkg="last_letter" name="GPS" type="GPS.py" output="screen"/>
-			<node pkg="last_letter" name="Magnetometer" type="magnetometer.py" output="screen"/>
-		</group>
+<!--		<group>-->
+<!--			<node pkg="last_letter" name="Accelerometer" type="accelerometer.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="Altimeter" type="altimeter.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="Barometer" type="barometer.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="Gyroscope" type="gyroscope.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="GPS" type="GPS.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="Magnetometer" type="magnetometer.py" output="screen"/>-->
+<!--		</group>-->
 
 		<!-- Transformations broadcaster -->
 		<group>

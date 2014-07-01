@@ -11,7 +11,8 @@ import datetime
 from geometry_msgs.msg import Vector3, Vector3Stamped
 import numpy as np
 from numpy.linalg import inv, lstsq
-from utils import saturation, quat2Reb, Vector2Array, quat2euler, ECEF2lla, lla2ECEF, vectornorm, block_diag
+from uav_utils import ECEF2lla, lla2ECEF
+from mathutils import saturation, quat2Reb, Vector2Array, quat2euler, vectornorm, block_diag
 from math import floor, exp, atan2, pi, sqrt, sin, cos
 from last_letter.msg import SimStates, SimGPS, SimSats, Geoid
 

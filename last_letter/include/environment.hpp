@@ -6,7 +6,8 @@
 #include <last_letter/Environment.h>
 #include <last_letter/SimStates.h>
 #include <last_letter/Geoid.h>
-#include <mathutils/utls.hpp>
+#include <mathutils/mathutils.hpp>
+#include <uav_utils/uav_utils.hpp>
 
 using namespace std;
 

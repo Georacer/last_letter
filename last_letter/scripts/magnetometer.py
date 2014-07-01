@@ -7,7 +7,8 @@ import geomag
 
 from geometry_msgs.msg import Vector3, Vector3Stamped
 import numpy as np
-from utils import saturation, quat2Reb, Vector2Array, quat2euler, getMag, ThermalRise
+from uav_utils import getMag, ThermalRise
+from mathutils import saturation, quat2Reb, Vector2Array, quat2euler
 from math import floor, exp, atan2, pi
 from last_letter.msg import SimStates, SimSensor3, Environment
 

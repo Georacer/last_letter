@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>last_letter</name>
-  <version>0.4.0</version>
+  <version>0.5.0</version>
   <description>The last_letter package</description>
 
   <maintainer email="gzogop@mail.ntua.gr">George Zogopoulos Papaliakos</maintainer>
@@ -37,11 +37,13 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>uav_utils</build_depend>
+  <build_depend>mathutils</build_depend>
   <build_depend>joy</build_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>std_msgs</run_depend>  
   <run_depend>uav_utils</run_depend>
+  <run_depend>mathutils</run_depend>
   <run_depend>joy</run_depend>
 
 

@@ -4,7 +4,8 @@ import roslib
 import sys
 import rospy
 import numpy as np
-from utils import saturation, quat2Reb, ThermalRise
+from uav_utils import ThermalRise
+from mathutils import saturation, quat2Reb
 from math import floor
 from last_letter.msg import SimStates, SimSensor, Environment
 
