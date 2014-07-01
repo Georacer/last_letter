@@ -37,6 +37,7 @@ class ModelPlane
 	ros::Time tprev;
 	ros::Duration durTemp;
 	double dt;
+	int initTime;
 	double input[4];
 	double contactpoints[contactN*3];
 	

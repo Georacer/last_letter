@@ -13,6 +13,7 @@ static double _spp[contactN]={0.0};
 		XmlRpc::XmlRpcValue list;
 		double temp[4];
 		int i;
+		initTime = -1;
 		
 		//Initialize states
 		states.header.frame_id = "bodyFrame";
@@ -321,7 +322,7 @@ static double _spp[contactN]={0.0};
 		forces.x = forces.x - gravForce.x;
 		forces.y = forces.y - gravForce.y;
 		forces.z = forces.z - gravForce.z;
-		double lg = col_y*forces.z - col_z*forces.y; //Must remove gravity from forces
+		double lg = col_y*forces.z - col_z*forces.y;
 		double mg = -col_x*forces.z + col_z*forces.x;
 		double ng = -col_y*forces.x + col_x*forces.y;
 		
@@ -514,20 +515,18 @@ static double _spp[contactN]={0.0};
 		//create speed derivatives
 		double mass;
 		if(!ros::param::getCached("airframe/m", mass)) {ROS_FATAL("Invalid parameters for -m- in param server!"); ros::shutdown();}
-	
-		//ros::param::getCached("airframe/m",mass);
 		geometry_msgs::Vector3 linearAcc = (1.0/mass)*dynamics.wrench.force;
 		geometry_msgs::Vector3 corriolisAcc;
 		vector3_cross(-states.velocity.angular, states.velocity.linear, &corriolisAcc);
 		geometry_msgs::Vector3 speedDot = linearAcc + corriolisAcc;
-		states.acceleration.linear = linearAcc;	
+		states.acceleration.linear = linearAcc;
 		
 		//create angular derivatives
 		geometry_msgs::Quaternion wquat;
 		wquat.w = 1.0;
 		wquat.x = states.velocity.angular.x*0.5*dt;
 		wquat.y = states.velocity.angular.y*0.5*dt;
-		wquat.z = states.velocity.angular.z*0.5*dt;				
+		wquat.z = states.velocity.angular.z*0.5*dt;
 		
 		//create angular rate derivatives
 		double j_x, j_y, j_z, j_xz;
@@ -568,8 +567,14 @@ static double _spp[contactN]={0.0};
 	//Make one step of the plane simulation
 	void ModelPlane::step(void)
 	{
-		durTemp = (ros::Time::now() - tprev);
-		dt = durTemp.toSec();
+		if (initTime > 0) {
+			durTemp = (ros::Time::now() - tprev);
+			dt = durTemp.toSec();
+			}
+		else {
+			if(!ros::param::getCached("simRate", dt)) {ROS_FATAL("Invalid parameters for -simRate- in param server!"); ros::shutdown();}
+			dt = 1/dt;
+		}
 		tprev = ros::Time::now();
 		states.header.stamp = tprev;
 		
@@ -580,7 +585,7 @@ static double _spp[contactN]={0.0};
 		groundDynamicsVect = groundDynamics(states.pose.orientation);
 		dynamics.wrench.force = dynamics.wrench.force + groundDynamicsVect.force;
 		dynamics.wrench.torque = dynamics.wrench.torque + groundDynamicsVect.torque;
-				
+
 		//make a simulation step
 		diffEq();
 		//publish results
@@ -594,9 +599,9 @@ static double _spp[contactN]={0.0};
 	{
 		//Convert PPM to -1/1 ranges (0/1 for throttle)
 		input[0] = (double)(inputMsg.value[0]-1500)/500;
-		input[1] = (double)-(inputMsg.value[1]-1500)/500;
+		input[1] = (double)(inputMsg.value[1]-1500)/500;
 		input[2] = (double)(inputMsg.value[2]-1000)/1000;
-		input[3] = (double)-(inputMsg.value[3]-1500)/500;
+		input[3] = (double)(inputMsg.value[3]-1500)/500;
 	}
 	
 	/////////////////////////////////////////////////
@@ -622,13 +627,13 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 		
 	ros::Duration(3).sleep(); //wait for other nodes to get raised
-	double simRate;	
-	ros::param::get("simRate",simRate); //frame rate in Hz	
+	double simRate;
+	ros::param::get("simRate",simRate); //frame rate in Hz
 	ros::Rate spinner(simRate);
 	
 	ModelPlane uav(n);
 	//ros::Duration(3).sleep(); 
-	uav.tprev = ros::Time::now();
+//	uav.tprev = ros::Time::now();
 	spinner.sleep();
 	ROS_INFO("simNode up");
 	
