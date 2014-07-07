@@ -24,12 +24,15 @@
 		<!-- Initialization of the parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/custom.yaml" />
 		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" />
+		<rosparam command="load" file="$(find last_letter)data/parameters/controller.yaml" />
 		
 		<!-- Raising core nodes -->
 		<group>
 			<node pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag states wrenchStamped input"/>
 			<node if="$(arg clockSim)" name="clock" pkg="last_letter" type="clock.py" />
-			<node pkg="last_letter" name="plane_model" type="model" output="screen"/>
+			<node pkg="last_letter" name="plane_model" type="model" output="screen">
+				<remap from="ctrlPWM" to="rawPWM"/>
+			</node>
 			<node pkg="last_letter" name="environment_model" type="environment" output="screen"/>
 			<node pkg="last_letter" name="euler_translator" type="quat2euler" output="screen"/>
 		</group>
@@ -43,7 +46,12 @@
 			<node pkg="last_letter" name="GPS" type="GPS.py" output="screen"/>
 			<node pkg="last_letter" name="Magnetometer" type="magnetometer.py" output="screen"/>
 		</group>
-
+		
+		<!-- Raising controller nodes -->
+		<group>
+			<node pkg="last_letter" name="Autopilot" type="autopilot" output="screen"/>
+		</group>
+		
 		<!-- Transformations broadcaster -->
 		<group>
 			<node pkg="tf" type="static_transform_publisher" name="body2Cockpit" args="0.0 0.0 0.0 0.0 0.0 3.14 base_link plane_camera 10" />

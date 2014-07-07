@@ -6,8 +6,8 @@ simRate: 1000
 
 #Initial State
 init/position: [0.0, 0.0, -1000.0] #NED frame
-init/orientation: [0.0000, 0.0125, -0.0000, 0.9999] #NED frame
-init/velLin: [24.992, 0.000, 0.625] #body frame
+init/orientation: [0.0000, 0.00, -0.7071, 0.7071] #NED frame
+init/velLin: [30.0, 0.000, 0.625] #body frame
 init/velAng: [0.000, -0.000, -0.000] #body frame
 init/aileron: 0.000
 init/elevator: 0.292

@@ -1,12 +1,11 @@
 #include "ros/ros.h"
-#include "nav_msgs/Odometry.h"
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Quaternion.h"
 #include "tf/transform_datatypes.h"
-//#include "LinearMath/btMatrix3x3.h"
 #include <cstdlib>
 #include <math.h>
 
+#include "mathutils/mathutils.hpp"
 #include "last_letter/SimStates.h"
 ros::Publisher pub;
 
@@ -22,12 +21,12 @@ void translate_callback(last_letter::SimStates Odo)
 //		ROS_INFO("Quaterion: %g, %g, %g, %g, len: %g",quat[0], quat[1], quat[2], quat[3], quat.length());
 		quat.normalize();
 	}	
-	double phi,theta,psi;
-	tf::Matrix3x3(quat).getEulerYPR(psi, theta, phi);
-	geometry_msgs::Vector3 eulerVec;
-	eulerVec.x = phi*180.0/M_PI;
-	eulerVec.y = theta*180.0/M_PI;
-	eulerVec.z = psi*180.0/M_PI;
+//	double phi,theta,psi;
+//	tf::Matrix3x3(quat).getEulerYPR(psi, theta, phi);
+	geometry_msgs::Vector3 eulerVec = quat2euler(Odo.pose.orientation);
+	eulerVec.x = eulerVec.x*180.0/M_PI;
+	eulerVec.y = eulerVec.y*180.0/M_PI;
+	eulerVec.z = eulerVec.z*180.0/M_PI;
 	pub.publish(eulerVec);
 }
 

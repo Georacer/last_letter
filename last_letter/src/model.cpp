@@ -81,7 +81,7 @@ static double _spp[contactN]={0.0};
 		environment.gravity = 9.81;
 		
 		//Subscribe and advertize
-		subInp = n.subscribe("input",1,&ModelPlane::getInput, this);
+		subInp = n.subscribe("ctrlPWM",1,&ModelPlane::getInput, this);
 		subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this);
 		pubState = n.advertise<last_letter::SimStates>("states",1000);
 		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("wrenchStamped",1000);
@@ -141,12 +141,10 @@ static double _spp[contactN]={0.0};
 		double c_y_0,c_y_b,c_y_p,c_y_r,c_y_deltaa,c_y_deltar;
 		double s_prop,c_prop,k_motor;
 	
-		//if(!ros::param::getCached("/environment/rho", rho)) {ROS_FATAL("Invalid parameters for -rho- in param server!"); ros::shutdown();}	
-		//if(!ros::param::getCached("/environment/g", g)) {ROS_FATAL("Invalid parameters for -g- in param server!"); ros::shutdown();}	
 		rho = environment.density;
 		g = environment.gravity;
 		
-		if(!ros::param::getCached("airframe/m", m)) {ROS_FATAL("Invalid parameters for -m- in param server!"); ros::shutdown();}			
+		if(!ros::param::getCached("airframe/m", m)) {ROS_FATAL("Invalid parameters for -m- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_lift_q", c_lift_q)) {ROS_FATAL("Invalid parameters for -c_lift_q- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_lift_deltae", c_lift_deltae)) {ROS_FATAL("Invalid parameters for -c_lift_deltae- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_drag_q", c_lift_q)) {ROS_FATAL("Invalid parameters for -c_drag_q- in param server!"); ros::shutdown();}
@@ -186,7 +184,6 @@ static double _spp[contactN]={0.0};
 		geometry_msgs::Vector3 gravVect;
 		gravVect.z = m*g;
 		geometry_msgs::Vector3 gravForce = Reb/gravVect;
-		//quat_vector3_rotate(quat, gravVect, &gravForce);
 		double gx = gravForce.x;
 		double gy = gravForce.y;
 		double gz = gravForce.z;
@@ -484,8 +481,8 @@ static double _spp[contactN]={0.0};
 	double ModelPlane::dragCoeff (double alpha)
 	{
 		double c_drag_p, c_lift_0, c_lift_a, oswald, b, S, AR;
-		if(!ros::param::getCached("airframe/c_drag_p", c_drag_p)) {ROS_FATAL("Invalid parameters for -c_drag_p- in param server!"); ros::shutdown();}	
-		if(!ros::param::getCached("airframe/c_lift_0", c_lift_0)) {ROS_FATAL("Invalid parameters for -c_lift_0- in param server!"); ros::shutdown();}	
+		if(!ros::param::getCached("airframe/c_drag_p", c_drag_p)) {ROS_FATAL("Invalid parameters for -c_drag_p- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airframe/c_lift_0", c_lift_0)) {ROS_FATAL("Invalid parameters for -c_lift_0- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_lift_a", c_lift_a)) {ROS_FATAL("Invalid parameters for -c_lift_a- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("/environment/oswald", oswald)) {ROS_FATAL("Invalid parameters for -oswald- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/b", b)) {ROS_FATAL("Invalid parameters for -b- in param server!"); ros::shutdown();}
@@ -553,7 +550,7 @@ static double _spp[contactN]={0.0};
 		states.velocity.linear = states.velocity.linear + tempVect;
 		
 		quat_product(quat,wquat,&states.pose.orientation);
-		quat_normalize(&states.pose.orientation);		
+		quat_normalize(&states.pose.orientation);
 		
 		tempVect = dt*rateDot;
 		states.velocity.angular = states.velocity.angular + tempVect;
@@ -625,15 +622,13 @@ int main(int argc, char **argv)
 
 	ros::init(argc, argv, "simNode");
 	ros::NodeHandle n;
-		
+
 	ros::Duration(3).sleep(); //wait for other nodes to get raised
 	double simRate;
 	ros::param::get("simRate",simRate); //frame rate in Hz
 	ros::Rate spinner(simRate);
 	
 	ModelPlane uav(n);
-	//ros::Duration(3).sleep(); 
-//	uav.tprev = ros::Time::now();
 	spinner.sleep();
 	ROS_INFO("simNode up");
 	

@@ -6,7 +6,14 @@ set (CMAKE_CXX_FLAGS "-Wall -DBT_USE_DOUBLE_PRECISION")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS tf geometry_msgs roscpp rospy sensor_msgs std_msgs)
+find_package(catkin REQUIRED COMPONENTS
+	tf
+	geometry_msgs
+	roscpp
+	rospy
+	sensor_msgs
+	std_msgs
+	)
 
 find_package (LAPACK REQUIRED)
 

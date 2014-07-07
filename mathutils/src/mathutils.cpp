@@ -266,14 +266,3 @@ int inverse(double* A, double* Ainv, int N)
 
     return INFO;
 }
-
-void WGS84_NM(double lat,double *NE, double *ME)
-{
-	double sfi =sin(lat);
-	double e2 = e_earth*e_earth;
-
-	double temp = 1.0-e2*sfi*sfi;
-
-	*NE = R_earth / sqrt(temp);
-	*ME = R_earth*(1.0-e2) / pow(temp,3.0/2.0);
-}

@@ -10,6 +10,7 @@
 
 #include "mathutils/mathutils.hpp"
 #include "uav_utils/uav_utils.hpp"
+//#include "last_letter/uavFwLib.hpp"
 #include "last_letter/SimStates.h"
 #include "last_letter/SimPWM.h"
 #include "last_letter/Environment.h"
@@ -41,7 +42,6 @@ class ModelPlane
 	int initTime;
 	double input[4];
 	double contactpoints[contactN*3];
-	
 	
 	///////////
 	//Functions

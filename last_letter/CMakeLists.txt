@@ -116,9 +116,7 @@ include_directories(
 )
 
 ## Declare a cpp library
-# add_library(last_letter
-#   src/${PROJECT_NAME}/last_letter.cpp
-# )
+add_library(last_letter src/uavFwLib.cpp)
 
 ## Declare a cpp executable
 	add_executable(uav_publisher src/state_publisher.cpp)
@@ -127,6 +125,7 @@ include_directories(
 	add_executable(joy2chan src/joy2chan.cpp)
 	add_executable(environment src/environment.cpp)
 	add_executable(virtualJoy src/virtualJoy.cpp)
+	add_executable(autopilot src/controller.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -136,14 +135,16 @@ include_directories(
 	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(environment ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(virtualJoy ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(autopilot ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(uav_publisher ${catkin_LIBRARIES})
-	target_link_libraries(quat2euler ${catkin_LIBRARIES})
+	target_link_libraries(quat2euler mathutils ${catkin_LIBRARIES})
 	target_link_libraries(model mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(joy2chan ${catkin_LIBRARIES})
 	target_link_libraries(environment mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(virtualJoy mathutils uav_utils ${catkin_LIBRARIES})
+	target_link_libraries(autopilot mathutils uav_utils ${catkin_LIBRARIES})
 
 #############
 ## Install ##
