@@ -7,7 +7,7 @@
 /environment/groundPres: 1013.25 #in mBar
 
 #Parameters for the wind model
-/environment/windRef: 5.0 #in m/s
+/environment/windRef: 0.0 #in m/s
 /environment/windRefAlt: 10 #in m
 /environment/windDir: 90.0 #in degrees
 /environment/surfSmooth: 0.28 #rural environment

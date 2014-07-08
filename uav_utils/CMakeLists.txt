@@ -61,8 +61,8 @@ catkin_python_setup()
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-   INCLUDE_DIRS include
-#  LIBRARIES helim_stm32f4
+	INCLUDE_DIRS include
+	LIBRARIES uav_utils
 #  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs
 #   DEPENDS lm 
    

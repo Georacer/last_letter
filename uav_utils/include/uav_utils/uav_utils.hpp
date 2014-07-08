@@ -28,4 +28,6 @@ class PID
 	double step(double error, double dt, double derivative);
 };
 
+geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);
+
 void WGS84_NM(double lat,double *NE, double *ME);

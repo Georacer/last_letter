@@ -28,7 +28,7 @@
   <!-- Example: -->
   <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
   <maintainer email="marantos@mail.ntua.gr">Panos Marantos</maintainer>
-  <maintainer email="gzogops@mail.ntua.gr">George Zogopoulos Papaliakos</maintainer>
+  <maintainer email="gzogop@mail.ntua.gr">George Zogopoulos Papaliakos</maintainer>
 
 
   <!-- The *_depend tags are used to specify dependencies -->

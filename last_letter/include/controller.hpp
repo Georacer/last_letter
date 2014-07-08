@@ -7,6 +7,8 @@
 #include "uav_utils/uav_utils.hpp"
 #include "last_letter/SimStates.h"
 #include "last_letter/SimPWM.h"
+#include "last_letter/Environment.h"
+#include "last_letter/RefCommands.h"
 
 class BMcLAttitudeController
 {
@@ -14,16 +16,35 @@ class BMcLAttitudeController
 	///////////
 	//Variables
 	last_letter::SimStates states;
-	geometry_msgs::Vector3 euler;
+	last_letter::Environment environment;
+	last_letter::RefCommands refCommands;
+	geometry_msgs::Vector3 euler, airdata;
 	double input[4];
 	double output[4];
 	ros::Time tprev;
-	ros::Subscriber subInp, subState;
+	ros::Subscriber subInp, subState, subEnv, subRef;
 	ros::Publisher pubCtrl;
 	double P, I, D, satU, satL, Ts, N;
 	///////////
 	//Functions
-	uav_utils::PID roll2Aileron, yaw2Roll;
+	PID * roll2Aileron;
+	PID * yaw2Roll;
+	PID * beta2Rudder;
+	PID * pitch2Elevator;
+	void step();
+	void getInput(last_letter::SimPWM inputMsg);
+	void getStates(last_letter::SimStates inpStates);
+	void getReference(last_letter::RefCommands refInp);
+	void writePWM(double *output);
+	void getEnvironment(last_letter::Environment envUpdate);
+	double aileronControl();
+	double rudderControl();
+	double elevatorControl();
+	
+	//Constructor
+	BMcLAttitudeController(ros::NodeHandle n);
+	//Destructor
+	~BMcLAttitudeController();
 	
 	private:
 	///////////
@@ -32,4 +53,4 @@ class BMcLAttitudeController
 	///////////
 	//Functions
 
-}
+};

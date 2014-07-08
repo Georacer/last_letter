@@ -119,7 +119,11 @@ static double _spp[contactN]={0.0};
 	{
 	
 		//request air data from getAirData
-		geometry_msgs::Vector3 airData = getAirData(states.velocity.linear);
+		geometry_msgs::Vector3 temp;
+		temp.x = states.velocity.linear.x - environment.wind.x;
+		temp.y = states.velocity.linear.y - environment.wind.y;
+		temp.z = states.velocity.linear.z - environment.wind.z;
+		geometry_msgs::Vector3 airData = getAirData(temp);
 		double airspeed = airData.x;
 		double alpha = airData.y;
 		double beta = airData.z;
@@ -229,7 +233,11 @@ static double _spp[contactN]={0.0};
 	{
 
 		//request air data from getAirData
-		geometry_msgs::Vector3 airData = getAirData(states.velocity.linear);
+		geometry_msgs::Vector3 temp;
+		temp.x = states.velocity.linear.x - environment.wind.x;
+		temp.y = states.velocity.linear.y - environment.wind.y;
+		temp.z = states.velocity.linear.z - environment.wind.z;
+		geometry_msgs::Vector3 airData = getAirData(temp);
 		double airspeed = airData.x;
 		double alpha = airData.y;
 		double beta = airData.z;
@@ -423,40 +431,8 @@ static double _spp[contactN]={0.0};
 			totalB.torque= Reb/totalE.torque;
 		}
 
-		return totalB;			
+		return totalB;
 	}	
-	
-	/////////////////////////////////////////
-	//Aerodynamc angles/ airspeed calculation
-	geometry_msgs::Vector3 ModelPlane::getAirData (geometry_msgs::Vector3 speeds)
-	{
-		double u = speeds.x-environment.wind.x;
-		double v = speeds.y-environment.wind.y;
-		double w = speeds.z-environment.wind.z;
-
-		double airspeed = sqrt(pow(u,2)+pow(v,2)+pow(w,2));
-		double alpha = atan2(w,u);
-		double beta = 0;
-		if (u==0) {
-			if (v==0) {
-				beta=0;
-			}
-			else {
-				beta=asin(v/abs(v));
-			}
-	
-		}
-		else {
-			beta = atan2(v,u);
-		}
-	
-		geometry_msgs::Vector3 result;
-		result.x = airspeed;
-		result.y = alpha;
-		result.z = beta;
-		
-		return result;
-	}
 	
 	//////////////////////////
 	//C_lift_alpha calculation
@@ -606,13 +582,14 @@ static double _spp[contactN]={0.0};
 	void ModelPlane::getEnvironment(last_letter::Environment envUpdate)
 	{
 		environment = envUpdate;
-	}	
+	}
 	
 	//////////////////
 	//Class destructor
 	ModelPlane::~ModelPlane ()
 	{
 	}
+	
 	
 ///////////////
 //Main function

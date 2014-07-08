@@ -14,12 +14,19 @@ roll2ail/min : -1.0
 yaw2roll/p : 5.129
 yaw2roll/i : 0.644
 yaw2roll/d : 0.0
-yaw2roll/max : 45
-yaw2roll/min : -45
+yaw2roll/max : 0.785
+yaw2roll/min : -0.785
 
 # beta to rudder controller
-roll2ail/p : -1.273
-roll2ail/i : -2.627
-roll2ail/d : 0.0
-roll2ail/max : 1.0
-roll2ail/min : -1.0
+beta2rud/p : -17.22
+beta2rud/i : -22.685
+beta2rud/d : 0.0
+beta2rud/max : 1.0
+beta2rud/min : -1.0
+
+# pitch to elevator controller
+pitch2elev/p : 0.1
+pitch2elev/i : 0.8
+pitch2elev/d : 0.008
+pitch2elev/max : 1.0
+pitch2elev/min : -1.0

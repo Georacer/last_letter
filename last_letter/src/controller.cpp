@@ -13,8 +13,10 @@
 		states.header.stamp = tprev;
 		
 		//Subscribe and advertize
-		subInp = n.subscribe("rawPWM",1,&ModelPlane::getInput, this);
-		subState = n.subscribe("states",1,&ModelPlane::getStates, this);
+		subInp = n.subscribe("rawPWM",1,&BMcLAttitudeController::getInput, this);
+		subState = n.subscribe("states",1,&BMcLAttitudeController::getStates, this);
+		subEnv = n.subscribe("environment",1,&BMcLAttitudeController::getEnvironment, this);
+		subRef = n.subscribe("refCommands",1,&BMcLAttitudeController::getReference, this);
 		pubCtrl = n.advertise<last_letter::SimPWM>("ctrlPWM",1000);
 		
 		//Create roll to aileron controller
@@ -26,7 +28,7 @@
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
 		N = 10;
-		roll2Aileron = PID(P, I, D, satU, satL, Ts, N);
+		roll2Aileron = new PID(P, I, D, satU, satL, Ts, N);
 		
 		//Create roll to aileron controller
 		if(!ros::param::getCached("yaw2roll/p", P)) {ROS_FATAL("Invalid parameters for -roll2ail/p- in param server!"); ros::shutdown();}
@@ -37,28 +39,86 @@
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
 		N = 10;
-		yaw2Roll = last_letter::PID(P, I, D, satU, satL, Ts, N);
+		yaw2Roll = new PID(P, I, D, satU, satL, Ts, N);
+		
+		//Create roll to aileron controller
+		if(!ros::param::getCached("beta2rud/p", P)) {ROS_FATAL("Invalid parameters for -beta2rud/p- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("beta2rud/i", I)) {ROS_FATAL("Invalid parameters for -beta2rud/i- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("beta2rud/d", D)) {ROS_FATAL("Invalid parameters for -beta2rud/d- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("beta2rud/max", satU)) {ROS_FATAL("Invalid parameters for -beta2rud/max- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("beta2rud/min", satL)) {ROS_FATAL("Invalid parameters for -beta2rud/min- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
+		Ts = 1.0/Ts;
+		N = 10;
+		beta2Rudder = new PID(P, I, D, satU, satL, Ts, N);
+		
+		//Create pitch to elevator controller
+		if(!ros::param::getCached("pitch2elev/p", P)) {ROS_FATAL("Invalid parameters for -pitch2elev/p- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("pitch2elev/i", I)) {ROS_FATAL("Invalid parameters for -pitch2elev/i- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("pitch2elev/d", D)) {ROS_FATAL("Invalid parameters for -pitch2elev/d- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("pitch2elev/max", satU)) {ROS_FATAL("Invalid parameters for -pitch2elev/max- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("pitch2elev/min", satL)) {ROS_FATAL("Invalid parameters for -pitch2elev/min- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
+		Ts = 1.0/Ts;
+		N = 10;
+		pitch2Elevator = new PID(P, I, D, satU, satL, Ts, N);
 	}
+
+	///////////////////
+	//Class Destructor
+	BMcLAttitudeController::~BMcLAttitudeController() {}
 	
 	/////////////////////
 	//Lateral Controllers
-	/////////////////////
+	double BMcLAttitudeController::aileronControl() {
+		euler = quat2euler(states.pose.orientation);
+		double errYaw = refCommands.euler.z - euler.z;
+		if (errYaw>M_PI) {errYaw-=2*M_PI;}
+		if (errYaw<-M_PI) {errYaw+=M_PI;}
+		return roll2Aileron->step( yaw2Roll->step( errYaw, 0.01) - euler.x, 0.01);
+	}
 	
+	double BMcLAttitudeController::rudderControl() {
+		geometry_msgs::Vector3 temp;
+		temp.x = states.velocity.linear.x - environment.wind.x;
+		temp.y = states.velocity.linear.y - environment.wind.y;
+		temp.z = states.velocity.linear.z - environment.wind.z;
+		airdata = getAirData(temp);
+		return beta2Rudder->step( -airdata.z, 0.01);
+	}
+
+	/////////////////////
+	//Longitudinal Controllers
+	double BMcLAttitudeController::elevatorControl() {
+		euler = quat2euler(states.pose.orientation);
+		double errPitch = refCommands.euler.y - euler.y;
+		if (errPitch>M_PI) {errPitch-=2*M_PI;}
+		if (errPitch<-M_PI) {errPitch+=M_PI;}
+		return pitch2Elevator->step( errPitch, 0.01);
+	}
+	
+	////////////
+	// Main Step
+	void BMcLAttitudeController::step()
+	{
+		euler = quat2euler(states.pose.orientation);
+		geometry_msgs::Vector3 temp;
+		temp.x = states.velocity.linear.x - environment.wind.x;
+		temp.y = states.velocity.linear.y - environment.wind.y;
+		temp.z = states.velocity.linear.z - environment.wind.z;
+		airdata = getAirData(temp);
+//		std::cout << euler.x <<' '<< euler.y << ' '<< euler.z << std::endl;
+		double output[4];
+		output[0] = aileronControl();
+		output[1] = elevatorControl();
+		output[2] = input[2];
+		output[3] = rudderControl();
+		writePWM(output);
+	}
 	
 	///////////
 	//Utilities
 	///////////
-	
-	void BMcLAttitudeController::step()
-	{
-		euler = quat2euler(states.pose.orientation);
-		double output[4];
-		output[0] = roll2Aileron( yaw2Roll( euler.z));
-		output[1] = input[1];
-		output[2] = input[2];
-		output[3] = input[3];
-		writePWM(output);
-	}
 	
 	void BMcLAttitudeController::getStates(last_letter::SimStates inpStates)
 	{
@@ -86,6 +146,20 @@
 		channels.header.stamp = ros::Time::now();
 		pubCtrl.publish(channels);
 	}
+	
+	/////////////////////////////////////////////////
+	//Store environmental values
+	void BMcLAttitudeController::getEnvironment(last_letter::Environment envUpdate)
+	{
+		environment = envUpdate;
+	}
+	
+	/////////////////////////////////////////////////
+	//Store environmental values
+	void BMcLAttitudeController::getReference(last_letter::RefCommands refInp)
+	{
+		refCommands = refInp;
+	}
 
 ///////////////
 //Main function
@@ -101,7 +175,7 @@ int main(int argc, char **argv)
 	ros::param::get("ctrlRate",ctrlRate); //frame rate in Hz
 	ros::Rate spinner(ctrlRate);
 	
-	attCtrl = BMcLAttitudeController(n);
+	BMcLAttitudeController attCtrl(n);
 	spinner.sleep();
 	ROS_INFO("controlNode up");
 	

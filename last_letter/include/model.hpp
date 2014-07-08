@@ -70,9 +70,6 @@ class ModelPlane
 	//Calculate Ground Forces and Torques
 	geometry_msgs::Wrench groundDynamics(geometry_msgs::Quaternion quat);
 	
-	//Extract air data (airspeed, alpha, beta)
-	geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);
-	
 	//Calculate lift coefficient from alpha
 	double liftCoeff (double alpha);
 	

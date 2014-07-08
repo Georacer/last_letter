@@ -12,7 +12,6 @@ find_package(catkin REQUIRED COMPONENTS
 	geometry_msgs
 	sensor_msgs
 	message_generation
-	tf
 	uav_utils
 	mathutils
 )
@@ -65,6 +64,7 @@ find_package(catkin REQUIRED COMPONENTS
 		SimSat.msg
 		SimSats.msg
 		DOP.msg
+		RefCommands.msg
 	)
 
 ## Generate services in the 'srv' folder

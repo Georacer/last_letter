@@ -90,14 +90,41 @@ void quat2rotmtx (const geometry_msgs::Quaternion q, double *rotmtx)
 geometry_msgs::Vector3 quat2euler (const geometry_msgs::Quaternion q)
 // Based on Stevens & Lewis p. 42
 {
-	double rotmtx[9];
+//	double rotmtx[9];
 	geometry_msgs::Vector3 euler;
-	quat2rotmtx(q, rotmtx);
-	euler.x = atan2(rotmtx[5],rotmtx[8]);
-	euler.y = -asin(rotmtx[2]);
-	euler.z = atan2(rotmtx[1],rotmtx[0]);
-	
-	return euler;
+//	quat2rotmtx(q, rotmtx);
+//	euler.x = atan2(rotmtx[5],rotmtx[8]);
+//	euler.y = -asin(rotmtx[2]);
+//	euler.z = atan2(rotmtx[1],rotmtx[0]);
+//	
+//	return euler;
+	const double tol = 0.499;
+	const double q0 = q.w, q1 = q.x, q2 = q.y, q3 = q.z;
+	const double q00 = q0*q0, q11 = q1*q1, q22 = q2*q2, q33 = q3*q3;
+	const double q01 = q0*q1, q23 = q2*q3;
+	const double q12 = q1*q2, q03 = q0*q3;
+	double test = q1*q3 - q0*q2;
+	if (test < -tol)
+	  {
+	    euler.x = 0.0;
+	    euler.y = 0.5 * M_PI;
+	    euler.z = 2.0 * atan2 (q0, q3);
+	    return euler;
+	  }
+	else if (test > +tol)
+	  {
+	    euler.x = 0.0;
+	    euler.y = -0.5 * M_PI;
+	    euler.z = 2.0 * atan2 (q0, q3);
+	    return euler;
+	  }
+	else
+	  {
+	    euler.x = atan2 (2.0*(q01 + q23), q00 - q11 - q22 + q33);
+	    euler.y = asin (-2.0*test);
+	    euler.z = atan2 (2.0*(q12 + q03), q00 + q11 - q22 - q33);
+	    return euler;
+	  }
 }
 
 void euler2rotmtx (const geometry_msgs::Vector3 euler, double *rotmtx)

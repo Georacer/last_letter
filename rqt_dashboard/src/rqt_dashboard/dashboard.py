@@ -411,7 +411,7 @@ class Dashboard(Plugin):
             print 'arguments: ', args
             print 'unknowns: ', unknowns
 
-	rospy.sleep(5.)
+	rospy.sleep(2.)
 	self._layout = DashboardGrid()
         # Get path to UI file which is a sibling of this file
         # in this example the .ui and .py file are in the same folder
