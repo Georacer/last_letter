@@ -26,6 +26,8 @@ class DashboardGrid(QtGui.QWidget):
 		self.column3 = QtGui.QVBoxLayout()
 		
 		self.commands = RefCommands()
+		self.commands.altitude = 100.0
+		self.commands.airspeed = 25.0
 		self.pub = rospy.Publisher('/fw1/refCommands', RefCommands)
 		self.pubTimer = QtCore.QTimer()
 		self.pubTimer.timeout.connect(self.publishCommands)

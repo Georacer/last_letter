@@ -31,6 +31,9 @@ class BMcLAttitudeController
 	PID * yaw2Roll;
 	PID * beta2Rudder;
 	PID * pitch2Elevator;
+	PID * alt2Pitch;
+	PID * airspd2Pitch;
+	PID * airspd2Throt;
 	void step();
 	void getInput(last_letter::SimPWM inputMsg);
 	void getStates(last_letter::SimStates inpStates);
@@ -40,6 +43,7 @@ class BMcLAttitudeController
 	double aileronControl();
 	double rudderControl();
 	double elevatorControl();
+	double throttleControl();
 	
 	//Constructor
 	BMcLAttitudeController(ros::NodeHandle n);
