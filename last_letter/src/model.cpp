@@ -476,11 +476,11 @@ static double _spp[contactN]={0.0};
 	{
 		//variables declaration
 		geometry_msgs::Vector3 tempVect;
-		geometry_msgs::Quaternion quat = states.pose.orientation;		
+		geometry_msgs::Quaternion quat = states.pose.orientation;
 		double Reb[9];
 		
 		//create transformation matrix
-		quat2rotmtx (states.pose.orientation, Reb);			
+		quat2rotmtx (states.pose.orientation, Reb);
 		
 		//create position derivatives
 		geometry_msgs::Vector3 posDot = Reb*states.velocity.linear;

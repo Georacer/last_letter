@@ -60,6 +60,7 @@
 
 		<!-- Input nodes -->
 		<group>
+<!--			<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
 			<node pkg="joy" type="joy_node" name="joystick" output="screen" >
 				<param name="dev" value="/dev/input/js0" />
 				<param name="deadzone" value="0.01" />
