@@ -11,8 +11,8 @@ class PID
 	public:
 	///////////
 	//Variables
-	double P, I, D, satU, satL, Ts, N;
-	double Iterm, Iprev, Eprev, Uprev;
+	double P, I, D, satU, satL, Ts, Tau;
+	double Iterm, Iprev, Eprev, Uprev, Dprev;
 	double output;
 	///////////
 	//Functions
@@ -24,8 +24,10 @@ class PID
 	~PID ();
 	
 	//Main step
+	double step(double error);
 	double step(double error, double dt);
 	double step(double error, double dt, double derivative);
+	void init(void);
 };
 
 geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);

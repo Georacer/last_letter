@@ -27,8 +27,8 @@
 		if(!ros::param::getCached("roll2ail/min", satL)) {ROS_FATAL("Invalid parameters for -roll2ail/min- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		N = 10;
-		roll2Aileron = new PID(P, I, D, satU, satL, Ts, N);
+		Tau = 0.1;
+		roll2Aileron = new PID(P, I, D, satU, satL, Ts, Tau);
 		
 		//Create roll to aileron controller
 		if(!ros::param::getCached("yaw2roll/p", P)) {ROS_FATAL("Invalid parameters for -roll2ail/p- in param server!"); ros::shutdown();}
@@ -38,8 +38,8 @@
 		if(!ros::param::getCached("yaw2roll/min", satL)) {ROS_FATAL("Invalid parameters for -roll2ail/min- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		N = 10;
-		yaw2Roll = new PID(P, I, D, satU, satL, Ts, N);
+		Tau = 0.1;
+		yaw2Roll = new PID(P, I, D, satU, satL, Ts, Tau);
 		
 		//Create roll to aileron controller
 		if(!ros::param::getCached("beta2rud/p", P)) {ROS_FATAL("Invalid parameters for -beta2rud/p- in param server!"); ros::shutdown();}
@@ -49,8 +49,8 @@
 		if(!ros::param::getCached("beta2rud/min", satL)) {ROS_FATAL("Invalid parameters for -beta2rud/min- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		N = 10;
-		beta2Rudder = new PID(P, I, D, satU, satL, Ts, N);
+		Tau = 0.1;
+		beta2Rudder = new PID(P, I, D, satU, satL, Ts, Tau);
 		
 		//Create pitch to elevator controller
 		if(!ros::param::getCached("pitch2elev/p", P)) {ROS_FATAL("Invalid parameters for -pitch2elev/p- in param server!"); ros::shutdown();}
@@ -60,8 +60,8 @@
 		if(!ros::param::getCached("pitch2elev/min", satL)) {ROS_FATAL("Invalid parameters for -pitch2elev/min- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		N = 10;
-		pitch2Elevator = new PID(P, I, D, satU, satL, Ts, N);
+		Tau = 0.1;
+		pitch2Elevator = new PID(P, I, D, satU, satL, Ts, Tau);
 		
 		//Create altitude to pitch controller
 		if(!ros::param::getCached("alt2pitch/p", P)) {ROS_FATAL("Invalid parameters for -alt2pitch/p- in param server!"); ros::shutdown();}
@@ -69,10 +69,10 @@
 		if(!ros::param::getCached("alt2pitch/d", D)) {ROS_FATAL("Invalid parameters for -alt2pitch/d- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("alt2pitch/max", satU)) {ROS_FATAL("Invalid parameters for -alt2pitch/max- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("alt2pitch/min", satL)) {ROS_FATAL("Invalid parameters for -alt2pitch/min- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("alt2pitch/tau", Tau)) {ROS_FATAL("Invalid parameters for -alt2pitch/tau- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		N = 10;
-		alt2Pitch = new PID(P, I, D, satU, satL, Ts, N);
+		alt2Pitch = new PID(P, I, D, satU, satL, Ts, Tau);
 		
 		//Create airspeed to pitch controller
 		if(!ros::param::getCached("airspd2pitch/p", P)) {ROS_FATAL("Invalid parameters for -airspd2pitch/p- in param server!"); ros::shutdown();}
@@ -80,10 +80,10 @@
 		if(!ros::param::getCached("airspd2pitch/d", D)) {ROS_FATAL("Invalid parameters for -airspd2pitch/d- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airspd2pitch/max", satU)) {ROS_FATAL("Invalid parameters for -airspd2pitch/max- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airspd2pitch/min", satL)) {ROS_FATAL("Invalid parameters for -airspd2pitch/min- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airspd2pitch/tau", Tau)) {ROS_FATAL("Invalid parameters for -airspd2pitch/tau- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		N = 10;
-		airspd2Pitch = new PID(P, I, D, satU, satL, Ts, N);
+		airspd2Pitch = new PID(P, I, D, satU, satL, Ts, Tau);
 		
 		//Create airspeed to throttle controller
 		if(!ros::param::getCached("airspd2throt/p", P)) {ROS_FATAL("Invalid parameters for -airspd2throt/p- in param server!"); ros::shutdown();}
@@ -93,15 +93,25 @@
 		if(!ros::param::getCached("airspd2throt/min", satL)) {ROS_FATAL("Invalid parameters for -airspd2throt/min- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		N = 10;
-		airspd2Throt = new PID(P, I, D, satU, satL, Ts, N);
+		Tau = 0.1;
+		airspd2Throt = new PID(P, I, D, satU, satL, Ts, Tau);
+		
+		if(!ros::param::getCached("altSwitchThresh", altThresh)) {ROS_FATAL("Invalid parameters for -altSwitchThresh- in param server!"); ros::shutdown();}
 	}
 	
 	
 
 	///////////////////
 	//Class Destructor
-	BMcLAttitudeController::~BMcLAttitudeController() {}
+	BMcLAttitudeController::~BMcLAttitudeController() {
+		delete roll2Aileron;
+		delete yaw2Roll;
+		delete beta2Rudder;
+		delete pitch2Elevator;
+		delete alt2Pitch;
+		delete airspd2Pitch;
+		delete airspd2Throt;
+	}
 	
 	/////////////////////
 	//Lateral Controllers
@@ -110,35 +120,85 @@
 		double errYaw = refCommands.euler.z - euler.z;
 		if (errYaw>M_PI) {errYaw-=2*M_PI;}
 		if (errYaw<-M_PI) {errYaw+=2*M_PI;}
-		return roll2Aileron->step( yaw2Roll->step( errYaw, 0.01) - euler.x, 0.01);
+		double targetRoll = yaw2Roll->step(errYaw);
+		return roll2Aileron->step( targetRoll - euler.x);
 	}
 	
 	double BMcLAttitudeController::rudderControl() {
-		geometry_msgs::Vector3 temp;
-		temp.x = states.velocity.linear.x - environment.wind.x;
-		temp.y = states.velocity.linear.y - environment.wind.y;
-		temp.z = states.velocity.linear.z - environment.wind.z;
-		airdata = getAirData(temp);
-		return beta2Rudder->step( -airdata.z, 0.01);
+		return beta2Rudder->step( -airdata.z);
 	}
 
 	/////////////////////
 	//Longitudinal Controllers
 	double BMcLAttitudeController::elevatorControl() {
-		euler = quat2euler(states.pose.orientation);
 		double errAlt = refCommands.altitude - states.geoid.altitude;
-		double errPitch = alt2Pitch->step(errAlt, 0.01) - euler.y;
-		return pitch2Elevator->step( errPitch, 0.01);
+		double errPitch;
+		int static state = 0;
+		
+//		euler = quat2euler(states.pose.orientation);
+//		errPitch = alt2Pitch->step(errAlt) - euler.y;
+		
+		if (abs(errAlt) <= altThresh) {
+			if (state) {
+				state = 0;
+				alt2Pitch->Iterm = airspd2Pitch->Iterm * airspd2Pitch->I / alt2Pitch-> I;
+				std::cout << "Adapting alt2Pitch" << std::endl;
+			}
+			euler = quat2euler(states.pose.orientation);
+			errPitch = alt2Pitch->step(errAlt) - euler.y;
+			std::cout << "Elevator mode 0 (near) "<< errPitch << std::endl;
+
+		}
+		else {
+			if (!state) {
+				state = 1;
+				airspd2Pitch->Iterm = alt2Pitch->Iterm * alt2Pitch->I / airspd2Pitch-> I;
+				std::cout << "Adapting airspd2Pitch" << std::endl;
+			}
+			double errVa = refCommands.airspeed - airdata.x;
+			double refPitch = airspd2Pitch->step( errVa);
+			std::cout << refPitch << std::endl;
+			errPitch = refPitch - euler.y;
+			std::cout << "Elevator mode 1 (far) "<< errPitch << std::endl;
+		}
+
+		
+		return pitch2Elevator->step( errPitch);
 	}
 	
 	double BMcLAttitudeController::throttleControl() {
-		geometry_msgs::Vector3 temp;
-		temp.x = states.velocity.linear.x - environment.wind.x;
-		temp.y = states.velocity.linear.y - environment.wind.y;
-		temp.z = states.velocity.linear.z - environment.wind.z;
-		airdata = getAirData(temp);
-		double errVa = refCommands.airspeed - airdata.x;
-		return airspd2Throt->step( errVa, 0.01);
+		double errAlt = refCommands.altitude - states.geoid.altitude;
+		int static state = 0;
+		double static deltat;
+
+//		double errVa = refCommands.airspeed - airdata.x;
+//		return airspd2Throt->step( errVa);
+		
+		if (abs(errAlt) <= altThresh) {
+			double errVa = refCommands.airspeed - airdata.x;
+			std::cout << "Throttle mode 0 "<< errVa << std::endl;
+			if (state != 0) {
+				state = 0;
+			}
+			deltat = airspd2Throt->step( errVa);
+		}
+		else if (errAlt < altThresh) {
+			if (state!=1) {
+				state = 1;
+				airspd2Throt->Iterm = deltat / airspd2Throt->I;
+			}
+		std::cout << "Throttle mode 1 (descend) " << std::endl;
+			deltat = 0.0;
+		}
+		else {
+			if (state!=2) {
+				state = 2;
+				airspd2Throt->Iterm = deltat / airspd2Throt->I;
+			}
+		std::cout << "Throttle mode 2 (climb) " << std::endl;
+			deltat = 1.0;
+		}
+		return deltat;
 	}
 	
 	
@@ -152,7 +212,6 @@
 		temp.y = states.velocity.linear.y - environment.wind.y;
 		temp.z = states.velocity.linear.z - environment.wind.z;
 		airdata = getAirData(temp);
-//		std::cout << euler.x <<' '<< euler.y << ' '<< euler.z << std::endl;
 		double output[4];
 		output[0] = aileronControl();
 		output[1] = elevatorControl();

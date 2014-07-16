@@ -6,26 +6,58 @@
 
 	//Constructor
 	PID::PID (double Pi, double Ii, double Di, double satUi = std::numeric_limits<double>::max(), double satLi = std::numeric_limits<double>::min(),
-		double Tsi = 1.0/100, double Ni = 10)
+		double Tsi = 1.0/100, double Taui = 0.1)
 	{
-		Iterm = 0;
-		Iprev = 0;
-		Eprev = 0;
-		Uprev = 0;
+		init();
 		P = Pi;
 		I = Ii;
 		D = Di;
 		satU = satUi;
 		satL = satLi;
 		Ts = Tsi;
-		N = Ni;
+		Tau = Taui;
+	}
+	
+	void PID::init(void) {
+		Iterm = 0;
+		Iprev = 0;
+		Eprev = 0;
+		Uprev = 0;
+		Dprev = 0;
+	}
+	
+	double PID::step(double error)
+	{
+	
+		Iterm += Ts*error;
+		double Dterm = 1.0 / (Tau + Ts) * ( Tau * Dprev + error - Eprev);
+		output = P*error + I*Iterm + D*Dterm;
+
+//		double Pterm = P*error;
+//		Iterm += Ts/2 * (error + Eprev);
+//		double Dterm = (2*Tau - Ts)/(2*Tau + Ts) * Dprev + 2/(2*Tau + Ts)*(error - Eprev); //Bilinear transform, not working
+//		output = Pterm + I*Iterm + D*Dterm;
+		
+		if (output>satU) {
+			output = satU;
+			Iterm = Iprev;
+		}
+		if (output<satL) {
+			output = satL;
+			Iterm = Iprev;
+		}
+		Iprev = Iterm;
+		Eprev = error;
+		Uprev = output;
+		Dprev = Dterm;
+		return output;
 	}
 	
 	double PID::step(double error, double dt)
 	{
 		double Pterm = P*error;
 		Iterm += I*error*dt;
-		double Dterm = D / (D + N*dt) * (Uprev + N * (error - Eprev));
+		double Dterm = D / (D + dt/Tau) * (Uprev + (error - Eprev)/Tau);
 		output = Pterm + Iterm + Dterm;
 		if (output>satU) {
 			output = satU;
@@ -45,7 +77,7 @@
 	{
 		double Pterm = P*error;
 		Iterm += I*error*dt;
-		double Dterm = D / (D + N * dt) * (Uprev + N * derivative * dt);
+		double Dterm = D / (D + dt/Tau) * (Uprev + (error - Eprev)/Tau);
 		output = Pterm + Iterm + Dterm;
 		if (output>satU) {
 			output = satU;

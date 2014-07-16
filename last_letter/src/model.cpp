@@ -209,6 +209,9 @@ static double _spp[contactN]={0.0};
 		}
 	
 		//Calculate Thrust force
+//		double static omega = 0;
+//		omega = dt / (0.5 + dt) * (omega + deltat);
+//		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*omega,2)-pow(airspeed,2));
 		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
 		double ty = 0;
 		double tz = 0;
@@ -313,6 +316,9 @@ static double _spp[contactN]={0.0};
 		}
 	
 		//calculate thrust torque
+//		double static omega = 0;
+//		omega = dt / (0.5 + dt) * (omega + deltat);
+//		double lm = -k_t_p*pow(k_omega*omega,2); //Calculate dynamic pressure
 		double lm = -k_t_p*pow(k_omega*deltat,2);
 		double mm = 0;
 		double nm = 0;

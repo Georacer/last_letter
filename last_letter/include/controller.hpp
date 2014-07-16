@@ -24,7 +24,7 @@ class BMcLAttitudeController
 	ros::Time tprev;
 	ros::Subscriber subInp, subState, subEnv, subRef;
 	ros::Publisher pubCtrl;
-	double P, I, D, satU, satL, Ts, N;
+	double P, I, D, satU, satL, Ts, Tau, altThresh;
 	///////////
 	//Functions
 	PID * roll2Aileron;

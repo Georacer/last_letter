@@ -107,10 +107,10 @@ class DashboardGrid(QtGui.QWidget):
 		length=360.0
 		end_angle=-90.0
 		min=0.0
-		max=100.0
+		max=500.0
 		main_points=10
-		warning=[(5, 10)]
-		danger=[(0, 5)]
+		warning=[(20, 50)]
+		danger=[(0, 20)]
 		description='Geometric Altitude'
 		multiplier=''
 		units='m'
