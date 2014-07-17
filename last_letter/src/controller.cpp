@@ -89,11 +89,11 @@
 		if(!ros::param::getCached("airspd2throt/p", P)) {ROS_FATAL("Invalid parameters for -airspd2throt/p- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airspd2throt/i", I)) {ROS_FATAL("Invalid parameters for -airspd2throt/i- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airspd2throt/d", D)) {ROS_FATAL("Invalid parameters for -airspd2throt/d- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airspd2throt/tau", Tau)) {ROS_FATAL("Invalid parameters for -airspd2throt/tau- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airspd2throt/max", satU)) {ROS_FATAL("Invalid parameters for -airspd2throt/max- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airspd2throt/min", satL)) {ROS_FATAL("Invalid parameters for -airspd2throt/min- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		Tau = 0.1;
 		airspd2Throt = new PID(P, I, D, satU, satL, Ts, Tau);
 		
 		if(!ros::param::getCached("altSwitchThresh", altThresh)) {ROS_FATAL("Invalid parameters for -altSwitchThresh- in param server!"); ros::shutdown();}
@@ -135,33 +135,26 @@
 		double errPitch;
 		int static state = 0;
 		
-//		euler = quat2euler(states.pose.orientation);
-//		errPitch = alt2Pitch->step(errAlt) - euler.y;
-		
 		if (abs(errAlt) <= altThresh) {
 			if (state) {
 				state = 0;
-				alt2Pitch->Iterm = airspd2Pitch->Iterm * airspd2Pitch->I / alt2Pitch-> I;
-				std::cout << "Adapting alt2Pitch" << std::endl;
+//				alt2Pitch->Iterm = airspd2Pitch->Iterm * airspd2Pitch->I / alt2Pitch-> I;
+				alt2Pitch->init();
 			}
 			euler = quat2euler(states.pose.orientation);
 			errPitch = alt2Pitch->step(errAlt) - euler.y;
-			std::cout << "Elevator mode 0 (near) "<< errPitch << std::endl;
 
 		}
 		else {
 			if (!state) {
 				state = 1;
 				airspd2Pitch->Iterm = alt2Pitch->Iterm * alt2Pitch->I / airspd2Pitch-> I;
-				std::cout << "Adapting airspd2Pitch" << std::endl;
+//				airspd2Pitch->init();
 			}
 			double errVa = refCommands.airspeed - airdata.x;
 			double refPitch = airspd2Pitch->step( errVa);
-			std::cout << refPitch << std::endl;
 			errPitch = refPitch - euler.y;
-			std::cout << "Elevator mode 1 (far) "<< errPitch << std::endl;
 		}
-
 		
 		return pitch2Elevator->step( errPitch);
 	}
@@ -170,13 +163,9 @@
 		double errAlt = refCommands.altitude - states.geoid.altitude;
 		int static state = 0;
 		double static deltat;
-
-//		double errVa = refCommands.airspeed - airdata.x;
-//		return airspd2Throt->step( errVa);
 		
 		if (abs(errAlt) <= altThresh) {
 			double errVa = refCommands.airspeed - airdata.x;
-			std::cout << "Throttle mode 0 "<< errVa << std::endl;
 			if (state != 0) {
 				state = 0;
 			}
@@ -187,7 +176,6 @@
 				state = 1;
 				airspd2Throt->Iterm = deltat / airspd2Throt->I;
 			}
-		std::cout << "Throttle mode 1 (descend) " << std::endl;
 			deltat = 0.0;
 		}
 		else {
@@ -195,7 +183,6 @@
 				state = 2;
 				airspd2Throt->Iterm = deltat / airspd2Throt->I;
 			}
-		std::cout << "Throttle mode 2 (climb) " << std::endl;
 			deltat = 1.0;
 		}
 		return deltat;

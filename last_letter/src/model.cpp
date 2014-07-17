@@ -169,10 +169,10 @@ static double _spp[contactN]={0.0};
 		//convert coefficients to the body frame
 		double c_x_a = -c_drag_a*cos(alpha)-c_lift_a*sin(alpha);
 		double c_x_q = -c_drag_q*cos(alpha)-c_lift_q*sin(alpha);
-		double c_x_deltae = -c_drag_deltae*cos(alpha)-c_lift_deltae*sin(alpha);
+//		double c_x_deltae = -c_drag_deltae*cos(alpha)-c_lift_deltae*sin(alpha);
 		double c_z_a = -c_drag_a*sin(alpha)-c_lift_a*cos(alpha);
 		double c_z_q = -c_drag_q*sin(alpha)-c_lift_q*cos(alpha);
-		double c_z_deltae = -c_drag_deltae*sin(alpha)-c_lift_deltae*cos(alpha);
+//		double c_z_deltae = -c_drag_deltae*sin(alpha)-c_lift_deltae*cos(alpha);
 	
 		//read orientation
 		geometry_msgs::Quaternion quat = states.pose.orientation;
@@ -199,20 +199,22 @@ static double _spp[contactN]={0.0};
 		{
 			ax = 0;
 			ay = 0;
-			az = 0;	
+			az = 0;
 		}
 		else
 		{
-			ax = qbar*(c_x_a + c_x_q*c*q/(2*airspeed) + c_x_deltae*deltae);
+			ax = qbar*(c_x_a + c_x_q*c*q/(2*airspeed) - c_drag_deltae*cos(alpha)*abs(deltae) - c_lift_deltae*sin(alpha)*deltae);
+			//split c_x_deltae to include "abs" term
 			ay = qbar*(c_y_0 + c_y_b*beta + c_y_p*b*p/(2*airspeed) + c_y_r*b*r/(2*airspeed) + c_y_deltaa*deltaa + c_y_deltar*deltar);
-			az = qbar*(c_z_a + c_z_q*c*q/(2*airspeed) + c_z_deltae*deltae);
+			az = qbar*(c_z_a + c_z_q*c*q/(2*airspeed) - c_drag_deltae*sin(alpha)*abs(deltae) - c_lift_deltae*cos(alpha)*deltae);
+			//split c_z_deltae to include "abs" term
 		}
 	
 		//Calculate Thrust force
-//		double static omega = 0;
-//		omega = dt / (0.5 + dt) * (omega + deltat);
-//		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*omega,2)-pow(airspeed,2));
-		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
+		double static omega = 0;
+		omega = 1 / (0.5 + dt) * (0.5 * omega + dt * deltat);
+		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*omega,2)-pow(airspeed,2));
+//		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
 		double ty = 0;
 		double tz = 0;
 		states.rotorspeed[0] = k_motor*deltat;
@@ -292,7 +294,7 @@ static double _spp[contactN]={0.0};
 		if(!ros::param::getCached("airframe/c_n_deltar", c_n_deltar)) {ROS_FATAL("Invalid parameters for -c_n_deltar- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("motor/k_t_p", k_t_p)) {ROS_FATAL("Invalid parameters for -k_t_p- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("motor/k_omega", k_omega)) {ROS_FATAL("Invalid parameters for -k_omega- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("airframe/m", mass)) {ROS_FATAL("Invalid parameters for -m- in param server!"); ros::shutdown();}			
+		if(!ros::param::getCached("airframe/m", mass)) {ROS_FATAL("Invalid parameters for -m- in param server!"); ros::shutdown();}
 			
 		//read angular rates
 		double p = states.velocity.angular.x;
@@ -316,10 +318,10 @@ static double _spp[contactN]={0.0};
 		}
 	
 		//calculate thrust torque
-//		double static omega = 0;
-//		omega = dt / (0.5 + dt) * (omega + deltat);
-//		double lm = -k_t_p*pow(k_omega*omega,2); //Calculate dynamic pressure
-		double lm = -k_t_p*pow(k_omega*deltat,2);
+		double static omega = 0;
+		omega = 1 / (0.5 + dt) * (0.5 * omega + dt * deltat);
+		double lm = -k_t_p*pow(k_omega*omega,2); //Calculate dynamic pressure
+//		double lm = -k_t_p*pow(k_omega*deltat,2);
 		double mm = 0;
 		double nm = 0;
 		
@@ -576,11 +578,14 @@ static double _spp[contactN]={0.0};
 	//convert uS PPM values to control surface inputs
 	void ModelPlane::getInput(last_letter::SimPWM inputMsg)
 	{
-		//Convert PPM to -1/1 ranges (0/1 for throttle)
-		input[0] = (double)(inputMsg.value[0]-1500)/500;
-		input[1] = (double)(inputMsg.value[1]-1500)/500;
+		if(!ros::param::getCached("airframe/deltaa_max", deltaa_max)) {ROS_FATAL("Invalid parameters for -airframe/deltaa_max- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airframe/deltae_max", deltae_max)) {ROS_FATAL("Invalid parameters for -airframe/deltae_max- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airframe/deltar_max", deltar_max)) {ROS_FATAL("Invalid parameters for -airframe/deltar_max- in param server!"); ros::shutdown();}
+		//Convert PPM to radians (0/1 for throttle)
+		input[0] = deltaa_max * (double)(inputMsg.value[0]-1500)/500;
+		input[1] = deltae_max * (double)(inputMsg.value[1]-1500)/500;
 		input[2] = (double)(inputMsg.value[2]-1000)/1000;
-		input[3] = (double)(inputMsg.value[3]-1500)/500;
+		input[3] = deltar_max * (double)(inputMsg.value[3]-1500)/500;
 	}
 	
 	/////////////////////////////////////////////////

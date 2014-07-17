@@ -23,6 +23,7 @@
 		
 		<!-- Initialization of the parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/custom.yaml" />
+<!--		<rosparam command="load" file="$(find last_letter)data/parameters/HCUAV.yaml" />-->
 		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" />
 		<rosparam command="load" file="$(find last_letter)data/parameters/controller.yaml" />
 		

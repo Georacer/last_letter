@@ -27,22 +27,19 @@ airframe/s: 0.55
 airframe/b: 2.8956
 airframe/c: 0.18994
 airframe/c_lift_0: 0.56
-airframe/c_drag_0: 0.03
 airframe/c_m_0: 0.045
 airframe/c_lift_a: 6.9
-airframe/c_drag_a: 0.3
 airframe/c_m_a: -0.7
 airframe/c_lift_q: 0
 airframe/c_drag_q: 0
 airframe/c_m_q: -10
-airframe/c_lift_deltae: -0.36
-airframe/c_drag_deltae: 0
-airframe/c_m_deltae: 0.5
+airframe/c_lift_deltae: -1.031
+airframe/c_drag_deltae: 0.0
+airframe/c_m_deltae: 1.4323
 airframe/mcoeff: 50
 airframe/alpha_stall: 0.4712
-airframe/eps: 0.1592
 airframe/c_drag_p: 0.06
-airframe/c_n_deltar: 0.08 #opposite sign than c_y_deltar
+airframe/c_n_deltar: 0.229 #opposite sign than c_y_deltar
 airframe/c_y_0: 0
 airframe/c_l_0: 0
 airframe/c_n_0: 0
@@ -56,10 +53,13 @@ airframe/c_y_r: 0
 airframe/c_l_r: 0.14
 airframe/c_n_r: -1
 airframe/c_y_deltaa: 0
-airframe/c_l_deltaa: 0.08
+airframe/c_l_deltaa: 0.229
 airframe/c_n_deltaa: 0.00
-airframe/c_y_deltar: -0.17 #opposite sign than c_n_deltar
-airframe/c_l_deltar: -0.005
+airframe/c_y_deltar: -0.487 #opposite sign than c_n_deltar
+airframe/c_l_deltar: -0.0143
+airframe/deltaa_max: 0.3491
+airframe/deltae_max: 0.3491
+airframe/deltar_max: 0.3491
 
 #Airframe Propulsion Parameters
 motor/s_prop: 0.20

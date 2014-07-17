@@ -40,7 +40,7 @@ class ModelPlane
 	ros::Duration durTemp;
 	double dt;
 	int initTime;
-	double input[4];
+	double input[4], deltaa_max, deltae_max, deltar_max;
 	double contactpoints[contactN*3];
 	
 	///////////
