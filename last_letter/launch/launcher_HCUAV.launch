@@ -1,0 +1,14 @@
+<!-- Top-Level launch file for bundled launching /-->
+
+<launch>
+
+	<!-- Launch the simulator /-->
+	<include file="$(find last_letter)/launch/sim_HCUAV.launch" >
+	</include>
+
+	<!-- Launch the visualizers /-->
+	<include file="$(find last_letter)/launch/visualization.launch" >
+		<arg name="model" value="HCUAV" />
+	</include>
+
+</launch>

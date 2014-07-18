@@ -1,15 +1,15 @@
 <!-- Launch file for the visualization modules /-->
 
 <launch>
-
 	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
-
+	<arg name="model" />
+	
 	<!-- Initialization of the parameters -->
 	<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
 
 	<!-- Initialization of the parameters -->
 	<group>
-		<param name="robot_description" command="cat $(find last_letter)urdf/skywalker.urdf" />
+		<param name="robot_description" command="cat $(find last_letter)urdf/$(arg model).urdf" />
 	</group>
 
 	<!-- Plotting nodes -->

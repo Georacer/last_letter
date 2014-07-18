@@ -1,0 +1,42 @@
+<!-- Launch file for the simulator core /-->
+
+<launch>
+
+	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
+
+	<!-- Initialization of the parameters -->
+	<group>	
+		<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
+		<node pkg="last_letter" name="parameters" type="AerosondeParameters.py" />
+	</group>
+
+	<!-- Initialization of the services -->
+	<group>
+		<node pkg="last_letter" name="c_lift_a_server" type="c_lift_a_server.py" />
+		<node pkg="last_letter" name="c_drag_a_server" type="c_drag_a_server.py" />
+		<node pkg="last_letter" name="calc_air_data_server" type="calc_air_data_server.py" />
+		<node pkg="last_letter" name="calc_force_server" type="calc_force_server.py" />
+		<node pkg="last_letter" name="calc_torque_server" type="calc_torque_server.py" />
+	</group>
+	
+	<!-- Raising core nodes -->
+	<group>
+		<!--<node pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag /sim/states /sim/wrenchStamped /sim/input"/>-->
+		<node if="$(arg clockSim)" name="clock" pkg="last_letter" type="clock.py" />
+		<node pkg="last_letter" name="plane_model" type="model.py" output="screen"/>
+		<node pkg="last_letter" name="euler_translator" type="quat2euler.py" />
+	</group>
+
+	<!-- Transformations broadcaster /-->
+	<group>
+		<node pkg="last_letter" type="plane_publisher" name="broadcaster" />
+	</group>
+
+<?ignore
+	<node pkg="joy" type="joy_node" name="joystick" output="screen" >
+		<param name="dev" value="/dev/input/js1" />
+	</node>
+
+?>
+
+</launch>
