@@ -5,9 +5,9 @@
 simRate: 1000
 
 #Initial State
-init/position: [0.0, 0.0, -100.0] #NED frame
+init/position: [0.0, 0.0, 0.5] #NED frame
 init/orientation: [0.00, 0.00, 0.00, 1.0] #NED frame
-init/velLin: [30.0, 0.000, 0.625] #body frame
+init/velLin: [0.0, 0.000, 0.0] #body frame
 init/velAng: [0.000, -0.000, -0.000] #body frame
 init/aileron: 0.000
 init/elevator: 0.292
@@ -67,3 +67,14 @@ motor/k_motor: 35
 motor/k_t_p: 0
 motor/k_omega: 0
 motor/c_prop: 1.0
+
+#Contact points array
+#Material types: 0 foam, 1 metal, 2 rubber wheel
+airframe/contactPtsNo: 7
+airframe/contactPoint1: [0.162, -0.2324, 0.2214, 2.0]
+airframe/contactPoint2: [0.162, 0.2324, 0.2214, 2.0]
+airframe/contactPoint3: [-0.8639, 0.0, 0.0522, 2.0]
+airframe/contactPoint4: [-0.0832, 0.9671, -0.1283, 0.0]
+airframe/contactPoint5: [-0.0832, -0.9671, -0.1683, 0.0]
+airframe/contactPoint6: [0.3785, 0.0, 0.017, 0.0]
+airframe/contactPoint7: [-0.9328, 0.0, -0.2196, 0.0]

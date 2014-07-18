@@ -1,7 +1,5 @@
 #include "model.hpp"
 
-static double _spp[contactN]={0.0};
-
 //////////////////////////
 // Define ModelPlane class
 //////////////////////////
@@ -12,8 +10,9 @@ static double _spp[contactN]={0.0};
 	{
 		XmlRpc::XmlRpcValue list;
 		double temp[4];
-		int i;
+		int i, j, points;
 		initTime = -1;
+		char param[25];
 		
 		//Initialize states
 		states.header.frame_id = "bodyFrame";
@@ -37,7 +36,7 @@ static double _spp[contactN]={0.0};
 		states.pose.orientation.x=temp[0];
 		states.pose.orientation.y=temp[1];
 		states.pose.orientation.z=temp[2];
-		states.pose.orientation.w=temp[3];	
+		states.pose.orientation.w=temp[3];
 		
 		if(!ros::param::getCached("init/velLin", list)) {ROS_FATAL("Invalid parameters for -init/velLin- in param server!"); ros::shutdown();}
 		for (i = 0; i < list.size(); ++i) {
@@ -86,31 +85,24 @@ static double _spp[contactN]={0.0};
 		pubState = n.advertise<last_letter::SimStates>("states",1000);
 		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("wrenchStamped",1000);
 		
-		//Define contact points
-		contactpoints[0]=0.162; //x1
-		contactpoints[1]=0.162; //x2
-		contactpoints[2]=-0.8639; //x3 
-		contactpoints[3]=-0.0832; //x4
-		contactpoints[4]=-0.0832; //x5
-		contactpoints[5]=0.3785; //x6
-		contactpoints[6]=-0.9328; //x7
-
-		contactpoints[7]=-0.2324; //y1
-		contactpoints[8]=0.2324; //y2
-		contactpoints[9]=0.0; //y3
-		contactpoints[10]=0.9671; //y4
-		contactpoints[11]=-0.9671; //y5
-		contactpoints[12]=0.0; //y6
-		contactpoints[13]=0.0; //y7
-
-		contactpoints[14]=0.2214; //z1
-		contactpoints[15]=0.2214; //z2
-		contactpoints[16]=0.0522; //z3
-		contactpoints[17]=-0.1683; //z4
-		contactpoints[18]=-0.1683; //z5
-		contactpoints[19]=0.017; //z6
-		contactpoints[20]=-0.2196; //z7
+		//Read contact points
+		if(!ros::param::getCached("/fw1/airframe/contactPtsNo", contactPtsNo)) {ROS_FATAL("Invalid parameters for -/airframe/contactPtsNo- in param server!"); ros::shutdown();}
+		contactPoints = (double*)malloc(sizeof(double) * (contactPtsNo*4));
 		
+		for (j = 0; j<contactPtsNo; j++) {
+			sprintf(param, "/fw1/airframe/contactPoint%i", j+1);
+			if(!ros::param::getCached(param, list)) {ROS_FATAL("Invalid parameters for -/airframe/contactPoint- in param server!"); ros::shutdown();}
+			for (i = 0; i < list.size(); ++i) {
+				ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+				temp[i]=list[i];
+			}
+			contactPoints[j] = temp[0];
+			contactPoints[j + contactPtsNo] = temp[1];
+			contactPoints[j + contactPtsNo*2] = temp[2];
+			contactPoints[j + contactPtsNo*3] = temp[2];
+		}
+		spp = (double*)malloc(sizeof(double) * contactPtsNo);
+		memset(spp, 0, sizeof(spp));
 	}
 	
 	////////////////////////////////////
@@ -365,18 +357,20 @@ static double _spp[contactN]={0.0};
 		double kfriction = 0.01;
 		double len=-0.02;
 
-		int i,j;	
-		double cpi_up[contactN*3];
-		double cpi_down[contactN*3];
-		double helipos[3], normVe;
-
+		int i,j;
+		double * cpi_up, * cpi_down, * spd, * pointCoords;
+		double uavpos[3], normVe;
 		bool contact = false;
-		double spd[contactN];
+		cpi_up = (double*)malloc(sizeof(double) * contactPtsNo*3);
+		cpi_down = (double*)malloc(sizeof(double) * contactPtsNo*3);
+		spd = (double*)malloc(sizeof(double) * contactPtsNo);
+		pointCoords = (double*)malloc(sizeof(double) * contactPtsNo*3);
+		for (i=0; i<contactPtsNo*3; i++) {
+			pointCoords[i] = contactPoints[i];
+		}
 
 		geometry_msgs::Wrench temp, totalE, totalB;
-
-
-		geometry_msgs::Vector3 dx[contactN],we,vpoint,Ve;
+		geometry_msgs::Vector3 dx,we,vpoint,Ve;
 
 		Ve=Reb*states.velocity.linear;
 
@@ -387,39 +381,39 @@ static double _spp[contactN]={0.0};
 		totalB.force = 0.0*temp.force;
 		totalB.torque = 0.0*temp.torque;
 
-		helipos[0]=states.pose.position.x;
-		helipos[1]=states.pose.position.y;
-		helipos[2]=states.pose.position.z;
+		uavpos[0]=states.pose.position.x;
+		uavpos[1]=states.pose.position.y;
+		uavpos[2]=states.pose.position.z;
 
-		multi_mtx_mtx_3Xn(Reb,contactpoints,cpi_up,contactN);
+		multi_mtx_mtx_3Xn(Reb,pointCoords,cpi_up,contactPtsNo);
 
 		for (i=0;i<3;i++) {
-			for (j=0;j<contactN;j++) {
-				cpi_up[contactN*i+j] +=helipos[i];
-				cpi_down[contactN*i+j]=cpi_up[contactN*i+j];
+			for (j=0;j<contactPtsNo;j++) {
+				cpi_up[contactPtsNo*i+j] +=uavpos[i];
+				cpi_down[contactPtsNo*i+j]=cpi_up[contactPtsNo*i+j];
 			}
 		}
 
 		we = Reb*states.velocity.angular;
-		for (i=0;i<contactN;i++) {
-			cpi_down[i+2*contactN]-=len;
-			dx[i].x = (cpi_up[i]-helipos[0]);
-			dx[i].y = (cpi_up[i+contactN]-helipos[1]);
-			dx[i].z = (cpi_up[i+2*contactN]-helipos[2]);
+		for (i=0;i<contactPtsNo;i++) {
+			cpi_down[i+2*contactPtsNo]-=len;
+			dx.x = (cpi_up[i]-uavpos[0]);
+			dx.y = (cpi_up[i+contactPtsNo]-uavpos[1]);
+			dx.z = (cpi_up[i+2*contactPtsNo]-uavpos[2]);
 
-			spd[i]=(len-(cpi_up[i+2*contactN]-cpi_down[i+2*contactN])-_spp[i])/dt;
-			_spp[i]=len-(cpi_up[i+2*contactN]-cpi_down[i+2*contactN]);
+			spd[i]=(len-(cpi_up[i+2*contactPtsNo]-cpi_down[i+2*contactPtsNo])-spp[i])/dt;
+			spp[i]=len-(cpi_up[i+2*contactPtsNo]-cpi_down[i+2*contactPtsNo]);
 
-			if (cpi_down[i+2*contactN]>0) {
-				cpi_down[i+2*contactN]=0;
+			if (cpi_down[i+2*contactPtsNo]>0) {
+				cpi_down[i+2*contactPtsNo]=0;
 				contact=true;
-				vector3_cross(we,dx[i], &vpoint);
-				vpoint = Ve+vpoint;			
+				vector3_cross(we,dx, &vpoint);
+				vpoint = Ve+vpoint;
 				normVe = sqrt(vpoint.x*vpoint.x+vpoint.y*vpoint.y+vpoint.z*vpoint.z);
 				if (normVe<=0.001)
 					normVe=0.001;
 
-				temp.force.z = kspring*(len-cpi_up[i+2*contactN])-mspring*vpoint.z*abs(vpoint.z)+10.0*spd[i];
+				temp.force.z = kspring*(len-cpi_up[i+2*contactPtsNo])-mspring*vpoint.z*abs(vpoint.z)+10.0*spd[i];
 				temp.force.x = -kfriction*abs(temp.force.z)*vpoint.x;
 				temp.force.y = -kfriction*abs(temp.force.z)*vpoint.y;
 				temp.force.x = max(-1000.0,min(temp.force.x,1000.0));
@@ -428,7 +422,7 @@ static double _spp[contactN]={0.0};
 
 				totalE.force = totalE.force + temp.force;
 
-				vector3_cross(dx[i],temp.force, &temp.torque);
+				vector3_cross(dx,temp.force, &temp.torque);
 				totalE.torque = totalE.torque + temp.torque;
 
 			}
@@ -438,7 +432,11 @@ static double _spp[contactN]={0.0};
 			totalB.force= Reb/totalE.force;
 			totalB.torque= Reb/totalE.torque;
 		}
-
+		
+		free(cpi_up);
+		free(cpi_down);
+		free(spd);
+		free(pointCoords);
 		return totalB;
 	}	
 	
@@ -456,7 +454,7 @@ static double _spp[contactN]={0.0};
 		double linear = (1-sigmoid) * (c_lift_0 + c_lift_a*alpha); //Lift at small AoA
 		double flatPlate = sigmoid*(2*copysign(1,alpha)*pow(sin(alpha),2)*cos(alpha)); //Lift beyond stall
 	
-		c_lift_a = linear+flatPlate;	
+		c_lift_a = linear+flatPlate;
 		return c_lift_a;
 	}
 	
@@ -599,6 +597,7 @@ static double _spp[contactN]={0.0};
 	//Class destructor
 	ModelPlane::~ModelPlane ()
 	{
+		free(contactPoints);
 	}
 	
 	

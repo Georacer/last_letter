@@ -3,7 +3,7 @@
 <launch>
 
 	<!-- Launch the simulator /-->
-	<include file="$(find last_letter)/launch/sim_HCUAV.launch" >
+	<include file="$(find last_letter)/launch/sim_ll.launch" >
 	</include>
 
 	<!-- Launch the visualizers /-->

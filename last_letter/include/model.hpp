@@ -15,8 +15,6 @@
 #include "last_letter/SimPWM.h"
 #include "last_letter/Environment.h"
 
-#define contactN 7
-
 using namespace std;
 
 /////////
@@ -41,7 +39,8 @@ class ModelPlane
 	double dt;
 	int initTime;
 	double input[4], deltaa_max, deltae_max, deltar_max;
-	double contactpoints[contactN*3];
+	double* contactPoints, * spp;
+	int contactPtsNo;
 	
 	///////////
 	//Functions
