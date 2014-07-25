@@ -1,4 +1,5 @@
 <!-- Top-Level launch file for bundled launching /-->
+<!--Simulation launcher for the HCAUV aircraft-->
 
 <launch>
 

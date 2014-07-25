@@ -1,3 +1,4 @@
+# Barometer
 Header header
-float32 pressure
-float32 temperature
+float32 pressure #in mBar
+float32 temperature #in Kelvin

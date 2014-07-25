@@ -1,2 +1,3 @@
+# Servo message
 Header header
-uint16[] servos
+uint16[] servos #PWM microseconds

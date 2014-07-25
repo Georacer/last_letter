@@ -5,9 +5,9 @@
 simRate: 1000
 
 #Initial State
-init/position: [0.0, 0.0, 0.5] #NED frame
-init/orientation: [0.00, 0.00, 0.00, 1.0] #NED frame
-init/velLin: [0.0, 0.000, 0.0] #body frame
+init/position: [0.0, 0.0, -0.5] #NED frame
+init/orientation: [0.0, 0.0, 0.0, 1.0] #NED frame
+init/velLin: [0.0, 0.0, 0.0] #body frame
 init/velAng: [0.000, -0.000, -0.000] #body frame
 init/aileron: 0.000
 init/elevator: 0.292
@@ -62,6 +62,7 @@ airframe/deltae_max: 0.3491
 airframe/deltar_max: 0.3491
 
 #Airframe Propulsion Parameters
+motor/motorType: 1
 motor/s_prop: 0.20
 motor/k_motor: 35
 motor/k_t_p: 0

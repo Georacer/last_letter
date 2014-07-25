@@ -14,8 +14,7 @@
 	<group>
 	</group>
 	
-	<!-- Place an upright camera transform broadcaster-->
-	<node pkg="tf" type="static_transform_publisher" name="NED2GrCamera" args="0.0 0.0 0.0 0.0 0.0 3.14 map ground_camera 1" />
+
 
 	<!-- First UAV Group -->
 	<arg name="uav_name" value="fw1"/>	
@@ -37,14 +36,22 @@
 			<node pkg="last_letter" name="euler_translator" type="quat2euler" output="screen"/>
 		</group>
 		
+		<!-- Transformations broadcasters -->
+		<group>
+			<!-- transform body NED to body NWU -->
+			<node pkg="tf" type="static_transform_publisher" name="body2Cockpit" args="0.0 0.0 0.0 0.0 0.0 3.14 base_link plane_camera 10" />
+			<!-- publish body NWU frame for rviz-->
+			<node pkg="last_letter" type="uav_publisher" name="broadcaster" />
+		</group>
+		
 		<!-- Raising sensor nodes -->
 		<group>
-			<node pkg="last_letter" name="Accelerometer" type="accelerometer.py" output="screen"/>
-			<node pkg="last_letter" name="Altimeter" type="altimeter.py" output="screen"/>
-			<node pkg="last_letter" name="Barometer" type="barometer.py" output="screen"/>
-			<node pkg="last_letter" name="Gyroscope" type="gyroscope.py" output="screen"/>
-			<node pkg="last_letter" name="GPS" type="GPS.py" output="screen"/>
-			<node pkg="last_letter" name="Magnetometer" type="magnetometer.py" output="screen"/>
+<!--			<node pkg="last_letter" name="Accelerometer" type="accelerometer.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="Altimeter" type="altimeter.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="Barometer" type="barometer.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="Gyroscope" type="gyroscope.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="GPS" type="GPS.py" output="screen"/>-->
+<!--			<node pkg="last_letter" name="Magnetometer" type="magnetometer.py" output="screen"/>-->
 		</group>
 		
 		<!-- Raising controller nodes -->
@@ -52,12 +59,6 @@
 <!--			<node pkg="last_letter" name="Autopilot" type="autopilot" output="screen"/>-->
 		</group>
 		
-		<!-- Transformations broadcaster -->
-		<group>
-			<node pkg="tf" type="static_transform_publisher" name="body2Cockpit" args="0.0 0.0 0.0 0.0 0.0 3.14 base_link plane_camera 10" />
-			<node pkg="last_letter" type="uav_publisher" name="broadcaster" />
-		</group>
-
 		<!-- Input nodes -->
 		<group>
 <!--			<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->

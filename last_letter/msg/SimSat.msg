@@ -1,4 +1,3 @@
-geometry_msgs/Vector3 position
-float64 range
-
-
+# Satelite description
+geometry_msgs/Vector3 position #in ECEF
+float64 range #from receiver

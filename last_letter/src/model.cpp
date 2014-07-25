@@ -14,6 +14,22 @@
 		initTime = -1;
 		char param[25];
 		
+		//Build engine model
+		if(!ros::param::getCached("motor/motorType", i)) {ROS_FATAL("Invalid parameters for -motorType- in param server!"); ros::shutdown();}
+		std::cout<< "building engine model" << std::endl;
+		switch (i)
+		{
+		case 1:
+			std::cout << "selecting Beard engine" << std::endl;
+			powerPlant = new engBeard();
+			std::cout << "built new Beard engine" << std::endl;
+			break;
+		default:
+			ROS_FATAL("Error while constructing Beard motor");
+			ros::shutdown();
+			break;
+		}
+		
 		//Initialize states
 		states.header.frame_id = "bodyFrame";
 		tprev = ros::Time::now();
@@ -80,12 +96,12 @@
 		environment.gravity = 9.81;
 		
 		//Subscribe and advertize
-		subInp = n.subscribe("ctrlPWM",1,&ModelPlane::getInput, this);
-		subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this);
-		pubState = n.advertise<last_letter::SimStates>("states",1000);
-		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("wrenchStamped",1000);
+		subInp = n.subscribe("ctrlPWM",1,&ModelPlane::getInput, this); //model control input
+		subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this); //dynamic environment effects
+		pubState = n.advertise<last_letter::SimStates>("states",1000); //model states
+		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("wrenchStamped",1000); //forces & torques
 		
-		//Read contact points
+		//Read contact points from airframe parameters
 		if(!ros::param::getCached("/fw1/airframe/contactPtsNo", contactPtsNo)) {ROS_FATAL("Invalid parameters for -/airframe/contactPtsNo- in param server!"); ros::shutdown();}
 		contactPoints = (double*)malloc(sizeof(double) * (contactPtsNo*4));
 		
@@ -154,9 +170,9 @@
 		if(!ros::param::getCached("airframe/c_y_r", c_y_r)) {ROS_FATAL("Invalid parameters for -c_y_r- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_y_deltaa", c_y_deltaa)) {ROS_FATAL("Invalid parameters for -c_y_deltaa- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_y_deltar", c_y_deltar)) {ROS_FATAL("Invalid parameters for -c_y_deltar- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("motor/s_prop", s_prop)) {ROS_FATAL("Invalid parameters for -s_prop- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("motor/c_prop", c_prop)) {ROS_FATAL("Invalid parameters for -c_prop- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("motor/k_motor", k_motor)) {ROS_FATAL("Invalid parameters for -k_motor- in param server!"); ros::shutdown();}
+//		if(!ros::param::getCached("motor/s_prop", s_prop)) {ROS_FATAL("Invalid parameters for -s_prop- in param server!"); ros::shutdown();}
+//		if(!ros::param::getCached("motor/c_prop", c_prop)) {ROS_FATAL("Invalid parameters for -c_prop- in param server!"); ros::shutdown();}
+//		if(!ros::param::getCached("motor/k_motor", k_motor)) {ROS_FATAL("Invalid parameters for -k_motor- in param server!"); ros::shutdown();}
 		
 		//convert coefficients to the body frame
 		double c_x_a = -c_drag_a*cos(alpha)-c_lift_a*sin(alpha);
@@ -203,13 +219,20 @@
 		}
 	
 		//Calculate Thrust force
-		double static omega = 0;
-		omega = 1 / (0.5 + dt) * (0.5 * omega + dt * deltat);
-		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*omega,2)-pow(airspeed,2));
-//		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
-		double ty = 0;
-		double tz = 0;
-		states.rotorspeed[0] = k_motor*deltat;
+		
+		temp = powerPlant->getForce();
+		double tx = temp.x;
+		double ty = temp.y;
+		double tz = temp.z;
+		states.rotorspeed[0] = powerPlant->omega;
+		
+//		double static omega = 0;
+//		omega = 1 / (0.5 + dt) * (0.5 * omega + dt * deltat);
+//		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*omega,2)-pow(airspeed,2));
+////		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
+//		double ty = 0;
+//		double tz = 0;
+//		states.rotorspeed[0] = k_motor*deltat;
 
 		//Sum forces
 		double fx = gx+ax+tx;
@@ -244,7 +267,7 @@
 		double deltae = inputs[1];
 		double deltat = inputs[2];
 		double deltar = inputs[3];
-	
+
 		//request lift and drag alpha-coefficients from the corresponding functions
 		double c_lift_a = liftCoeff(alpha);
 		double c_drag_a = dragCoeff(alpha);
@@ -284,8 +307,8 @@
 		if(!ros::param::getCached("airframe/c_n_r", c_n_r)) {ROS_FATAL("Invalid parameters for -c_n_r- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_n_deltaa", c_n_deltaa)) {ROS_FATAL("Invalid parameters for -c_n_deltaa- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_n_deltar", c_n_deltar)) {ROS_FATAL("Invalid parameters for -c_n_deltar- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("motor/k_t_p", k_t_p)) {ROS_FATAL("Invalid parameters for -k_t_p- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("motor/k_omega", k_omega)) {ROS_FATAL("Invalid parameters for -k_omega- in param server!"); ros::shutdown();}
+//		if(!ros::param::getCached("motor/k_t_p", k_t_p)) {ROS_FATAL("Invalid parameters for -k_t_p- in param server!"); ros::shutdown();}
+//		if(!ros::param::getCached("motor/k_omega", k_omega)) {ROS_FATAL("Invalid parameters for -k_omega- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/m", mass)) {ROS_FATAL("Invalid parameters for -m- in param server!"); ros::shutdown();}
 			
 		//read angular rates
@@ -310,12 +333,17 @@
 		}
 	
 		//calculate thrust torque
-		double static omega = 0;
-		omega = 1 / (0.5 + dt) * (0.5 * omega + dt * deltat);
-		double lm = -k_t_p*pow(k_omega*omega,2); //Calculate dynamic pressure
-//		double lm = -k_t_p*pow(k_omega*deltat,2);
-		double mm = 0;
-		double nm = 0;
+		temp = powerPlant->getTorque();
+		double lm = temp.x;
+		double mm = temp.y;
+		double nm = temp.z;
+		
+//		double static omega = 0;
+//		omega = 1 / (0.5 + dt) * (0.5 * omega + dt * deltat);
+//		double lm = -k_t_p*pow(k_omega*omega,2); //Calculate dynamic pressure
+////		double lm = -k_t_p*pow(k_omega*deltat,2);
+//		double mm = 0;
+//		double nm = 0;
 		
 		//calculate cog torque, r x F, where r is the distance of CoL from CoG
 		geometry_msgs::Quaternion quat = states.pose.orientation;
@@ -477,7 +505,7 @@
 	}
 	
 	///////////////////////////////////////////////////
-	//Differential Equation calculation and propagation	
+	//Differential Equation calculation and propagation
 	void ModelPlane::diffEq(void)
 	{
 		//variables declaration
@@ -514,7 +542,7 @@
 		if(!ros::param::getCached("airframe/j_z", j_z)) {ROS_FATAL("Invalid parameters for -j_z- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/j_xz", j_xz)) {ROS_FATAL("Invalid parameters for -j_xz- in param server!"); ros::shutdown();}
 
-		double G = j_x*j_z-pow(j_xz,2);	
+		double G = j_x*j_z-pow(j_xz,2);
 		double J[9] = {j_x, 0, -j_xz, 0, j_y, 0, -j_xz, 0, j_z};
 		double Jinv[9] = {j_z/G, 0, j_xz/G, 0, 1/j_y, 0, j_xz/G, 0, j_x/G};
 
@@ -553,11 +581,13 @@
 		else {
 			if(!ros::param::getCached("simRate", dt)) {ROS_FATAL("Invalid parameters for -simRate- in param server!"); ros::shutdown();}
 			dt = 1/dt;
+			initTime = 1;
 		}
 		tprev = ros::Time::now();
 		states.header.stamp = tprev;
 		
 		//calclulate body force/torques
+		powerPlant->step(states, environment, input, dt);
 		dynamics.wrench.force = getForce(states, input);
 		dynamics.wrench.torque = getTorque(states, dynamics.wrench.force, input);
 		//add ground dynamics

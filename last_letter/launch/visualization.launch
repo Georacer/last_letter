@@ -4,7 +4,7 @@
 	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
 	<arg name="model" />
 	
-	<!-- Initialization of the parameters -->
+	<!-- apply realtime/simulated clock option -->
 	<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
 
 	<!-- Initialization of the parameters -->
@@ -13,6 +13,13 @@
 	</group>
 
 	<!-- Plotting nodes -->
+	
+	<!-- Transformations broadcaster -->
+	<group>
+		<!-- Place an upright camera transform broadcaster-->
+		<node pkg="tf" type="static_transform_publisher" name="NED2GrCamera" args="0.0 0.0 0.0 0.0 0.0 3.14 map ground_camera 1" />
+	</group>
+		
 	<!--node pkg="rqt_console" name="debugger" type="rqt_console" /-->
 	<!-- node pkg="rqt_plot" type="rqt_plot" name="plot_states" args="/sim/states/pose/pose/position/z" /-->
 	<!--node pkg="rqt_plot" type="rqt_plot" name="plot_states" args="/sim/wrenchStamped/wrench/force/x" /-->

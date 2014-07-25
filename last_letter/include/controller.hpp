@@ -25,8 +25,8 @@ class BMcLAttitudeController
 	ros::Subscriber subInp, subState, subEnv, subRef;
 	ros::Publisher pubCtrl;
 	double P, I, D, satU, satL, Ts, Tau, altThresh;
-	///////////
-	//Functions
+	/////////
+	//Members
 	PID * roll2Aileron;
 	PID * yaw2Roll;
 	PID * beta2Rudder;
@@ -34,6 +34,8 @@ class BMcLAttitudeController
 	PID * alt2Pitch;
 	PID * airspd2Pitch;
 	PID * airspd2Throt;
+	///////////
+	//Functions
 	void step();
 	void getInput(last_letter::SimPWM inputMsg);
 	void getStates(last_letter::SimStates inpStates);

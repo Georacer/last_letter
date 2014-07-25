@@ -1,3 +1,4 @@
+# GPS message
 Header header
 float64 latitude
 float64 longitude
@@ -8,4 +9,3 @@ float64 course
 DOP dop
 uint8 satellites
 uint8 fix
-

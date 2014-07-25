@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(last_letter)
 
-## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
 	roscpp
 	rospy
@@ -16,10 +13,6 @@ find_package(catkin REQUIRED COMPONENTS
 	mathutils
 )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -28,26 +21,6 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################
 ## Declare ROS messages, services and actions ##
 ################################################
-
-## To declare and build messages, services or actions from within this
-## package, follow these steps:
-## * Let MSG_DEP_SET be the set of packages whose message types you use in
-##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
-## * In the file package.xml:
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependencies might have been
-##     pulled in transitively but can be declared for certainty nonetheless:
-##     * add a build_depend tag for "message_generation"
-##     * add a run_depend tag for "message_runtime"
-## * In this file (CMakeLists.txt):
-##   * add "message_generation" and every package in MSG_DEP_SET to
-##     find_package(catkin REQUIRED COMPONENTS ...)
-##   * add "message_runtime" and every package in MSG_DEP_SET to
-##     catkin_package(CATKIN_DEPENDS ...)
-##   * uncomment the add_*_files sections below as needed
-##     and list every .msg/.srv/.action file to be processed
-##   * uncomment the generate_messages entry below
-##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
 	add_message_files(FILES
@@ -69,7 +42,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate services in the 'srv' folder
 	add_service_files(DIRECTORY srv FILES
-		#calc_air_data.srv
 	)
 
 ## Generate actions in the 'action' folder
@@ -98,8 +70,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  INCLUDE_DIRS include
-#  LIBRARIES last_letter
+	INCLUDE_DIRS include
+	LIBRARIES engineLib
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -116,7 +88,7 @@ include_directories(
 )
 
 ## Declare a cpp library
-add_library(last_letter src/uavFwLib.cpp)
+add_library(engineLib src/engineLib.cpp)
 
 ## Declare a cpp executable
 	add_executable(uav_publisher src/state_publisher.cpp)
@@ -140,11 +112,12 @@ add_library(last_letter src/uavFwLib.cpp)
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(uav_publisher ${catkin_LIBRARIES})
 	target_link_libraries(quat2euler mathutils ${catkin_LIBRARIES})
-	target_link_libraries(model mathutils uav_utils ${catkin_LIBRARIES})
+	target_link_libraries(model mathutils uav_utils engineLib ${catkin_LIBRARIES})
 	target_link_libraries(joy2chan ${catkin_LIBRARIES})
 	target_link_libraries(environment mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(virtualJoy mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(autopilot mathutils uav_utils ${catkin_LIBRARIES})
+	target_link_libraries(engineLib ${catkin_LIBRARIES})
 
 #############
 ## Install ##
