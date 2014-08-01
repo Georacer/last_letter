@@ -1,14 +1,16 @@
 #include "engineLib.hpp"
 
-engine::engine()
+Propulsion::Propulsion(ModelPlane * parent)
 {
+	parentObj = parent;
 }
 
-engine::~engine()
+Propulsion::~Propulsion()
 {
+	delete parentObj;
 }
 
-engBeard::engBeard():engine()
+EngBeard::EngBeard(ModelPlane * parent):Propulsion(parent)
 {
 	std::cout << "reading parameters for new Beard engine" << std::endl;
 	omega = 0;
@@ -19,48 +21,34 @@ engBeard::engBeard():engine()
 	if(!ros::param::getCached("motor/k_omega", k_omega)) {ROS_FATAL("Invalid parameters for -k_omega- in param server!"); ros::shutdown();}
 }
 
-engBeard::~engBeard()
+EngBeard::~EngBeard()
 {
 }
 
-void engBeard::step(last_letter::SimStates states, last_letter::Environment environment, double input[4], double dtIn)
+void EngBeard::updateRPS()
 {
-	geometry_msgs::Vector3 temp;
-	temp.x = states.velocity.linear.x - environment.wind.x;
-	temp.y = states.velocity.linear.y - environment.wind.y;
-	temp.z = states.velocity.linear.z - environment.wind.z;
-	geometry_msgs::Vector3 airData = getAirData(temp);
-	airspeed = airData.x;
-	rho = environment.density;
-	deltat = input[2];
-	dt = dtIn;
-	omega = 1 / (0.5 + dt) * (0.5 * omega + dt * deltat * k_motor);
+	rho = parentObj->environment.density;
+	deltat = parentObj->input[2];
+	airspeed = parentObj->airdata.airspeed;
+	omega = 1 / (0.5 + parentObj->dt) * (0.5 * omega + parentObj->dt * deltat * k_motor);
 }
 
-geometry_msgs::Vector3 engBeard::getForce()
+geometry_msgs::Vector3 EngBeard::getForce()
 {
-	double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(omega,2)-pow(airspeed,2));
+	wrenchProp.force.x = 1.0/2.0*rho*s_prop*c_prop*(pow(omega,2)-pow(airspeed,2));
 //		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
-	double ty = 0;
-	double tz = 0;
-	
-	geometry_msgs::Vector3 output;
-	output.x = tx;
-	output.y = ty;
-	output.z = tz;
-	return output;
+	wrenchProp.force.y = 0;
+	wrenchProp.force.z = 0;
+
+	return wrenchProp.force;
 }
 
-geometry_msgs::Vector3 engBeard::getTorque()
+geometry_msgs::Vector3 EngBeard::getTorque()
 {
-	double lm = -k_t_p*pow(k_omega*omega/k_motor,2);
+	wrenchProp.torque.x = -k_t_p*pow(k_omega*omega/k_motor,2);
 //		double lm = -k_t_p*pow(k_omega*deltat,2);
-	double mm = 0;
-	double nm = 0;
-	
-	geometry_msgs::Vector3 output;
-	output.x = lm;
-	output.y = mm;
-	output.z = nm;
-	return output;
+	wrenchProp.torque.y = 0;
+	wrenchProp.torque.z = 0;
+
+	return wrenchProp.torque;
 }

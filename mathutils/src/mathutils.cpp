@@ -225,6 +225,16 @@ geometry_msgs::Vector3 operator+(const geometry_msgs::Vector3& a, geometry_msgs:
     return c;
 }
 
+//geometry_msgs::Vector3 operator+(geometry_msgs::Vector3& a, geometry_msgs::Vector3& b) 
+//{
+//    geometry_msgs::Vector3 c;
+//    c.x = a.x+b.x;
+//    c.y = a.y+b.y;
+//    c.z = a.z+b.z;   
+
+//    return c;
+//}
+
 geometry_msgs::Vector3 operator-(geometry_msgs::Vector3& vec) 
 {
     geometry_msgs::Vector3 c;

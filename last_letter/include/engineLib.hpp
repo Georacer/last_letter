@@ -3,6 +3,7 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Quaternion.h"
+#include "geometry_msgs/Wrench.h"
 #include <cstdlib>
 #include <math.h>
 
@@ -16,52 +17,58 @@ using namespace std;
 //Classes
 /////////
 
-class engine
+
+//////////////////////////
+// Define Propulsion class
+//////////////////////////
+
+
+class Propulsion
 {
 	public:
 	//Variables
+	ModelPlane * parentObj;
 	double omega; //motor angular speed in rad/s
+	geometry_msgs::Wrench wrenchProp;
 	
 	///////////
 	//Functions
 	
 //	//Constructor
-	engine();
+	Propulsion(ModelPlane *);
 //	
 //	//Destructor
-	~engine();
+	~Propulsion();
 	
 	//Step the angular speed
-	virtual void step(last_letter::SimStates states, last_letter::Environment environment, double input[4], double dt) =0;
-//	virtual void step(double, double);
+	virtual void updateRPS() =0;
 	
 	//Calculate Forces
 	virtual geometry_msgs::Vector3 getForce() =0;
-//	virtual geometry_msgs::Vector3 getForce(double, double);
 	
 	//Calculate Torques
 	virtual geometry_msgs::Vector3 getTorque() =0;
 };
 
-class engBeard: public engine
+class EngBeard: public Propulsion
 {
 	public:
 	///////////
 	//Variables
 	double s_prop, c_prop, k_motor, k_t_p, k_omega;
-	double airspeed, rho, dt, deltat;
+	double airspeed, rho, deltat;
 	
 	///////////
 	//Functions
 	
 	//Constructor
-	engBeard();
+	EngBeard(ModelPlane *);
 	
 	//Destructor
-	~engBeard();
+	~EngBeard();
 	
 	//Step the angular speed
-	void step(last_letter::SimStates states, last_letter::Environment environment, double input[4], double dt);
+	void updateRPS();
 	
 	//Calculate Forces
 	geometry_msgs::Vector3 getForce();
