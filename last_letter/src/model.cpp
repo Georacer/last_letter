@@ -17,7 +17,8 @@
 		subInp = n.subscribe("ctrlPWM",1,&ModelPlane::getInput, this); //model control input
 		subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this); //dynamic environment effects
 		pubState = n.advertise<last_letter::SimStates>("states",1000); //model states
-//		pubWrench = n.advertise<geometry_msgs::WrenchStamped>("wrenchStamped",1000); //forces & torques
+		pubForce = n.advertise<geometry_msgs::Vector3>("forceInput",1000); //forces & torques
+		pubTorque = n.advertise<geometry_msgs::Vector3>("torqueInput",1000); //forces & torques
 	}
 	
 	//Initialize states
@@ -106,14 +107,16 @@
 		states.header.stamp = tprev;
 		
 		//make a simulation step
+		dynamics.propulsion->updateRPS();
 		kinematics.forceInput = dynamics.getForce();
 		kinematics.torqueInput = dynamics.getTorque();
 		kinematics.calcDerivatives();
+		kinematics.integrator->propagation();
+		airdata.calcAirData();
 		//publish results
-//		dynamics.force = forceInput;
-//		dynamics.torque = torqueInput;
 		pubState.publish(states);
-//		pubWrench.publish(dynamics);
+		pubForce.publish(kinematics.forceInput);
+		pubTorque.publish(kinematics.torqueInput);
 	}
 	
 	/////////////////////////////////////////////////
@@ -128,6 +131,7 @@
 		input[1] = deltae_max * (double)(inputMsg.value[1]-1500)/500;
 		input[2] = (double)(inputMsg.value[2]-1000)/1000;
 		input[3] = deltar_max * (double)(inputMsg.value[3]-1500)/500;
+//		std::cout << "aetr :" << input[0] << " " << input[1] << " " << input[2] << " " << input[3] << std::endl;
 	}
 	
 	/////////////////////////////////////////////////
@@ -198,13 +202,13 @@
 		quat2rotmtx (parentObj->states.pose.orientation, Reb);
 		
 		//create position derivatives
-		geometry_msgs::Vector3 posDot = Reb*parentObj->states.velocity.linear;
+		posDot = Reb*parentObj->states.velocity.linear;
 		
 		//create speed derivatives
 		geometry_msgs::Vector3 linearAcc = (1.0/mass)*forceInput;
 		geometry_msgs::Vector3 corriolisAcc;
 		vector3_cross(-parentObj->states.velocity.angular, parentObj->states.velocity.linear, &corriolisAcc);
-		geometry_msgs::Vector3 speedDot = linearAcc + corriolisAcc;
+		speedDot = linearAcc + corriolisAcc;
 		
 		//create angular derivatives
 		quatDot.w = 1.0;
@@ -215,9 +219,68 @@
 		//create angular rate derivatives
 		vector3_cross(parentObj->states.velocity.angular, J*parentObj->states.velocity.angular, &tempVect);
 		tempVect = -tempVect+torqueInput;
-		geometry_msgs::Vector3 rateDot = Jinv*tempVect;
+		rateDot = Jinv*tempVect;
 	}
 
+//////////////////////////
+// Define Integrator class
+//////////////////////////
+
+	Integrator::Integrator(ModelPlane * parent)
+	{
+		parentObj = parent;
+	}
+	
+	Integrator::~Integrator()
+	{
+		delete parentObj;
+	}
+
+//////////////////////////
+// Define ForwardEuler class
+//////////////////////////
+
+	//Class Constructor
+	ForwardEuler::ForwardEuler(ModelPlane * parent) : Integrator(parent)
+	{
+	}
+	//Class Destructor
+	
+	//Propagation of the states
+	void ForwardEuler::propagation()
+	{
+		geometry_msgs::Vector3 tempVect;
+		
+		parentObj->states.pose.position.x = parentObj->states.pose.position.x + parentObj->kinematics.posDot.x * parentObj->dt;
+		parentObj->states.pose.position.y = parentObj->states.pose.position.y + parentObj->kinematics.posDot.y * parentObj->dt;
+		parentObj->states.pose.position.z = parentObj->states.pose.position.z + parentObj->kinematics.posDot.z * parentObj->dt;
+		
+//		tempVect = parentObj->dt*parentObj->kinematics.posDot;
+//		tempVect = parentObj->states.pose.position + tempVect;
+//		parentObj->states.pose.position = tempVect;
+//		parentObj->states.pose.position = parentObj->states.pose.position + tempVect;
+		
+		geometry_msgs::Quaternion quat = parentObj->states.pose.orientation;
+		quat_product(quat,parentObj->kinematics.quatDot,&(parentObj->states.pose.orientation));
+		quat_normalize(&(parentObj->states.pose.orientation));
+		
+		tempVect = parentObj->dt*parentObj->kinematics.speedDot;
+		parentObj->states.velocity.linear = parentObj->states.velocity.linear + tempVect;
+		
+		tempVect = parentObj->dt*parentObj->kinematics.rateDot;
+		parentObj->states.velocity.angular = parentObj->states.velocity.angular + tempVect;
+		
+		parentObj->states.acceleration.linear = parentObj->kinematics.speedDot;
+		
+		parentObj->states.acceleration.angular = parentObj->kinematics.rateDot;
+		
+		//Update Geoid stuff -- To update!
+		parentObj->states.geoid.altitude = -parentObj->states.pose.position.z;
+		
+//		std::cout << "u v w : " << parentObj->states.velocity.linear.x << " " << parentObj->states.velocity.linear.y << " " << parentObj->states.velocity.linear.z << std::endl;
+		
+//		std::cout << "Updated ModelPlane states" << std::endl;
+	}
 
 //////////////////////////
 // Define Dynamics class
@@ -252,6 +315,11 @@
 		tempVect = groundReaction->getForce() + tempVect;
 		tempVect = gravity->getForce() + tempVect;
 		tempVect = aerodynamics->getForce() + tempVect;
+		
+//		std::cout << "AeroForceY: " << aerodynamics->wrenchAero.force.z;
+//		std::cout << " GroundForceY: " << groundReaction->wrenchGround.force.z;
+//		std::cout << " GravForceY: " << gravity->wrenchGrav.force.z;
+//		std::cout << " PropForceX: " << propulsion->wrenchProp.force.x << std::endl;
 		return tempVect;
 	}
 	
@@ -262,6 +330,11 @@
 		tempVect = gravity->getTorque() + tempVect;
 		tempVect = propulsion->getTorque() + tempVect;
 		tempVect = groundReaction->getTorque() + tempVect;
+		
+//		std::cout << "AeroTorqueY: " << aerodynamics->wrenchAero.torque.y;
+//		std::cout << " GroundTorqueY: " << groundReaction->wrenchGround.torque.y;
+//		std::cout << " GravTorqueY: " << gravity->wrenchGrav.torque.y;
+//		std::cout << " PropTorqueY: " << propulsion->wrenchProp.torque.y << std::endl;
 		return tempVect;
 	}
 	
@@ -309,19 +382,6 @@
 		}
 	}
 
-//////////////////////////
-// Define Integrator class
-//////////////////////////
-
-	Integrator::Integrator(ModelPlane * parent)
-	{
-		parentObj = parent;
-	}
-	
-	Integrator::~Integrator()
-	{
-		delete parentObj;
-	}
 
 //////////////////////////
 // Define Aerodynamics class
@@ -393,50 +453,6 @@
 	}
 
 //////////////////////////
-// Define ForwardEuler class
-//////////////////////////
-
-	//Class Constructor
-	ForwardEuler::ForwardEuler(ModelPlane * parent) : Integrator(parent)
-	{
-	}
-	//Class Destructor
-	
-	//Propagation of the states
-	void ForwardEuler::propagation()
-	{
-
-		geometry_msgs::Vector3 tempVect;
-		
-		parentObj->states.pose.position.x = parentObj->states.pose.position.x + parentObj->kinematics.posDot.x * parentObj->dt;
-		parentObj->states.pose.position.y = parentObj->states.pose.position.y + parentObj->kinematics.posDot.y * parentObj->dt;
-		parentObj->states.pose.position.z = parentObj->states.pose.position.z + parentObj->kinematics.posDot.z * parentObj->dt;
-		
-//		tempVect = parentObj->dt*parentObj->kinematics.posDot;
-//		tempVect = parentObj->states.pose.position + tempVect;
-//		parentObj->states.pose.position = tempVect;
-//		parentObj->states.pose.position = parentObj->states.pose.position + tempVect;
-		
-		geometry_msgs::Quaternion quat = parentObj->states.pose.orientation;
-		quat_product(quat,parentObj->kinematics.quatDot,&(parentObj->states.pose.orientation));
-		quat_normalize(&(parentObj->states.pose.orientation));
-		
-		tempVect = parentObj->dt*parentObj->kinematics.speedDot;
-		parentObj->states.velocity.linear = parentObj->states.velocity.linear + tempVect;
-		
-		tempVect = parentObj->dt*parentObj->kinematics.rateDot;
-		parentObj->states.velocity.angular = parentObj->states.velocity.angular + tempVect;
-		
-//		states.acceleration.linear = linearAcc;
-		parentObj->states.acceleration.linear = parentObj->kinematics.speedDot;
-		
-		parentObj->states.acceleration.angular = parentObj->kinematics.rateDot;
-		
-		//Update Geoid stuff -- To update!
-		parentObj->states.geoid.altitude = -parentObj->states.pose.position.z;
-	}
-
-//////////////////////////
 // Define StdLinearAero class
 //////////////////////////
 
@@ -474,7 +490,7 @@
 		if(!ros::param::getCached("airframe/c_n_deltar", c_n_deltar)) {ROS_FATAL("Invalid parameters for -c_n_deltar- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_drag_p", c_drag_p)) {ROS_FATAL("Invalid parameters for -c_drag_p- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/c_lift_0", c_lift_0)) {ROS_FATAL("Invalid parameters for -c_lift_0- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("airframe/c_lift_a", c_lift_a)) {ROS_FATAL("Invalid parameters for -c_lift_a- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airframe/c_lift_a", c_lift_a0)) {ROS_FATAL("Invalid parameters for -c_lift_a- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("/environment/oswald", oswald)) {ROS_FATAL("Invalid parameters for -oswald- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/mcoeff", M)) {ROS_FATAL("Invalid parameters for -mcoeff- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/alpha_stall", alpha0)) {ROS_FATAL("Invalid parameters for -alpha_stall- in param server!"); ros::shutdown();}
@@ -492,6 +508,7 @@
 		double deltat = parentObj->input[2];
 		double deltar = parentObj->input[3];
 		double airspeed = parentObj->airdata.airspeed;
+//		std::cout << airspeed << std::endl;
 		double alpha = parentObj->airdata.alpha;
 		double beta = parentObj->airdata.beta;
 		
@@ -502,9 +519,9 @@
 		double c_drag_a = dragCoeff(alpha);
 		
 		//convert coefficients to the body frame
-		double c_x_a = -c_drag_a*cos(alpha)-c_lift_a*sin(alpha);
-		double c_x_q = -c_drag_q*cos(alpha)-c_lift_q*sin(alpha);
-//		double c_x_deltae = -c_drag_deltae*cos(alpha)-c_lift_deltae*sin(alpha);
+		double c_x_a = -c_drag_a*cos(alpha)+c_lift_a*sin(alpha);
+		double c_x_q = -c_drag_q*cos(alpha)+c_lift_q*sin(alpha);
+//		double c_x_deltae = -c_drag_deltae*cos(alpha)+c_lift_deltae*sin(alpha);
 		double c_z_a = -c_drag_a*sin(alpha)-c_lift_a*cos(alpha);
 		double c_z_q = -c_drag_q*sin(alpha)-c_lift_q*cos(alpha);
 //		double c_z_deltae = -c_drag_deltae*sin(alpha)-c_lift_deltae*cos(alpha);
@@ -528,16 +545,20 @@
 		}
 		else
 		{
-			ax = qbar*(c_x_a + c_x_q*c*q/(2*airspeed) - c_drag_deltae*cos(alpha)*abs(deltae) - c_lift_deltae*sin(alpha)*deltae);
+			ax = qbar*(c_x_a + c_x_q*c*q/(2*airspeed) - c_drag_deltae*cos(alpha)*abs(deltae) + c_lift_deltae*sin(alpha)*deltae);
 			//split c_x_deltae to include "abs" term
 			ay = qbar*(c_y_0 + c_y_b*beta + c_y_p*b*p/(2*airspeed) + c_y_r*b*r/(2*airspeed) + c_y_deltaa*deltaa + c_y_deltar*deltar);
 			az = qbar*(c_z_a + c_z_q*c*q/(2*airspeed) - c_drag_deltae*sin(alpha)*abs(deltae) - c_lift_deltae*cos(alpha)*deltae);
 			//split c_z_deltae to include "abs" term
 		}
 		
+		double temp = c_lift_a + c_lift_deltae*deltae;
+//		std::cout << "c_lift: " << temp << std::endl;
+		
 		wrenchAero.force.x = ax;
 		wrenchAero.force.y = ay;
 		wrenchAero.force.z = az;
+//		std::cout << "body aerodynamic forces: " << ax << " " << ay << " " << az << std::endl;
 		return wrenchAero.force;
 	}
 	
@@ -555,8 +576,8 @@
 		rho = parentObj->environment.density;
 
 		//request lift and drag alpha-coefficients from the corresponding functions
-		double c_lift_a = liftCoeff(alpha);
-		double c_drag_a = dragCoeff(alpha);
+//		double c_lift_a = liftCoeff(alpha);
+//		double c_drag_a = dragCoeff(alpha);
 
 		//read angular rates
 		double p = parentObj->states.velocity.angular.x;
@@ -590,11 +611,12 @@
 	double StdLinearAero::liftCoeff (double alpha)
 	{
 		double sigmoid = ( 1+exp(-M*(alpha-alpha0))+exp(M*(alpha+alpha0)) ) / (1+exp(-M*(alpha-alpha0))) / (1+exp(M*(alpha+alpha0)));
-		double linear = (1-sigmoid) * (c_lift_0 + c_lift_a*alpha); //Lift at small AoA
+		double linear = (1.0-sigmoid) * (c_lift_0 + c_lift_a0*alpha); //Lift at small AoA
 		double flatPlate = sigmoid*(2*copysign(1,alpha)*pow(sin(alpha),2)*cos(alpha)); //Lift beyond stall
 	
-		c_lift_a = linear+flatPlate;
-		return c_lift_a;
+		double result  = linear+flatPlate;
+//		std::cout << "sigma, alpha, c_lift_a :" << sigmoid << " " << alpha << " " << result << std::endl;
+		return result;
 	}
 	
 	//////////////////////////
@@ -602,7 +624,7 @@
 	double StdLinearAero::dragCoeff (double alpha)
 	{
 		AR = pow(b,2)/s;
-		double c_drag_a = c_drag_p + pow(c_lift_0+c_lift_a*alpha,2)/(M_PI*oswald*AR);
+		double c_drag_a = c_drag_p + pow(c_lift_0+c_lift_a0*alpha,2)/(M_PI*oswald*AR);
 
 		return c_drag_a;
 	}
@@ -763,6 +785,7 @@ void EngBeard::updateRPS()
 {
 	rho = parentObj->environment.density;
 	deltat = parentObj->input[2];
+//	std::cout << "throttle input: " << deltat << std::endl;
 	airspeed = parentObj->airdata.airspeed;
 	omega = 1 / (0.5 + parentObj->dt) * (0.5 * omega + parentObj->dt * deltat * k_motor);
 }
@@ -888,7 +911,7 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 		uav.step();
-		std::cout << "Just stepped" << std::endl;
+//		std::cout << "Just stepped" << std::endl;
 		ros::spinOnce();
 		spinner.sleep();
 

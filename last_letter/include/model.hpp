@@ -113,7 +113,7 @@ class StdLinearAero : public Aerodynamics
 	double c_l_0, c_l_b, c_l_p, c_l_r, c_l_deltaa, c_l_deltar;
 	double c_m_0, c_m_a, c_m_q, c_m_deltae;
 	double c_n_0, c_n_b, c_n_p, c_n_r, c_n_deltaa, c_n_deltar;
-	double M, alpha0, c_lift_0, c_lift_a;
+	double M, alpha0, c_lift_0, c_lift_a0;
 	double c_drag_p, oswald, AR;
 	geometry_msgs::Vector3 getForce();
 	geometry_msgs::Vector3 getTorque();
@@ -259,8 +259,7 @@ class ModelPlane
 	last_letter::SimStates states; // main simulation states
 	last_letter::Environment environment; // environmental component local to the UAV
 	ros::Subscriber subInp, subEnv; // ROS subscribers
-	ros::Publisher pubState; // ROS publishers
-//	ros::Publisher pubWrench;
+	ros::Publisher pubState, pubForce, pubTorque; // ROS publishers
 	ros::Time tprev; // previous ROS time holder
 	double dt; // simulation timestep in s
 	int initTime; // first simulation loop flag
