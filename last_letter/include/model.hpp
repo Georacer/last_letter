@@ -158,8 +158,8 @@ class PanosContactPoints : public GroundReaction
 	double* contactPoints, * spp, * sppprev;
 	double * cpi_up, * cpi_down, * spd, * pointCoords;
 	double uavpos[3], normVe;
-	double kspring, mspring, kfriction, len;
-	bool contact;
+	double kspring, mspring, len, frictForw[3], frictSide[3];
+	bool contact, safe;
 	int contactPtsNo;
 	geometry_msgs::Vector3 getForce();
 	geometry_msgs::Vector3 getTorque();
