@@ -131,7 +131,6 @@
 		input[1] = deltae_max * (double)(inputMsg.value[1]-1500)/500;
 		input[2] = (double)(inputMsg.value[2]-1000)/1000;
 		input[3] = deltar_max * (double)(inputMsg.value[3]-1500)/500;
-//		std::cout << "aetr :" << input[0] << " " << input[1] << " " << input[2] << " " << input[3] << std::endl;
 	}
 	
 	/////////////////////////////////////////////////
@@ -170,11 +169,9 @@
 		if(!ros::param::getCached("airframe/j_z", j_z)) {ROS_FATAL("Invalid parameters for -j_z- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airframe/j_xz", j_xz)) {ROS_FATAL("Invalid parameters for -j_xz- in param server!"); ros::shutdown();}
 		double G = j_x*j_z-pow(j_xz,2);
-//		J[9] = {j_x, 0, -j_xz, 0, j_y, 0, -j_xz, 0, j_z};
 		J[0] = j_x; J[1] = 0; J[2] = -j_xz;
 		J[3] = 0; J[4] = j_y; J[5] = 0;
 		J[6] = -j_xz; J[7] = 0; J[8] = j_z;
-//		Jinv[9] = {j_z/G, 0, j_xz/G, 0, 1/j_y, 0, j_xz/G, 0, j_x/G};
 		Jinv[0] = j_z/G; Jinv[1] = 0; Jinv[2] = j_xz/G;
 		Jinv[3] = 0; Jinv[4] = 1/j_y; Jinv[5] = 0;
 		Jinv[6] = j_xz/G; Jinv[7] = 0; Jinv[8] = j_x/G;
@@ -255,11 +252,6 @@
 		parentObj->states.pose.position.y = parentObj->states.pose.position.y + parentObj->kinematics.posDot.y * parentObj->dt;
 		parentObj->states.pose.position.z = parentObj->states.pose.position.z + parentObj->kinematics.posDot.z * parentObj->dt;
 		
-//		tempVect = parentObj->dt*parentObj->kinematics.posDot;
-//		tempVect = parentObj->states.pose.position + tempVect;
-//		parentObj->states.pose.position = tempVect;
-//		parentObj->states.pose.position = parentObj->states.pose.position + tempVect;
-		
 		geometry_msgs::Quaternion quat = parentObj->states.pose.orientation;
 		quat_product(quat,parentObj->kinematics.quatDot,&(parentObj->states.pose.orientation));
 		quat_normalize(&(parentObj->states.pose.orientation));
@@ -276,10 +268,6 @@
 		
 		//Update Geoid stuff -- To update!
 		parentObj->states.geoid.altitude = -parentObj->states.pose.position.z;
-		
-//		std::cout << "u v w : " << parentObj->states.velocity.linear.x << " " << parentObj->states.velocity.linear.y << " " << parentObj->states.velocity.linear.z << std::endl;
-		
-//		std::cout << "Updated ModelPlane states" << std::endl;
 	}
 
 //////////////////////////
@@ -316,10 +304,6 @@
 		tempVect = gravity->getForce() + tempVect;
 		tempVect = aerodynamics->getForce() + tempVect;
 		
-//		std::cout << "AeroForceY: " << aerodynamics->wrenchAero.force.z;
-//		std::cout << " GroundForceY: " << groundReaction->wrenchGround.force.z;
-//		std::cout << " GravForceY: " << gravity->wrenchGrav.force.z;
-//		std::cout << " PropForceX: " << propulsion->wrenchProp.force.x << std::endl;
 		return tempVect;
 	}
 	
@@ -331,10 +315,6 @@
 		tempVect = propulsion->getTorque() + tempVect;
 		tempVect = groundReaction->getTorque() + tempVect;
 		
-//		std::cout << "AeroTorqueY: " << aerodynamics->wrenchAero.torque.y;
-//		std::cout << " GroundTorqueY: " << groundReaction->wrenchGround.torque.y;
-//		std::cout << " GravTorqueY: " << gravity->wrenchGrav.torque.y;
-//		std::cout << " PropTorqueY: " << propulsion->wrenchProp.torque.y << std::endl;
 		return tempVect;
 	}
 	
@@ -508,7 +488,6 @@
 		double deltat = parentObj->input[2];
 		double deltar = parentObj->input[3];
 		double airspeed = parentObj->airdata.airspeed;
-//		std::cout << airspeed << std::endl;
 		double alpha = parentObj->airdata.alpha;
 		double beta = parentObj->airdata.beta;
 		
@@ -521,10 +500,8 @@
 		//convert coefficients to the body frame
 		double c_x_a = -c_drag_a*cos(alpha)+c_lift_a*sin(alpha);
 		double c_x_q = -c_drag_q*cos(alpha)+c_lift_q*sin(alpha);
-//		double c_x_deltae = -c_drag_deltae*cos(alpha)+c_lift_deltae*sin(alpha);
 		double c_z_a = -c_drag_a*sin(alpha)-c_lift_a*cos(alpha);
 		double c_z_q = -c_drag_q*sin(alpha)-c_lift_q*cos(alpha);
-//		double c_z_deltae = -c_drag_deltae*sin(alpha)-c_lift_deltae*cos(alpha);
 	
 		//read orientation
 		geometry_msgs::Quaternion quat = parentObj->states.pose.orientation;
@@ -553,12 +530,10 @@
 		}
 		
 		double temp = c_lift_a + c_lift_deltae*deltae;
-//		std::cout << "c_lift: " << temp << std::endl;
 		
 		wrenchAero.force.x = ax;
 		wrenchAero.force.y = ay;
 		wrenchAero.force.z = az;
-//		std::cout << "body aerodynamic forces: " << ax << " " << ay << " " << az << std::endl;
 		return wrenchAero.force;
 	}
 	
@@ -574,10 +549,6 @@
 		double beta = parentObj->airdata.beta;
 		
 		rho = parentObj->environment.density;
-
-		//request lift and drag alpha-coefficients from the corresponding functions
-//		double c_lift_a = liftCoeff(alpha);
-//		double c_drag_a = dragCoeff(alpha);
 
 		//read angular rates
 		double p = parentObj->states.velocity.angular.x;
@@ -615,7 +586,6 @@
 		double flatPlate = sigmoid*(2*copysign(1,alpha)*pow(sin(alpha),2)*cos(alpha)); //Lift beyond stall
 	
 		double result  = linear+flatPlate;
-//		std::cout << "sigma, alpha, c_lift_a :" << sigmoid << " " << alpha << " " << result << std::endl;
 		return result;
 	}
 	
@@ -644,6 +614,11 @@
 		if(!ros::param::getCached("airframe/contactPtsNo", contactPtsNo)) {ROS_FATAL("Invalid parameters for -/airframe/contactPtsNo- in param server!"); ros::shutdown();}
 		contactPoints = (double*)malloc(sizeof(double) * (contactPtsNo*4)); //Allocate space for the table
 		
+		kspring = 30000.0;
+		mspring = 100.0;
+		kfriction = 0.01;
+		len=0.1;
+
 		for (j = 0; j<contactPtsNo; j++) { //Distribute the data
 			sprintf(paramMsg, "airframe/contactPoint%i", j+1);
 			if(!ros::param::getCached(paramMsg, list)) {ROS_FATAL("Invalid parameters for -/airframe/contactPoint- in param server!"); ros::shutdown();}
@@ -654,16 +629,15 @@
 			contactPoints[j] = temp[0];
 			contactPoints[j + contactPtsNo] = temp[1];
 			contactPoints[j + contactPtsNo*2] = temp[2];
-			contactPoints[j + contactPtsNo*3] = temp[2];
+			contactPoints[j + contactPtsNo*3] = temp[3];
 		}
-		
+	
 		spp = (double*)malloc(sizeof(double) * contactPtsNo); 
-		memset(spp, 0, sizeof(spp)); // initialize sprint contraction
+		memset(spp, 0, sizeof(spp)); // initialize spring contraction
 		
-		kspring = 8000.0;
-		mspring = 250.0;
-		kfriction = 0.01;
-		len=-0.02;
+		sppprev = (double*)malloc(sizeof(double) * contactPtsNo); 
+		memset(sppprev, 0, sizeof(sppprev)); // initialize spring contraction
+
 
 		contact = false;
 		cpi_up = (double*)malloc(sizeof(double) * contactPtsNo*3); // upper spring end matrix
@@ -678,6 +652,8 @@
 		free(cpi_up);
 		free(cpi_down);
 		free(spd);
+		free(spp);
+		free(sppprev);
 		free(pointCoords);
 	}
 	
@@ -685,13 +661,21 @@
 	{
 		double Reb[9];
 		int i, j;
+		contact = false;
 		for (i=0; i<contactPtsNo*3; i++) {
 			pointCoords[i] = contactPoints[i];
 		}
 		geometry_msgs::Quaternion quat = parentObj->states.pose.orientation;
 		quat2rotmtx(quat, Reb);
-		geometry_msgs::Wrench totalE;
+		geometry_msgs::Wrench tempE, totalE;
 		geometry_msgs::Vector3 dx,we,vpoint,Ve;
+
+		totalE.force.x = 0;
+		totalE.force.y = 0;
+		totalE.force.z = 0;
+		totalE.torque.x = 0;
+		totalE.torque.y = 0;
+		totalE.torque.z = 0;
 
 		Ve=Reb*parentObj->states.velocity.linear; // Rotate body velocity to earth velocity
 
@@ -701,50 +685,81 @@
 
 		multi_mtx_mtx_3Xn(Reb,pointCoords,cpi_up,contactPtsNo); // Rotate contact points coordinates from body frame to earth frame
 
-		for (i=0;i<3;i++) 
+		for (i=0;i<3;i++)
 		{
 			for (j=0;j<contactPtsNo;j++) {
-				cpi_up[contactPtsNo*i+j] +=uavpos[i]; // Place upper spring end to contact point
+				cpi_up[contactPtsNo*i+j] += uavpos[i]; // Place upper spring end to contact point
+				if (i==2)
+					cpi_up[contactPtsNo*i+j] -= len; //Raise the upper spring end to obtain a visually pleasing result in RViz
 				cpi_down[contactPtsNo*i+j]=cpi_up[contactPtsNo*i+j]; // Place lower spring end to contact point
 			}
 		}
-		
+
 		we = Reb*parentObj->states.velocity.angular; // Rotate body angular speeds to earth frame
 		
 		for (i=0;i<contactPtsNo;i++) // For each contact point
 		{
-			cpi_down[i+2*contactPtsNo]-=len; // Place lower spring end "len" below upper spring end
+			cpi_down[i+2*contactPtsNo]+=len; // Place lower spring end "len" below upper spring end
 			dx.x = (cpi_up[i]-uavpos[0]); // Calculate force arm
 			dx.y = (cpi_up[i+contactPtsNo]-uavpos[1]);
 			dx.z = (cpi_up[i+2*contactPtsNo]-uavpos[2]);
 
-			spd[i]=(len-(cpi_up[i+2*contactPtsNo]-cpi_down[i+2*contactPtsNo])-spp[i])/parentObj->dt; // Update spring contraction speed
+//			spd[i]=(len-(cpi_up[i+2*contactPtsNo]-cpi_down[i+2*contactPtsNo])-spp[i])/parentObj->dt; // Update spring contraction speed
 			
 			if (cpi_down[i+2*contactPtsNo]>0) // Handle ground contact
 			{
 				cpi_down[i+2*contactPtsNo]=0;
 				contact=true;
+				spp[i]=len+cpi_up[i+2*contactPtsNo];
+				spd[i]=(spp[i]-sppprev[i])/parentObj->dt;
 				vector3_cross(we,dx, &vpoint); // Contact point inertial speed
 				vpoint = Ve+vpoint;
 				normVe = sqrt(vpoint.x*vpoint.x+vpoint.y*vpoint.y+vpoint.z*vpoint.z); // Absolute contact point velocity
 				if (normVe<=0.001) // Take at static friction???
 					normVe=0.001;
 
-				totalE.force.z = kspring*(len-cpi_up[i+2*contactPtsNo])-mspring*vpoint.z*abs(vpoint.z)+10.0*spd[i]; // Spring force along body z-axis
-				totalE.force.x = -kfriction*abs(totalE.force.z)*vpoint.x; // Spring friction along body x-axis
-				totalE.force.y = -kfriction*abs(totalE.force.z)*vpoint.y; // Spring friction along body y-axis
-				totalE.force.x = max(-1000.0,min(totalE.force.x,1000.0)); // Cap forces
-				totalE.force.y = max(-1000.0,min(totalE.force.y,1000.0));
-				totalE.force.z = max(-1000.0,min(totalE.force.z,1000.0));
+				tempE.force.z = -(kspring*spp[i] + mspring*spd[i]*abs(spd[i])); // -mspring*vpoint.z*abs(vpoint.z)) // Spring force along earth z-axis
+				if (tempE.force.z > 0)
+					tempE.force.z = 0;
+				tempE.force.x = -kfriction*abs(tempE.force.z)*vpoint.x; // Spring friction along earth x-axis
+				tempE.force.y = -kfriction*abs(tempE.force.z)*vpoint.y; // Spring friction along earth y-axis
+				// totalE.force.x = max(-10000.0,min(totalE.force.x,10000.0)); // Cap forces
+				// totalE.force.y = max(-10000.0,min(totalE.force.y,10000.0));
+				// totalE.force.z = max(-10000.0,min(totalE.force.z,10000.0));
+
+				std::cout << "Contact Point No: " << i << std::endl;
+
+			totalE.force = totalE.force + tempE.force;
+			vector3_cross(dx,tempE.force, &tempE.torque);
+			totalE.torque = totalE.torque + tempE.torque;
+
 			}
-			spp[i]=len-(cpi_up[i+2*contactPtsNo]-cpi_down[i+2*contactPtsNo]); // Update spring contraction
+			else {
+				spp[i] = 0;
+				spd[i] = 0;
+
+			}
+			sppprev[i] = spp[i];
+			// if (firstContact)
+			// 	ros::shutdown();
+			// spp[i]= len-(cpi_up[i+2*contactPtsNo]-cpi_down[i+2*contactPtsNo]); // Update spring contraction
 		}
 
 		if (contact) {
 			wrenchGround.force= Reb/totalE.force;
-			vector3_cross(dx,wrenchGround.force, &totalE.torque);
 			wrenchGround.torque= Reb/totalE.torque;
+			std::cout << "spring length: " << spp[0] << " spring speed: " << spd[0] << " vertical ground force: " << totalE.force.z << std::endl;
+
 		}
+		else {
+			wrenchGround.force.x = 0;
+			wrenchGround.force.y = 0;
+			wrenchGround.force.z = 0;
+			wrenchGround.torque.x = 0;
+			wrenchGround.torque.y = 0;
+			wrenchGround.torque.z = 0;
+		}
+
 		return wrenchGround.force;
 		
 	}
@@ -785,7 +800,6 @@ void EngBeard::updateRPS()
 {
 	rho = parentObj->environment.density;
 	deltat = parentObj->input[2];
-//	std::cout << "throttle input: " << deltat << std::endl;
 	airspeed = parentObj->airdata.airspeed;
 	omega = 1 / (0.5 + parentObj->dt) * (0.5 * omega + parentObj->dt * deltat * k_motor);
 }
@@ -793,7 +807,6 @@ void EngBeard::updateRPS()
 geometry_msgs::Vector3 EngBeard::getForce()
 {
 	wrenchProp.force.x = 1.0/2.0*rho*s_prop*c_prop*(pow(omega,2)-pow(airspeed,2));
-//		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
 	wrenchProp.force.y = 0;
 	wrenchProp.force.z = 0;
 
@@ -803,7 +816,6 @@ geometry_msgs::Vector3 EngBeard::getForce()
 geometry_msgs::Vector3 EngBeard::getTorque()
 {
 	wrenchProp.torque.x = -k_t_p*pow(k_omega*omega/k_motor,2);
-//		double lm = -k_t_p*pow(k_omega*deltat,2);
 	wrenchProp.torque.y = 0;
 	wrenchProp.torque.z = 0;
 
@@ -911,7 +923,6 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 		uav.step();
-//		std::cout << "Just stepped" << std::endl;
 		ros::spinOnce();
 		spinner.sleep();
 

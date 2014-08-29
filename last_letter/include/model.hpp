@@ -155,7 +155,7 @@ class PanosContactPoints : public GroundReaction
 	public:
 	PanosContactPoints(ModelPlane *);
 	~PanosContactPoints();
-	double* contactPoints, * spp;
+	double* contactPoints, * spp, * sppprev;
 	double * cpi_up, * cpi_down, * spd, * pointCoords;
 	double uavpos[3], normVe;
 	double kspring, mspring, kfriction, len;
