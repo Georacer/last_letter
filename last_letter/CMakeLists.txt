@@ -71,7 +71,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 	INCLUDE_DIRS include
-#	LIBRARIES engineLib
+	LIBRARIES modelPlaneLib
 #  CATKIN_DEPENDS roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -88,7 +88,7 @@ include_directories(
 )
 
 ## Declare a cpp library
-#add_library(engineLib src/engineLib.cpp)
+	add_library(modelPlaneLib src/modelPlaneLib.cpp)
 
 ## Declare a cpp executable
 	add_executable(uav_publisher src/state_publisher.cpp)
@@ -112,13 +112,13 @@ include_directories(
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(uav_publisher ${catkin_LIBRARIES})
 	target_link_libraries(quat2euler mathutils ${catkin_LIBRARIES})
-#	target_link_libraries(model mathutils uav_utils engineLib ${catkin_LIBRARIES})
-	target_link_libraries(model mathutils uav_utils ${catkin_LIBRARIES})
+	target_link_libraries(model mathutils uav_utils modelPlaneLib ${catkin_LIBRARIES})
+	# target_link_libraries(model mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(joy2chan ${catkin_LIBRARIES})
 	target_link_libraries(environment mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(virtualJoy mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(autopilot mathutils uav_utils ${catkin_LIBRARIES})
-#	target_link_libraries(engineLib ${catkin_LIBRARIES})
+	target_link_libraries(modelPlaneLib mathutils ${catkin_LIBRARIES})
 
 #############
 ## Install ##

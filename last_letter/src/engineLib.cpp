@@ -1,4 +1,94 @@
-#include "engineLib.hpp"
+#include "coreLib.hpp"
+
+
+
+using namespace std;
+
+// #ifndef MODELPLANE_DEF
+// #define MODELPLANE_DEF
+
+// class ModelPlane;
+// class Kinematics;
+// class Dynamics;
+// class Integrator;
+// class Aerodynamics;
+// class Gravity;
+// // class Propulsion;
+// class GroundReaction;
+// class Airdata;
+
+// 	class ModelPlane
+// 	{
+// 		public:
+// 		///////////
+// 		//Variables
+// 		last_letter::SimStates states; // main simulation states
+// 		last_letter::Environment environment; // environmental component local to the UAV
+// 		ros::Subscriber subInp, subEnv; // ROS subscribers
+// 		ros::Publisher pubState, pubForce, pubTorque; // ROS publishers
+// 		ros::Time tprev; // previous ROS time holder
+// 		double dt; // simulation timestep in s
+// 		int initTime; // first simulation loop flag
+// 		double input[4], deltaa_max, deltae_max, deltar_max;
+		
+// 		/////////
+// 		//Members
+// 		Kinematics kinematics;
+// 		Dynamics dynamics;
+// 		Airdata airdata;
+		
+// 		///////////
+// 		//Methods
+		
+// 		//Constructor
+// 		ModelPlane (ros::NodeHandle n);
+		
+// 		//Reset
+// 		void init();
+		
+// 		//Destructor
+// 		~ModelPlane ();
+		
+// 		//Input callback
+// 		void getInput(last_letter::SimPWM inputMsg);
+		
+// 		//Simulation step
+// 		void step(void);
+		
+// 		//Read environmental values callback
+// 		void getEnvironment(last_letter::Environment environment);
+// 	};
+// #endif
+
+/////////
+//Classes
+/////////
+
+
+//////////////////////////
+// Define Propulsion class
+//////////////////////////
+
+
+
+
+//class engBeardAbs
+//{
+//	public:
+//	private:
+//};
+
+//class engPistonICE
+//{
+//	public:
+//	//Calculate Forces
+//	geometry_msgs::Vector3 getForce(last_letter::SimStates states, double inputs[4]);
+//	
+//	//Calculate Torques
+//	geometry_msgs::Vector3 getTorque(last_letter::SimStates states, geometry_msgs::Vector3 forces, double inputs[4]);
+//	private:
+//};
+
 
 Propulsion::Propulsion(ModelPlane * parent)
 {
@@ -36,7 +126,6 @@ void EngBeard::updateRPS()
 geometry_msgs::Vector3 EngBeard::getForce()
 {
 	wrenchProp.force.x = 1.0/2.0*rho*s_prop*c_prop*(pow(omega,2)-pow(airspeed,2));
-//		double tx = 1.0/2.0*rho*s_prop*c_prop*(pow(k_motor*deltat,2)-pow(airspeed,2));
 	wrenchProp.force.y = 0;
 	wrenchProp.force.z = 0;
 
