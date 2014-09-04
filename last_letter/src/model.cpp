@@ -1,6 +1,4 @@
 #include "model.hpp"
-
-
 		
 ///////////////
 //Main function
@@ -16,7 +14,7 @@ int main(int argc, char **argv)
 	ros::param::get("simRate",simRate); //frame rate in Hz
 	ros::Rate spinner(simRate);
 	
-	ModelPlane uav(n);
+	ModelPlane uav(n); //Create a ModelPlane passing the nodehandle for subscriptions & publicatons
 	spinner.sleep();
 	ROS_INFO("simNode up");
 	

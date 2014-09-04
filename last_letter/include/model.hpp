@@ -1,5 +1,5 @@
-//Physics model node
-//Performs propagation of the dynamic and kinematic model
+//Main executable
+//Instantiates a ModelPlane object and commands its step
 
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"

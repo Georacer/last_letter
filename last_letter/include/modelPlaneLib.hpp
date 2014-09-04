@@ -1,5 +1,7 @@
-//Physics model node
-//Performs propagation of the dynamic and kinematic model
+//Library header for the ModelPlane class
+
+#ifndef modelPlaneLib_include
+#define modelPlaneLib_include
 
 #include "ros/ros.h"
 #include "nav_msgs/Odometry.h"
@@ -13,11 +15,12 @@
 #include "mathutils/mathutils.hpp"
 //#include "uav_utils/uav_utils.hpp"
 
+//Include custom messages
 #include "last_letter/SimStates.h"
 #include "last_letter/SimPWM.h"
 #include "last_letter/Environment.h"
 
-// Top class for UAV object : First pass
+//Forward class declarations
 class ModelPlane;
 class Kinematics;
 class Dynamics;
@@ -28,9 +31,12 @@ class Propulsion;
 class GroundReaction;
 class Airdata;
 
-#include "kinematicsLib.hpp"
-#include "dynamicsLib.hpp"
-#include "gravityLib.hpp"
-#include "groundReactionLib.hpp"
-#include "propulsionLib.hpp"
-#include "coreLib.hpp"
+#include "kinematicsLib.hpp" //Kinematics related declarations
+#include "dynamicsLib.hpp" //Dynamics container class declarations
+#include "aerodynamicsLib.hpp" //Aerodynamics related declarations
+#include "gravityLib.hpp" //Gravity related declarations
+#include "groundReactionLib.hpp" //Ground reactions related declarations
+#include "propulsionLib.hpp" //Propulsion related declarations
+#include "coreLib.hpp" //Main class and other generic classes
+
+#endif

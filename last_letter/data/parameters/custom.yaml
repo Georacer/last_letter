@@ -1,11 +1,12 @@
 #Parameters for a customized UAV
 #Based on values provided in the book Small Unmanned Aircraft - Theory and Practice by Beard and McLain
+#All units are in S.I. unless otherwise stated
 
 #Simulation Rate
 simRate: 1000
 
 #Initial State
-init/position: [0.0, 0.0, -0.35] #NED frame
+init/position: [0.0, 0.0, -100.0] #NED frame
 init/orientation: [0.0, 0.0, 0.0, 1.0] #NED frame
 init/velLin: [0.0, 0.0, 0.0] #body frame
 init/velAng: [0.000, -0.000, -0.000] #body frame
@@ -65,9 +66,9 @@ airframe/deltar_max: 0.3491
 #Airframe Propulsion Parameters
 motor/motorType: 0
 motor/s_prop: 0.20
-motor/k_motor: 35
-motor/k_t_p: 0
-motor/k_omega: 0
+motor/k_motor: 0.117
+motor/k_t_p: 0.0
+motor/k_omega: 300.0
 motor/c_prop: 1.0
 
 #Contact points array

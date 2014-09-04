@@ -1,4 +1,6 @@
-// Air data class : First pass
+// Core class declarations
+
+// Air data class declaration
 class Airdata
 {
 	public:
@@ -11,7 +13,7 @@ class Airdata
 	void calcAirData();
 };
 
-// Factory Class for parametric class initializations : First pass
+// Factory Class for parametric class initializations
 class Factory
 {
 	public:
@@ -21,6 +23,7 @@ class Factory
 	GroundReaction * buildGroundReaction(ModelPlane *);
 };
 
+// Top ModelPlane object class
 class ModelPlane
 {
 	public:
@@ -33,7 +36,7 @@ class ModelPlane
 	ros::Time tprev; // previous ROS time holder
 	double dt; // simulation timestep in s
 	int initTime; // first simulation loop flag
-	double input[4], deltaa_max, deltae_max, deltar_max;
+	double input[4], deltaa_max, deltae_max, deltar_max; // Control inputs and maximum surface deflections
 	
 	/////////
 	//Members
@@ -44,21 +47,21 @@ class ModelPlane
 	///////////
 	//Methods
 	
-	//Constructor
+	// Constructor
 	ModelPlane (ros::NodeHandle n);
 	
-	//Reset
+	// Initialize ModelPlane object
 	void init();
 	
-	//Destructor
+	// Destructor
 	~ModelPlane ();
 	
-	//Input callback
+	// Input callback
 	void getInput(last_letter::SimPWM inputMsg);
 	
-	//Simulation step
+	// Perform simulation step
 	void step(void);
 	
-	//Read environmental values callback
+	// Read environmental values callback
 	void getEnvironment(last_letter::Environment environment);
 };

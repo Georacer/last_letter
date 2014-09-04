@@ -1,30 +1,26 @@
+// Propulsion class related declarations
+
+// Propulsion interface class declaration
 class Propulsion
 {
 	public:
-	//Variables
-	ModelPlane * parentObj;
-	double omega; //motor angular speed in rad/s
-	geometry_msgs::Wrench wrenchProp;
-	
 	///////////
-	//Functions
-	
-//	//Constructor
+	//Variables
+	ModelPlane * parentObj; // pointer to parent ModelPlane class
+	double omega; // motor angular speed in rad/s
+	geometry_msgs::Wrench wrenchProp;
+
+	///////////
+	//Functions	
 	Propulsion(ModelPlane *);
-//	
-//	//Destructor
 	~Propulsion();
-	
-	//Step the angular speed
-	virtual void updateRPS() =0;
-	
-	//Calculate Forces
-	virtual geometry_msgs::Vector3 getForce() =0;
-	
-	//Calculate Torques
-	virtual geometry_msgs::Vector3 getTorque() =0;
+
+	virtual void updateRadPS() =0; // Step the angular speed
+	virtual geometry_msgs::Vector3 getForce() =0; // Calculate Forces
+	virtual geometry_msgs::Vector3 getTorque() =0; //Calculate Torques
 };
 
+// Electric engine model found in R. Beard's book
 class EngBeard: public Propulsion
 {
 	public:
@@ -35,21 +31,10 @@ class EngBeard: public Propulsion
 	
 	///////////
 	//Functions
-	
-	//Constructor
 	EngBeard(ModelPlane *);
-	
-	//Destructor
 	~EngBeard();
 	
-	//Step the angular speed
-	void updateRPS();
-	
-	//Calculate Forces
-	geometry_msgs::Vector3 getForce();
-	
-	//Calculate Torques
-	geometry_msgs::Vector3 getTorque();
-	
-	private:
+	void updateRadPS(); //Step the angular speed
+	geometry_msgs::Vector3 getForce(); //Calculate Forces
+	geometry_msgs::Vector3 getTorque(); //Calculate Torques
 };

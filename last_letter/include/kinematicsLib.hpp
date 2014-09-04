@@ -1,4 +1,6 @@
-// Kinematic equations class : First pass
+// Kinematics equations related classes
+
+// Main generic class
 class Kinematics
 {
 	public:
@@ -19,6 +21,7 @@ class Kinematics
 };
 
 // State integrator interface class
+// Propagates the state derivatives onto the ModelPlane states
 class Integrator
 {
 	public:
@@ -28,7 +31,7 @@ class Integrator
 	virtual void propagation() =0;
 };
 
-// Forward Euler integrator class : First pass
+// Forward Euler integrator class
 class ForwardEuler : public Integrator
 {
 	public:

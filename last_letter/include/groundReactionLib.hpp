@@ -1,8 +1,8 @@
-// Ground reactions interface class : Blank
+// Ground reactions interface class 
 class GroundReaction
 {
 	public:
-	ModelPlane * parentObj;
+	ModelPlane * parentObj; // pointer to parent ModelPlane class
 	GroundReaction(ModelPlane *);
 	~GroundReaction();
 	geometry_msgs::Wrench wrenchGround;
@@ -10,7 +10,7 @@ class GroundReaction
 	virtual geometry_msgs::Vector3 getTorque()=0;
 };
 
-// Panos ground implementation : First pass
+// Panos Marantos ground reactions implementation
 class PanosContactPoints : public GroundReaction
 {
 	public:
