@@ -10,6 +10,16 @@ class GroundReaction
 	virtual geometry_msgs::Vector3 getTorque()=0;
 };
 
+// No ground reactions, dummy class
+class NoGroundReaction : public GroundReaction
+{
+public:
+	NoGroundReaction(ModelPlane *);
+	~NoGroundReaction();
+	geometry_msgs::Vector3 getForce();
+	geometry_msgs::Vector3 getTorque();
+};
+
 // Panos Marantos ground reactions implementation
 class PanosContactPoints : public GroundReaction
 {

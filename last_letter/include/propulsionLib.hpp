@@ -20,6 +20,18 @@ class Propulsion
 	virtual geometry_msgs::Vector3 getTorque() =0; //Calculate Torques
 };
 
+// No engine, dummy class
+class NoEngine: public Propulsion
+{
+public:
+	NoEngine(ModelPlane *);
+	~NoEngine();
+
+	void updateRadPS();
+	geometry_msgs::Vector3 getForce();
+	geometry_msgs::Vector3 getTorque();
+};
+
 // Electric engine model found in R. Beard's book
 class EngBeard: public Propulsion
 {

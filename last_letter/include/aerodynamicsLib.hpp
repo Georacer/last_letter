@@ -10,6 +10,15 @@ class Aerodynamics
 	virtual geometry_msgs::Vector3 getTorque() = 0;
 };
 
+// No aerodynamics, create a dummy class
+class NoAerodynamics : public Aerodynamics{
+public:
+	NoAerodynamics(ModelPlane *);
+	~NoAerodynamics();
+	geometry_msgs::Vector3 getForce();
+	geometry_msgs::Vector3 getTorque();
+};
+
 // Typical aerodynamics, linear to their coefficients
 class StdLinearAero : public Aerodynamics
 {

@@ -16,7 +16,7 @@ init/throttle: 0.778
 init/rudder: -0.000
 
 #Airframe Aerodynamic Parameters
-airframe/aerodynamicsType: 0
+airframe/aerodynamicsType: 1
 airframe/m: 13.5
 airframe/col_x: -0.05
 airframe/col_y: 0.00
@@ -64,7 +64,7 @@ airframe/deltae_max: 0.3491
 airframe/deltar_max: 0.3491
 
 #Airframe Propulsion Parameters
-motor/motorType: 0
+motor/motorType: 1
 motor/s_prop: 0.20
 motor/k_motor: 0.117
 motor/k_t_p: 0.0
@@ -73,7 +73,7 @@ motor/c_prop: 1.0
 
 #Contact points array
 #Material types: 0 foam, 1 metal, 2 rubber wheel
-airframe/groundReactionType: 0
+airframe/groundReactionType: 1
 airframe/contactPtsNo: 7
 airframe/contactPoint1: [0.162, -0.2324, 0.2214, 2.0]
 airframe/contactPoint2: [0.162, 0.2324, 0.2214, 2.0]

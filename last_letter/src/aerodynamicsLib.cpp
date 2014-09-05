@@ -13,6 +13,38 @@ Aerodynamics::~Aerodynamics()
 }
 
 /////////////////////////////
+// Define NoAerodynamics class
+/////////////////////////////
+
+// Class constructor
+NoAerodynamics::NoAerodynamics(ModelPlane * parent) : Aerodynamics(parent)
+{
+	wrenchAero.force.x = 0.0;
+	wrenchAero.force.y = 0.0;
+	wrenchAero.force.z = 0.0;
+	wrenchAero.torque.x = 0.0;
+	wrenchAero.torque.y = 0.0;
+	wrenchAero.torque.z = 0.0;
+}
+
+// Class destructor
+NoAerodynamics::~NoAerodynamics()
+{
+}
+
+// Force calculation function
+geometry_msgs::Vector3 NoAerodynamics::getForce()
+{
+	return wrenchAero.force;
+}
+
+// Torque calculation function
+geometry_msgs::Vector3 NoAerodynamics::getTorque()
+{
+	return wrenchAero.torque;
+}
+
+/////////////////////////////
 // Define StdLinearAero class
 /////////////////////////////
 

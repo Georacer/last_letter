@@ -1,5 +1,6 @@
-//////////////////////////////////////////
-// Propulsion interfrace class definitions
+//////////////////////////////
+// Propulsion interfrace class 
+//////////////////////////////
 
 // Constructor
 Propulsion::Propulsion(ModelPlane * parent)
@@ -13,8 +14,46 @@ Propulsion::~Propulsion()
 	delete parentObj;
 }
 
-////////////////////////////////////////////////////
-// Engine model found in R. Beard's book definitions
+//////////////////
+// No Engine Model
+//////////////////
+
+// Constructor
+NoEngine::NoEngine(ModelPlane * parent) : Propulsion(parent)
+{	
+	wrenchProp.force.x = 0.0;
+	wrenchProp.force.y = 0.0;
+	wrenchProp.force.z = 0.0;
+	wrenchProp.torque.x = 0.0;
+	wrenchProp.torque.y = 0.0;
+	wrenchProp.torque.z = 0.0;
+	omega = 0.0;
+}
+
+// Destructor
+NoEngine::~NoEngine()
+{
+}
+
+void NoEngine::updateRadPS()
+{
+}
+
+// Force calculation function
+geometry_msgs::Vector3 NoEngine::getForce()
+{
+	return wrenchProp.force;
+}
+
+// Torque calculation function
+geometry_msgs::Vector3 NoEngine::getTorque()
+{
+	return wrenchProp.torque;
+}
+
+////////////////////////////////////////
+// Engine model found in R. Beard's book
+////////////////////////////////////////
 
 // Constructor
 EngBeard::EngBeard(ModelPlane * parent):Propulsion(parent)

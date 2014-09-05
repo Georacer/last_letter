@@ -231,6 +231,9 @@ Aerodynamics * Factory::buildAerodynamics(ModelPlane * parent)
 	switch (i)
 	{
 	case 0:
+		std::cout << "selecting no aerodynamics model" << std::endl;
+		return new NoAerodynamics(parent);
+	case 1:
 		std::cout << "selecting StdLinearAero aerodynamics" << std::endl;
 		return new StdLinearAero(parent);
 	default:
@@ -249,6 +252,9 @@ Propulsion * Factory::buildPropulsion(ModelPlane * parent)
 	switch (i)
 	{
 	case 0:
+		std::cout << "selecting no engine" << std::endl;
+		return new NoEngine(parent);
+	case 1:
 		std::cout << "selecting Beard engine" << std::endl;
 		return new EngBeard(parent);
 	default:
@@ -267,6 +273,9 @@ GroundReaction * Factory::buildGroundReaction(ModelPlane * parent)
 	switch (i)
 	{
 	case 0:
+		std::cout << "selecting no ground reactions" << std::endl;
+		return new NoGroundReaction(parent);
+	case 1:
 		std::cout << "selecting Panos ground reactions" << std::endl;
 		return new PanosContactPoints(parent);
 	default:
