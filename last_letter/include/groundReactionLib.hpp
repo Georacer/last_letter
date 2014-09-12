@@ -29,7 +29,7 @@ class PanosContactPoints : public GroundReaction
 	double* contactPoints, * spp, * sppprev;
 	double * cpi_up, * cpi_down, * spd, * pointCoords;
 	double uavpos[3], normVe;
-	double kspring, mspring, len, frictForw[3], frictSide[3];
+	double kspring, mspring, len, frictForw[4], frictSide[4];
 	bool contact, safe;
 	int contactPtsNo;
 	geometry_msgs::Vector3 getForce();

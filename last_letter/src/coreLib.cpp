@@ -141,6 +141,10 @@ void ModelPlane::getInput(last_letter::SimPWM inputMsg)
 	input[1] = deltae_max * (double)(inputMsg.value[1]-1500)/500;
 	input[2] = (double)(inputMsg.value[2]-1000)/1000;
 	input[3] = deltar_max * (double)(inputMsg.value[3]-1500)/500;
+
+	if (inputMsg.value[9] > 1500) {
+		init();
+	}
 }
 
 /////////////////////////////////////////////////
@@ -257,6 +261,9 @@ Propulsion * Factory::buildPropulsion(ModelPlane * parent)
 	case 1:
 		std::cout << "selecting Beard engine" << std::endl;
 		return new EngBeard(parent);
+	case 2:
+		std::cout << "selecting piston engine" << std::endl;
+		return new PistonEng(parent);
 	default:
 		ROS_FATAL("Error while constructing Beard motor");
 		ros::shutdown();

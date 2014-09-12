@@ -4,7 +4,7 @@
 	<link name="base_link">
 		<visual>
 			<geometry>
-				<!--mesh filename="package://last_letter/urdf/skywalker.dae"/-->
+				<!-- <mesh filename="package://last_letter/urdf/skywalker.dae"/> -->
 				<mesh filename="package://last_letter/urdf/skywalker.stl" scale="0.02621 0.02621 0.02621"/>
 			</geometry>
 			<material name="white">

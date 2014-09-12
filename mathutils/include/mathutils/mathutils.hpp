@@ -14,6 +14,8 @@ extern "C" {
     void dgetri_(int* N, double* A, int* lda, int* IPIV, double* WORK, int* lwork, int* INFO);
 }
 
+////////////
+// Functions
 
 void quat_normalize (geometry_msgs::Quaternion *q);
 void quat_normal_wcomplete (geometry_msgs::Quaternion *q);
@@ -44,3 +46,28 @@ geometry_msgs::Vector3 operator*(const double a, geometry_msgs::Vector3& vec);
 geometry_msgs::Vector3 operator/(const double *mtx, geometry_msgs::Vector3& vec);
 
 int inverse(double* A, double* Ainv, int N);
+
+
+//////////
+// Classes
+
+class Polynomial1D {
+public:
+	double coeffNo;
+	double * coeffs;
+	Polynomial1D(int maxOrder, double * coeffArray);
+	~Polynomial1D();
+	double evaluate(double x);
+};
+
+class Polynomial2D {
+public:
+	double coeffNo1, coeffNo2;
+	double * coeffs;
+	Polynomial2D(int maxOrder1, int maxOrder2, double * coeffArray);
+	~Polynomial2D();
+	double evaluate(double x, double y);
+	// Important notes: maxOrder of variable y must but greater or equal to maxOrder of variable x
+	// Pass the coefficient array with the following ordering (eg for maxOrder1=1, maxOrder2=3):
+	// [00 01 02 03 10 11 12]
+};

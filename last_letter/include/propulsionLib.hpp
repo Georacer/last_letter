@@ -50,3 +50,27 @@ class EngBeard: public Propulsion
 	geometry_msgs::Vector3 getForce(); //Calculate Forces
 	geometry_msgs::Vector3 getTorque(); //Calculate Torques
 };
+
+// Piston engine
+class PistonEng : public Propulsion
+{
+public:
+	////////////
+	// Variables
+	double omegaMin, omegaMax;
+	double deltat, propDiam, engInertia;
+
+	//////////
+	// Members
+	Polynomial1D * npPoly;
+	Polynomial2D * powerPoly;
+
+	////////////
+	// Functions
+	PistonEng(ModelPlane *);
+	~PistonEng();
+
+	void updateRadPS();
+	geometry_msgs::Vector3 getForce();
+	geometry_msgs::Vector3 getTorque();
+};

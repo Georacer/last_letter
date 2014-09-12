@@ -5,7 +5,7 @@
 ///////////////////
 
 	//Constructor
-	PID::PID (double Pi, double Ii, double Di, double satUi = std::numeric_limits<double>::max(), double satLi = std::numeric_limits<double>::min(),
+	PID::PID (double Pi, double Ii, double Di, double satUi = std::numeric_limits<double>::max(), double satLi = std::numeric_limits<double>::min(), double trimi = 0.0,
 		double Tsi = 1.0/100, double Taui = 0.1)
 	{
 		init();
@@ -14,6 +14,7 @@
 		D = Di;
 		satU = satUi;
 		satL = satLi;
+		trim = trimi;
 		Ts = Tsi;
 		Tau = Taui;
 	}
@@ -29,9 +30,9 @@
 	double PID::step(double error)
 	{
 	
-		Iterm += Ts*error;
+		Iterm += I*Ts*error;
 		double Dterm = 1.0 / (Tau + Ts) * ( Tau * Dprev + error - Eprev);
-		output = P*error + I*Iterm + D*Dterm;
+		output = P*error + Iterm + D*Dterm + trim;
 
 //		double Pterm = P*error;
 //		Iterm += Ts/2 * (error + Eprev);
@@ -58,7 +59,7 @@
 		double Pterm = P*error;
 		Iterm += I*error*dt;
 		double Dterm = D / (D + dt/Tau) * (Uprev + (error - Eprev)/Tau);
-		output = Pterm + Iterm + Dterm;
+		output = Pterm + Iterm + Dterm + trim;
 		if (output>satU) {
 			output = satU;
 			Iterm = Iprev;
@@ -78,7 +79,7 @@
 		double Pterm = P*error;
 		Iterm += I*error*dt;
 		double Dterm = D / (D + dt/Tau) * (Uprev + (error - Eprev)/Tau);
-		output = Pterm + Iterm + Dterm;
+		output = Pterm + Iterm + Dterm + trim;
 		if (output>satU) {
 			output = satU;
 			Iterm = Iprev;

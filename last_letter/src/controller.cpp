@@ -28,7 +28,7 @@
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
 		Tau = 0.1;
-		roll2Aileron = new PID(P, I, D, satU, satL, Ts, Tau);
+		roll2Aileron = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 		
 		//Create roll to aileron controller
 		if(!ros::param::getCached("yaw2roll/p", P)) {ROS_FATAL("Invalid parameters for -roll2ail/p- in param server!"); ros::shutdown();}
@@ -39,7 +39,7 @@
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
 		Tau = 0.1;
-		yaw2Roll = new PID(P, I, D, satU, satL, Ts, Tau);
+		yaw2Roll = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 		
 		//Create roll to aileron controller
 		if(!ros::param::getCached("beta2rud/p", P)) {ROS_FATAL("Invalid parameters for -beta2rud/p- in param server!"); ros::shutdown();}
@@ -50,7 +50,7 @@
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
 		Tau = 0.1;
-		beta2Rudder = new PID(P, I, D, satU, satL, Ts, Tau);
+		beta2Rudder = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 		
 		//Create pitch to elevator controller
 		if(!ros::param::getCached("pitch2elev/p", P)) {ROS_FATAL("Invalid parameters for -pitch2elev/p- in param server!"); ros::shutdown();}
@@ -58,10 +58,11 @@
 		if(!ros::param::getCached("pitch2elev/d", D)) {ROS_FATAL("Invalid parameters for -pitch2elev/d- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("pitch2elev/max", satU)) {ROS_FATAL("Invalid parameters for -pitch2elev/max- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("pitch2elev/min", satL)) {ROS_FATAL("Invalid parameters for -pitch2elev/min- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("pitch2elev/neutral", trim)) {ROS_FATAL("Invalid parameters for -pitch2elev/neutral- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
 		Tau = 0.1;
-		pitch2Elevator = new PID(P, I, D, satU, satL, Ts, Tau);
+		pitch2Elevator = new PID(P, I, D, satU, satL, trim, Ts, Tau);
 		
 		//Create altitude to pitch controller
 		if(!ros::param::getCached("alt2pitch/p", P)) {ROS_FATAL("Invalid parameters for -alt2pitch/p- in param server!"); ros::shutdown();}
@@ -72,7 +73,7 @@
 		if(!ros::param::getCached("alt2pitch/tau", Tau)) {ROS_FATAL("Invalid parameters for -alt2pitch/tau- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		alt2Pitch = new PID(P, I, D, satU, satL, Ts, Tau);
+		alt2Pitch = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 		
 		//Create airspeed to pitch controller
 		if(!ros::param::getCached("airspd2pitch/p", P)) {ROS_FATAL("Invalid parameters for -airspd2pitch/p- in param server!"); ros::shutdown();}
@@ -83,7 +84,7 @@
 		if(!ros::param::getCached("airspd2pitch/tau", Tau)) {ROS_FATAL("Invalid parameters for -airspd2pitch/tau- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		airspd2Pitch = new PID(P, I, D, satU, satL, Ts, Tau);
+		airspd2Pitch = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 		
 		//Create airspeed to throttle controller
 		if(!ros::param::getCached("airspd2throt/p", P)) {ROS_FATAL("Invalid parameters for -airspd2throt/p- in param server!"); ros::shutdown();}
@@ -92,9 +93,10 @@
 		if(!ros::param::getCached("airspd2throt/tau", Tau)) {ROS_FATAL("Invalid parameters for -airspd2throt/tau- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airspd2throt/max", satU)) {ROS_FATAL("Invalid parameters for -airspd2throt/max- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("airspd2throt/min", satL)) {ROS_FATAL("Invalid parameters for -airspd2throt/min- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("airspd2throt/neutral", trim)) {ROS_FATAL("Invalid parameters for -airspd2throt/neutral- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		airspd2Throt = new PID(P, I, D, satU, satL, Ts, Tau);
+		airspd2Throt = new PID(P, I, D, satU, satL, trim, Ts, Tau);
 		
 		if(!ros::param::getCached("altSwitchThresh", altThresh)) {ROS_FATAL("Invalid parameters for -altSwitchThresh- in param server!"); ros::shutdown();}
 	}
@@ -132,31 +134,41 @@
 	//Longitudinal Controllers
 	double BMcLAttitudeController::elevatorControl() {
 		double errAlt = refCommands.altitude - states.geoid.altitude;
+		double errVa = refCommands.airspeed - airdata.x;
+
 		double errPitch;
+		double refPitch;
 		int static state = 0;
-		
+		euler = quat2euler(states.pose.orientation);
+
+
 		if (abs(errAlt) <= altThresh) {
 			if (state) {
 				state = 0;
-//				alt2Pitch->Iterm = airspd2Pitch->Iterm * airspd2Pitch->I / alt2Pitch-> I;
-				alt2Pitch->init();
+				// alt2Pitch->Iterm = airspd2Pitch->Iterm / airspd2Pitch->I * alt2Pitch-> I;
+				// alt2Pitch->init();
 			}
-			euler = quat2euler(states.pose.orientation);
-			errPitch = alt2Pitch->step(errAlt) - euler.y;
-
+			refPitch = alt2Pitch->step(errAlt);
+			errPitch = refPitch - euler.y;
+			airspd2Pitch->Iterm += 0.01*(errPitch - airspd2Pitch->step(errVa));
+			// airspd2Pitch->Iterm = errPitch;
 		}
 		else {
 			if (!state) {
 				state = 1;
-				airspd2Pitch->Iterm = alt2Pitch->Iterm * alt2Pitch->I / airspd2Pitch-> I;
+				// airspd2Pitch->Iterm = alt2Pitch->Iterm / alt2Pitch->I * airspd2Pitch-> I;
 //				airspd2Pitch->init();
 			}
-			double errVa = refCommands.airspeed - airdata.x;
-			double refPitch = airspd2Pitch->step( errVa);
-			errPitch = refPitch - euler.y;
+			refPitch = airspd2Pitch->step( errVa);
+			errPitch =  refPitch - euler.y;
+			// alt2Pitch->Iterm += -0.0005*(errPitch - alt2Pitch->step(errAlt));
+			// alt2Pitch->Iterm = errPitch;
+			// alt2Pitch->Eprev = errAlt;
+
 		}
-		
-		return pitch2Elevator->step( errPitch);
+		std::cout << "alt2Pitch I :" << alt2Pitch->Iterm << ", airspd2pitch I :"<< airspd2Pitch->Iterm << ", refPitch : " << refPitch << ", errPitch : " << errPitch;
+		std::cout << std::endl;
+		return pitch2Elevator->step(errPitch);
 	}
 	
 	double BMcLAttitudeController::throttleControl() {
@@ -225,6 +237,7 @@
 		input[1] = (double)(inputMsg.value[1]-1500)/500;
 		input[2] = (double)(inputMsg.value[2]-1000)/1000;
 		input[3] = (double)(inputMsg.value[3]-1500)/500;
+		input[9] = (double)(inputMsg.value[9]-1000)/1000;
 	}
 	
 	void BMcLAttitudeController::writePWM(double *output)
@@ -234,6 +247,7 @@
 		channels.value[1] = (unsigned int)(output[1]*500+ 1500);
 		channels.value[2] = (unsigned int)((output[2]+1)*500+ 1000);
 		channels.value[3] = (unsigned int)(output[3]*500+ 1500);
+		channels.value[9] = (unsigned int)(input[9]*1000 + 1000);
 		channels.header.stamp = ros::Time::now();
 		pubCtrl.publish(channels);
 	}

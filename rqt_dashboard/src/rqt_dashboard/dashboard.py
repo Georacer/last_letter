@@ -27,7 +27,7 @@ class DashboardGrid(QtGui.QWidget):
 		
 		self.commands = RefCommands()
 		self.commands.altitude = 100.0
-		self.commands.airspeed = 25.0
+		self.commands.airspeed = 27.0
 		self.pub = rospy.Publisher('/fw1/refCommands', RefCommands)
 		self.pubTimer = QtCore.QTimer()
 		self.pubTimer.timeout.connect(self.publishCommands)
@@ -142,6 +142,19 @@ class DashboardGrid(QtGui.QWidget):
 		multiplier=''
 		units='degrees'
 		self.gaugeBeta = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
+		#RPM gauge
+		topic = "/fw1/dashboard/rotorspeed"
+		length=300.0
+		end_angle= -60.0
+		min=3000.0
+		max=7000.0
+		main_points=9
+		warning=[(3250, 3500), (6750, 7000)]
+		danger=[(3000, 3250), (6500, 6750)]
+		description='Engine Speed'
+		multiplier=''
+		units='RPM'
+		self.gaugeRPM = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
 		
 		self.column1.addWidget(self.gaugeYaw)
 		self.column1.addWidget(self.gaugeRoll)
@@ -151,6 +164,7 @@ class DashboardGrid(QtGui.QWidget):
 		self.column2.addWidget(self.gaugeAltitude)
 		self.column3.addWidget(self.gaugeAlpha)
 		self.column3.addWidget(self.gaugeBeta)
+		self.column3.addWidget(self.gaugeRPM)
 		self.line1.addLayout(self.column1)
 		self.line1.addLayout(self.column2)
 		self.line1.addLayout(self.column3)

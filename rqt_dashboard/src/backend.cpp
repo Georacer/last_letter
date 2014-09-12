@@ -98,6 +98,7 @@ void calculations(void)
 	dash.beta = tempVec.z;
 	dash.climbRate = calcClimb(); //RAW warning!
 	dash.altitude = states.geoid.altitude;
+	dash.rotorspeed = states.rotorspeed[0]*60.0/2.0/M_PI; // Convert from RadPS to RPM
 }
 
 int main(int argc, char **argv)
@@ -110,6 +111,9 @@ int main(int argc, char **argv)
 	ros::Subscriber subEuler = n.subscribe("/fw1/euler", 1, euler_callback);
 	ros::Subscriber subEnv = n.subscribe("/fw1/environment", 1, env_callback);
 	ros::Publisher pub = n.advertise<rqt_dashboard::Dashboard>("/fw1/dashboard", 1);
+	// Initialize rotorspeed array
+	states.rotorspeed.clear();
+	states.rotorspeed.push_back((double) 0);
 	ROS_INFO("dashboard backend ready");
 
 	while (ros::ok())

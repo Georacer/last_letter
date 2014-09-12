@@ -26,8 +26,8 @@ int main(int argc, char **argv)
 
 		if (isnan(uav.states.velocity.linear.x))
 		{		
-			ROS_FATAL("State NAN!");
-			break;
+			ROS_FATAL("State NAN detected on main!");
+			uav.init();
 		}
 	}
 	

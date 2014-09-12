@@ -8,6 +8,7 @@
 	<group>	
 		<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
 		<rosparam command="load" file="$(find last_letter)data/parameters/environment.yaml" />
+		<rosparam command="load" file="$(find last_letter)data/parameters/world.yaml" />
 	</group>
 
 	<!-- Initialization of services -->

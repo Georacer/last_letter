@@ -11,14 +11,14 @@ class PID
 	public:
 	///////////
 	//Variables
-	double P, I, D, satU, satL, Ts, Tau;
+	double P, I, D, satU, satL, Ts, Tau, trim;
 	double Iterm, Iprev, Eprev, Uprev, Dprev;
 	double output;
 	///////////
 	//Functions
 	
 	//Constructor
-	PID (double Pi, double Ii, double Di, double satUi, double satLi, double Tsi, double Ni);
+	PID (double Pi, double Ii, double Di, double satUi, double satLi, double trim, double Tsi, double Ni);
 
 	//Destructor
 	~PID ();

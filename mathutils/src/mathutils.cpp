@@ -303,3 +303,74 @@ int inverse(double* A, double* Ainv, int N)
 
     return INFO;
 }
+
+////////////////////
+// Class Definitions
+////////////////////
+
+//////////////////////
+// Define Polynomial1D
+
+// class constructor
+Polynomial1D::Polynomial1D (int maxOrder, double * coeffArray) {
+    int i;
+    coeffNo = maxOrder;
+    // Create and initialize polynomial coefficients container
+    coeffs = (double*)malloc(sizeof(double) * coeffNo);
+    for (i=0; i<=coeffNo; i++) {
+        coeffs[i] = coeffArray[i];
+    }
+}
+
+// class destructor
+Polynomial1D::~Polynomial1D () {
+    free(coeffs);
+}
+
+// polynomial evaluation
+double Polynomial1D::evaluate (double x) {
+    int i;
+    double sum=0;
+    for (i=0; i<=coeffNo; i++) {
+        sum += coeffs[i]*pow(x,i);
+    }
+    return sum;
+}
+
+//////////////////////
+// Define Polynomial2D
+
+// class constructor
+Polynomial2D::Polynomial2D (int maxOrder1, int maxOrder2, double * coeffArray) {
+    // Attention! maxOrder2 > maxOrder1. If not, swap the variables!
+    int i;
+    coeffNo1 = maxOrder1;
+    coeffNo2 = maxOrder2;
+    // Create and initialize polynomial coefficients container
+    int arrayLen = (2*maxOrder2 + 2*maxOrder1*maxOrder2 + maxOrder1 - maxOrder1*maxOrder1 + 2)/2;
+    coeffs = (double*)malloc(sizeof(double) * arrayLen);
+    for (i=0; i<arrayLen; i++) {
+        coeffs[i] = coeffArray[i];
+    }
+}
+
+// class destructor
+Polynomial2D::~Polynomial2D () {
+    free(coeffs);
+}
+
+// polynomial evaluation
+double Polynomial2D::evaluate (double x, double y) {
+    int i, j, k=0;
+    double sum=0;
+    for (i=0; i<=coeffNo1; i++) {
+        for (j=0; j<=coeffNo2; j++) {
+            if (i+j<=coeffNo2) {
+                sum += coeffs[k]*pow(x,i)*pow(y,j);
+                k++;
+            }
+        }
+    }
+    // std::cout << "2DPoly: " << x << " " << y << " " << sum << std::endl; // Sanity check output
+    return sum;
+}

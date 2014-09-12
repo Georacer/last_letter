@@ -1,11 +1,12 @@
 #Parameters for a customized UAV
 #Based on values provided in the book Small Unmanned Aircraft - Theory and Practice by Beard and McLain
+#All units are in S.I. unless otherwise stated
 
 #Simulation Rate
 simRate: 1000
 
 #Initial State
-init/position: [0.0, 0.0, 0.0] #NED frame
+init/position: [0.0, 0.0, -1.0] #NED frame
 init/orientation: [0.00, 0.00, 0.00, 1.0] #NED frame
 init/velLin: [0.0, 0.000, 0.0] #body frame
 init/velAng: [0.000, 0.000, 0.000] #body frame
@@ -15,6 +16,7 @@ init/throttle: 0.778
 init/rudder: -0.000
 
 #Airframe Aerodynamic Parameters
+airframe/aerodynamicsType: 1
 airframe/m: 185.0
 airframe/col_x: 0.00
 airframe/col_y: 0.00
@@ -27,7 +29,6 @@ airframe/s: 4.45
 airframe/b: 6.4
 airframe/c: 0.78
 airframe/c_lift_0: 0.062
-airframe/c_drag_p: 0.036
 airframe/c_m_0: -0.00778
 airframe/c_lift_a: 5.33
 airframe/c_m_a: -0.268
@@ -39,6 +40,7 @@ airframe/c_drag_deltae: 0.26
 airframe/c_m_deltae: 0.59
 airframe/mcoeff: 50
 airframe/alpha_stall: 0.2967
+airframe/c_drag_p: 0.036
 airframe/c_n_deltar: 0.016 #opposite sign than c_y_deltar
 airframe/c_y_0: 0.0
 airframe/c_l_0: 0.0
@@ -61,15 +63,26 @@ airframe/deltaa_max: 0.2618
 airframe/deltae_max: 0.4363
 airframe/deltar_max: 0.4363
 
-#Airframe Propulsion Parameters
-motor/s_prop: 2.01
-motor/k_motor: 55
-motor/k_t_p: 0
-motor/k_omega: 0
+# Airframe Propulsion Parameters
+# Motor types: 0 No motor, 1 Bear Engine, 2 Piston engine
+motor/motorType: 1
+motor/s_prop: 1.0
+motor/k_motor: 0.150
+motor/k_t_p: 0.0
+motor/k_omega: 366.0
 motor/c_prop: 1.0
+# motor/motorType: 2
+# motor/powerPolyNo: [1, 5]
+# motor/powerPoly: [7.554e+4, -1076.0, 5.768, -0.01416, 1.66e-5, -7.553e-9, 1.676e+5, -1487.0, 4.831, -0.006781, 3.493e-6]
+# motor/nCoeffPolyNo: 4
+# motor/nCoeffPoly: [0.115, -0.22, 2.982, -2.846, 0.8]
+# motor/RadPSLimits: [314.16, 733.04]
+# motor/propDiam: 0.8 # in m
+# motor/engInertia: 10.0 # in kg*m^3
 
-#Contact points array
-#Material types: 0 foam, 1 metal, 2 rubber wheel, 3 composites
+# Contact points array
+# Material types: 0 foam, 1 metal, 2 rubber wheel, 3 composites
+airframe/groundReactionType: 1
 airframe/contactPtsNo: 11
 airframe/contactPoint1: [-0.38, -0.50, 0.71, 2.0]
 airframe/contactPoint2: [-0.38, 0.50, 0.71, 2.0]

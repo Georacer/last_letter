@@ -19,12 +19,12 @@ class BMcLAttitudeController
 	last_letter::Environment environment;
 	last_letter::RefCommands refCommands;
 	geometry_msgs::Vector3 euler, airdata;
-	double input[4];
-	double output[4];
+	double input[10];
+	double output[10];
 	ros::Time tprev;
 	ros::Subscriber subInp, subState, subEnv, subRef;
 	ros::Publisher pubCtrl;
-	double P, I, D, satU, satL, Ts, Tau, altThresh;
+	double P, I, D, satU, satL, trim, Ts, Tau, altThresh;
 	/////////
 	//Members
 	PID * roll2Aileron;
