@@ -98,6 +98,103 @@
 	{
 	}
 
+///////////////////
+// Define APID class
+///////////////////
+
+	//Constructor
+	APID::APID (double Pi, double Ii, double Di, double satUi = std::numeric_limits<double>::max(), double satLi = std::numeric_limits<double>::min(), double trimi = 0.0,
+		double Tsi = 1.0/100, double Taui = 0.1)
+	{
+		init();
+		Pinit = Pi;
+		P = Pinit;
+		Iinit = Ii;
+		I = Iinit;
+		Dinit = Di;
+		D = Dinit;
+		satU = satUi;
+		satL = satLi;
+		trim = trimi;
+		Ts = Tsi;
+		Tau = Taui;
+	}
+	
+	void APID::init(void) {
+		Iterm = 0;
+		Iprev = 0;
+		Eprev = 0;
+		Uprev = 0;
+		Dprev = 0;
+		Ierror = 0;
+		bumplessI1 = 0;
+		bumplessI2 = 0;
+	}
+	
+	double APID::step(double error, bool track, double trInput)
+	{
+		double PGainPrev = P;
+		double IGainPrev = I;
+		double DGainPrev = I;
+		if (!track) {
+			Ierror += error*Ts;
+			// Ierror = std::max(-100.0, std::min(100.0, Ierror));
+
+			P += (0.000001*error*error - 0.01*P)*Ts;
+			I += (1e-7*Ierror*Ierror - 0.5*I)*Ts;
+			// I += (0.00001*error*Ierror)*Ts;
+			D += (1e-8*pow((error - Eprev)/Ts,2) - 0.05*D)*Ts;
+			if (I<Iinit) {
+				I = Iinit;
+			}
+			bumplessI1 = 0;
+			bumplessI2 = 0;
+		}
+
+		Iterm += I*Ts*error;
+		output = P*error + Iterm + D*(error-Eprev)/Ts + trim;
+		// output = P*error + Iterm + trim;
+
+
+		if (!track) {
+			if (output>satU) {
+				output = satU;
+				Iterm = Iprev;
+				P = PGainPrev;
+				I = IGainPrev;
+				D = DGainPrev;
+			}
+			if (output<satL) {
+				output = satL;
+				Iterm = Iprev;
+				P = PGainPrev;
+				I = IGainPrev;
+				D = DGainPrev;
+			}
+		}
+
+		if (track) {
+			trErr = 100*(trInput - output);
+			bumplessI1 += 25*trErr*Ts;
+			bumplessI2 += 2.0*bumplessI1*Ts;
+			Iterm += (trErr + bumplessI1 + bumplessI2)*Ts;
+			Ierror = 0;
+			P = Pinit;
+			I = Iinit;
+			D = Dinit;
+		}
+
+		Iprev = Iterm;
+		Eprev = error;
+		return output;
+	}
+	
+	//Destructor
+	APID::~APID ()
+	{
+	}
+
+
 /////////////////////////////////////////
 //Aerodynamc angles/ airspeed calculation
 geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds)

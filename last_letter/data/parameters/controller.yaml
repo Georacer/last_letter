@@ -36,14 +36,14 @@ pitch2elev/min : -1.0
 pitch2elev/neutral : 0.274
 
 # altitude to pitch controller
-# alt2pitch/p : 0.00934
-# alt2pitch/i : 0.00002
-# alt2pitch/d : -0.0192
-# alt2pitch/tau : 2.0562
-alt2pitch/p : 0.01623
-alt2pitch/i : 0.00005677
-alt2pitch/d : -0.019205
-alt2pitch/tau : 1.1832
+# alt2pitch/p : 0.01623
+# alt2pitch/i : 0.0000567
+# alt2pitch/d : -0.019205
+# alt2pitch/tau : 1.1832
+alt2pitch/p : 0.0493
+alt2pitch/i : 0.00475
+alt2pitch/d : 0.0183 #Originally negative
+alt2pitch/tau : 0.912
 alt2pitch/max : 0.5236
 alt2pitch/min : -0.5236
 
@@ -56,10 +56,6 @@ airspd2pitch/max : 0.5236
 airspd2pitch/min : -0.5236
 
 # airspeed to throttle controller
-# airspd2throt/p : 0.034458
-# airspd2throt/i : 0.019414
-# airspd2throt/d : 0.003156
-# airspd2throt/tau : 0.0147
 airspd2throt/p : 0.10143
 airspd2throt/i : 0.10456
 airspd2throt/d : 0.01879

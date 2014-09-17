@@ -11,6 +11,7 @@
 		//Initialize states
 		tprev = ros::Time::now();
 		states.header.stamp = tprev;
+		altDes = 0;
 		
 		//Subscribe and advertize
 		subInp = n.subscribe("rawPWM",1,&BMcLAttitudeController::getInput, this);
@@ -73,7 +74,8 @@
 		if(!ros::param::getCached("alt2pitch/tau", Tau)) {ROS_FATAL("Invalid parameters for -alt2pitch/tau- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
-		alt2Pitch = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
+		// alt2Pitch = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
+		alt2Pitch = new APID(P, I, D, satU, satL, 0.0, Ts, Tau);
 		
 		//Create airspeed to pitch controller
 		if(!ros::param::getCached("airspd2pitch/p", P)) {ROS_FATAL("Invalid parameters for -airspd2pitch/p- in param server!"); ros::shutdown();}
@@ -133,40 +135,44 @@
 	/////////////////////
 	//Longitudinal Controllers
 	double BMcLAttitudeController::elevatorControl() {
+		double static altDesPrev;
+		// altDes += (refCommands.altitude - altDesPrev)*0.01;
+		// altDesPrev = altDes;
 		double errAlt = refCommands.altitude - states.geoid.altitude;
 		double errVa = refCommands.airspeed - airdata.x;
 
 		double errPitch;
 		double refPitch;
 		int static state = 0;
+		double static sumErrAlt = 0, sumErrVa = 0, sumErrAlt2 = 0, sumErrVa2 = 0;
+		double errContr, contrOutput;
 		euler = quat2euler(states.pose.orientation);
 
 
 		if (abs(errAlt) <= altThresh) {
 			if (state) {
 				state = 0;
-				// alt2Pitch->Iterm = airspd2Pitch->Iterm / airspd2Pitch->I * alt2Pitch-> I;
-				// alt2Pitch->init();
+				sumErrAlt = 0;
+				sumErrAlt2 = 0;
 			}
-			refPitch = alt2Pitch->step(errAlt);
-			errPitch = refPitch - euler.y;
-			airspd2Pitch->Iterm += 0.01*(errPitch - airspd2Pitch->step(errVa));
-			// airspd2Pitch->Iterm = errPitch;
+			refPitch = alt2Pitch->step(errAlt, false, 0);
+			errContr = errPitch - airspd2Pitch->step(errVa);
+			sumErrVa += errContr*0.01;
+			sumErrVa2 += sumErrVa*0.01;
+			airspd2Pitch->Iterm += (10*errContr + 10*sumErrVa + 10*sumErrVa2)*0.01;
 		}
 		else {
 			if (!state) {
 				state = 1;
-				// airspd2Pitch->Iterm = alt2Pitch->Iterm / alt2Pitch->I * airspd2Pitch-> I;
-//				airspd2Pitch->init();
+				sumErrVa = 0;
+				sumErrVa2 = 0;
 			}
 			refPitch = airspd2Pitch->step( errVa);
-			errPitch =  refPitch - euler.y;
-			// alt2Pitch->Iterm += -0.0005*(errPitch - alt2Pitch->step(errAlt));
-			// alt2Pitch->Iterm = errPitch;
-			// alt2Pitch->Eprev = errAlt;
+			contrOutput = alt2Pitch->step(errAlt, true, refPitch);
 
 		}
-		std::cout << "alt2Pitch I :" << alt2Pitch->Iterm << ", airspd2pitch I :"<< airspd2Pitch->Iterm << ", refPitch : " << refPitch << ", errPitch : " << errPitch;
+		errPitch = refPitch - euler.y;
+		std::cout << "P /  I /  D / Iterm /  Out / Target :" << alt2Pitch->P << "/"<< alt2Pitch->I << "/"<< alt2Pitch->D << "/"<< alt2Pitch->Iterm << "/"<< contrOutput << "/" << refCommands.altitude;
 		std::cout << std::endl;
 		return pitch2Elevator->step(errPitch);
 	}

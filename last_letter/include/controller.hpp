@@ -24,14 +24,14 @@ class BMcLAttitudeController
 	ros::Time tprev;
 	ros::Subscriber subInp, subState, subEnv, subRef;
 	ros::Publisher pubCtrl;
-	double P, I, D, satU, satL, trim, Ts, Tau, altThresh;
+	double P, I, D, satU, satL, trim, Ts, Tau, altThresh, altDes;
 	/////////
 	//Members
 	PID * roll2Aileron;
 	PID * yaw2Roll;
 	PID * beta2Rudder;
 	PID * pitch2Elevator;
-	PID * alt2Pitch;
+	APID * alt2Pitch;
 	PID * airspd2Pitch;
 	PID * airspd2Throt;
 	///////////
