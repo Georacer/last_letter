@@ -101,6 +101,12 @@
 		airspd2Throt = new PID(P, I, D, satU, satL, trim, Ts, Tau);
 		
 		if(!ros::param::getCached("altSwitchThresh", altThresh)) {ROS_FATAL("Invalid parameters for -altSwitchThresh- in param server!"); ros::shutdown();}
+
+		int alphaOrder = 2;
+		int betaOrder = 1;
+		double alpha[] = {0.9751804568, -1.97502451};
+		double beta[] = {0.77646787e-4, 0.78300013e-4};
+		pitchSmoother = new discrTF(alpha, alphaOrder, beta, betaOrder);
 	}
 	
 	
@@ -136,8 +142,6 @@
 	//Longitudinal Controllers
 	double BMcLAttitudeController::elevatorControl() {
 		double static altDesPrev;
-		// altDes += (refCommands.altitude - altDesPrev)*0.01;
-		// altDesPrev = altDes;
 		double errAlt = refCommands.altitude - states.geoid.altitude;
 		double errVa = refCommands.airspeed - airdata.x;
 
@@ -149,11 +153,15 @@
 		euler = quat2euler(states.pose.orientation);
 
 
-		if (abs(errAlt) <= altThresh) {
+		if (abs(errAlt) <= altThresh) { // within altitude hold zone
+			double refAlt = pitchSmoother->step(refCommands.altitude);
+			std::cout << refAlt << " ";
+			errAlt = refAlt - states.geoid.altitude;
 			if (state) {
 				state = 0;
 				sumErrAlt = 0;
 				sumErrAlt2 = 0;
+
 			}
 			refPitch = alt2Pitch->step(errAlt, false, 0);
 			errContr = errPitch - airspd2Pitch->step(errVa);
@@ -161,20 +169,26 @@
 			sumErrVa2 += sumErrVa*0.01;
 			airspd2Pitch->Iterm += (10*errContr + 10*sumErrVa + 10*sumErrVa2)*0.01;
 		}
-		else {
+		else { // outside of altitude hold zone
 			if (!state) {
 				state = 1;
 				sumErrVa = 0;
 				sumErrVa2 = 0;
+				pitchSmoother->init(refCommands.altitude, refCommands.altitude);
 			}
-			refPitch = airspd2Pitch->step( errVa);
+			refPitch = airspd2Pitch->step(errVa);
 			contrOutput = alt2Pitch->step(errAlt, true, refPitch);
 
 		}
+
 		errPitch = refPitch - euler.y;
-		std::cout << "P /  I /  D / Iterm /  Out / Target :" << alt2Pitch->P << "/"<< alt2Pitch->I << "/"<< alt2Pitch->D << "/"<< alt2Pitch->Iterm << "/"<< contrOutput << "/" << refCommands.altitude;
-		std::cout << std::endl;
+		// std::cout << "P /  I /  D / Iterm /  Out / Target :" << alt2Pitch->P << "/"<< alt2Pitch->I << "/"<< alt2Pitch->D << "/"<< alt2Pitch->Iterm << "/"<< contrOutput << "/" << refCommands.altitude;
+		// std::cout << std::endl;
+
+		// smooth out commanded pitch
+
 		return pitch2Elevator->step(errPitch);
+		// return pitch2Elevator->step(pitchSmoother->step(errPitch));
 	}
 	
 	double BMcLAttitudeController::throttleControl() {

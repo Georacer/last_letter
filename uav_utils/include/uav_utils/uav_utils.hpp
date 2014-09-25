@@ -53,7 +53,3 @@ public:
 	double step(double error, bool track, double trInput);
 	void init(void);	
 };
-
-geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);
-
-void WGS84_NM(double lat,double *NE, double *ME);

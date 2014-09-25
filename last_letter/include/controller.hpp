@@ -34,6 +34,7 @@ class BMcLAttitudeController
 	APID * alt2Pitch;
 	PID * airspd2Pitch;
 	PID * airspd2Throt;
+	discrTF * pitchSmoother;
 	///////////
 	//Functions
 	void step();

@@ -71,3 +71,35 @@ public:
 	// Pass the coefficient array with the following ordering (eg for maxOrder1=1, maxOrder2=3):
 	// [00 01 02 03 10 11 12]
 };
+
+
+// Discrete transfer function implementation
+// for strictly proper TFs
+class discrTF
+{
+public:
+	///////////
+	//Variables
+	double * alpha, * beta;
+	double * outputHist, * inputHist;
+	int alphaOrder, betaOrder;
+
+	///////////
+	//Functions
+
+	// Constructor
+	discrTF (double * alphaIn, int alphaOrderIn, double * betaIn, int betaOrderIn);
+
+	// Destructor
+	~discrTF ();
+
+	// matrix reset
+	void init(double restInp, double restOut);
+
+	// main step
+	double step(double input);
+};
+
+geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);
+
+void WGS84_NM(double lat,double *NE, double *ME);

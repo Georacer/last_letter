@@ -374,3 +374,70 @@ double Polynomial2D::evaluate (double x, double y) {
     // std::cout << "2DPoly: " << x << " " << y << " " << sum << std::endl; // Sanity check output
     return sum;
 }
+
+
+///////////////////////
+// Define discrTF class
+///////////////////////
+
+  // Constructor
+  discrTF::discrTF (double * alphaIn, int alphaOrderIn, double * betaIn, int betaOrderIn)
+  {
+    int i;
+    alphaOrder = alphaOrderIn;
+    betaOrder = betaOrderIn;
+
+    outputHist = (double*)malloc(sizeof(double) * alphaOrder);
+    inputHist = (double*)malloc(sizeof(double) * alphaOrder);
+
+    alpha = (double*)malloc(sizeof(double) * alphaOrder);
+    beta = (double*)malloc(sizeof(double) * (betaOrder+1));
+    for (i=0; i<alphaOrder; i++){
+      alpha[i] = alphaIn[i];
+    }
+    for (i=0; i<=betaOrder; i++){
+      beta[i] = betaIn[i];
+    }
+
+    init(0, 0);
+  }
+
+  // Destructor
+  discrTF::~discrTF ()
+  {
+    free(alpha);
+    free(beta);
+    free(outputHist);
+    free(inputHist);
+  }
+
+  // matrix reset
+  void discrTF::init(double restInp, double restOut)
+  {
+    int i;
+    for (i=0; i<alphaOrder; i++){
+      outputHist[i]=restOut;
+      inputHist[i]=restInp;
+    }
+  }
+
+  // main step
+  double discrTF::step(double input)
+  {
+    int i;
+    double sum = 0;
+    for (i=0; i<alphaOrder; i++){ // evaluate past output contribution
+      sum -= alpha[i]*outputHist[i];
+    }
+    for (i=0; i<=betaOrder; i++){ // evaluate input contribution
+      sum += beta[i]*inputHist[i];
+    }
+    for (i=0; i<(alphaOrder-1); i++){ // Slide history vectors back
+      outputHist[i] = outputHist[i+1];
+      inputHist[i] = inputHist[i+1];
+    }
+    outputHist[alphaOrder-1] = sum;
+    inputHist[alphaOrder-1]  = input;
+
+    return sum;
+  } 
