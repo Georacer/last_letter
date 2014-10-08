@@ -240,6 +240,9 @@ Aerodynamics * Factory::buildAerodynamics(ModelPlane * parent)
 	case 1:
 		std::cout << "selecting StdLinearAero aerodynamics" << std::endl;
 		return new StdLinearAero(parent);
+	case 2:
+		std::cout << "selecting HCUAVAero aerodynamics" << std::endl;
+		return new HCUAVAero(parent);
 	default:
 		ROS_FATAL("Error while constructing StdLinearAero aerodynamics");
 		ros::shutdown();

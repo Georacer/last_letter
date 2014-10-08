@@ -16,7 +16,7 @@ init/throttle: 0.778
 init/rudder: -0.000
 
 #Airframe Aerodynamic Parameters
-airframe/aerodynamicsType: 1
+airframe/aerodynamicsType: 2
 airframe/m: 185.0
 airframe/CGOffset: [0.0, 0.0, 0.0]
 airframe/j_x: 93.5

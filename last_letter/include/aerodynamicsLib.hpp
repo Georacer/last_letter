@@ -38,8 +38,18 @@ class StdLinearAero : public Aerodynamics
 	geometry_msgs::Vector3 getForce();
 	geometry_msgs::Vector3 getTorque();
 	//Calculate lift coefficient from alpha
-	double liftCoeff(double);
+	virtual double liftCoeff(double);
 	//Calculate drag coefficient from alpha
-	double dragCoeff(double);
+	virtual double dragCoeff(double);
 	
+};
+
+// Extension for fine specification of the drag polar
+class HCUAVAero : public StdLinearAero
+{
+public:
+	HCUAVAero(ModelPlane *);
+	~HCUAVAero();
+	double liftCoeff(double);
+	double dragCoeff(double);
 };
