@@ -6,6 +6,7 @@ class Aerodynamics
 	Aerodynamics(ModelPlane *);
 	~Aerodynamics();
 	geometry_msgs::Wrench wrenchAero;
+	geometry_msgs::Vector3 CGOffset; // vector from CG to CoL
 	virtual geometry_msgs::Vector3 getForce() = 0;
 	virtual geometry_msgs::Vector3 getTorque() = 0;
 };

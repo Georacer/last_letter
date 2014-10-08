@@ -5,6 +5,15 @@
 Aerodynamics::Aerodynamics(ModelPlane * parent)
 {
 	parentObj = parent;
+	XmlRpc::XmlRpcValue list;
+	int i;
+	if(!ros::param::getCached("airframe/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/airframe/CGOffset- in param server!"); ros::shutdown();}
+	for (i = 0; i < list.size(); ++i) {
+		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+	}
+	CGOffset.x = list[0];
+	CGOffset.y = list[1];
+	CGOffset.z = list[2];
 }
 
 Aerodynamics::~Aerodynamics()
@@ -194,6 +203,21 @@ geometry_msgs::Vector3 StdLinearAero::getTorque()
 	wrenchAero.torque.x = la;
 	wrenchAero.torque.y = ma;
 	wrenchAero.torque.z = na;
+
+	// Add torque to to force misalignment with CG
+	// r x F, where r is the distance from CoG to CoL
+	// Will potentially add the following code in the future, to support shift of CoG mid-flight
+	// XmlRpc::XmlRpcValue list;
+	// int i;
+	// if(!ros::param::getCached("airframe/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/airframe/CGOffset- in param server!"); ros::shutdown();}
+	// for (i = 0; i < list.size(); ++i) {
+	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+	// 	CGOffset[i]=list[i];
+	// }
+	wrenchAero.torque.x = wrenchAero.torque.x + CGOffset.y*wrenchAero.force.z - CGOffset.z*wrenchAero.force.y;
+	wrenchAero.torque.y = wrenchAero.torque.y - CGOffset.x*wrenchAero.force.z + CGOffset.z*wrenchAero.force.x;
+	wrenchAero.torque.z = wrenchAero.torque.z - CGOffset.y*wrenchAero.force.x + CGOffset.x*wrenchAero.force.y;
+
 	return wrenchAero.torque;
 }
 

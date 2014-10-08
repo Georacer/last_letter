@@ -7,6 +7,7 @@ class Propulsion
 	///////////
 	//Variables
 	ModelPlane * parentObj; // pointer to parent ModelPlane class
+	geometry_msgs::Vector3 CGOffset; // vector from CG to engine coordinates
 	double omega; // motor angular speed in rad/s
 	geometry_msgs::Wrench wrenchProp;
 

@@ -18,9 +18,7 @@ init/rudder: -0.000
 #Airframe Aerodynamic Parameters
 airframe/aerodynamicsType: 1
 airframe/m: 13.5
-airframe/col_x: -0.05
-airframe/col_y: 0.00
-airframe/col_z: -0.10
+airframe/CGOffset: [-0.05, 0.00, -0.10] # vector from CG to CoL
 airframe/j_x: 0.8244
 airframe/j_y: 1.135
 airframe/j_z: 1.759
@@ -64,6 +62,7 @@ airframe/deltae_max: 0.3491
 airframe/deltar_max: 0.3491
 
 #Airframe Propulsion Parameters
+motor/CGOffset: [-0.22, 0.0, -0.1] # vector from CG to motor mount position
 motor/motorType: 1
 motor/s_prop: 0.20
 motor/k_motor: 0.117

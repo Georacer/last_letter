@@ -155,7 +155,6 @@
 
 		if (abs(errAlt) <= altThresh) { // within altitude hold zone
 			double refAlt = pitchSmoother->step(refCommands.altitude);
-			std::cout << refAlt << " ";
 			errAlt = refAlt - states.geoid.altitude;
 			if (state) {
 				state = 0;
@@ -265,7 +264,7 @@
 		last_letter::SimPWM channels;
 		channels.value[0] = (unsigned int)(output[0]*500+ 1500);
 		channels.value[1] = (unsigned int)(output[1]*500+ 1500);
-		channels.value[2] = (unsigned int)((output[2]+1)*500+ 1000);
+		channels.value[2] = (unsigned int)((output[2])*500+ 1500);
 		channels.value[3] = (unsigned int)(output[3]*500+ 1500);
 		channels.value[9] = (unsigned int)(input[9]*1000 + 1000);
 		channels.header.stamp = ros::Time::now();
