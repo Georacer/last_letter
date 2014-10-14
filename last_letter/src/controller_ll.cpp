@@ -1,4 +1,4 @@
-#include "controller.hpp"
+#include "controller_ll.hpp"
 
 ///////////////////////////////////
 // Define attitude controller class
@@ -31,18 +31,18 @@
 		Tau = 0.1;
 		roll2Aileron = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 		
-		//Create roll to aileron controller
-		if(!ros::param::getCached("yaw2roll/p", P)) {ROS_FATAL("Invalid parameters for -roll2ail/p- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("yaw2roll/i", I)) {ROS_FATAL("Invalid parameters for -roll2ail/i- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("yaw2roll/d", D)) {ROS_FATAL("Invalid parameters for -roll2ail/d- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("yaw2roll/max", satU)) {ROS_FATAL("Invalid parameters for -roll2ail/max- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("yaw2roll/min", satL)) {ROS_FATAL("Invalid parameters for -roll2ail/min- in param server!"); ros::shutdown();}
+		//Create yaw to roll controller
+		if(!ros::param::getCached("yaw2roll/p", P)) {ROS_FATAL("Invalid parameters for -yaw2roll/p- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("yaw2roll/i", I)) {ROS_FATAL("Invalid parameters for -yaw2roll/i- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("yaw2roll/d", D)) {ROS_FATAL("Invalid parameters for -yaw2roll/d- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("yaw2roll/max", satU)) {ROS_FATAL("Invalid parameters for -yaw2roll/max- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached("yaw2roll/min", satL)) {ROS_FATAL("Invalid parameters for -yaw2roll/min- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
 		Ts = 1.0/Ts;
 		Tau = 0.1;
 		yaw2Roll = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 		
-		//Create roll to aileron controller
+		//Create beta to rudder controller
 		if(!ros::param::getCached("beta2rud/p", P)) {ROS_FATAL("Invalid parameters for -beta2rud/p- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("beta2rud/i", I)) {ROS_FATAL("Invalid parameters for -beta2rud/i- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("beta2rud/d", D)) {ROS_FATAL("Invalid parameters for -beta2rud/d- in param server!"); ros::shutdown();}

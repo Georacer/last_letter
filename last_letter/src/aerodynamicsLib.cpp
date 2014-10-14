@@ -149,10 +149,10 @@ geometry_msgs::Vector3 StdLinearAero::getForce()
 	}
 	else
 	{
-		ax = qbar*(c_x_a + c_x_q*c*q/(2*airspeed) - c_drag_deltae*cos(alpha)*abs(deltae) + c_lift_deltae*sin(alpha)*deltae);
+		ax = qbar*(c_x_a + c_x_q*c*q/(2*airspeed) - c_drag_deltae*cos(alpha)*fabs(deltae) + c_lift_deltae*sin(alpha)*deltae);
 		// split c_x_deltae to include "abs" term
 		ay = qbar*(c_y_0 + c_y_b*beta + c_y_p*b*p/(2*airspeed) + c_y_r*b*r/(2*airspeed) + c_y_deltaa*deltaa + c_y_deltar*deltar);
-		az = qbar*(c_z_a + c_z_q*c*q/(2*airspeed) - c_drag_deltae*sin(alpha)*abs(deltae) - c_lift_deltae*cos(alpha)*deltae);
+		az = qbar*(c_z_a + c_z_q*c*q/(2*airspeed) - c_drag_deltae*sin(alpha)*fabs(deltae) - c_lift_deltae*cos(alpha)*deltae);
 		// split c_z_deltae to include "abs" term
 	}
 	

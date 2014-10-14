@@ -26,8 +26,8 @@ class DashboardGrid(QtGui.QWidget):
 		self.column3 = QtGui.QVBoxLayout()
 		
 		self.commands = RefCommands()
-		self.commands.altitude = 100.0
-		self.commands.airspeed = 27.0
+		self.commands.altitude = 500.0
+		self.commands.airspeed = 44.44
 		self.pub = rospy.Publisher('/fw1/refCommands', RefCommands)
 		self.pubTimer = QtCore.QTimer()
 		self.pubTimer.timeout.connect(self.publishCommands)
@@ -80,7 +80,7 @@ class DashboardGrid(QtGui.QWidget):
 		length=300.0
 		end_angle=-60.0
 		min=0.0
-		max=40.0
+		max=60.0
 		main_points=5
 		warning=[(13, 15), (25, 30)]
 		danger=[(0, 13), (30, 40)]
@@ -93,11 +93,11 @@ class DashboardGrid(QtGui.QWidget):
 		topic = "/fw1/dashboard/climbRate"
 		length=180.0
 		end_angle=90.0
-		min=-15.0
-		max=15.0
+		min=-10.0
+		max=5.0
 		main_points=7
-		warning=[(-10, -5), (5, 10)]
-		danger=[(-15, -10), (10, 15)]
+		warning=[(-6, -4), (2, 3)]
+		danger=[(-10, -6), (3, 5)]
 		description='Climb Rate'
 		multiplier=''
 		units='m/s'
@@ -107,7 +107,7 @@ class DashboardGrid(QtGui.QWidget):
 		length=360.0
 		end_angle=-90.0
 		min=0.0
-		max=500.0
+		max=1000.0
 		main_points=10
 		warning=[(20, 50)]
 		danger=[(0, 20)]

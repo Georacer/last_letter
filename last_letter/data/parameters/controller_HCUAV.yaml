@@ -1,0 +1,84 @@
+# Controller parameters
+
+# controller loop rate
+ctrlRate : 100
+
+# roll to aileron controller
+roll2ail/p : 1.2309
+roll2ail/i : 0.008716
+roll2ail/d : -0.7653
+roll2ail/tau : 1.2412
+roll2ail/max : 1.0
+roll2ail/min : -1.0
+
+# yaw to roll controller
+yaw2roll/p : 0.9503
+yaw2roll/i : 0.001591
+yaw2roll/d : -2.3492
+yaw2roll/tau : 2.4721
+yaw2roll/max : 0.3491
+yaw2roll/min : -0.3491
+
+# beta to rudder controller
+beta2rud/p : -22.48
+beta2rud/i : -0.634
+beta2rud/d : 0.0
+beta2rud/max : 1.0
+beta2rud/min : -1.0
+
+# pitch to elevator controller
+# pitch2elev/p : 0.3229
+# pitch2elev/i : 0.0851
+# pitch2elev/d : 0.0
+pitch2elev/p : 0.3229
+pitch2elev/i : 0.0851
+pitch2elev/d : 0.2
+pitch2elev/max : 1.0
+pitch2elev/min : -1.0
+pitch2elev/neutral : -0.0203
+
+# altitude to pitch controller
+# alt2pitch/p : 0.00494
+# alt2pitch/i : 0.000087
+# alt2pitch/d : 0.0117 #Originally negative
+# alt2pitch/tau : 2.36
+alt2pitch/p : 0.0
+alt2pitch/i : 0.0142
+alt2pitch/d : 0.00 #Originally negative
+alt2pitch/tau : 0.1
+alt2pitch/max : 0.1745
+alt2pitch/min : -0.1745
+
+# # climbRate to pitch controller
+# alt2pitch/p : 0.00494
+# alt2pitch/i : 0.000087
+# # alt2pitch/i : 0.0
+# alt2pitch/d : 0.0117 #Originally negative
+# # alt2pitch/d : 0.0 #Originally negative
+# alt2pitch/tau : 2.36
+# # alt2pitch/tau : 10.0
+# alt2pitch/max : 0.1745
+# alt2pitch/min : -0.1745
+
+# airspeed to pitch controller
+airspd2pitch/p : -0.01753
+airspd2pitch/i : -0.2161
+airspd2pitch/d : 0.0
+airspd2pitch/tau : 0.0
+airspd2pitch/max : 0.1745
+airspd2pitch/min : -0.1745
+
+# airspeed to throttle controller
+# airspd2throt/p : 0.10143
+# airspd2throt/i : 0.10456
+# airspd2throt/d : 0.01879
+# airspd2throt/tau : 0.12148
+airspd2throt/p : 0.05212
+airspd2throt/i : 0.04057
+airspd2throt/d : -0.000414
+airspd2throt/tau : 0.0079527
+airspd2throt/max : 1.0
+airspd2throt/min : 0.0
+airspd2throt/neutral : 0.832
+
+altSwitchThresh : 10000 #in meters

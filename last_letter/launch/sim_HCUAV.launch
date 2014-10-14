@@ -24,7 +24,7 @@
 		<!-- Initialization of the parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/HCUAV.yaml" />
 		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" />
-		<rosparam command="load" file="$(find last_letter)data/parameters/controller.yaml" />
+		<rosparam command="load" file="$(find last_letter)data/parameters/controller_HCUAV.yaml" />
 		
 		<!-- Raising core nodes -->
 		<group>
@@ -57,7 +57,7 @@
 		
 		<!-- Raising controller nodes -->
 		<group if="$(arg autoMode)">
-			<node pkg="last_letter" name="Autopilot" type="autopilot" output="screen"/>
+			<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
 		</group>
 		
 		<!-- Input nodes -->

@@ -24,7 +24,7 @@
 		<!-- Initialization of the parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/custom.yaml" /> <!-- load aircraft parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" /> <!-- load sensor parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/controller.yaml" /> <!-- load controller parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/controller_ll.yaml" /> <!-- load controller parameters -->
 		
 		<!-- Raising core nodes -->
 		<group>
@@ -57,7 +57,7 @@
 		
 		<!-- Raising controller nodes -->
 		<group if="$(arg autoMode)">
-			<node pkg="last_letter" name="Autopilot" type="autopilot" output="screen"/>
+			<node pkg="last_letter" name="Autopilot" type="autopilot_ll" output="screen"/>
 		</group>
 
 		<!-- Input nodes -->
