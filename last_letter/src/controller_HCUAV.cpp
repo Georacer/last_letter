@@ -162,7 +162,7 @@
 			double climbRate = (states.geoid.altitude - altPrev)/0.01;
 			altPrev = states.geoid.altitude;
 			double errRate = comRate - climbRate;
-			std::cout<< comRate << ',' << climbRate << std::endl;
+			// std::cout<< comRate << ',' << climbRate << std::endl;
 			if (state) {
 				state = 0;
 				sumErrAlt = 0;

@@ -8,9 +8,14 @@
 
 	<!-- Initialization of parameters -->
 	<group>	
+		<!-- Select real/simulation Clock -->
 		<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
+		<!-- Load environmental parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/environment.yaml" />
+		<!-- Load global parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/world.yaml" />
+		<!-- Load dashboard parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/dashboard_HCUAV.yaml" />
 	</group>
 
 	<!-- Initialization of services -->
@@ -28,7 +33,7 @@
 		
 		<!-- Raising core nodes -->
 		<group>
-			<node pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag states wrenchStamped input"/>
+			<node pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag -a"/>
 			<node if="$(arg clockSim)" name="clock" pkg="last_letter" type="clock.py" />
 			<node pkg="last_letter" name="plane_model" type="model" output="screen">
 				<remap if="$(arg manualMode)" from="ctrlPWM" to="rawPWM"/>

@@ -42,9 +42,9 @@ pitch2elev/neutral : -0.0203
 # alt2pitch/i : 0.000087
 # alt2pitch/d : 0.0117 #Originally negative
 # alt2pitch/tau : 2.36
-alt2pitch/p : 0.0
-alt2pitch/i : 0.0142
-alt2pitch/d : 0.00 #Originally negative
+alt2pitch/p : 0.00
+alt2pitch/i : 0.03
+alt2pitch/d : 0.0 #Originally negative
 alt2pitch/tau : 0.1
 alt2pitch/max : 0.1745
 alt2pitch/min : -0.1745

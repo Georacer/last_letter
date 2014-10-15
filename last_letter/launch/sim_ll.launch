@@ -8,8 +8,11 @@
 
 	<!-- Initialization of parameters -->
 	<group>	
+		<!-- Select Real/Simulation Clock -->
 		<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
+		<!-- Load environmental parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/environment.yaml" />
+		<!-- Load global parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/world.yaml" />
 	</group>
 

@@ -1,0 +1,56 @@
+# Dashboard parameters
+
+# Yaw gauge
+dashboard/yaw/points : 8
+
+# Roll gauge
+dashboard/roll/points : 24
+dashboard/roll/warning : [-45, -30, 30, 45]
+dashboard/roll/danger : [-180, -45, 45, 180]
+
+# Pitch gauge
+dashboard/pitch/points : 13
+dashboard/pitch/warning : [-15, -5, 5, 15]
+dashboard/pitch/danger : [-90, -15, 15, 90]
+
+# Airspeed gauge
+dashboard/airspeed/min : 0.0
+dashboard/airspeed/max : 60.0
+dashboard/airspeed/points : 5
+dashboard/airspeed/warning : [21, 25, 50, 55]
+dashboard/airspeed/danger : [0, 21, 55, 60]
+
+# Climb rate gauge
+dashboard/climbRate/min : -10.0
+dashboard/climbRate/max : 10.0
+dashboard/climbRate/points : 7
+dashboard/climbRate/warning : [-6, -4, 2, 3]
+dashboard/climbRate/danger : [-10, -6, 3, 10]
+
+# Altitude gauge
+dashboard/altitude/min : 0.0
+dashboard/altitude/max : 1000.0
+dashboard/altitude/points : 10
+dashboard/altitude/warning : [50, 100]
+dashboard/altitude/danger : [0, 50]
+
+# Alpha gauge
+dashboard/alpha/min : -90.0
+dashboard/alpha/max : 90.0
+dashboard/alpha/points : 13
+dashboard/alpha/warning : [-7, -5, 12, 17]
+dashboard/alpha/danger : [-90, -7, 17, 90]
+
+# Beta gauge
+dashboard/beta/min : -90.0
+dashboard/beta/max : 90.0
+dashboard/beta/points : 13
+dashboard/beta/warning : [-10, -5, 5, 10]
+dashboard/beta/danger : [-90, -10, 10, 90]
+
+# Rotorspeed gauge
+dashboard/rotorspeed/min : 3000.0
+dashboard/rotorspeed/max : 7000.0
+dashboard/rotorspeed/points : 9
+dashboard/rotorspeed/warning : [3250, 3500, 6750, 7000]
+dashboard/rotorspeed/danger : [3000, 3250, 6500, 6750]
