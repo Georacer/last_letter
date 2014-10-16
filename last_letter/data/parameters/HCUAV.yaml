@@ -64,20 +64,20 @@ airframe/deltar_max: 0.4363
 # Airframe Propulsion Parameters
 # Motor types: 0 No motor, 1 Beard Engine, 2 Piston engine
 motor/CGOffset: [0.0, 0.0, 0.0]
-motor/motorType: 1
-motor/s_prop: 1.0
-motor/k_motor: 0.150
-motor/k_t_p: 0.0
-motor/k_omega: 366.0
-motor/c_prop: 1.0
-# motor/motorType: 2
-# motor/powerPolyNo: [1, 5]
-# motor/powerPoly: [7.554e+4, -1076.0, 5.768, -0.01416, 1.66e-5, -7.553e-9, 1.676e+5, -1487.0, 4.831, -0.006781, 3.493e-6]
-# motor/nCoeffPolyNo: 4
-# motor/nCoeffPoly: [0.115, -0.22, 2.982, -2.846, 0.8]
-# motor/RadPSLimits: [314.16, 733.04]
-# motor/propDiam: 0.8 # in m
-# motor/engInertia: 10.0 # in kg*m^3
+# motor/motorType: 1
+# motor/s_prop: 1.0
+# motor/k_motor: 0.150
+# motor/k_t_p: 0.0
+# motor/k_omega: 366.0
+# motor/c_prop: 1.0
+motor/motorType: 2
+motor/powerPolyNo: [1, 5]
+motor/powerPoly: [7.554e+4, -1076.0, 5.768, -0.01416, 1.66e-5, -7.553e-9, 1.676e+5, -1487.0, 4.831, -0.006781, 3.493e-6]
+motor/nCoeffPolyNo: 4
+motor/nCoeffPoly: [0.115, -0.22, 2.982, -2.846, 0.8]
+motor/RadPSLimits: [314.16, 733.04]
+motor/propDiam: 0.8 # in m
+motor/engInertia: 5.0 # in kg*m^3
 
 # Contact points array
 # Material types: 0 foam, 1 metal, 2 rubber wheel, 3 composites

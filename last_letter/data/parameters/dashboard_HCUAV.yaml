@@ -1,56 +1,125 @@
-# Dashboard parameters
-
 # Yaw gauge
-dashboard/yaw/points : 8
+Gauge1:
+    topic: euler/z
+    length: 360.0
+    end_angle: -90.0
+    min: -180.0
+    max: 180.0
+    main_points : 8
+    warning: []
+    danger: []
+    multiplier: ''
+    units: degrees
+    description: Yaw
 
 # Roll gauge
-dashboard/roll/points : 24
-dashboard/roll/warning : [-45, -30, 30, 45]
-dashboard/roll/danger : [-180, -45, 45, 180]
+Gauge2:
+    topic: euler/x
+    length: 360.0
+    end_angle: -90.0
+    min: -180.0
+    max: 180.0
+    main_points : 24
+    warning : [-45, -30, 30, 45]
+    danger : [-180, -45, 45, 180]
+    multiplier: ''
+    units: degrees
+    description: Roll
 
 # Pitch gauge
-dashboard/pitch/points : 13
-dashboard/pitch/warning : [-15, -5, 5, 15]
-dashboard/pitch/danger : [-90, -15, 15, 90]
+Gauge3:
+    topic: euler/y
+    length: 180.0
+    end_angle: 90.0
+    min: -90.0
+    max: 90.0
+    main_points : 13
+    warning : [-15, -5, 5, 15]
+    danger : [-90, -15, 15, 90]
+    multiplier: ''
+    units: degrees
+    description: Pitch
 
 # Airspeed gauge
-dashboard/airspeed/min : 0.0
-dashboard/airspeed/max : 60.0
-dashboard/airspeed/points : 5
-dashboard/airspeed/warning : [21, 25, 50, 55]
-dashboard/airspeed/danger : [0, 21, 55, 60]
+Gauge4:
+    topic: airspeed
+    length: 300.0
+    end_angle: -60.0
+    min : 0.0
+    max : 60.0
+    main_points : 5
+    warning : [21, 25, 50, 55]
+    danger : [0, 21, 55, 60]
+    multiplier: ''
+    units: m/s
+    description: Airspeed
 
 # Climb rate gauge
-dashboard/climbRate/min : -10.0
-dashboard/climbRate/max : 10.0
-dashboard/climbRate/points : 7
-dashboard/climbRate/warning : [-6, -4, 2, 3]
-dashboard/climbRate/danger : [-10, -6, 3, 10]
+Gauge5:
+    topic: climbRate
+    length: 180.0
+    end_angle: 90.0
+    min : -10.0
+    max : 10.0
+    main_points : 7
+    warning : [-6, -4, 2, 3]
+    danger : [-10, -6, 3, 10]
+    multiplier: ''
+    units: m/s
+    description: Climb Rate
 
 # Altitude gauge
-dashboard/altitude/min : 0.0
-dashboard/altitude/max : 1000.0
-dashboard/altitude/points : 10
-dashboard/altitude/warning : [50, 100]
-dashboard/altitude/danger : [0, 50]
+Gauge6:
+    topic: altitude
+    length: 360.0
+    end_angle: -90.0
+    min : 0.0
+    max : 1000.0
+    main_points : 10
+    warning : [50, 100]
+    danger : [0, 50]
+    multiplier: ''
+    units: m
+    description: Geometric Altitude
 
 # Alpha gauge
-dashboard/alpha/min : -90.0
-dashboard/alpha/max : 90.0
-dashboard/alpha/points : 13
-dashboard/alpha/warning : [-7, -5, 12, 17]
-dashboard/alpha/danger : [-90, -7, 17, 90]
+Gauge7:
+    topic: alpha
+    length: 180.0
+    end_angle: 90.0
+    min : -90.0
+    max : 90.0
+    main_points : 13
+    warning : [-7, -5, 12, 17]
+    danger : [-90, -7, 17, 90]
+    multiplier: ''
+    units: degrees
+    description: Angle of Attack
 
 # Beta gauge
-dashboard/beta/min : -90.0
-dashboard/beta/max : 90.0
-dashboard/beta/points : 13
-dashboard/beta/warning : [-10, -5, 5, 10]
-dashboard/beta/danger : [-90, -10, 10, 90]
+Gauge8:
+    topic: beta
+    length: 180.0
+    end_angle: 0.0
+    min : -90.0
+    max : 90.0
+    main_points : 13
+    warning : [-10, -5, 5, 10]
+    danger : [-90, -10, 10, 90]
+    multiplier: ''
+    units: degrees
+    description: Angle of Sideslip
 
 # Rotorspeed gauge
-dashboard/rotorspeed/min : 3000.0
-dashboard/rotorspeed/max : 7000.0
-dashboard/rotorspeed/points : 9
-dashboard/rotorspeed/warning : [3250, 3500, 6750, 7000]
-dashboard/rotorspeed/danger : [3000, 3250, 6500, 6750]
+Gauge9:
+    topic: rotorspeed
+    length: 300.0
+    end_angle: -60.0
+    min : 3000.0
+    max : 7000.0
+    main_points : 9
+    warning : [3250, 3500, 6750, 7000]
+    danger : [3000, 3250, 6500, 6750]
+    multiplier: ''
+    units: RPM
+    description: Engine Speed

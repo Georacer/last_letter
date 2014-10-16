@@ -62,7 +62,7 @@
 		
 		<!-- Raising controller nodes -->
 		<group if="$(arg autoMode)">
-			<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
+				<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
 		</group>
 		
 		<!-- Input nodes -->

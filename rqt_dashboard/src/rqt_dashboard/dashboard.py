@@ -2,6 +2,9 @@ import os
 import rospy
 import sys
 import math
+import yaml
+from itertools import izip_longest
+
 from operator import add, sub
 
 from qt_gui.plugin import Plugin
@@ -20,10 +23,12 @@ class DashboardGrid(QtGui.QWidget):
 		self.setFixedSize(900, 900)
 		self.setWindowTitle('UAV Dashboard')
 		self.setAutoFillBackground(True)
-		self.line1 = QtGui.QHBoxLayout()
-		self.column1 = QtGui.QVBoxLayout()
-		self.column2 = QtGui.QVBoxLayout()
-		self.column3 = QtGui.QVBoxLayout()
+
+		filename = '/home/georgezp/ROS/catkin_ws/src/last_letter/data/parameters/dashboard_HCUAV.yaml'
+		prefix = '/{}/dashboard/'.format('fw1')
+		data = yaml.load(open(filename).read())
+		gauges = []
+		self.line = QtGui.QHBoxLayout()
 		
 		self.commands = RefCommands()
 		self.commands.altitude = 500.0
@@ -33,142 +38,27 @@ class DashboardGrid(QtGui.QWidget):
 		self.pubTimer.timeout.connect(self.publishCommands)
 		self.pubTimer.start(1000)
 
-		
-		#Yaw gauge
-		topic = "/fw1/dashboard/euler/z"
-		length=360.0
-		end_angle=-90.0
-		min=-180.0
-		max=180.0
-		main_points = rospy.get_param('dashboard/yaw/points',8)
-		warning=[]
-		danger=[]
-		description='Yaw'
-		multiplier=''
-		units='degrees'
-		self.gaugeYaw = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		self.gaugeYaw.marker_set.connect(self.onClick)
-		#Roll gauge
-		topic = "/fw1/dashboard/euler/x"
-		length=360.0
-		end_angle=-90.0
-		min=-180.0
-		max=180.0
-		main_points = rospy.get_param('dashboard/roll/points',8)
-		warning= zip(*[iter(rospy.get_param('dashboard/roll/warning',{}))]*2)
-		danger= zip(*[iter(rospy.get_param('dashboard/roll/danger',{}))]*2)
-		description='Roll'
-		multiplier=''
-		units='degrees'
-		self.gaugeRoll = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		#Pitch gauge
-		topic = "/fw1/dashboard/euler/y"
-		length=180.0
-		end_angle=90.0
-		min=-90.0
-		max=90.0
-		main_points = rospy.get_param('dashboard/pitch/points',13)
-		warning= zip(*[iter(rospy.get_param('dashboard/pitch/warning',{}))]*2)
-		danger= zip(*[iter(rospy.get_param('dashboard/pitch/danger',{}))]*2)
-		description='Pitch'
-		multiplier=''
-		units='degrees'
-		self.gaugePitch = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		self.gaugePitch.marker_set.connect(self.onClick)
-		#Airspeed gauge
-		topic = "/fw1/dashboard/airspeed"
-		length=300.0
-		end_angle=-60.0
-		min = rospy.get_param('dashboard/airspeed/min',0.0)
-		max = rospy.get_param('dashboard/airspeed/max',60.0)
-		main_points = rospy.get_param('dashboard/airspeed/points',5)
-		warning= zip(*[iter(rospy.get_param('dashboard/airspeed/warning',{}))]*2)
-		danger= zip(*[iter(rospy.get_param('dashboard/airspeed/danger',{}))]*2)
-		description='Airspeed'
-		multiplier=''
-		units='m/s'
-		self.gaugeAirspeed = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		self.gaugeAirspeed.marker_set.connect(self.onClick)
-		#Climb gauge
-		topic = "/fw1/dashboard/climbRate"
-		length=180.0
-		end_angle=90.0
-		min = rospy.get_param('dashboard/climbRate/min',-10.0)
-		max = rospy.get_param('dashboard/climbRate/max',10.0)
-		main_points = rospy.get_param('dashboard/climbRate/points',5)
-		warning= zip(*[iter(rospy.get_param('dashboard/climbRate/warning',{}))]*2)
-		danger= zip(*[iter(rospy.get_param('dashboard/climbRate/danger',{}))]*2)
-		description='Climb Rate'
-		multiplier=''
-		units='m/s'
-		self.gaugeClimb = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		#Altitude gauge
-		topic = "/fw1/dashboard/altitude"
-		length=360.0
-		end_angle=-90.0
-		min = rospy.get_param('dashboard/altitude/min',0.0)
-		max = rospy.get_param('dashboard/altitude/max',300.0)
-		main_points = rospy.get_param('dashboard/altitude/points',6)
-		warning= zip(*[iter(rospy.get_param('dashboard/altitude/warning',{}))]*2)
-		danger= zip(*[iter(rospy.get_param('dashboard/altitude/danger',{}))]*2)
-		description='Geometric Altitude'
-		multiplier=''
-		units='m'
-		self.gaugeAltitude = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		self.gaugeAltitude.marker_set.connect(self.onClick)
-		#Alpha gauge
-		topic = "/fw1/dashboard/alpha"
-		length=180.0
-		end_angle=90.0
-		min = rospy.get_param('dashboard/alpha/min',-90.0)
-		max = rospy.get_param('dashboard/alpha/max',90.0)
-		main_points = rospy.get_param('dashboard/alpha/points',13)
-		warning= zip(*[iter(rospy.get_param('dashboard/alpha/warning',{}))]*2)
-		danger= zip(*[iter(rospy.get_param('dashboard/alpha/danger',{}))]*2)
-		description='Angle of Attack'
-		multiplier=''
-		units='degrees'
-		self.gaugeAlpha = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		#Beta gauge
-		topic = "/fw1/dashboard/beta"
-		length=180.0
-		end_angle= 0.0
-		min = rospy.get_param('dashboard/beta/min',-90.0)
-		max = rospy.get_param('dashboard/beta/max',90.0)
-		main_points = rospy.get_param('dashboard/beta/points',13)
-		warning= zip(*[iter(rospy.get_param('dashboard/beta/warning',{}))]*2)
-		danger= zip(*[iter(rospy.get_param('dashboard/beta/danger',{}))]*2)
-		description='Angle of Sideslip'
-		multiplier=''
-		units='degrees'
-		self.gaugeBeta = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		#RPM gauge
-		topic = "/fw1/dashboard/rotorspeed"
-		length=300.0
-		end_angle= -60.0
-		min = rospy.get_param('dashboard/rotorspeed/min',0.0)
-		max = rospy.get_param('dashboard/rotorspeed/max',20000.0)
-		main_points = rospy.get_param('dashboard/rotorspeed/points',21)
-		warning= zip(*[iter(rospy.get_param('dashboard/rotorspeed/warning',{}))]*2)
-		danger= zip(*[iter(rospy.get_param('dashboard/rotorspeed/danger',{}))]*2)
-		description='Engine Speed'
-		multiplier=''
-		units='RPM'
-		self.gaugeRPM = GaugeSimple(topic, length, end_angle, min, max, main_points, warning, danger, multiplier, units, description)
-		
-		self.column1.addWidget(self.gaugeYaw)
-		self.column1.addWidget(self.gaugeRoll)
-		self.column1.addWidget(self.gaugePitch)
-		self.column2.addWidget(self.gaugeAirspeed)
-		self.column2.addWidget(self.gaugeClimb)
-		self.column2.addWidget(self.gaugeAltitude)
-		self.column3.addWidget(self.gaugeAlpha)
-		self.column3.addWidget(self.gaugeBeta)
-		self.column3.addWidget(self.gaugeRPM)
-		self.line1.addLayout(self.column1)
-		self.line1.addLayout(self.column2)
-		self.line1.addLayout(self.column3)
-		self.setLayout(self.line1)
+		for name in sorted(data.keys()): #sort vasei tou onomatos
+			values = data[name]
+			# print 'Adding: {}'.format(name)
+			values['topic'] = prefix + values['topic']
+			values['warning'] = zip(*[iter(values['warning'])]*2)
+			values['danger'] = zip(*[iter(values['danger'])]*2)
+			gauges.append(GaugeSimple(**values))
+			gauges[-1].marker_set.connect(self.onClick)
+
+		grouped_gauges = list(izip_longest(*(iter(gauges),)*3))
+
+		for i in xrange(len(grouped_gauges)):
+			setattr(self, 'column{}'.format(i), QtGui.QVBoxLayout())
+		    # setattr(self, 'column{}'.format(i), [])
+			curr_column = getattr(self, 'column{}'.format(i))
+			for g in grouped_gauges[i]:
+				if g is not None:
+					curr_column.addWidget(g)
+					# curr_column.append(g.topic)
+			self.line.addLayout(curr_column)
+		self.setLayout(self.line)
 
 		
 	def onClick(self,comList):
@@ -559,6 +449,9 @@ class Dashboard(Plugin):
 			self._layout.setWindowTitle(self._layout.windowTitle() + (' (%d)' % context.serial_number()))
 		# Add widget to the user interface
 		context.add_widget(self._layout)
+
+		# foo = yaml.load("- Hesperiidae - Papilionidae - Apatelodidae - Epiplemidae")
+		# print foo
 
 	def shutdown_plugin(self):
 		# TODO unregister all publishers here

@@ -197,27 +197,36 @@ PistonEng::~PistonEng()
 void PistonEng::updateRadPS()
 {
 	deltat = parentObj->input[2];
-	omega = omegaMin + deltat*(omegaMax-omegaMin);
-	double power = powerPoly->evaluate(1.0, omega); // Calculate current engine power
+
+	// omega = omegaMin + deltat*(omegaMax-omegaMin); // For use for direct RPM control
+	// double power = powerPoly->evaluate(1.0, omega); // Calculate current engine power // For use for direct RPM control
+
+	double power = deltat * powerPoly->evaluate(1.0, omega); // Calculate current engine power // For use for direct RPM control
+	// std::cout << deltat << " ";
 	// std::cout << power << " ";
-	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	// double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	// std:: cout << advRatio << " ";
-	double npCoeff = npPoly->evaluate(advRatio);
+	// double npCoeff = npPoly->evaluate(advRatio);
 	// std::cout << npCoeff << " ";
-	wrenchProp.force.x = power*npCoeff/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
+	// wrenchProp.force.x = power*npCoeff/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
+	wrenchProp.force.x = power/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability - Eff dem propellers!
+
 	// std::cout << wrenchProp.force.x << " ";
+	// std::cout << parentObj->kinematics.forceInput.x << " ";
 	// Constrain propeller force to +-2 times the aircraft weight
-	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 2.0*parentObj->kinematics.mass*9.81), -2.0*parentObj->kinematics.mass*9.81);
+	// wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 2.0*parentObj->kinematics.mass*9.81), -2.0*parentObj->kinematics.mass*9.81);
 	// std::cout << wrenchProp.force.x << " " << std::endl;
-	wrenchProp.torque.x = 0.0;
+	wrenchProp.torque.x = power / omega;
 	wrenchProp.torque.y = 0.0;
 	wrenchProp.torque.z = 0.0;
-	double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;
+	// double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;
+	double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x ;
 	double omegaDot = 1/engInertia*deltaP/omega;
 	// std::cout << omegaDot << " ";
-	// omega += omegaDot*parentObj->dt;
-	// omega = std::max(std::min(omega, omegaMax), omegaMin); // Constrain omega to working range
-	// std::cout << omega << std::endl;
+	omega += omegaDot*parentObj->dt;
+	omega = std::max(std::min(omega, omegaMax), omegaMin); // Constrain omega to working range
+	// std::cout << omega;
+	// std::cout << std::endl;
 	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
 
 }
