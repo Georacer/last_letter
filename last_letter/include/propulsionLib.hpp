@@ -63,8 +63,12 @@ public:
 
 	//////////
 	// Members
-	Polynomial1D * npPoly;
-	Polynomial2D * powerPoly;
+	Polynomial * engPowerPoly;
+	Polynomial * npPoly;
+	Polynomial * propPowerPoly;
+	// Polynomial1D * npPoly;
+	// Polynomial1D * propPowerPoly;
+	// Polynomial2D * engPowerPoly;
 
 	////////////
 	// Functions

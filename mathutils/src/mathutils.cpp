@@ -308,22 +308,36 @@ int inverse(double* A, double* Ainv, int N)
 // Class Definitions
 ////////////////////
 
+////////////////////
+// Define Polynomial
+
+Polynomial::Polynomial ()
+{
+};
+
+Polynomial::~Polynomial ()
+{
+};
+
+
 //////////////////////
 // Define Polynomial1D
 
 // class constructor
-Polynomial1D::Polynomial1D (int maxOrder, double * coeffArray) {
+Polynomial1D::Polynomial1D (int maxOrder, double * coeffArray) : Polynomial()
+{
     int i;
     coeffNo = maxOrder;
     // Create and initialize polynomial coefficients container
-    coeffs = (double*)malloc(sizeof(double) * coeffNo);
+    coeffs = (double*)malloc(sizeof(double) * (coeffNo+1));
     for (i=0; i<=coeffNo; i++) {
         coeffs[i] = coeffArray[i];
     }
 }
 
 // class destructor
-Polynomial1D::~Polynomial1D () {
+Polynomial1D::~Polynomial1D ()
+{
     free(coeffs);
 }
 
@@ -337,11 +351,13 @@ double Polynomial1D::evaluate (double x) {
     return sum;
 }
 
+
 //////////////////////
 // Define Polynomial2D
 
 // class constructor
-Polynomial2D::Polynomial2D (int maxOrder1, int maxOrder2, double * coeffArray) {
+Polynomial2D::Polynomial2D (int maxOrder1, int maxOrder2, double * coeffArray) : Polynomial()
+{
     // Attention! maxOrder2 > maxOrder1. If not, swap the variables!
     int i;
     coeffNo1 = maxOrder1;
@@ -355,7 +371,8 @@ Polynomial2D::Polynomial2D (int maxOrder1, int maxOrder2, double * coeffArray) {
 }
 
 // class destructor
-Polynomial2D::~Polynomial2D () {
+Polynomial2D::~Polynomial2D ()
+{
     free(coeffs);
 }
 
@@ -375,6 +392,48 @@ double Polynomial2D::evaluate (double x, double y) {
     return sum;
 }
 
+
+/////////////////
+// Define Spline3
+// Cubic spline, 4 parameters per variable interval
+
+// class constructor
+Spline3::Spline3(int breaksNoIn, double * breaksIn, double * coeffsIn) : Polynomial()
+{
+    int i;
+    breaksNo = breaksNoIn;
+    // Create and initialize breaks container
+    breaks = (double*)malloc(sizeof(double) * (breaksNo+1));
+    for (i=0; i<=breaksNo; i++) {
+        breaks[i] = breaksIn[i];
+    }
+    // Create and initialize polynomial coefficients container
+    coeffs = (double*)malloc(sizeof(double) * (breaksNo*4));
+    for (i=0; i<(breaksNo*4); i++) {
+        coeffs[i] = coeffsIn[i];
+    }
+}
+
+// class destructor
+Spline3::~Spline3()
+{
+    free(breaks);
+    free(coeffs);
+}
+
+// polynomial evaluation
+double Spline3::evaluate(double x)
+{
+    int i;
+    for (i=0;i<breaksNo;i++) {
+    if (x<=breaks[i+1])
+      break;
+    }
+    if (i==breaksNo) i--;
+    double delta = x-breaks[i];
+    double value = coeffs[4*i]*pow(delta,3) + coeffs[4*i+1]*pow(delta,2) + coeffs[4*i+2]*delta + coeffs[4*i+3];
+    return value;
+}
 
 ///////////////////////
 // Define discrTF class

@@ -21,6 +21,7 @@ class Factory
 	Aerodynamics * buildAerodynamics(ModelPlane *);
 	Propulsion * buildPropulsion(ModelPlane *);
 	GroundReaction * buildGroundReaction(ModelPlane *);
+	Polynomial * buildPolynomial(char * parameter);
 };
 
 // Top ModelPlane object class

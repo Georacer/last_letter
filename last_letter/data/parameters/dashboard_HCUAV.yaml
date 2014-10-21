@@ -47,7 +47,7 @@ Gauge4:
     end_angle: -60.0
     min : 0.0
     max : 60.0
-    main_points : 5
+    main_points : 13
     warning : [21, 25, 50, 55]
     danger : [0, 21, 55, 60]
     multiplier: ''
@@ -118,8 +118,8 @@ Gauge9:
     min : 3000.0
     max : 7000.0
     main_points : 9
-    warning : [3250, 3500, 6750, 7000]
-    danger : [3000, 3250, 6500, 6750]
+    warning : [3250, 3500, 6500, 6750]
+    danger : [3000, 3250, 6750, 7000]
     multiplier: ''
     units: RPM
     description: Engine Speed

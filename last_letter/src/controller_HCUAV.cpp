@@ -157,7 +157,7 @@
 			// double refAlt = pitchSmoother->step(refCommands.altitude);
 			// errAlt = refAlt - states.geoid.altitude;
 			double comRate = (refCommands.altitude - states.geoid.altitude)/5.0;
-			comRate = std::min(2.8, std::max(comRate, -5.0));
+			comRate = std::min(2.8, std::max(comRate, -3.0));
 			// double climbRate = airdata.x*sin(airdata.y);
 			double climbRate = (states.geoid.altitude - altPrev)/0.01;
 			altPrev = states.geoid.altitude;

@@ -26,6 +26,10 @@ geometry_msgs::Vector3 Gravity::getForce()
 	geometry_msgs::Vector3 gravVect;
 	gravVect.z = parentObj->kinematics.mass*g;
 	wrenchGrav.force = Reb/gravVect;
+
+	// Printouts
+	// std::cout << wrenchGrav.force.x << " ";
+
 	return wrenchGrav.force;
 }
 

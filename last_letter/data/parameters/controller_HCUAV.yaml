@@ -74,8 +74,8 @@ airspd2pitch/min : -0.1745
 # airspd2throt/d : 0.01879
 # airspd2throt/tau : 0.12148
 airspd2throt/p : 0.05212
-airspd2throt/i : 0.04057
-airspd2throt/d : -0.000414
+airspd2throt/i : 0.00857
+airspd2throt/d : 0.001
 airspd2throt/tau : 0.0079527
 airspd2throt/max : 1.0
 airspd2throt/min : 0.0

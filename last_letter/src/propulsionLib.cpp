@@ -136,8 +136,7 @@ PistonEng::PistonEng(ModelPlane * parent) : Propulsion(parent)
 {
 	XmlRpc::XmlRpcValue list;
 	int i, length;
-
-	std::cout << "reading parameters for new Beard engine" << std::endl;
+	char s[100];
 	if(!ros::param::getCached("motor/propDiam", propDiam)) {ROS_FATAL("Invalid parameters for -propDiam- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("motor/engInertia", engInertia)) {ROS_FATAL("Invalid parameters for -engInertia- in param server!"); ros::shutdown();}
 	// Initialize RadPS limits
@@ -146,35 +145,16 @@ PistonEng::PistonEng(ModelPlane * parent) : Propulsion(parent)
 	omegaMin = list[0];
 	omegaMax = list[1];
 
+	Factory factory;
 	// Create engine power polynomial
-	if(!ros::param::getCached("motor/powerPolyNo", list)) {ROS_FATAL("Invalid parameters for -powerPolyNo- in param server!"); ros::shutdown();}
-	ROS_ASSERT(list[0].getType() == XmlRpc::XmlRpcValue::TypeInt);
-	int powerPolyOrder1 = list[0];
-	int powerPolyOrder2 = list[1];
-	if(!ros::param::getCached("motor/powerPoly", list)) {ROS_FATAL("Invalid parameters for -powerPoly- in param server!"); ros::shutdown();}
-	length = list.size();
-	if ((2*powerPolyOrder2 + 2*powerPolyOrder1*powerPolyOrder2 + powerPolyOrder1 - powerPolyOrder1*powerPolyOrder1 + 2)/2 != length) {
-		ROS_FATAL("Engine power polynomial order and provided coefficient number do not match");
-		ros::shutdown();
-	}
-	double temp[length];
-	for (i = 0; i < list.size(); ++i) {
-		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-		temp[i]=list[i];
-	}
-	powerPoly = new Polynomial2D(powerPolyOrder1, powerPolyOrder2, temp);
-
+	sprintf(s,"%s","motor/engPowerPoly");
+	engPowerPoly =  factory.buildPolynomial(s);
 	// Create propeller efficiency polynomial
-	if(!ros::param::getCached("motor/nCoeffPolyNo", i)) {ROS_FATAL("Invalid parameters for -nCoeffPolyNo- in param server!"); ros::shutdown();}
-	int nCoeffPolyNo = i;
-	if(!ros::param::getCached("motor/nCoeffPoly", list)) {ROS_FATAL("Invalid parameters for -nCoeffPoly- in param server!"); ros::shutdown();}
-	double temp2[nCoeffPolyNo+1];
-	if (nCoeffPolyNo+1!=list.size()) {ROS_FATAL("Propeller efficiency polynomial order and provided coefficient number do not match"); ros::shutdown();}
-	for (i = 0; i <=nCoeffPolyNo; i++) {
-		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-		temp2[i]=list[i];
-	}
-	npPoly = new Polynomial1D(nCoeffPolyNo, temp2);
+	sprintf(s,"%s","motor/nCoeffPoly");
+	npPoly =  factory.buildPolynomial(s);
+	// Create propeller power polynomial
+	sprintf(s,"%s","motor/propPowerPoly");
+	propPowerPoly =  factory.buildPolynomial(s);
 
 	omega = omegaMin; // Initialize engine rotational speed
 
@@ -184,13 +164,15 @@ PistonEng::PistonEng(ModelPlane * parent) : Propulsion(parent)
 	wrenchProp.torque.x = 0.0;
 	wrenchProp.torque.y = 0.0;
 	wrenchProp.torque.z = 0.0;
+
 }
 
 // Destructor
 PistonEng::~PistonEng()
 {
 	delete npPoly;
-	delete powerPoly;
+	// delete engPowerPoly;
+	delete propPowerPoly;
 }
 
 // Update motor rotational speed and calculate thrust
@@ -198,36 +180,41 @@ void PistonEng::updateRadPS()
 {
 	deltat = parentObj->input[2];
 
-	// omega = omegaMin + deltat*(omegaMax-omegaMin); // For use for direct RPM control
-	// double power = powerPoly->evaluate(1.0, omega); // Calculate current engine power // For use for direct RPM control
+	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
+	double engPower = deltat * powerHP * 745.7 * 2.0; // Calculate current engine power
 
-	double power = deltat * powerPoly->evaluate(1.0, omega); // Calculate current engine power // For use for direct RPM control
-	// std::cout << deltat << " ";
-	// std::cout << power << " ";
-	// double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
-	// std:: cout << advRatio << " ";
-	// double npCoeff = npPoly->evaluate(advRatio);
-	// std::cout << npCoeff << " ";
-	// wrenchProp.force.x = power*npCoeff/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
-	wrenchProp.force.x = power/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability - Eff dem propellers!
+	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
+	double npCoeff = npPoly->evaluate(advRatio);
 
-	// std::cout << wrenchProp.force.x << " ";
-	// std::cout << parentObj->kinematics.forceInput.x << " ";
+	wrenchProp.force.x = propPower*npCoeff/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
+	// wrenchProp.force.x = engPower/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability - Eff dem propellers!
+
 	// Constrain propeller force to +-2 times the aircraft weight
-	// wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 2.0*parentObj->kinematics.mass*9.81), -2.0*parentObj->kinematics.mass*9.81);
-	// std::cout << wrenchProp.force.x << " " << std::endl;
-	wrenchProp.torque.x = power / omega;
+	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 2.0*parentObj->kinematics.mass*9.81), -2.0*parentObj->kinematics.mass*9.81);
+	wrenchProp.torque.x = propPower / omega;
 	wrenchProp.torque.y = 0.0;
 	wrenchProp.torque.z = 0.0;
 	// double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;
-	double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x ;
-	double omegaDot = 1/engInertia*deltaP/omega;
-	// std::cout << omegaDot << " ";
+	double deltaT = (engPower - propPower)/omega;
+	double omegaDot = 1/engInertia*deltaT;
 	omega += omegaDot*parentObj->dt;
 	omega = std::max(std::min(omega, omegaMax), omegaMin); // Constrain omega to working range
+
+	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
+
+	// Printouts
+	// std::cout << deltat << " ";
+	// std::cout << powerHP << " ";
+	// std::cout << engPower << " ";
+	// std::cout << propPower << " ";
+	// std:: cout << advRatio << " ";
+	// std::cout << npCoeff << " ";
+	// std::cout << wrenchProp.force.x << " ";
+	// std::cout << parentObj->kinematics.forceInput.x << " ";
+	// std::cout << omegaDot << " ";				
 	// std::cout << omega;
 	// std::cout << std::endl;
-	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
 
 }
 

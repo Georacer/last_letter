@@ -50,6 +50,9 @@ class HCUAVAero : public StdLinearAero
 public:
 	HCUAVAero(ModelPlane *);
 	~HCUAVAero();
-	double liftCoeff(double);
-	double dragCoeff(double);
+	Polynomial * liftCoeffPoly;
+	Polynomial * dragCoeffPoly;
+
+	double liftCoeff(double alpha);
+	double dragCoeff(double alpha);
 };
