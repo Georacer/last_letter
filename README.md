@@ -1,6 +1,6 @@
 # last_letter : Unmanned Aerial Vehicle simulation and control packages
 
-"last_letter" is a collection of [ROS](http://ros.org/) packages suitable for Unmanned Aerial Vehicle research, control algorithm development, non-linear physics simulation, Software-in-the-Loop (SIL) simulation and Hardware-in-the-Loop (HIL) simulation. It is developed by George Zogopoulos Papaliakos 
+"last_letter" is a collection of [ROS](http://ros.org/) packages suitable for Unmanned Aerial Vehicle research, control algorithm development, non-linear physics simulation, Software-in-the-Loop (SIL) simulation and Hardware-in-the-Loop (HIL) simulation. It is developed by George Zogopoulos Papaliakos.
 This document serves as a manual for this congregation of ROS packages.
 
 ## Table of Contents
@@ -38,7 +38,7 @@ Just clone the root of this repo to your catkin workspace. Each of the package f
 
 ### last_letter
 
-This is the core package, containing the physics and kinematics simulator and controller nodes. 
+This is the core package, containing the physics and kinematics simulator and controller nodes.
 
 ## How to Run
 

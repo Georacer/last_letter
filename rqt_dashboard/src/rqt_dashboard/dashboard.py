@@ -29,7 +29,7 @@ class DashboardGrid(QtGui.QWidget):
 		data = yaml.load(open(filename).read())
 		gauges = []
 		self.line = QtGui.QHBoxLayout()
-		
+
 		self.commands = RefCommands()
 		initPos = rospy.get_param('/fw1/init/position',[0])
 		self.commands.altitude = -initPos[-1]
@@ -62,10 +62,12 @@ class DashboardGrid(QtGui.QWidget):
 			self.line.addLayout(curr_column)
 		self.setLayout(self.line)
 
-		
+
 	def onClick(self,comList):
 		member = comList[0]
 		value = comList[1]
+		if member == 'Roll':
+			self.commands.euler.x = value*math.pi/180
 		if member == 'Yaw':
 			self.commands.euler.z = value*math.pi/180
 		if member == 'Pitch':
@@ -87,7 +89,7 @@ class GaugeSimple(QtGui.QWidget):
 	maximum value > minimum-value
 	'''
 	marker_set = QtCore.pyqtSignal(list)
-	
+
 	def __init__(self, topic='/HUD', length=300.0, end_angle=300.0, min=0.0, max=100.0, main_points=11,
 			warning=[], danger=[], multiplier='', units='', description=''):
 		super(GaugeSimple, self).__init__()
@@ -173,10 +175,10 @@ class GaugeSimple(QtGui.QWidget):
 		divisor = self.main_points
 		if self.start_angle != self.end_angle:
 			divisor -= 1
-		
+
 		angle_step = self.length/divisor
 		value_step = abs(self.max-self.min)/divisor
-	
+
 		#Gauge main line(the circular path)
 		#Safe zones
 		zones = map(self.val2deg_tuple, self.detect_safe_zones())
@@ -226,7 +228,7 @@ class GaugeSimple(QtGui.QWidget):
 
 			#Store the tick_length for the marker area
 			self.gauge_ticks.append([QtCore.QPointF(x_text, y_text), value, tick_path])
-		
+
 			#Store the tick_length for the marker area
 		self.tick_length = math.sqrt((x-x_new)**2+(y-y_new)**2)
 
@@ -235,14 +237,14 @@ class GaugeSimple(QtGui.QWidget):
 
 	def val2deg_tuple(self, t):
 		return map(self.val2deg, t)
-		
+
 	def deg2val(self, degrees):
 		#Convert the given degress relative to the start_angle to the respective value
 		return abs(self.max-self.min)*(degrees/self.length)+self.min
 
 	def mouseReleaseEvent(self, e):
 		self.mouseMoveEvent(e)
-		
+
 	def mouseMoveEvent(self, e):
 		#marker_line and marker_value dont exist before the first call of this function
 		click_pos = e.posF()
@@ -434,7 +436,7 @@ class Dashboard(Plugin):
 
 			rospy.sleep(2.)
 			self._layout = DashboardGrid()
-		
+
 		# Get path to UI file which is a sibling of this file
 		# in this example the .ui and .py file are in the same folder
 		##ui_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'MyPlugin.ui')
@@ -442,10 +444,10 @@ class Dashboard(Plugin):
 		##loadUi(ui_file, self._widget)
 		# Give QObjects reasonable names
 		self._layout.setObjectName('MyPluginUi')
-		# Show _widget.windowTitle on left-top of each plugin (when 
-		# it's set in _widget). This is useful when you open multiple 
-		# plugins at once. Also if you open multiple instances of your 
-		# plugin at once, these lines add number to make it easy to 
+		# Show _widget.windowTitle on left-top of each plugin (when
+		# it's set in _widget). This is useful when you open multiple
+		# plugins at once. Also if you open multiple instances of your
+		# plugin at once, these lines add number to make it easy to
 		# tell from pane to pane.
 		if context.serial_number() > 1:
 			self._layout.setWindowTitle(self._layout.windowTitle() + (' (%d)' % context.serial_number()))

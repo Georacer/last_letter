@@ -1,0 +1,28 @@
+last_letter:
+
+new features:
+   ☐ test integration with http://wiki.ros.org/ground_station
+   ☐ test integration with MAVProxy (http://tridge.github.io/MAVProxy/)
+   ☐ integrate with MAVLINK
+     useful links
+       https://github.com/mavlink/mavros
+       https://github.com/mavlink/mavlink_ros
+       http://qgroundcontrol.org/mavlink/start
+   ☐ test integration with QGroundControl
+       https://github.com/mavlink/qgroundcontrol
+   ☐ test multimaster support with http://wiki.ros.org/multimaster_fkie
+   ☐ write documentation as a GitHub README.md (./last_letter/README.md/)
+     may want to read the following documentation
+       https://github.com/ttscoff/MarkdownEditing
+       https://help.github.com/articles/github-flavored-markdown/
+       https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+       https://github.com/AutonomyLab/ardrone_autonomy/blob/hydro-devel/README.md#contributors
+
+bugfixes:
+   ☐ find out why rviz doesn't support .dae files on Ubuntu 12.04 / Hydro
+
+improvements:
+   ☐ make a more realistic landing gear model
+   ☐ investigate and make a report on the accuracy of quaternion conversions and propagation
+   ☐ find adequate propulsion model coefficients for HCUAV aircraft
+   ☐ replace FIR tfs with space-state representations and investigate accuracy

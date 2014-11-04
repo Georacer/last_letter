@@ -1,5 +1,5 @@
 //////////////////////////////
-// Propulsion interfrace class 
+// Propulsion interfrace class
 //////////////////////////////
 
 // Constructor
@@ -29,7 +29,7 @@ Propulsion::~Propulsion()
 
 // Constructor
 NoEngine::NoEngine(ModelPlane * parent) : Propulsion(parent)
-{	
+{
 	wrenchProp.force.x = 0.0;
 	wrenchProp.force.y = 0.0;
 	wrenchProp.force.z = 0.0;
@@ -181,7 +181,7 @@ void PistonEng::updateRadPS()
 	deltat = parentObj->input[2];
 
 	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
-	double engPower = deltat * powerHP * 745.7 * 2.0; // Calculate current engine power
+	double engPower = deltat * powerHP * 745.7 * 3.0; // Calculate current engine power
 
 	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
@@ -212,7 +212,7 @@ void PistonEng::updateRadPS()
 	// std::cout << npCoeff << " ";
 	// std::cout << wrenchProp.force.x << " ";
 	// std::cout << parentObj->kinematics.forceInput.x << " ";
-	// std::cout << omegaDot << " ";				
+	// std::cout << omegaDot << " ";
 	// std::cout << omega;
 	// std::cout << std::endl;
 
@@ -233,7 +233,7 @@ geometry_msgs::Vector3 PistonEng::getTorque()
 		ROS_FATAL("State NaN in wrenchProp.torque");
 		ros::shutdown();
 	}
-	
+
 	// Add torque to to force misalignment with CG
 	// r x F, where r is the distance from CoG to CoL
 	// Will potentially add the following code in the future, to support shift of CoG mid-flight

@@ -30,9 +30,9 @@ beta2rud/min : -1.0
 # pitch2elev/p : 0.3229
 # pitch2elev/i : 0.0851
 # pitch2elev/d : 0.0
-pitch2elev/p : 0.3229
-pitch2elev/i : 0.0851
-pitch2elev/d : 0.2
+pitch2elev/p : 5.0
+pitch2elev/i : 1.1265
+pitch2elev/d : 0.0
 pitch2elev/max : 1.0
 pitch2elev/min : -1.0
 pitch2elev/neutral : -0.0203

@@ -41,7 +41,6 @@ class StdLinearAero : public Aerodynamics
 	virtual double liftCoeff(double);
 	//Calculate drag coefficient from alpha
 	virtual double dragCoeff(double);
-	
 };
 
 // Extension for fine specification of the drag polar
