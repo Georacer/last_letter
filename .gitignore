@@ -17,6 +17,7 @@ msg/_.*\.py$
 #Other irrelevant folders
 microstrain_3dmgx2_imu/
 mavros/
+rosplot/
 
 \.pcd$
 .pyc$
