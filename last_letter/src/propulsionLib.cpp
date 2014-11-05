@@ -181,7 +181,7 @@ void PistonEng::updateRadPS()
 	deltat = parentObj->input[2];
 
 	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
-	double engPower = deltat * powerHP * 745.7 * 3.0; // Calculate current engine power
+	double engPower = deltat * powerHP * 745.7; // Calculate current engine power
 
 	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);

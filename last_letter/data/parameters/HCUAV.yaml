@@ -162,15 +162,15 @@ motor/engPowerPoly/coeffs: [ # Original Zanzoterra power curve
 # motor/engPowerPoly/polyNo: [1, 5]
 # motor/engPowerPoly/coeffs: [7.554e+4, -1076.0, 5.768, -0.01416, 1.66e-5, -7.553e-9, 1.676e+5, -1487.0, 4.831, -0.006781, 3.493e-6]
 motor/nCoeffPoly/polyType: 0
-motor/nCoeffPoly/polyNo: 4
-motor/nCoeffPoly/coeffs: [0.115, -0.22, 2.982, -2.846, 0.8]
+motor/nCoeffPoly/polyNo: 3
+motor/nCoeffPoly/coeffs: [-0.1226, 2.6374, -0.6788, -2.2577]
 motor/propPowerPoly/polyType: 0
 motor/propPowerPoly/polyNo: 3
 # motor/propPowerPoly/coeffs: [0.0559, -0.00896, 0.00193, -0.0104] # 0.25 from Raymer Cp, 287N max thrust, requires 2xPower
-motor/propPowerPoly/coeffs: [0.0745, -0.0119, 0.0026, -0.0138] # 0.33 from Raymer Cp, 383N max thrust, requires 3xPower
+motor/propPowerPoly/coeffs: [0.0738, -0.1329, 0.2872, -0.2853] # from Raymer Cp, 15degree pitch propeller
 # motor/propPowerPoly/coeffs:[0.03724, -0.005971, 0.00128, -0.00691]
 motor/RadPSLimits: [314.16, 733.04]
-motor/propDiam: 0.8 # in m
+motor/propDiam: 0.75 # in m
 motor/engInertia: 0.08 # in kg*m^3
 
 # Contact points array

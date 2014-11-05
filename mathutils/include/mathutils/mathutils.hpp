@@ -57,11 +57,11 @@ public:
 	Polynomial();
 	~Polynomial();
 	virtual double evaluate() {return 0;}
-	virtual double evaluate(double x) {return 0;}	
+	virtual double evaluate(double x) {return 0;}
 	virtual double evaluate(double x, double y) {return 0;}
 };
 
-class Polynomial1D : public Polynomial 
+class Polynomial1D : public Polynomial
 {
 public:
 	double coeffNo;

@@ -61,5 +61,3 @@ motor/k_motor: 80
 motor/k_t_p: 0
 motor/k_omega: 0
 motor/c_prop: 1.0
-
-

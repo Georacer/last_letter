@@ -24,5 +24,6 @@ bugfixes:
 improvements:
    ☐ make a more realistic landing gear model
    ☐ investigate and make a report on the accuracy of quaternion conversions and propagation
-   ☐ find adequate propulsion model coefficients for HCUAV aircraft
+   ✔ find adequate propulsion model coefficients for HCUAV aircraft @today @done (14-11-05 23:29)
+   ☐ mix static thrust into propulsion model
    ☐ replace FIR tfs with space-state representations and investigate accuracy
