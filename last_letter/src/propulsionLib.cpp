@@ -187,7 +187,7 @@ void PistonEng::updateRadPS()
 	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
 	double npCoeff = npPoly->evaluate(advRatio);
 
-	wrenchProp.force.x = propPower*npCoeff/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
+	wrenchProp.force.x = propPower*std::fabs(npCoeff)/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
 	// wrenchProp.force.x = engPower/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability - Eff dem propellers!
 
 	// Constrain propeller force to +-2 times the aircraft weight

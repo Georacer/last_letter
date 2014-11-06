@@ -142,7 +142,16 @@
 	}
 
 	double BMcLAttitudeController::rudderControl() {
-		return std::max(std::min(-0.06*states.acceleration.linear.y,1.0),-1.0);
+		// TODO: take accelerometer feedback
+		//read orientation and subtract gravity
+		double Reb[9];
+		quat2rotmtx(states.pose.orientation,Reb);
+		geometry_msgs::Vector3 gravVect;
+		gravVect.z = 9.8051;
+		geometry_msgs::Vector3 gravAcc = Reb/gravVect;
+		double accError = states.acceleration.linear.y - gravAcc.y;
+		// std::cout << accError << std::endl;
+		return std::max(std::min( -0.1*(states.acceleration.linear.y - gravAcc.y),1.0),-1.0);
 		// return beta2Rudder->step( -airdata.z);
 	}
 
@@ -204,11 +213,11 @@
 		// std::cout << std::endl;
 
 		// return std::max(std::min(-0.6*states.velocity.angular.y +4.0*errPitch,1.0),-1.0);
-		// 
+		//
 		// Compensator scheme based on Stevens/Lewis
 		x1 += 0.01*0.9493*errPitch;
 		return std::max(std::min(1.1878*x1 + 5.0*errPitch -0.6*states.velocity.angular.y,1.0),-1.0);
-		// 
+		//
 		// smooth out commanded pitch
 		// 	// return pitch2Elevator->step(pitchSmoother->step(errPitch));
 	}
@@ -224,6 +233,10 @@
 				state = 0;
 			}
 			deltat = airspd2Throt->step( errVa);
+			// double forwarddelta = 0.00151*pow(refCommands.airspeed,2) -0.0896*refCommands.airspeed + 1.703;
+			// std::cout<< deltat <<',' << forwarddelta << ','<< refCommands.airspeed << std::endl;
+			// deltat += forwarddelta;
+			// deltat = std::max(std::min(deltat,1.0),0.0);
 		}
 		else if (errAlt < altThresh) {
 			if (state!=1) {

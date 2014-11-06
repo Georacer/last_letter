@@ -17,6 +17,7 @@ new features:
        https://help.github.com/articles/github-flavored-markdown/
        https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
        https://github.com/AutonomyLab/ardrone_autonomy/blob/hydro-devel/README.md#contributors
+   ☐ model additions/subtractions of masses in-flight
 
 bugfixes:
    ☐ find out why rviz doesn't support .dae files on Ubuntu 12.04 / Hydro
@@ -24,6 +25,7 @@ bugfixes:
 improvements:
    ☐ make a more realistic landing gear model
    ☐ investigate and make a report on the accuracy of quaternion conversions and propagation
-   ✔ find adequate propulsion model coefficients for HCUAV aircraft @today @done (14-11-05 23:29)
+   ✔ find adequate propulsion model coefficients for HCUAV aircraft @started(14-11-05 14:30) @done (14-11-06 14:30) @lasted(1 day, 0:00)
    ☐ mix static thrust into propulsion model
    ☐ replace FIR tfs with space-state representations and investigate accuracy
+   ☐ investigate feedforward control for throttle managment

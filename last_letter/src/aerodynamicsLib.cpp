@@ -123,7 +123,7 @@ geometry_msgs::Vector3 StdLinearAero::getForce()
 	//request lift and drag alpha-coefficients from the corresponding functions
 	double c_lift_a = liftCoeff(alpha);
 	double c_drag_a = dragCoeff(alpha);
-	
+
 	//convert coefficients to the body frame
 	double c_x_a = -c_drag_a*cos(alpha)+c_lift_a*sin(alpha);
 	double c_x_q = -c_drag_q*cos(alpha)+c_lift_q*sin(alpha);
@@ -155,12 +155,13 @@ geometry_msgs::Vector3 StdLinearAero::getForce()
 		az = qbar*(c_z_a + c_z_q*c*q/(2*airspeed) - c_drag_deltae*sin(alpha)*fabs(deltae) - c_lift_deltae*cos(alpha)*deltae);
 		// split c_z_deltae to include "abs" term
 	}
-	
+
 	wrenchAero.force.x = ax;
 	wrenchAero.force.y = ay;
 	wrenchAero.force.z = az;
 
 	// Printouts
+	// std::cout << deltar << " ";
 	// std::cout << rho << " ";
 	// std::cout << airspeed << " ";
 	// std::cout << pow(airspeed,2) << " ";
@@ -169,7 +170,7 @@ geometry_msgs::Vector3 StdLinearAero::getForce()
 	// std::cout << c_lift_a << " ";
 	// std::cout << c_drag_a << " ";
 	// std::cout << c_x_a << " ";
-	// std::cout<< ax << std::endl;
+	// std::cout<< ay << std::endl;
 
 	return wrenchAero.force;
 }
@@ -211,7 +212,7 @@ geometry_msgs::Vector3 StdLinearAero::getTorque()
 		ma = qbar*c*(c_m_0 + c_m_a*alpha + c_m_q*c*q/(2*airspeed) + c_m_deltae*deltae);
 		na = qbar*b*(c_n_0 + c_n_b*beta + c_n_p*b*p/(2*airspeed) + c_n_r*b*r/(2*airspeed) + c_n_deltaa*deltaa + c_n_deltar*deltar);
 	}
-	
+
 	wrenchAero.torque.x = la;
 	wrenchAero.torque.y = ma;
 	wrenchAero.torque.z = na;
@@ -269,7 +270,7 @@ HCUAVAero::HCUAVAero (ModelPlane * parent) : StdLinearAero(parent)
 	liftCoeffPoly =  factory.buildPolynomial(s);
 	// Create CDrag polynomial
 	sprintf(s,"%s","airframe/cDragPoly");
-	dragCoeffPoly =  factory.buildPolynomial(s);	
+	dragCoeffPoly =  factory.buildPolynomial(s);
 }
 
 // Class destructor
