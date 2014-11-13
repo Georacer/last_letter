@@ -21,15 +21,6 @@
 		pubCtrl = n.advertise<last_letter::SimPWM>("ctrlPWM",1000);
 
 		//Create roll to aileron controller
-		if(!ros::param::getCached("roll2ail/p", P)) {ROS_FATAL("Invalid parameters for -roll2ail/p- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("roll2ail/i", I)) {ROS_FATAL("Invalid parameters for -roll2ail/i- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("roll2ail/d", D)) {ROS_FATAL("Invalid parameters for -roll2ail/d- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("roll2ail/tau", Tau)) {ROS_FATAL("Invalid parameters for -roll2ail/tau- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("roll2ail/max", satU)) {ROS_FATAL("Invalid parameters for -roll2ail/max- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("roll2ail/min", satL)) {ROS_FATAL("Invalid parameters for -roll2ail/min- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
-		Ts = 1.0/Ts;
-		roll2Aileron = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 
 		//Create yaw to roll controller
 		if(!ros::param::getCached("yaw2roll/p", P)) {ROS_FATAL("Invalid parameters for -yaw2roll/p- in param server!"); ros::shutdown();}
@@ -54,16 +45,6 @@
 		beta2Rudder = new PID(P, I, D, satU, satL, 0.0, Ts, Tau);
 
 		//Create pitch to elevator controller
-		if(!ros::param::getCached("pitch2elev/p", P)) {ROS_FATAL("Invalid parameters for -pitch2elev/p- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("pitch2elev/i", I)) {ROS_FATAL("Invalid parameters for -pitch2elev/i- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("pitch2elev/d", D)) {ROS_FATAL("Invalid parameters for -pitch2elev/d- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("pitch2elev/max", satU)) {ROS_FATAL("Invalid parameters for -pitch2elev/max- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("pitch2elev/min", satL)) {ROS_FATAL("Invalid parameters for -pitch2elev/min- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("pitch2elev/neutral", trim)) {ROS_FATAL("Invalid parameters for -pitch2elev/neutral- in param server!"); ros::shutdown();}
-		if(!ros::param::getCached("ctrlRate", Ts)) {ROS_FATAL("Invalid parameters for -ctrlRate- in param server!"); ros::shutdown();}
-		Ts = 1.0/Ts;
-		Tau = 0.1;
-		pitch2Elevator = new PID(P, I, D, satU, satL, trim, Ts, Tau);
 
 		//Create altitude to pitch controller
 		if(!ros::param::getCached("alt2pitch/p", P)) {ROS_FATAL("Invalid parameters for -alt2pitch/p- in param server!"); ros::shutdown();}
@@ -100,8 +81,6 @@
 		Ts = 1.0/Ts;
 		airspd2Throt = new PID(P, I, D, satU, satL, trim, Ts, Tau);
 
-		if(!ros::param::getCached("altSwitchThresh", altThresh)) {ROS_FATAL("Invalid parameters for -altSwitchThresh- in param server!"); ros::shutdown();}
-
 		int alphaOrder = 2;
 		int betaOrder = 1;
 		double alpha[] = {0.9751804568, -1.97502451};
@@ -114,10 +93,8 @@
 	///////////////////
 	//Class Destructor
 	BMcLAttitudeController::~BMcLAttitudeController() {
-		delete roll2Aileron;
 		delete yaw2Roll;
 		delete beta2Rudder;
-		delete pitch2Elevator;
 		delete alt2Pitch;
 		delete airspd2Pitch;
 		delete airspd2Throt;
@@ -138,7 +115,6 @@
 		double errP = 2.0*errRoll - states.velocity.angular.x;
 		x1 += 0.01*6.325*errP;
 		return std::max(std::min(3.162*x1 + 2.0*errP -0.02*states.velocity.angular.x,1.0),-1.0);
-		// return roll2Aileron->step( errRoll );
 	}
 
 	double BMcLAttitudeController::rudderControl() {
@@ -149,10 +125,10 @@
 		geometry_msgs::Vector3 gravVect;
 		gravVect.z = 9.8051;
 		geometry_msgs::Vector3 gravAcc = Reb/gravVect;
-		double accError = states.acceleration.linear.y - gravAcc.y;
+		double accError = -states.acceleration.linear.y + gravAcc.y;
 		// std::cout << accError << std::endl;
-		return std::max(std::min( -0.1*(states.acceleration.linear.y - gravAcc.y),1.0),-1.0);
-		// return beta2Rudder->step( -airdata.z);
+		// return std::max(std::min( -0.003*(states.acceleration.linear.y - gravAcc.y),1.0),-1.0);
+		return beta2Rudder->step( accError );
 	}
 
 	/////////////////////
@@ -165,93 +141,39 @@
 
 		double errPitch;
 		double refPitch;
-		int static state = 0;
 		double static sumErrAlt = 0, sumErrVa = 0, sumErrAlt2 = 0, sumErrVa2 = 0;
 		double errContr, contrOutput;
 		euler = quat2euler(states.pose.orientation);
 
+		double comRate = (refCommands.altitude - states.geoid.altitude)/5.0; // Using exponential profile
+		comRate = std::min(2.8, std::max(comRate, -3.0));
+		double climbRate = (states.geoid.altitude - altPrev)/0.01;
+		altPrev = states.geoid.altitude;
+		double errRate = comRate - climbRate;
+		refPitch = alt2Pitch->step(errRate);
+		errContr = errPitch - airspd2Pitch->step(errVa);
+		sumErrVa += errContr*0.01;
+		sumErrVa2 += sumErrVa*0.01;
+		airspd2Pitch->Iterm += (10*errContr + 10*sumErrVa + 10*sumErrVa2)*0.01;
 
-		if (abs(errAlt) <= altThresh) { // within altitude hold zone
-			// double refAlt = pitchSmoother->step(refCommands.altitude);
-			// errAlt = refAlt - states.geoid.altitude;
-			double comRate = (refCommands.altitude - states.geoid.altitude)/5.0;
-			comRate = std::min(2.8, std::max(comRate, -3.0));
-			// double climbRate = airdata.x*sin(airdata.y);
-			double climbRate = (states.geoid.altitude - altPrev)/0.01;
-			altPrev = states.geoid.altitude;
-			double errRate = comRate - climbRate;
-			// std::cout<< comRate << ',' << climbRate << std::endl;
-			if (state) {
-				state = 0;
-				sumErrAlt = 0;
-				sumErrAlt2 = 0;
-
-			}
-			// refPitch = alt2Pitch->step(errAlt, false, 0);
-			// refPitch = alt2Pitch->step(errAlt);
-			refPitch = alt2Pitch->step(errRate);
-			errContr = errPitch - airspd2Pitch->step(errVa);
-			sumErrVa += errContr*0.01;
-			sumErrVa2 += sumErrVa*0.01;
-			airspd2Pitch->Iterm += (10*errContr + 10*sumErrVa + 10*sumErrVa2)*0.01;
-		}
-		else { // outside of altitude hold zone
-			if (!state) {
-				state = 1;
-				sumErrVa = 0;
-				sumErrVa2 = 0;
-				pitchSmoother->init(refCommands.altitude, refCommands.altitude);
-			}
-			refPitch = airspd2Pitch->step(errVa);
-			contrOutput = alt2Pitch->step(errAlt, true, refPitch);
-
-		}
-		// std::cout<< refPitch << std::endl;
 		errPitch = refPitch - euler.y;
 		// errPitch =  refCommands.euler.y - euler.y;
-		// std::cout << "P /  I /  D / Iterm /  Out / Target :" << alt2Pitch->P << "/"<< alt2Pitch->I << "/"<< alt2Pitch->D << "/"<< alt2Pitch->Iterm << "/"<< contrOutput << "/" << refCommands.altitude;
-		// std::cout << std::endl;
-
-		// return std::max(std::min(-0.6*states.velocity.angular.y +4.0*errPitch,1.0),-1.0);
 		//
 		// Compensator scheme based on Stevens/Lewis
 		x1 += 0.01*0.9493*errPitch;
 		return std::max(std::min(1.1878*x1 + 5.0*errPitch -0.6*states.velocity.angular.y,1.0),-1.0);
-		//
-		// smooth out commanded pitch
-		// 	// return pitch2Elevator->step(pitchSmoother->step(errPitch));
 	}
 
 	double BMcLAttitudeController::throttleControl() {
 		double errAlt = refCommands.altitude - states.geoid.altitude;
-		int static state = 0;
 		double static deltat;
 
-		if (abs(errAlt) <= altThresh) {
-			double errVa = refCommands.airspeed - airdata.x;
-			if (state != 0) {
-				state = 0;
-			}
-			deltat = airspd2Throt->step( errVa);
-			// double forwarddelta = 0.00151*pow(refCommands.airspeed,2) -0.0896*refCommands.airspeed + 1.703;
-			// std::cout<< deltat <<',' << forwarddelta << ','<< refCommands.airspeed << std::endl;
-			// deltat += forwarddelta;
-			// deltat = std::max(std::min(deltat,1.0),0.0);
-		}
-		else if (errAlt < altThresh) {
-			if (state!=1) {
-				state = 1;
-				airspd2Throt->Iterm = deltat / airspd2Throt->I;
-			}
-			deltat = 0.0;
-		}
-		else {
-			if (state!=2) {
-				state = 2;
-				airspd2Throt->Iterm = deltat / airspd2Throt->I;
-			}
-			deltat = 1.0;
-		}
+		double errVa = refCommands.airspeed - airdata.x;
+		deltat = airspd2Throt->step( errVa);
+		// double forwarddelta = 0.00151*pow(refCommands.airspeed,2) -0.0896*refCommands.airspeed + 1.703;
+		// std::cout<< deltat <<',' << forwarddelta << ','<< refCommands.airspeed << std::endl;
+		// deltat += forwarddelta;
+		// deltat = std::max(std::min(deltat,1.0),0.0);
 		return deltat;
 	}
 

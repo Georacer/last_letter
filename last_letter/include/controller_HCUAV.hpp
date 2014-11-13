@@ -27,7 +27,6 @@ class BMcLAttitudeController
 	double P, I, D, satU, satL, trim, Ts, Tau, altThresh, altDes;
 	/////////
 	//Members
-	PID * roll2Aileron;
 	PID * yaw2Roll;
 	PID * beta2Rudder;
 	PID * pitch2Elevator;
@@ -47,12 +46,12 @@ class BMcLAttitudeController
 	double rudderControl();
 	double elevatorControl();
 	double throttleControl();
-	
+
 	//Constructor
 	BMcLAttitudeController(ros::NodeHandle n);
 	//Destructor
 	~BMcLAttitudeController();
-	
+
 	private:
 	///////////
 	//Variables

@@ -4,38 +4,23 @@
 ctrlRate : 100
 
 # roll to aileron controller
-roll2ail/p : 1.2309
-roll2ail/i : 0.008716
-roll2ail/d : -0.7653
-roll2ail/tau : 1.2412
-roll2ail/max : 1.0
-roll2ail/min : -1.0
 
 # yaw to roll controller
 yaw2roll/p : 0.9503
 yaw2roll/i : 0.001591
 yaw2roll/d : -2.3492
 yaw2roll/tau : 2.4721
-yaw2roll/max : 0.3491
-yaw2roll/min : -0.3491
+yaw2roll/max : 0.7
+yaw2roll/min : -0.7
 
 # beta to rudder controller
-beta2rud/p : -22.48
-beta2rud/i : -0.634
+beta2rud/p : 0.003
+beta2rud/i : 0.0
 beta2rud/d : 0.0
 beta2rud/max : 1.0
 beta2rud/min : -1.0
 
 # pitch to elevator controller
-# pitch2elev/p : 0.3229
-# pitch2elev/i : 0.0851
-# pitch2elev/d : 0.0
-pitch2elev/p : 5.0
-pitch2elev/i : 1.1265
-pitch2elev/d : 0.0
-pitch2elev/max : 1.0
-pitch2elev/min : -1.0
-pitch2elev/neutral : -0.0203
 
 # altitude to pitch controller
 # alt2pitch/p : 0.00494
@@ -80,5 +65,3 @@ airspd2throt/tau : 0.0079527
 airspd2throt/max : 1.0
 airspd2throt/min : 0.0
 airspd2throt/neutral : 0.832
-
-altSwitchThresh : 10000 #in meters

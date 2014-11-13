@@ -33,13 +33,13 @@ airframe/c_m_a: -0.268
 airframe/c_lift_q: 4.154
 airframe/c_drag_q: 0
 airframe/c_m_q: -8.513
-airframe/c_lift_deltae: -0.21
-airframe/c_drag_deltae: 0.26
-airframe/c_m_deltae: 0.59
+airframe/c_lift_deltae: -0.381
+airframe/c_drag_deltae: 0.0
+airframe/c_m_deltae: 1.079
 airframe/mcoeff: 0.0 #not used but required
 airframe/alpha_stall: 0.0 #not used but required
 airframe/c_drag_p: 0.0 #not used but required
-airframe/c_n_deltar: 0.016 #opposite sign than c_y_deltar
+airframe/c_n_deltar: 0.0476 #opposite sign than c_y_deltar
 airframe/c_y_0: 0.0
 airframe/c_l_0: 0.0
 airframe/c_n_0: 0.0
@@ -53,10 +53,10 @@ airframe/c_y_r: 1.201
 airframe/c_l_r: 0.209
 airframe/c_n_r: -0.408
 airframe/c_y_deltaa: 0.0
-airframe/c_l_deltaa: 0.1042
-airframe/c_n_deltaa: -0.0103
-airframe/c_y_deltar: -0.044 #opposite sign than c_n_deltar
-airframe/c_l_deltar: -0.00141
+airframe/c_l_deltaa: 0.1028
+airframe/c_n_deltaa: -0.01018
+airframe/c_y_deltar: -0.127 #opposite sign than c_n_deltar
+airframe/c_l_deltar: -0.00635
 airframe/deltaa_max: 0.2618
 airframe/deltae_max: 0.4363
 airframe/deltar_max: 0.4363
