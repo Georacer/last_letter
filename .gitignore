@@ -18,6 +18,7 @@ msg/_.*\.py$
 microstrain_3dmgx2_imu/
 mavros/
 rosplot/
+autopilot_bridge/
 
 \.pcd$
 .pyc$
