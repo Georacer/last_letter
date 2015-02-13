@@ -25,6 +25,7 @@ last_letter:
      ☐ add reference model for all high-level commands
      ☐ investigate the possibility to replace JSBSim for ArduPlane SITL with LL
      ☐ test integration with https://code.google.com/p/happykillmore-gcs/
+     ✔ Propagate NED states onto GPS coordianates @done (15-02-04 12:15)
 
   MAVLink Related:
      ✔ Examine all selected MAVLink messages @done (15-01-27 14:05)
@@ -51,3 +52,6 @@ last_letter:
      ☐ examine FAR gust models
          http://www.flightsimaviation.com/data/FARS/part_25-appG.html
          http://www.flightsimaviation.com/data/FARS/part_23-333.html
+     ☐ Improve gravity model using either WGS84 or USStdAtm
+     ☐ Compare current equations with this pressure model by ETH
+         https://github.com/AutonomyLab/pressure2odometry

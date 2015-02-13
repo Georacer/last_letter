@@ -50,25 +50,25 @@ void Kinematics::calcDerivatives()
 	// variable declaration
 	geometry_msgs::Vector3 tempVect;
 	double Reb[9];
-	
+
 	// create transformation matrix from state orientation quaternion
 	quat2rotmtx (parentObj->states.pose.orientation, Reb);
-	
+
 	// create position derivatives from earth velocity
 	posDot = Reb*parentObj->states.velocity.linear;
-	
+
 	// create body velocity derivatives from acceleration, angular rotation and body velocity
 	geometry_msgs::Vector3 linearAcc = (1.0/mass)*forceInput;
 	geometry_msgs::Vector3 corriolisAcc;
 	vector3_cross(-parentObj->states.velocity.angular, parentObj->states.velocity.linear, &corriolisAcc);
 	speedDot = linearAcc + corriolisAcc;
-	
+
 	// create angular derivatives quaternion from angular rates
 	quatDot.w = 1.0;
 	quatDot.x = parentObj->states.velocity.angular.x*0.5*parentObj->dt;
 	quatDot.y = parentObj->states.velocity.angular.y*0.5*parentObj->dt;
 	quatDot.z = parentObj->states.velocity.angular.z*0.5*parentObj->dt;
-	
+
 	// create angular rate derivatives from torque
 	vector3_cross(parentObj->states.velocity.angular, J*parentObj->states.velocity.angular, &tempVect);
 	tempVect = -tempVect+torqueInput;
@@ -102,31 +102,36 @@ ForwardEuler::ForwardEuler(ModelPlane * parent) : Integrator(parent)
 void ForwardEuler::propagation()
 {
 	geometry_msgs::Vector3 tempVect;
-	
+
 	// Propagate the NED coordinates from earth velocity
 	parentObj->states.pose.position.x = parentObj->states.pose.position.x + parentObj->kinematics.posDot.x * parentObj->dt;
 	parentObj->states.pose.position.y = parentObj->states.pose.position.y + parentObj->kinematics.posDot.y * parentObj->dt;
 	parentObj->states.pose.position.z = parentObj->states.pose.position.z + parentObj->kinematics.posDot.z * parentObj->dt;
-	
+
 	// Propagate orientation quaternion from angular derivatives quaternion
 	geometry_msgs::Quaternion quat = parentObj->states.pose.orientation;
 	quat_product(quat,parentObj->kinematics.quatDot,&(parentObj->states.pose.orientation));
 	quat_normalize(&(parentObj->states.pose.orientation));
-	
+
 	// Propagate body velocity from body velocity derivatives
 	tempVect = parentObj->dt*parentObj->kinematics.speedDot;
 	parentObj->states.velocity.linear = parentObj->states.velocity.linear + tempVect;
-	
+
 	// Propagates angular velocity from angular derivatives
 	tempVect = parentObj->dt*parentObj->kinematics.rateDot;
 	parentObj->states.velocity.angular = parentObj->states.velocity.angular + tempVect;
-	
+
 	// Set linear acceleration from the speed derivatives
 	parentObj->states.acceleration.linear = parentObj->kinematics.speedDot;
-	
+
 	// Set angular acceleration from the angular rate derivatives
 	parentObj->states.acceleration.angular = parentObj->kinematics.rateDot;
-	
-	//Update Geoid stuff -- To update!
-	parentObj->states.geoid.altitude = -parentObj->states.pose.position.z;
+
+	//Update Geoid stuff using the NED coordinates
+	parentObj->states.geoid.latitude += 180.0/M_PI*asin(parentObj->kinematics.posDot.x * parentObj->dt / WGS84_RM(parentObj->states.geoid.latitude));
+	parentObj->states.geoid.longitude += 180.0/M_PI*asin(parentObj->kinematics.posDot.y * parentObj->dt / WGS84_RN(parentObj->states.geoid.longitude));
+	parentObj->states.geoid.altitude += -parentObj->kinematics.posDot.z * parentObj->dt;
+	parentObj->states.geoid.velocity.x = parentObj->kinematics.posDot.x;
+	parentObj->states.geoid.velocity.y = parentObj->kinematics.posDot.y;
+	parentObj->states.geoid.velocity.z = -parentObj->kinematics.posDot.z; // Upwards velocity
 }

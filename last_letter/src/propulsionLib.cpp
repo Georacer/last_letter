@@ -187,12 +187,16 @@ void PistonEng::updateRadPS()
 	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
 	double npCoeff = npPoly->evaluate(advRatio);
 
-	wrenchProp.force.x = propPower*std::fabs(npCoeff)/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
-	// wrenchProp.force.x = engPower/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability - Eff dem propellers!
+	// wrenchProp.force.x = propPower*std::fabs(npCoeff)/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
+	wrenchProp.force.x = propPower*std::fabs(npCoeff/(parentObj->states.velocity.linear.x+1.0e-10)); // Added epsilon for numerical stability
 
 	// Constrain propeller force to +-2 times the aircraft weight
 	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 2.0*parentObj->kinematics.mass*9.81), -2.0*parentObj->kinematics.mass*9.81);
 	wrenchProp.torque.x = propPower / omega;
+	if (deltat < 0.01) {
+		wrenchProp.force.x = 0;
+		wrenchProp.torque.x = 0;
+	} // To avoid aircraft rolling while on the ground, since we don't have static friction yet
 	wrenchProp.torque.y = 0.0;
 	wrenchProp.torque.z = 0.0;
 	// double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;
@@ -211,6 +215,7 @@ void PistonEng::updateRadPS()
 	// std:: cout << advRatio << " ";
 	// std::cout << npCoeff << " ";
 	// std::cout << wrenchProp.force.x << " ";
+	// std::cout << wrenchProp.torque.x << " ";
 	// std::cout << parentObj->kinematics.forceInput.x << " ";
 	// std::cout << omegaDot << " ";
 	// std::cout << omega;

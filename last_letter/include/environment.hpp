@@ -11,11 +11,11 @@
 
 using namespace std;
 
-#define E_EARTH sqrt(2.0*last_letter::Geoid::EARTH_flattening - last_letter::Geoid::EARTH_flattening*last_letter::Geoid::EARTH_flattening)
-#define RP_EARTH last_letter::Geoid::EARTH_radius*(1.0-E_EARTH*E_EARTH)
+#define E2_EARTH last_letter::Geoid::WGS84_e2
+#define RP_EARTH last_letter::Geoid::WGS84_Ra*(1.0-E2_EARTH)
 
-#define grav_const 3.986004418e14		
-#define grav_temp (2.0/last_letter::Geoid::EARTH_radius)*(1.0+last_letter::Geoid::EARTH_flattening+(last_letter::Geoid::EARTH_Omega*last_letter::Geoid::EARTH_Omega)*(last_letter::Geoid::EARTH_radius*last_letter::Geoid::EARTH_radius)*RP_EARTH/grav_const)
+#define grav_const 3.986004418e14
+#define grav_temp (2.0/last_letter::Geoid::WGS84_Ra)*(1.0+last_letter::Geoid::EARTH_flattening+(last_letter::Geoid::EARTH_Omega*last_letter::Geoid::EARTH_Omega)*(last_letter::Geoid::WGS84_Ra*last_letter::Geoid::WGS84_Ra)*RP_EARTH/grav_const)
 
 #define Rd 287.05307  //Gas constant for dry air, J/kg K
 #define L0 -6.5  //Temperature lapse rate, at sea level deg K/km
@@ -34,7 +34,7 @@ class environmentModel
 	double allowTurbulence;
 
 	ros::Publisher env_pub;
-	
+
 	//conditions starting at sea level, in a region with temperature gradient
 	double T0; //Temperature at sea level, degrees K
 	double P0; //Pressure at sea level, in HG
@@ -45,20 +45,20 @@ class environmentModel
 	double Lu, Lw, sigmau, sigmaw;
 	double windDistU;
 	double windDistV[2], windDistW[2];
-	
+
 	/////////////
 	//Constructor
 	environmentModel();
-	
+
 	void callback(const last_letter::SimStates::ConstPtr& InpStates);
-	
+
 	void calcWind();
-	
+
 	void calcDens();
-	
+
 	void calcPres();
-	
+
 	void calcTemp();
-	
+
 	void calcGrav();
 };

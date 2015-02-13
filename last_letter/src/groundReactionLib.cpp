@@ -61,11 +61,11 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 	if(!ros::param::getCached("airframe/contactPtsNo", contactPtsNo)) {ROS_FATAL("Invalid parameters for -/airframe/contactPtsNo- in param server!"); ros::shutdown();}
 	// Create an appropriately sized matrix to contain contact point information
 	contactPoints = (double*)malloc(sizeof(double) * (contactPtsNo*4));
-	
+
 	// Set spring characteristics
-	kspring = 30000.0;
-	mspring = 100.0;
-	len=0.1;
+	kspring = 4100.0;
+	mspring = 1000.0;
+	len=0.2;
 
 	// Set coefficient of friction for each material
 	frictForw[0] = 0.7; frictSide[0] = 0.7;
@@ -88,11 +88,11 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 	}
 
 	// Create and initialize spring contraction container
-	spp = (double*)malloc(sizeof(double) * contactPtsNo); 
+	spp = (double*)malloc(sizeof(double) * contactPtsNo);
 	memset(spp, 0, sizeof(spp));
-	
-	// Create and initialize previous spring contraction container	
-	sppprev = (double*)malloc(sizeof(double) * contactPtsNo); 
+
+	// Create and initialize previous spring contraction container
+	sppprev = (double*)malloc(sizeof(double) * contactPtsNo);
 	memset(sppprev, 0, sizeof(sppprev));
 
 	contact = false;
@@ -168,13 +168,13 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 
 	// Rotate body angular speeds to earth frame
 	we = Reb*parentObj->states.velocity.angular;
-	
+
 	// Main calculations for each contact point
 	for (i=0;i<contactPtsNo;i++)
 	{
 		cpi_down[i+2*contactPtsNo]+=len; // Place lower spring end "len" below upper spring end
 		// Calculate force arm
-		dx.x = (cpi_up[i]-uavpos[0]); 
+		dx.x = (cpi_up[i]-uavpos[0]);
 		dx.y = (cpi_up[i+contactPtsNo]-uavpos[1]);
 		dx.z = (cpi_up[i+2*contactPtsNo]-uavpos[2]);
 
@@ -210,6 +210,13 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 			// }
 
 			// Select contact point friction coefficient
+			// if (parentObj->input[5]==0) { // Apply breaks, kind of not working, prolly due to bad physics model
+			// 	frictForw[2] = 0.01;
+			// }
+			// else {
+			// 	frictForw[2] = 1.0;
+			// }
+
 			kFrictionLong = frictForw[materialIndex];
 			kFrictionLat = frictSide[materialIndex];
 			// Convert frictions coefficients to the Earth frame
@@ -263,7 +270,7 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 	}
 
 	return wrenchGround.force;
-	
+
 }
 
 // Dummy torque calculation function

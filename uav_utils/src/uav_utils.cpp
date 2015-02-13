@@ -18,7 +18,7 @@
 		Ts = Tsi;
 		Tau = Taui;
 	}
-	
+
 	void PID::init(void) {
 		Iterm = 0;
 		Iprev = 0;
@@ -26,10 +26,10 @@
 		Uprev = 0;
 		Dprev = 0;
 	}
-	
+
 	double PID::step(double error)
 	{
-	
+
 		Iterm += I*Ts*error;
 		double Dterm = 1.0 / (Tau + Ts) * ( Tau * Dprev + error - Eprev);
 		output = P*error + Iterm + D*Dterm + trim;
@@ -38,7 +38,7 @@
 //		Iterm += Ts/2 * (error + Eprev);
 //		double Dterm = (2*Tau - Ts)/(2*Tau + Ts) * Dprev + 2/(2*Tau + Ts)*(error - Eprev); //Bilinear transform, not working
 //		output = Pterm + I*Iterm + D*Dterm;
-		
+
 		if (output>satU) {
 			output = satU;
 			Iterm = Iprev;
@@ -53,7 +53,7 @@
 		Dprev = Dterm;
 		return output;
 	}
-	
+
 	double PID::step(double error, double dt)
 	{
 		double Pterm = P*error;
@@ -73,7 +73,7 @@
 		Uprev = output;
 		return output;
 	}
-	
+
 	double PID::step(double error, double dt, double derivative)
 	{
 		double Pterm = P*error;
@@ -119,7 +119,7 @@
 		Ts = Tsi;
 		Tau = Taui;
 	}
-	
+
 	void APID::init(void) {
 		Iterm = 0;
 		Iprev = 0;
@@ -130,7 +130,7 @@
 		bumplessI1 = 0;
 		bumplessI2 = 0;
 	}
-	
+
 	double APID::step(double error, bool track, double trInput)
 	{
 		double PGainPrev = P;
@@ -188,7 +188,7 @@
 		Eprev = error;
 		return output;
 	}
-	
+
 	//Destructor
 	APID::~APID ()
 	{
@@ -223,20 +223,23 @@ geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds)
 	result.x = airspeed;
 	result.y = alpha;
 	result.z = beta;
-	
+
 	return result;
 }
 
-void WGS84_NM(double lat,double *NE, double *ME)
+
+/////////////////////////////
+// WGS84 utility functions //
+/////////////////////////////
+
+double WGS84_RN(double lat)
 {
-	double const R_earth = 6378137.0;
-	double const f_earth = 1.0/298.257223563;
-	double const e_earth = sqrt(2.0*f_earth - f_earth*f_earth);
-	double sfi =sin(lat);
-	double e2 = e_earth*e_earth;
+	double sfi =sin(lat*M_PI/180);
+	return last_letter::Geoid::WGS84_Ra/sqrt(1-last_letter::Geoid::WGS84_e2*sfi*sfi);
+}
 
-	double temp = 1.0-e2*sfi*sfi;
-
-	*NE = R_earth / sqrt(temp);
-	*ME = R_earth*(1.0-e2) / pow(temp,3.0/2.0);
+double WGS84_RM(double lat)
+{
+	double sfi =sin(lat*M_PI/180);
+	return last_letter::Geoid::WGS84_Ra*(1-last_letter::Geoid::WGS84_e2)/pow(1-last_letter::Geoid::WGS84_e2*sfi*sfi,1.5);
 }

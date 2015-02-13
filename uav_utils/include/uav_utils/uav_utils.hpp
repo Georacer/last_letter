@@ -5,6 +5,8 @@
 
 #include "geometry_msgs/Vector3.h"
 
+#include <last_letter/Geoid.h>
+
 class PID
 {
 	private:
@@ -16,13 +18,13 @@ class PID
 	double output;
 	///////////
 	//Functions
-	
+
 	//Constructor
 	PID (double Pi, double Ii, double Di, double satUi, double satLi, double trim, double Tsi, double Ni);
 
 	//Destructor
 	~PID ();
-	
+
 	//Main step
 	double step(double error);
 	double step(double error, double dt);
@@ -42,14 +44,34 @@ public:
 	double output;
 	///////////
 	//Functions
-	
+
 	//Constructor
 	APID (double Pi, double Ii, double Di, double satUi, double satLi, double trim, double Tsi, double Ni);
 
 	//Destructor
 	~APID ();
-	
+
 	//Main step
 	double step(double error, bool track, double trInput);
-	void init(void);	
+	void init(void);
 };
+
+geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);
+
+/////////////////////////////
+// WGS84 utility functions //
+/////////////////////////////
+
+/**
+ * [WGS84_RN Calculate the curvature of the Earth in the prime vertical
+ * @param  lat The latitude in degrees
+ * @return     RN - radius corresponding to curvature in meters
+ */
+double WGS84_RN(double lat);
+
+/**
+ * [WGS84_RN Calculate the curvature of the Earth in the meridian
+ * @param  lat The latitude in degrees
+ * @return     RM - radius corresponding to curvature in meters
+ */
+double WGS84_RM(double lat);

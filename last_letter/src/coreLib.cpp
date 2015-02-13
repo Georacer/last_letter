@@ -29,10 +29,10 @@ void ModelPlane::init()
 	XmlRpc::XmlRpcValue list;
 	double temp[4];
 	int i;
-	
+
 	// Set states message frame name
 	states.header.frame_id = "bodyFrame";
-	
+
 	// Read initial NED coordinates
 	if(!ros::param::getCached("init/position", list)) {ROS_FATAL("Invalid parameters for -init/position- in param server!"); ros::shutdown();}
 	for (i = 0; i < list.size(); ++i) {
@@ -42,7 +42,7 @@ void ModelPlane::init()
 	states.pose.position.x=temp[0];
 	states.pose.position.y=temp[1];
 	states.pose.position.z=temp[2];
-	
+
 	// Read initial orientation quaternion
 	if(!ros::param::getCached("init/orientation", list)) {ROS_FATAL("Invalid parameters for -init/orientation- in param server!"); ros::shutdown();}
 	for (i = 0; i < list.size(); ++i) {
@@ -53,7 +53,7 @@ void ModelPlane::init()
 	states.pose.orientation.y=temp[1];
 	states.pose.orientation.z=temp[2];
 	states.pose.orientation.w=temp[3];
-	
+
 	// Read initial velocity
 	if(!ros::param::getCached("init/velLin", list)) {ROS_FATAL("Invalid parameters for -init/velLin- in param server!"); ros::shutdown();}
 	for (i = 0; i < list.size(); ++i) {
@@ -63,7 +63,7 @@ void ModelPlane::init()
 	states.velocity.linear.x=temp[0];
 	states.velocity.linear.y=temp[1];
 	states.velocity.linear.z=temp[2];
-	
+
 	// Read initial angular velocity
 	if(!ros::param::getCached("init/velAng", list)) {ROS_FATAL("Invalid parameters for -init/velAng- in param server!"); ros::shutdown();}
 	for (i = 0; i < list.size(); ++i) {
@@ -73,22 +73,28 @@ void ModelPlane::init()
 	states.velocity.angular.x=temp[0];
 	states.velocity.angular.y=temp[1];
 	states.velocity.angular.z=temp[2];
-	
+
 	// Initialize rotorspeed array
 	states.rotorspeed.clear();
 	states.rotorspeed.push_back((double) 0);
-	
+
 	// Initialize WGS coordinates
-	states.geoid.latitude = 45.542;
-	states.geoid.longitude = 0.0;
-	states.geoid.altitude = 0.0;
-	
+	if(!ros::param::getCached("init/coordinates", list)) {ROS_FATAL("Invalid parameters for -init/coordinates- in param server!"); ros::shutdown();}
+	for (i = 0; i < list.size(); ++i) {
+		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+		temp[i]=list[i];
+	}
+	states.geoid.latitude = temp[0];
+	states.geoid.longitude = temp[1];
+	states.geoid.altitude = temp[2] - states.pose.position.z;
+
 	// Initialize control inputs
 	input[0] = 0;
 	input[1] = 0;
 	input[2] = 0;
 	input[3] = 0;
-	
+	input[5] = 0;
+
 	// Initialize environment
 	environment.wind.x = 0;
 	environment.wind.y = 0;
@@ -115,7 +121,7 @@ void ModelPlane::step(void)
 	}
 	tprev = ros::Time::now();
 	states.header.stamp = tprev;
-	
+
 	// Perform step actions serially
 	dynamics.propulsion->updateRadPS();
 	kinematics.forceInput = dynamics.getForce();
@@ -141,7 +147,8 @@ void ModelPlane::getInput(last_letter::SimPWM inputMsg)
 	input[1] = deltae_max * (double)(inputMsg.value[1]-1500)/500;
 	input[2] = (double)(inputMsg.value[2]-1000)/1000;
 	input[3] = deltar_max * (double)(inputMsg.value[3]-1500)/500;
-
+	input[5] = (double)(inputMsg.value[5]-1000)/1000;
+	// std::cout << input[0] << ',' << input[1] << ',' << input[2] << ',' << input[3] << '\n';
 	if (inputMsg.value[9] > 1500) {
 		init();
 	}
@@ -159,7 +166,7 @@ void ModelPlane::getEnvironment(last_letter::Environment envUpdate)
 ModelPlane::~ModelPlane ()
 {
 }
-	
+
 
 //////////////////////////
 // Define Airdata class
@@ -186,7 +193,7 @@ void Airdata::calcAirData()
 	double u = parentObj->states.velocity.linear.x;
 	double v = parentObj->states.velocity.linear.y;
 	double w = parentObj->states.velocity.linear.z;
-	
+
 	airspeed = sqrt(pow(u,2)+pow(v,2)+pow(w,2));
 	alpha = atan2(w,u);
 
@@ -370,7 +377,7 @@ Polynomial * Factory::buildPolynomial(char * baseParam)
 			coeffs[i]=list[i];
 		}
 		return new Spline3(breaksNo, breaks, coeffs);
-		}	
+		}
 	default: {
 		ROS_FATAL("Error while constructing a polynomial");
 		ros::shutdown();

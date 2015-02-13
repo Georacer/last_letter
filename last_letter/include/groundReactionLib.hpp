@@ -1,4 +1,4 @@
-// Ground reactions interface class 
+// Ground reactions interface class
 class GroundReaction
 {
 	public:

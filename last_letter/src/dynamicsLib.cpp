@@ -13,7 +13,7 @@
 		propulsion = factory.buildPropulsion(parentObj);
 		groundReaction = factory.buildGroundReaction(parentObj);
 	}
-	
+
 	//Class Destructor
 	Dynamics::~Dynamics()
 	{
@@ -23,7 +23,7 @@
 		delete groundReaction;
 		delete parentObj;
 	}
-	
+
 	// Collect forces from underlying models
 	geometry_msgs::Vector3 Dynamics::getForce()
 	{
@@ -32,10 +32,10 @@
 		tempVect = groundReaction->getForce() + tempVect;
 		tempVect = gravity->getForce() + tempVect;
 		tempVect = aerodynamics->getForce() + tempVect;
-		
+
 		return tempVect;
 	}
-	
+
 	// Collect torques from underlying models
 	geometry_msgs::Vector3 Dynamics::getTorque()
 	{
@@ -44,7 +44,7 @@
 		tempVect = gravity->getTorque() + tempVect;
 		tempVect = propulsion->getTorque() + tempVect;
 		tempVect = groundReaction->getTorque() + tempVect;
-		
+
 		return tempVect;
 	}
 

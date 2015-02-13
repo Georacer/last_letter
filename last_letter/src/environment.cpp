@@ -102,19 +102,19 @@
 		{
 			input = (((double)rand()) / (RAND_MAX) - 0.5); //turbulence u-component
 
-			windDistU = windDistU*(1-Va/Lu*dt) + sigmau*sqrt(2*Va/(M_PI*Lu)*dt*input;
+			windDistU = windDistU*(1-Va/Lu*dt) + sigmau*sqrt(2*Va/(M_PI*Lu))*dt*input;
 
 			input = (((double)rand()) / (RAND_MAX) - 0.5); //turbulence v-component
 			temp[0] = windDistV[0];
 			temp[1] = windDistV[1];
-			windDistV[1] = -pow(Va/Lu,2)*dt*temp[0] + temp[1] + sigmau*sqrt(3*Va/(M_PI*Lu)*Va/(sqrt(3)*Lu)*dt*input;
-			windDistV[0] = (1.0-2.0*Va/Lu*dt)*temp[0] + dt*temp[1] + sigmau*sqrt(3*Va/(M_PI*Lu)*dt*input;
+			windDistV[1] = -pow(Va/Lu,2)*dt*temp[0] + temp[1] + sigmau*sqrt(3*Va/(M_PI*Lu))*Va/(sqrt(3)*Lu)*dt*input;
+			windDistV[0] = (1.0-2.0*Va/Lu*dt)*temp[0] + dt*temp[1] + sigmau*sqrt(3*Va/(M_PI*Lu))*dt*input;
 
 			input = ((double)rand() / (RAND_MAX) - 0.5); //turbulence w-component
 			temp[0] = windDistW[0];
 			temp[1] = windDistW[1];
-			windDistW[1] = -pow(Va/Lw,2)*dt*temp[0] + temp[1] + sigmaw*sqrt(3*Va/(M_PI*Lw)*Va/(sqrt(3)*Lw)*dt*input;
-			windDistW[0] = (1.0-2.0*Va/Lw*dt)*temp[0] + dt*temp[1] + sigmaw*sqrt(3*Va/(M_PI*Lw)*dt*input;
+			windDistW[1] = -pow(Va/Lw,2)*dt*temp[0] + temp[1] + sigmaw*sqrt(3*Va/(M_PI*Lw))*Va/(sqrt(3)*Lw)*dt*input;
+			windDistW[0] = (1.0-2.0*Va/Lw*dt)*temp[0] + dt*temp[1] + sigmaw*sqrt(3*Va/(M_PI*Lw))*dt*input;
 		}
 
 		if (isnan(windDistU) || isnan(windDistV[0]) || isnan(windDistW[0]))
@@ -171,7 +171,7 @@
 	void environmentModel::calcGrav()
 	{
 		double slat2 = pow(sin(M_PI/180*states.geoid.latitude),2);
-		double Re2 = pow(last_letter::Geoid::EARTH_radius,2);
+		double Re2 = pow(last_letter::Geoid::WGS84_Ra,2);
 
 		grav0 = last_letter::Geoid::EARTH_grav * (1.0+0.00193185138639 * slat2) / sqrt(1.0-0.00669437999013 *slat2);
 		double gravity = grav0 * (1.0 - grav_temp * states.geoid.altitude + 3.0 *(pow(states.geoid.altitude,2)/Re2) );

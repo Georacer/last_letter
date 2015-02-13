@@ -13,12 +13,14 @@
 #include <math.h>
 
 #include "mathutils/mathutils.hpp"
-//#include "uav_utils/uav_utils.hpp"
+#include "uav_utils/uav_utils.hpp"
 
 //Include custom messages
 #include "last_letter/SimStates.h"
 #include "last_letter/SimPWM.h"
+#include "last_letter/Geoid.h"
 #include "last_letter/Environment.h"
+
 
 //Forward class declarations
 class ModelPlane;
