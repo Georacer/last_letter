@@ -21,6 +21,7 @@ kinematics(this), dynamics(this), airdata(this)
 	pubState = n.advertise<last_letter::SimStates>("states",1000); //model states publisher
 	pubForce = n.advertise<geometry_msgs::Vector3>("forceInput",1000); // forces publisher
 	pubTorque = n.advertise<geometry_msgs::Vector3>("torqueInput",1000); // torques publisher
+	pubLinAcc = n.advertise<geometry_msgs::Vector3>("linearAcc",1000); // Body frame linear acceleration - no corriolis effect
 }
 
 //Initialize states
@@ -133,6 +134,7 @@ void ModelPlane::step(void)
 	pubState.publish(states);
 	pubForce.publish(kinematics.forceInput);
 	pubTorque.publish(kinematics.torqueInput);
+	pubLinAcc.publish(kinematics.linearAcc);
 }
 
 /////////////////////////////////////////////////

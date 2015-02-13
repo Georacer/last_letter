@@ -22,7 +22,9 @@ def interpret_address(addrstr):
 
 def state_callback(state):
 
-	global fdm
+	global fdm, stateStorage
+
+	stateStorage = state
 
 	fdm.set('latitude', state.geoid.latitude, units='degrees')
 	fdm.set('longitude', state.geoid.longitude, units='degrees')
@@ -35,23 +37,20 @@ def state_callback(state):
 	# rospy.logerr('vn/ve/vd: %g/%g/%g',state.geoid.velocity.x, state.geoid.velocity.y, -state.geoid.velocity.z)
 
 	# Calculate accelerometer felt accelerations
-	Reb = quat2Reb(state.pose.orientation)
-	accx = (state.acceleration.linear.x - 9.80665*Reb[2][0])
-	accy = (state.acceleration.linear.y - 9.80665*Reb[2][1])
-	accz = (state.acceleration.linear.z - 9.80665*Reb[2][2])
-	# fdm.set('A_X_pilot', state.acceleration.linear.x, units='mpss')
-	# fdm.set('A_Y_pilot', state.acceleration.linear.y, units='mpss')
-	# fdm.set('A_Z_pilot', state.acceleration.linear.z, units='mpss')
-	fdm.set('A_X_pilot', accx, units='mpss')
-	fdm.set('A_Y_pilot', accy, units='mpss')
-	fdm.set('A_Z_pilot', accz, units='mpss')
+	# Reb = quat2Reb(state.pose.orientation)
+	# accx = (state.acceleration.linear.x - 9.80665*Reb[2][0])
+	# accy = (state.acceleration.linear.y - 9.80665*Reb[2][1])
+	# accz = (state.acceleration.linear.z - 9.80665*Reb[2][2])
+	# fdm.set('A_X_pilot', accx, units='mpss')
+	# fdm.set('A_Y_pilot', accy, units='mpss')
+	# fdm.set('A_Z_pilot', accz, units='mpss')
 	# rospy.logerr('acc_x/y/z: %g/%g/%g',accx, accy, accz)
 
 	(yaw, pitch, roll) = tf.transformations.euler_from_quaternion([state.pose.orientation.x, state.pose.orientation.y, state.pose.orientation.z, state.pose.orientation.w],'rzyx')
 	fdm.set('phi', roll, units='radians')
 	fdm.set('theta', pitch, units='radians')
 	fdm.set('psi', yaw, units='radians')
-	# rospy.logerr('r/p/y: %g/%g/%g',roll, pitch, yaw)
+	# rospy.logerr('r/p/y: %4.1f/%4.1f/%4.1f',180/np.pi*roll, 180/np.pi*pitch, 180/np.pi*yaw)
 
 	(p, q, r) = (state.velocity.angular.x, state.velocity.angular.y, state.velocity.angular.z)
 	phiDot = p + np.tan(pitch)*np.sin(roll)*q + np.tan(pitch)*np.cos(roll)*r
@@ -70,6 +69,19 @@ def state_callback(state):
 	fdm.set('rpm', state.rotorspeed[0]*np.pi*60)
 	fdm.set('agl', state.geoid.altitude, units='meters')
 
+def accel_callback(accel):
+
+	global fdm, stateStorage
+	Reb = quat2Reb(stateStorage.pose.orientation)
+	accx = (accel.x - 9.80665*Reb[2][0])
+	accy = (accel.y - 9.80665*Reb[2][1])
+	accz = (accel.z - 9.80665*Reb[2][2])
+	fdm.set('A_X_pilot', accx, units='mpss')
+	fdm.set('A_Y_pilot', accy, units='mpss')
+	fdm.set('A_Z_pilot', accz, units='mpss')
+	rospy.logerr('acc_x/y/z: %g/%g/%g',accx, accy, accz)
+
+
 ########
 ## Setup
 ########
@@ -87,8 +99,10 @@ fdm = fgFDM.fgFDM() # Create fdm objects
 if __name__ == '__main__':
 	try:
 		rospy.init_node('fdmUDPSend')
-		rospy.Subscriber('/fw1/states', SimStates, state_callback)
+		rospy.Subscriber('/fw1/states', SimStates, state_callback, queue_size=1)
+		rospy.Subscriber('/fw1/linearAcc', Vector3, accel_callback, queue_size=1)
 		timer = rospy.Rate(1000)
+		stateStorage = SimStates()
 
 		while not rospy.is_shutdown():
 			try:
@@ -97,7 +111,6 @@ if __name__ == '__main__':
 				if e.errno not in [ errno.ECONNREFUSED ]:
 					print "error on jsb_in sending"
 					raise
-
 			timer.sleep()
 
 		print "this node is pretty much dead"

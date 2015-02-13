@@ -13,7 +13,8 @@ class Kinematics
 	geometry_msgs::Vector3 speedDot;
 	geometry_msgs::Vector3 rateDot;
 	geometry_msgs::Quaternion quatDot;
-	
+	geometry_msgs::Vector3 linearAcc; // Temp variable
+
 	double mass;
 	double J[9], Jinv[9];
 	void calcDerivatives();
