@@ -23,8 +23,6 @@ class DashboardGrid(QtGui.QWidget):
 		self.setAutoFillBackground(True)
 
 		filename = '/home/georgezp/ROS/catkin_ws/src/last_letter/data/parameters/dashboard_HCUAV.yaml'
-		# prefix = 'dashboard/'
-		# print rospy.get_namespace()
 		prefix = '{}dashboard/'.format(rospy.get_namespace())
 		data = yaml.load(open(filename).read())
 		gauges = []

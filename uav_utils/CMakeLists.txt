@@ -64,11 +64,11 @@ catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES uav_utils
 #  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs
-#   DEPENDS lm 
-   
+#   DEPENDS lm
+
 )
 
-#add_dependencies(ppc_safe ${PROJECT_NAME}_gencfg) 
+#add_dependencies(ppc_safe ${PROJECT_NAME}_gencfg)
 
 ###########
 ## Build ##
@@ -92,7 +92,7 @@ add_library(uav_utils src/uav_utils.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 #add_dependencies(sensor_fusion nsr_generate_messages_cpp)
-#add_dependencies(sensor_fusion2 nsr_generate_messages_cpp)
+add_dependencies(uav_utils ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_utils ${LAPACK_LIBRARIES} ${catkin_LIBRARIES})
