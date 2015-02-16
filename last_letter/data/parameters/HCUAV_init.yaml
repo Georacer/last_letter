@@ -1,0 +1,19 @@
+#Parameters for the HCUAV
+#All units are in S.I. unless otherwise stated
+
+#Simulation Rate
+simRate: 1000
+
+#Initial State
+init/coordinates: [37.889063, 23.731863, 0.0] #latitude, longitude, altitude coordinates. Altitude for now should be ground elevation
+init/position: [0.0, 0.0, -1.0] #NED frame
+init/orientation:  [-0.0000, 0.0039, 0.0000, 1.0000] #NED frame
+# init/velLin:   [44.398, -0.000, -2.032] #body frame
+init/velLin:   [0.0, 0.0, 0.0] #body frame
+init/velAng: [0.000, 0.000, 0.000] #body frame
+init/aileron: 0.000
+# init/elevator: -0.017
+# init/throttle: 0.767
+init/elevator: 0.0
+init/throttle: 0.0
+init/rudder: -0.000

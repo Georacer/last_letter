@@ -60,26 +60,26 @@ geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds)
 	result.x = airspeed;
 	result.y = alpha*180/M_PI;
 	result.z = beta*180/M_PI;
-	
+
 	return result;
 }
 
 double calcClimb(void)
 {
 	static double buffer[averageN];
-	
+
 	ros::Time now = ros::Time::now();
 	double dt = (now - tprev).toSec();
 	tprev = now;
 	double deltaAlt = (states.geoid.altitude - altPrev);
 	altPrev = states.geoid.altitude;
 	double climbRate = deltaAlt/dt;
-	
+
 	for (int i=0; i<(averageN-1); i++) {
 		buffer[i] = buffer[i+1];
 	}
 	buffer[averageN-1]=climbRate;
-	
+
 	double tempSum = 0.0;
 	for (int i=0; i<averageN; i++) {
 		tempSum += buffer[i];
@@ -107,10 +107,10 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Rate spinner(100);
 	tprev = ros::Time::now();
-	ros::Subscriber subStates = n.subscribe("/fw1/states", 1, state_callback);
-	ros::Subscriber subEuler = n.subscribe("/fw1/euler", 1, euler_callback);
-	ros::Subscriber subEnv = n.subscribe("/fw1/environment", 1, env_callback);
-	ros::Publisher pub = n.advertise<rqt_dashboard::Dashboard>("/fw1/dashboard", 1);
+	ros::Subscriber subStates = n.subscribe("states", 1, state_callback);
+	ros::Subscriber subEuler = n.subscribe("euler", 1, euler_callback);
+	ros::Subscriber subEnv = n.subscribe("environment", 1, env_callback);
+	ros::Publisher pub = n.advertise<rqt_dashboard::Dashboard>("dashboard", 1);
 	// Initialize rotorspeed array
 	states.rotorspeed.clear();
 	states.rotorspeed.push_back((double) 0);

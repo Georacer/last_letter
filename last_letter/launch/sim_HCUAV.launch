@@ -5,9 +5,10 @@
 	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
 	<arg name="manualMode"/>
 	<arg name="autoMode"/>
+	<arg name="uav_name"/>
 
 	<!-- Initialization of parameters -->
-	<group>	
+	<group>
 		<!-- Select real/simulation Clock -->
 		<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
 		<!-- Load environmental parameters -->
@@ -21,16 +22,18 @@
 	<!-- Initialization of services -->
 	<group>
 	</group>
-	
+
 	<!-- First UAV Group -->
-	<arg name="uav_name" value="fw1"/>	
 	<group ns="$(arg uav_name)">
-		
+
 		<!-- Initialization of the parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/HCUAV.yaml" />
+		<rosparam command="load" file="$(find last_letter)data/parameters/$(arg uav_name)_init.yaml" /> <!-- load state initialization parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/$(arg uav_name)_aerodynamics.yaml" /> <!-- load aerodynamic parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/$(arg uav_name)_propulsion.yaml" /> <!-- load propulsion parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/$(arg uav_name)_contactPts.yaml" /> <!-- load contact points parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" />
 		<rosparam command="load" file="$(find last_letter)data/parameters/controller_HCUAV.yaml" />
-		
+
 		<!-- Raising core nodes -->
 		<group>
 			<node pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag -a"/>
@@ -41,7 +44,7 @@
 			<node pkg="last_letter" name="environment_model" type="environment" output="screen"/>
 			<node pkg="last_letter" name="euler_translator" type="quat2euler" output="screen"/>
 		</group>
-		
+
 		<!-- Transformations broadcasters -->
 		<group>
 			<!-- transform body NED to body NWU -->
@@ -49,7 +52,7 @@
 			<!-- publish body NWU frame for rviz-->
 			<node pkg="last_letter" type="uav_publisher" name="broadcaster" />
 		</group>
-		
+
 		<!-- Raising sensor nodes -->
 		<group>
 <!--			<node pkg="last_letter" name="Accelerometer" type="accelerometer.py" output="screen"/>-->
@@ -59,12 +62,12 @@
 <!--			<node pkg="last_letter" name="GPS" type="GPS.py" output="screen"/>-->
 <!--			<node pkg="last_letter" name="Magnetometer" type="magnetometer.py" output="screen"/>-->
 		</group>
-		
+
 		<!-- Raising controller nodes -->
 		<group if="$(arg autoMode)">
 				<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
 		</group>
-		
+
 		<!-- Input nodes -->
 		<group>
 <!--			<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
@@ -74,7 +77,7 @@
 			</node>
 			<node pkg="last_letter" name="joy2chan" type="joy2chan" />
 		</group>
-	
+
 	</group>
-	
+
 </launch>

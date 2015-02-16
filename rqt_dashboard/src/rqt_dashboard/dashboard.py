@@ -15,8 +15,6 @@ from rqt_plot.rosplot import ROSData
 from std_msgs.msg import Float32
 from last_letter.msg import RefCommands
 
-namespace = '' #To be implemented
-
 class DashboardGrid(QtGui.QWidget):
 	def __init__(self):
 		super(DashboardGrid, self).__init__()
@@ -25,22 +23,24 @@ class DashboardGrid(QtGui.QWidget):
 		self.setAutoFillBackground(True)
 
 		filename = '/home/georgezp/ROS/catkin_ws/src/last_letter/data/parameters/dashboard_HCUAV.yaml'
-		prefix = '/{}/dashboard/'.format('fw1')
+		# prefix = 'dashboard/'
+		# print rospy.get_namespace()
+		prefix = '{}dashboard/'.format(rospy.get_namespace())
 		data = yaml.load(open(filename).read())
 		gauges = []
 		self.line = QtGui.QHBoxLayout()
 
 		self.commands = RefCommands()
-		initPos = rospy.get_param('/fw1/init/position',[0])
+		initPos = rospy.get_param('init/position',[0])
 		self.commands.altitude = -initPos[-1]
-		initVa = rospy.get_param('/fw1/init/velLin',[0,0,0])
+		initVa = rospy.get_param('init/velLin',[0,0,0])
 		self.commands.airspeed = math.sqrt(initVa[0]*initVa[0] + initVa[1]*initVa[1] + initVa[2]*initVa[2])
-		self.pub = rospy.Publisher('/fw1/refCommands', RefCommands)
+		self.pub = rospy.Publisher('refCommands', RefCommands)
 		self.pubTimer = QtCore.QTimer()
 		self.pubTimer.timeout.connect(self.publishCommands)
 		self.pubTimer.start(1000)
 
-		for name in sorted(data.keys()): #sort vasei tou onomatos
+		for name in sorted(data.keys()): #sort based on name
 			values = data[name]
 			# print 'Adding: {}'.format(name)
 			values['topic'] = prefix + values['topic']

@@ -3,7 +3,7 @@ last_letter:
   new features:
      ☐ test integration with http://wiki.ros.org/ground_station
      ✔ test integration with MAVProxy (http://tridge.github.io/MAVProxy/) @done (15-02-13 22:13)
-     ☐ integrate with MAVLINK @started t(14-12-25 14:09)
+     ☐ integrate with MAVLINK @started (14-12-25 14:09)
        useful links
          https://github.com/mavlink/mavros
          https://github.com/mavlink/mavlink_ros
@@ -14,14 +14,6 @@ last_letter:
      ☐ test integration with QGroundControl
          https://github.com/mavlink/qgroundcontrol
      ✔ test multimaster support with http://wiki.ros.org/multimaster_fkie @started(14-12-01 15:00)  @done (14-12-01 18:00) @lasted(3:00)
-     ☐ write documentation as a GitHub README.md (./last_letter/README.md/)
-       may want to read the following documentation
-         https://github.com/ttscoff/MarkdownEditing
-         https://help.github.com/articles/github-flavored-markdown/
-         https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
-         https://github.com/AutonomyLab/ardrone_autonomy/blob/hydro-devel/README.md#contributors
-     ☐ model additions/subtractions of masses in-flight as movement of CG
-     ☐ create an adequate airspeed sensor model
      ☐ add reference model for all high-level commands
      ✔ investigate the possibility to replace JSBSim for ArduPlane SITL with LL @done (15-02-13 22:14)
      ☐ test integration with https://code.google.com/p/happykillmore-gcs/
@@ -33,27 +25,11 @@ last_letter:
      ✔ Write first draft for initial message integration @done (15-01-27 14:05)
      ☐ Separate SITL, HIL and normal messages
      ☐ Clarify the logic behind http://qgroundcontrol.org/mavlink/release_11#mission_protocol_profile
-  bugfixes:
-     ☐ find out why rviz doesn't support .dae files on Ubuntu 12.04 / Hydro
-     ☐ Examine why virtual accelerometers need to read accelations without the Corriolis component
 
   improvements:
      ☐ test polishing of rqt_dashboard with parts from https://github.com/vranki/ExtPlane-Panel
          It is written in C++ Qt
          C++ rqt plugin example here: http://wiki.ros.org/rqt/Tutorials/Writing%20a%20C%2B%2B%20Plugin
-     ☐ make a more realistic landing gear model
-     ☐ investigate and make a report on the accuracy of quaternion conversions and propagation
-     ✔ find adequate propulsion model coefficients for HCUAV aircraft @started(14-11-05 14:30) @done (14-11-06 14:30) @lasted(1 day, 0:00)
-     ☐ mix static thrust into propulsion model
-     ☐ replace FIR tfs with space-state representations and investigate accuracy
      ☐ investigate feedforward control for throttle managment
      ☐ revisit switch-over in altitude control
-     ☐ verify and document the atmosphere model
      ☐ add feedforward term for longitudinal controller, based on turning flight (K*(1/cos(phi)-1))
-     ☐ investigate the need for more precise physics integrators
-     ☐ examine FAR gust models
-         http://www.flightsimaviation.com/data/FARS/part_25-appG.html
-         http://www.flightsimaviation.com/data/FARS/part_23-333.html
-     ☐ Improve gravity model using either WGS84 or USStdAtm
-     ☐ Compare current equations with this pressure model by ETH
-         https://github.com/AutonomyLab/pressure2odometry

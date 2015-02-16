@@ -79,7 +79,7 @@ def accel_callback(accel):
 	fdm.set('A_X_pilot', accx, units='mpss')
 	fdm.set('A_Y_pilot', accy, units='mpss')
 	fdm.set('A_Z_pilot', accz, units='mpss')
-	rospy.logerr('acc_x/y/z: %g/%g/%g',accx, accy, accz)
+	# rospy.logerr('acc_x/y/z: %g/%g/%g',accx, accy, accz)
 
 
 ########
@@ -99,8 +99,8 @@ fdm = fgFDM.fgFDM() # Create fdm objects
 if __name__ == '__main__':
 	try:
 		rospy.init_node('fdmUDPSend')
-		rospy.Subscriber('/fw1/states', SimStates, state_callback, queue_size=1)
-		rospy.Subscriber('/fw1/linearAcc', Vector3, accel_callback, queue_size=1)
+		rospy.Subscriber('states', SimStates, state_callback, queue_size=1)
+		rospy.Subscriber('linearAcc', Vector3, accel_callback, queue_size=1)
 		timer = rospy.Rate(1000)
 		stateStorage = SimStates()
 
