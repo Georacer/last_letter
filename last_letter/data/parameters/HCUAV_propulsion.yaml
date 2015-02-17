@@ -29,7 +29,7 @@ motor/engPowerPoly/coeffs: [ # Original Zanzoterra power curve
 # motor/engPowerPoly/coeffs: [7.554e+4, -1076.0, 5.768, -0.01416, 1.66e-5, -7.553e-9, 1.676e+5, -1487.0, 4.831, -0.006781, 3.493e-6]
 motor/nCoeffPoly/polyType: 0
 motor/nCoeffPoly/polyNo: 3
-motor/nCoeffPoly/coeffs: [-0.1226, 2.6374, -0.6788, -2.2577]
+motor/nCoeffPoly/coeffs: [0.0, 2.5, -0.8, -2.6]
 motor/propPowerPoly/polyType: 0
 motor/propPowerPoly/polyNo: 3
 # motor/propPowerPoly/coeffs: [0.0559, -0.00896, 0.00193, -0.0104] # 0.25 from Raymer Cp, 287N max thrust, requires 2xPower
