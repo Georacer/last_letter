@@ -3,7 +3,8 @@
 "last_letter" is a collection of [ROS](http://ros.org/) packages suitable for Unmanned Aerial Vehicle research, control algorithm development, non-linear physics simulation, Software-in-the-Loop (SIL) simulation and Hardware-in-the-Loop (HIL) simulation. It is developed by George Zogopoulos Papaliakos.
 This document serves as a manual for this congregation of ROS packages.
 
-## Gitter chatroom (omnipresence not guaranteed)
+## Gitter chatroom
+####(omnipresence not guaranteed)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Georacer/last_letter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 ## Table of Contents

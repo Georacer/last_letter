@@ -30,10 +30,10 @@ catkin_make #Compile the files
 ```
 Compilation may take a while.
 
-### Testing everythin is installed properly
+### Testing everything is installed properly
 In a console, run:
 ```bash
 roslaunch last_letter launcher.launch
 ```
 This should start the simulator, open an avionics dashboard and a 3D simulation environment.
-If everything went smoothly, you can close everything and proceed to the instruction manual to learn how to use the last_letter simulator.
+If everything went smoothly, you can close everything and proceed to the instruction manual to learn how to use the `last_letter` simulator.
