@@ -19,6 +19,7 @@ This document serves as a manual for this congregation of ROS packages.
 - [Important Messages](#important-messages)
 - [How to Run](#how-to-run)
 	- [Typical Scenarios](#typical-scenarios)
+		- [As Simulator for the ArduPlane SITL](last_letter/doc/ArduPlane_SITL.md)
 		- [RC Simulator](#rc_simulator)
 		- [A Simple Autopilot](#a-simple-autopilot)
 - [Parameter Files](#parameter-files)
