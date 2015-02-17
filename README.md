@@ -9,7 +9,7 @@ This document serves as a manual for this congregation of ROS packages.
 ## Table of Contents
 
 - [Compatibility](#compatibility)
-- [Installation](last_letter/doc/installation)
+- [Installation](last_letter/doc/ll_installation.md)
 - [Packages](#packages)
 	- [last_letter](#last_letter)
 	- [uav_utils](#uav_utils)
