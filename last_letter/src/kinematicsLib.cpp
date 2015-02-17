@@ -58,7 +58,6 @@ void Kinematics::calcDerivatives()
 	posDot = Reb*parentObj->states.velocity.linear;
 
 	// create body velocity derivatives from acceleration, angular rotation and body velocity
-	// geometry_msgs::Vector3 linearAcc = (1.0/mass)*forceInput;
 	linearAcc = (1.0/mass)*forceInput;
 	geometry_msgs::Vector3 corriolisAcc;
 	vector3_cross(-parentObj->states.velocity.angular, parentObj->states.velocity.linear, &corriolisAcc);

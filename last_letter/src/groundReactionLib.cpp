@@ -60,11 +60,12 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 	// Read contact points number from parameter server
 	if(!ros::param::getCached("airframe/contactPtsNo", contactPtsNo)) {ROS_FATAL("Invalid parameters for -/airframe/contactPtsNo- in param server!"); ros::shutdown();}
 	// Create an appropriately sized matrix to contain contact point information
-	contactPoints = (double*)malloc(sizeof(double) * (contactPtsNo*4));
+	pointCoords = (double*)malloc(sizeof(double) * contactPtsNo*3); // contact points coordinates in the body frame
+	materialIndex = (double*)malloc(sizeof(double) * contactPtsNo*1); // contact points material type index
 
 	// Set spring characteristics
-	kspring = 4100.0;
-	mspring = 1000.0;
+	kspring = 4570.0;
+	mspring = 1300.0;
 	len=0.2;
 
 	// Set coefficient of friction for each material
@@ -81,10 +82,10 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 			ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 			temp[i]=list[i];
 		}
-		contactPoints[j] = temp[0];
-		contactPoints[j + contactPtsNo] = temp[1];
-		contactPoints[j + contactPtsNo*2] = temp[2];
-		contactPoints[j + contactPtsNo*3] = temp[3];
+		pointCoords[j] = temp[0]; // Save body frame contact point coordinates
+		pointCoords[j + contactPtsNo] = temp[1];
+		pointCoords[j + contactPtsNo*2] = temp[2];
+		materialIndex[j] = temp[3]; // And a separate contact point material index array
 	}
 
 	// Create and initialize spring contraction container
@@ -101,40 +102,35 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 	cpi_up = (double*)malloc(sizeof(double) * contactPtsNo*3); // upper spring end matrix
 	cpi_down = (double*)malloc(sizeof(double) * contactPtsNo*3); // lower spring end matrix
 	spd = (double*)malloc(sizeof(double) * contactPtsNo); // spring contraction speed
-	pointCoords = (double*)malloc(sizeof(double) * contactPtsNo*3); // contact points coordinates in the body frame
 }
 
 // Class destructor
 PanosContactPoints::~PanosContactPoints()
 {
-	free(contactPoints);
 	free(cpi_up);
 	free(cpi_down);
 	free(spd);
 	free(spp);
 	free(sppprev);
 	free(pointCoords);
+	free(materialIndex);
 }
 
 // Wrench calculation function
 geometry_msgs::Vector3 PanosContactPoints::getForce()
 {
 	double Reb[9];
-	double kFrictionLong, kFrictionLat, kFrictionX, kFrictionY;
+	double kFLong, kFLat, kFrictionE, kFrictionX, kFrictionY;
 	int i, j;
 	contact = false;
 	safe = true; // NaN protection flag
+	geometry_msgs::Vector3 Euler;
 
-	// Copy contact point coordinates to a separate matrix
-	for (i=0; i<contactPtsNo*3; i++) {
-		pointCoords[i] = contactPoints[i];
-	}
+	geometry_msgs::Quaternion quat = parentObj->states.pose.orientation; // Read vehicle orientation quaternion
+	quat2rotmtx(quat, Reb); // Construct the rotation matrix
+	Euler = quat2euler(quat);
 
-	//Read vehicle orientation quaternion
-	geometry_msgs::Quaternion quat = parentObj->states.pose.orientation;
-	quat2rotmtx(quat, Reb);
-
-	geometry_msgs::Wrench tempE, totalE;
+	geometry_msgs::Wrench tempE, totalE; /** @todo This is a TODO list example */
 	geometry_msgs::Vector3 dx,we,vpoint,Ve;
 
 	totalE.force.x = 0;
@@ -144,8 +140,8 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 	totalE.torque.y = 0;
 	totalE.torque.z = 0;
 
-	// Rotate body velocity to earth velocity
-	Ve=Reb*parentObj->states.velocity.linear;
+	// Get velocity in the inertial frame
+	Ve = parentObj->kinematics.posDot;
 
 	// Read vehicle coordinates
 	uavpos[0]=parentObj->states.pose.position.x;
@@ -178,8 +174,7 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 		dx.y = (cpi_up[i+contactPtsNo]-uavpos[1]);
 		dx.z = (cpi_up[i+2*contactPtsNo]-uavpos[2]);
 
-		// if the lower spring end touches the ground
-		if (cpi_down[i+2*contactPtsNo]>0)
+		if (cpi_down[i+2*contactPtsNo]>0) // if the lower spring end touches the ground
 		{
 			cpi_down[i+2*contactPtsNo]=0; // Force lower spring end to stay at ground level
 			contact=true;
@@ -187,51 +182,57 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 			spd[i]=(spp[i]-sppprev[i])/parentObj->dt; // Calculate current spring contraction spreed
 			vector3_cross(we,dx, &vpoint); // Contact point Earth-frame speed due to vehicle rotation
 			vpoint = Ve+vpoint; // Add vehicle velocity to find total contact point velocity
-			// Unused calculations
-			// normVe = sqrt(vpoint.x*vpoint.x+vpoint.y*vpoint.y+vpoint.z*vpoint.z); // Absolute contact point velocity
-			// if (normVe<=0.001) // Take at static friction???
-			// 	normVe=0.001;
 
 			// Calculate spring force. Acts only upon Earth z-axis
-			tempE.force.z = -(kspring*spp[i] + mspring*spd[i]*abs(spd[i])); // -mspring*vpoint.z*abs(vpoint.z));
+			tempE.force.z = -(kspring*spp[i] + mspring*spd[i]);
 			// Make spring force negative or zero, as the spring lower end isn't fixed on the ground
 			if (tempE.force.z > 0)
 				tempE.force.z = 0;
+			/** @todo model full spring contraction (possibly with exponential force curve after full contraction?) */
 
-			//Select Contact Point material
-			int materialIndex = int(contactPoints[i + contactPtsNo*3]);
+			int tempIndex = materialIndex[i];
+			// Get longitudinal and lateral friction coefficients for this surface
+			kFLong = frictForw[tempIndex];
+			kFLat = frictSide[tempIndex];
 
-			// To implement steering
-			// if (i==2) {
-			// 	double tempVx = vpoint.x*cos(parentObj->input[3]) + vpoint.y*sin(parentObj->input[3]);
-			// 	double tempVy = vpoint.x*sin(parentObj->input[3]) + vpoint.y*cos(parentObj->input[3]);
-			// 	vpoint.x = tempVx;
-			// 	vpoint.y = tempVy;
-			// }
+			if ((parentObj->input[5]!=0) && (i<3)) { // Apply breaks
+				kFLong = 1.0;
+			}
 
-			// Select contact point friction coefficient
-			// if (parentObj->input[5]==0) { // Apply breaks, kind of not working, prolly due to bad physics model
-			// 	frictForw[2] = 0.01;
-			// }
-			// else {
-			// 	frictForw[2] = 1.0;
-			// }
+			// Convert friction coefficients to the Earth frame
+			double trackAngle = Euler.z - atan2(vpoint.y, vpoint.x);
+			if (i==2) { // Apply steeering
+				trackAngle = trackAngle + parentObj->input[3]*3.14/3.0;
+			}
 
-			kFrictionLong = frictForw[materialIndex];
-			kFrictionLat = frictSide[materialIndex];
-			// Convert frictions coefficients to the Earth frame
-			kFrictionX = abs(Reb[0] *kFrictionLong + Reb[1]*kFrictionLat);
-			kFrictionY = abs(Reb[3]*kFrictionLong + Reb[4]*kFrictionLat);
-			// Calculate friction forces
-			tempE.force.x = -kFrictionX*abs(tempE.force.z)*vpoint.x; // Point friction along earth x-axis
-			tempE.force.y = -kFrictionY*abs(tempE.force.z)*vpoint.y; // Point friction along earth y-axis
+			// Calculate the magnitude of the friction force in the Earth frame
+			double frictionLong = fabs(sqrt(kFLong*(kFLong*cos(trackAngle)*cos(trackAngle)+kFLat*sin(trackAngle)*sin(trackAngle)))*tempE.force.z);
+			frictionLong = std::max(frictionLong - 0.01*frictionLong/sqrt(vpoint.x*vpoint.x + vpoint.y*vpoint.y + 0.001), 0.0); //Aply static friction
+			frictionLong = frictionLong*cos(trackAngle);
 
-		// Add current contact point force contribution to the total
-		totalE.force = totalE.force + tempE.force;
-		// Calculate current contact point torque
-		vector3_cross(dx,tempE.force, &tempE.torque);
-		// Add current contact point torque contribution to the total
-		totalE.torque = totalE.torque + tempE.torque;
+			double frictionLat = fabs(sqrt(kFLat*(kFLat*sin(trackAngle)*sin(trackAngle)+kFLong*cos(trackAngle)*cos(trackAngle)))*tempE.force.z);
+			frictionLat = std::max(frictionLat - 0.01*frictionLat/sqrt(vpoint.x*vpoint.x + vpoint.y*vpoint.y + 0.001), 0.0); //Aply static friction
+			frictionLat = frictionLat*sin(trackAngle);
+
+			tempE.force.x = -frictionLong*cos(Euler.z)-frictionLat*sin(Euler.z);
+			tempE.force.y = -frictionLong*sin(Euler.z)+frictionLat*cos(Euler.z);
+
+			// Add current contact point force contribution to the total
+			totalE.force = totalE.force + tempE.force;
+			// Calculate current contact point torque
+			vector3_cross(dx,tempE.force, &tempE.torque);
+			// Add current contact point torque contribution to the total
+			totalE.torque = totalE.torque + tempE.torque;
+
+			if (i==2) {
+				// std::cout << kFrictionLong << ',';
+				// std::cout << trackAngle << ',';
+				// std::cout << kFrictionE << ',';
+				// std::cout << tempE.force.x << ',';
+				// std::cout << tempE.force.y << ',';
+				// // std::cout << tempB.force.z << ',';
+				std::cout << std::endl;
+			}
 		}
 
 		// If there is no ground contact
@@ -245,13 +246,15 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 
 	// Chech for rogue NaN results
 	if (isnan(totalE.force.x) or isnan(totalE.force.y) or isnan(totalE.force.z)) {
-		safe = false;
+		safe = false; /** @todo remove the safe safety, it is not used*/
 		ROS_FATAL("State NAN in PanosGroundReactions force calculation!");
+		ros::shutdown();
 	}
 
 	if (isnan(totalE.torque.x) or isnan(totalE.torque.y) or isnan(totalE.torque.z)) {
 		safe = false;
 		ROS_FATAL("State NAN in PanosGroundReactions torque calculation!");
+		ros::shutdown();
 	}
 
 	// If there is a ground contact write the resulting wrench

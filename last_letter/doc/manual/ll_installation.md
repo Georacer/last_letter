@@ -38,3 +38,5 @@ roslaunch last_letter launcher.launch
 This should start the simulator, and open a 3D simulation environment.
 `rqt_gui` application will start as well, which is used to display the avionics instruments, but right now automatic configuration options do not work (WIP).
 If everything went smoothly, you can close everything and proceed to the instruction manual to learn how to use the `last_letter` simulator.
+
+(back to table of contents)[../..]

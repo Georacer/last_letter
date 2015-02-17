@@ -58,6 +58,10 @@ class ModelPlane
 	~ModelPlane ();
 
 	// Input callback
+	/**
+	 * getInput Read PWM input to the model and store its normalized values
+	 * @param inputMsg Direct servo control commands
+	 */
 	void getInput(last_letter::SimPWM inputMsg);
 
 	// Perform simulation step

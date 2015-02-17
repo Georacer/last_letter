@@ -16,3 +16,5 @@ This will run the ArduPlane code, MAVProxy and `last_letter` along with RViz all
 If `last_letter` communicates with ArduPlane correctly, MAVProxy should display 3D satellite fix and track 10 satellites.
 
 You can issue commands or rc overrides using MAVProxy normally.
+
+(back to table of contents)[../..]
