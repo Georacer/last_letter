@@ -9,7 +9,7 @@ This document serves as a manual for this congregation of ROS packages.
 ## Table of Contents
 
 - [Compatibility](#compatibility)
-- [Installation](#installation)
+- [Installation](last_letter/doc/installation)
 - [Packages](#packages)
 	- [last_letter](#last_letter)
 	- [uav_utils](#uav_utils)
@@ -32,10 +32,6 @@ This document serves as a manual for this congregation of ROS packages.
 ## Compatibility
 
 This collection of packages is being developed and used under Linux Ubuntu 12.04 using ROS Hydro.
-
-## Installation
-
-Just clone the root of this repo to your catkin workspace. Each of the package folders should be under your .../ROS/catkin_ws/src directory.
 
 ## Packages
 
