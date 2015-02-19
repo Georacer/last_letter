@@ -10,16 +10,20 @@ This document serves as a table of contents for the documentaiton of this congre
 ## Table of Contents
 
 <!-- - [Compatibility](#compatibility) -->
+
 - [Installation](last_letter/doc/manual/ll_installation.md)
+
 <!-- - [Packages](#packages)
 	- [last_letter](#last_letter)
 	- [uav_utils](#uav_utils)
 	- [mathutils](#mathutils)
 	- [rqt_dashboard](#rqt_dashboard)
 - [Important Messages](#important-messages) -->
+
 - [How to Run](#how-to-run)
 	- Typical Scenarios
 		- [As Simulator for the ArduPlane SITL](last_letter/doc/manual/ArduPlane_SITL.md)
+
 <!-- 		- [RC Simulator](#rc_simulator)
 		- [A Simple Autopilot](#a-simple-autopilot) -->
 <!-- - [Parameter Files](#parameter-files)
