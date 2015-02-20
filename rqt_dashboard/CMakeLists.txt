@@ -114,10 +114,17 @@ include_directories(
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
+ 	# add_dependencies(dash_backend ${PROJECT_NAME}_generate_messages_cpp ROSDOC_DASH)
  	add_dependencies(dash_backend ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(dash_backend ${catkin_LIBRARIES})
+
+## Generate Doxygen files
+	# add_custom_command(OUTPUT rosdoc_dash
+	# 	COMMAND rosdoc_lite $(rospack find rqt_dashboard) -o $(rospack find rqt_dashboard)/doc
+	# )
+	# add_custom_target(ROSDOC_DASH DEPENDS rosdoc_dash)
 
 #############
 ## Install ##

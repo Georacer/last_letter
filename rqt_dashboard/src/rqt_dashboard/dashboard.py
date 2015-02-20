@@ -1,5 +1,5 @@
 import os
-import rospy
+import rospy, rospkg
 import sys
 import math
 import yaml
@@ -22,8 +22,9 @@ class DashboardGrid(QtGui.QWidget):
 		self.setWindowTitle('UAV Dashboard')
 		self.setAutoFillBackground(True)
 
-		filename = '/home/georgezp/ROS/catkin_ws/src/last_letter/data/parameters/dashboard_HCUAV.yaml'
 		prefix = '{}dashboard/'.format(rospy.get_namespace())
+		rospack = rospkg.RosPack()
+		filename =  rospack.get_path('last_letter') + '/data/parameters/aircraft' + rospy.get_namespace() + 'dashboard.yaml'
 		data = yaml.load(open(filename).read())
 		gauges = []
 		self.line = QtGui.QHBoxLayout()

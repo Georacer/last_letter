@@ -1,4 +1,4 @@
-# last_letter : Unmanned Aerial Vehicle simulation and control packages
+# `last_letter` : Unmanned Aerial Vehicle simulation and control packages
 
 "last_letter" is a collection of [ROS](http://ros.org/) packages suitable for Unmanned Aerial Vehicle research, control algorithm development, non-linear physics simulation, Software-in-the-Loop (SIL) simulation and Hardware-in-the-Loop (HIL) simulation. It is developed by George Zogopoulos Papaliakos.
 This document serves as a table of contents for the documentaiton of this congregation of ROS packages.
@@ -26,11 +26,14 @@ This document serves as a table of contents for the documentaiton of this congre
 
 <!-- 		- [RC Simulator](#rc_simulator)
 		- [A Simple Autopilot](#a-simple-autopilot) -->
-<!-- - [Parameter Files](#parameter-files)
+- [Parameter Files](last_letter/doc/manual/parameterFiles.md)
 	- [Aircraft Parameters](#aircraft-parameters)
-	- [Environment Parameters](#environment-parameters)
-	- [Controller Parameters](#controller-parameters)
-	- [Sensor Parameters](#sensor-parameters) -->
+		-[]
+
+
+<!-- - [Environment Parameters](#environment-parameters) -->
+<!-- - [Controller Parameters](#controller-parameters) -->
+<!-- - [Sensor Parameters](#sensor-parameters) -->
 <!-- - [License](#license) -->
 <!-- - [Contributors](#contributors) -->
 

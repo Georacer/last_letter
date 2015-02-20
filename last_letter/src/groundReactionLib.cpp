@@ -231,7 +231,7 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 				// std::cout << tempE.force.x << ',';
 				// std::cout << tempE.force.y << ',';
 				// // std::cout << tempB.force.z << ',';
-				std::cout << std::endl;
+				// std::cout << std::endl;
 			}
 		}
 

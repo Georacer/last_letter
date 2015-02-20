@@ -17,4 +17,4 @@ If `last_letter` communicates with ArduPlane correctly, MAVProxy should display 
 
 You can issue commands or rc overrides using MAVProxy normally.
 
-(back to table of contents)[../..]
+[back to table of contents](../../Readme.md)

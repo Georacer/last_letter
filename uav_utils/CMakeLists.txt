@@ -86,16 +86,21 @@ add_library(uav_utils src/uav_utils.cpp)
 
 ## Declare a cpp executable
 # add_executable(helim_stm32f4_node src/helim_stm32f4_node.cpp)
-#add_executable(heli_sim_node src/sim_node.cpp)
-#add_executable(sensor_fusion2 src/nsr_node2.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 #add_dependencies(sensor_fusion nsr_generate_messages_cpp)
+# add_dependencies(uav_utils ${PROJECT_NAME}_generate_messages_cpp ROSDOC_UAVU)
 add_dependencies(uav_utils ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_utils ${LAPACK_LIBRARIES} ${catkin_LIBRARIES})
+
+## Generate Doxygen files
+	# add_custom_command(OUTPUT rosdoc_uavu
+	# 	COMMAND rosdoc_lite $(rospack find uav_utils) -o $(rospack find uav_utils)/doc
+	# )
+	# add_custom_target(ROSDOC_UAVU DEPENDS rosdoc_uavu)
 
 #############
 ## Install ##

@@ -80,17 +80,6 @@ catkin_package(
 ## Build ##
 ###########
 
-#### Generate doxygen documenation files
-##	add_custom_command(OUTPUT ""
-##		COMMAND rosdoc_lite ~/ROS~/ROS/catkin_ws/src/last_letter
-##		)
-## Generate doxygen documenation files
-add_custom_target( doxygenGZP )
-add_custom_command(TARGET doxygenGZP POST_BUILD
-	COMMAND touch tempdoc.txt VERBATIM
-##	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	)
-
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
@@ -118,11 +107,10 @@ include_directories(
 	add_dependencies(model ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(environment ${PROJECT_NAME}_generate_messages_cpp)
+	# add_dependencies(environment ROSLITE_LL)
 	add_dependencies(virtualJoy ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(autopilot_ll ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(autopilot_HCUAV ${PROJECT_NAME}_generate_messages_cpp)
-
-	add_dependencies(model doxygen)
 
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(uav_publisher ${catkin_LIBRARIES})
@@ -136,6 +124,14 @@ include_directories(
 	target_link_libraries(autopilot_HCUAV mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(modelPlaneLib mathutils ${catkin_LIBRARIES})
 
+## Generate Doxygen files
+	# add_custom_command(OUTPUT rosdoc_ll
+		# COMMAND rosdoc_lite /home/georgezp/ROS/catkin_ws/src/last_letter -o /home/georgezp/ROS/catkin_ws/src/last_letter/doc
+		# COMMAND echo ***************
+		# COMMAND rosdoc_lite ${DOC_PATH}
+		# echo ******** stars!
+	# )
+	# add_custom_target(ROSDOC_LL DEPENDS rosdoc_ll)
 
 #############
 ## Install ##

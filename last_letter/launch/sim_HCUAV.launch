@@ -16,7 +16,7 @@
 		<!-- Load global parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/world.yaml" />
 		<!-- Load dashboard parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/dashboard_HCUAV.yaml" />
+		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/dashboard.yaml" />
 	</group>
 
 	<!-- Initialization of services -->
@@ -27,10 +27,10 @@
 	<group ns="$(arg uav_name)">
 
 		<!-- Initialization of the parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/$(arg uav_name)_init.yaml" /> <!-- load state initialization parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/$(arg uav_name)_aerodynamics.yaml" /> <!-- load aerodynamic parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/$(arg uav_name)_propulsion.yaml" /> <!-- load propulsion parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/$(arg uav_name)_contactPts.yaml" /> <!-- load contact points parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/init.yaml" /> <!-- load state initialization parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/aerodynamics.yaml" /> <!-- load aerodynamic parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/propulsion.yaml" /> <!-- load propulsion parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/contactPts.yaml" /> <!-- load contact points parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" />
 		<rosparam command="load" file="$(find last_letter)data/parameters/controller_HCUAV.yaml" />
 

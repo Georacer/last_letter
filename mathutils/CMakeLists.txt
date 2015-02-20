@@ -54,13 +54,12 @@ catkin_python_setup()
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
    INCLUDE_DIRS include
-#  LIBRARIES helim_stm32f4
 #  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs
-#   DEPENDS lm 
-   
+#   DEPENDS lm
+
 )
 
-#add_dependencies(ppc_safe ${PROJECT_NAME}_gencfg) 
+#add_dependencies(ppc_safe ${PROJECT_NAME}_gencfg)
 
 ###########
 ## Build ##
@@ -83,11 +82,16 @@ add_library(mathutils src/mathutils.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-#add_dependencies(sensor_fusion nsr_generate_messages_cpp)
-#add_dependencies(sensor_fusion2 nsr_generate_messages_cpp)
+# add_dependencies(mathutils ROSDOC_MU)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(mathutils ${LAPACK_LIBRARIES} ${catkin_LIBRARIES})
+
+## Generate Doxygen files
+	# add_custom_command(OUTPUT rosdoc_mu
+	# 	COMMAND rosdoc_lite $(rospack find mathutils) -o $(rospack find mathutils)/doc
+	# )
+	# add_custom_target(ROSDOC_MU DEPENDS rosdoc_mu)
 
 #############
 ## Install ##
