@@ -1,6 +1,6 @@
 ## Using `last_letter` as the Physics Simulator for ArduPlane SITL
 
-Follow the (ArduPlane SITL instructions)[http://dev.ardupilot.com/wiki/setting-up-sitl-on-linux/] to download and compile the ArduPlane code, but instead of using their official repo, you will need to clone this fork:
+Follow the [ArduPlane SITL instructions](http://dev.ardupilot.com/wiki/setting-up-sitl-on-linux/) to download and compile the ArduPlane code, but instead of using their official repo, you will need to clone this fork:
 ```
 https://github.com/Georacer/last_letter.git
 ```
