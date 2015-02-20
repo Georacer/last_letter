@@ -65,7 +65,7 @@ geometry_msgs::Quaternion euler2quat (const geometry_msgs::Vector3 euler)
   q.x = sphi*ctheta*cpsi - cphi*stheta*spsi;
   q.y = cphi*stheta*cpsi + sphi*ctheta*spsi;
   q.z = cphi*ctheta*spsi - sphi*stheta*cpsi;
-  
+
   return q;
 }
 
@@ -73,7 +73,7 @@ void quat2rotmtx (const geometry_msgs::Quaternion q, double *rotmtx)
 {
   double q0 = q.w, q1 = q.x, q2 = q.y, q3 = q.z;
   double q00 = q0*q0, q11 = q1*q1, q22 = q2*q2, q33 = q3*q3;
-  double q01 = q0*q1, q02 = q0*q2, q03 = q0*q3; 
+  double q01 = q0*q1, q02 = q0*q2, q03 = q0*q3;
   double q12 = q1*q2, q13 = q1*q3;
   double q23 = q2*q3;
   rotmtx [0] = q00 + q11 - q22 - q33;
@@ -96,7 +96,7 @@ geometry_msgs::Vector3 quat2euler (const geometry_msgs::Quaternion q)
 //	euler.x = atan2(rotmtx[5],rotmtx[8]);
 //	euler.y = -asin(rotmtx[2]);
 //	euler.z = atan2(rotmtx[1],rotmtx[0]);
-//	
+//
 //	return euler;
 	const double tol = 0.499;
 	const double q0 = q.w, q1 = q.x, q2 = q.y, q3 = q.z;
@@ -215,27 +215,27 @@ void vector3_cross(geometry_msgs::Vector3 a, geometry_msgs::Vector3 b, geometry_
 	c->z = a.x*b.y - a.y*b.x;
 }
 
-geometry_msgs::Vector3 operator+(const geometry_msgs::Vector3& a, geometry_msgs::Vector3& b) 
+geometry_msgs::Vector3 operator+(const geometry_msgs::Vector3& a, geometry_msgs::Vector3& b)
 {
     geometry_msgs::Vector3 c;
     c.x = a.x+b.x;
     c.y = a.y+b.y;
-    c.z = a.z+b.z;   
+    c.z = a.z+b.z;
 
     return c;
 }
 
-//geometry_msgs::Vector3 operator+(geometry_msgs::Vector3& a, geometry_msgs::Vector3& b) 
+//geometry_msgs::Vector3 operator+(geometry_msgs::Vector3& a, geometry_msgs::Vector3& b)
 //{
 //    geometry_msgs::Vector3 c;
 //    c.x = a.x+b.x;
 //    c.y = a.y+b.y;
-//    c.z = a.z+b.z;   
+//    c.z = a.z+b.z;
 
 //    return c;
 //}
 
-geometry_msgs::Vector3 operator-(geometry_msgs::Vector3& vec) 
+geometry_msgs::Vector3 operator-(geometry_msgs::Vector3& vec)
 {
     geometry_msgs::Vector3 c;
     c.x = -vec.x;
@@ -255,7 +255,7 @@ geometry_msgs::Vector3 operator-(geometry_msgs::Vector3& a,geometry_msgs::Vector
     return c;
 }
 
-geometry_msgs::Vector3 operator*(const double *mtx, geometry_msgs::Vector3& vec) 
+geometry_msgs::Vector3 operator*(const double *mtx, geometry_msgs::Vector3& vec)
 {
     geometry_msgs::Vector3 c;
     c.x = mtx[0]*vec.x+mtx[1]*vec.y+mtx[2]*vec.z;
@@ -265,7 +265,7 @@ geometry_msgs::Vector3 operator*(const double *mtx, geometry_msgs::Vector3& vec)
     return c;
 }
 
-geometry_msgs::Vector3 operator*(const double a, geometry_msgs::Vector3& vec) 
+geometry_msgs::Vector3 operator*(const double a, geometry_msgs::Vector3& vec)
 {
     geometry_msgs::Vector3 c;
     c.x = a*vec.x;
@@ -275,12 +275,12 @@ geometry_msgs::Vector3 operator*(const double a, geometry_msgs::Vector3& vec)
     return c;
 }
 
-geometry_msgs::Vector3 operator/(const double *mtx, geometry_msgs::Vector3& vec) 
+geometry_msgs::Vector3 operator/(const double *mtx, geometry_msgs::Vector3& vec)
 {
     geometry_msgs::Vector3 c;
     c.x = mtx[0]*vec.x+mtx[3]*vec.y+mtx[6]*vec.z;
     c.y = mtx[1]*vec.x+mtx[4]*vec.y+mtx[7]*vec.z;
-    c.z = mtx[2]*vec.x+mtx[5]*vec.y+mtx[8]*vec.z; 
+    c.z = mtx[2]*vec.x+mtx[5]*vec.y+mtx[8]*vec.z;
 
     return c;
 }
@@ -499,4 +499,4 @@ double Spline3::evaluate(double x)
     inputHist[alphaOrder-1]  = input;
 
     return sum;
-  } 
+  }
