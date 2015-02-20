@@ -2,6 +2,7 @@
 
 These are contained in the file `init.yaml` and describe basic initialization quantities of the aircraft.
 
+
 `simRate`: The simulation frame-rate (in Hz)
 
 `coordinates`: The initial coordinates of the aircraft in the WGS84 frame, in latitude, longitude and altitude (in degrees and meters respectively)

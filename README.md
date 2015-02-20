@@ -9,7 +9,7 @@ This document serves as a table of contents for the documentaiton of this congre
 
 ## Table of Contents
 
-<!-- - [Compatibility](#compatibility) -->
+- [Compatibility](last_letter/doc/manual/compatibility.md)
 
 - [Installation](last_letter/doc/manual/ll_installation.md)
 
@@ -20,15 +20,14 @@ This document serves as a table of contents for the documentaiton of this congre
 	- [rqt_dashboard](#rqt_dashboard)
 - [Important Messages](#important-messages) -->
 
-- [How to Run](#how-to-run)
+- How to Run
 	- Typical Scenarios
 		- [As Simulator for the ArduPlane SITL](last_letter/doc/manual/ArduPlane_SITL.md)
 
 <!-- 		- [RC Simulator](#rc_simulator)
 		- [A Simple Autopilot](#a-simple-autopilot) -->
 - [Parameter Files](last_letter/doc/manual/parameterFiles.md)
-	- [Aircraft Parameters]
-
+- Frames of Reference and Conventions
 
 
 <!-- - [Environment Parameters](#environment-parameters) -->

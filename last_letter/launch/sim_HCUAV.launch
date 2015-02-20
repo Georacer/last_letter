@@ -28,6 +28,7 @@
 
 		<!-- Initialization of the parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/init.yaml" /> <!-- load state initialization parameters -->
+		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/rigidBody.yaml" /> <!-- load rigid body parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/aerodynamics.yaml" /> <!-- load aerodynamic parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/propulsion.yaml" /> <!-- load propulsion parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/contactPts.yaml" /> <!-- load contact points parameters -->
