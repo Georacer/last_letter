@@ -27,8 +27,8 @@ This document serves as a table of contents for the documentaiton of this congre
 <!-- 		- [RC Simulator](#rc_simulator)
 		- [A Simple Autopilot](#a-simple-autopilot) -->
 - [Parameter Files](last_letter/doc/manual/parameterFiles.md)
-	- [Aircraft Parameters](#aircraft-parameters)
-		-[]
+	- [Aircraft Parameters]
+
 
 
 <!-- - [Environment Parameters](#environment-parameters) -->
