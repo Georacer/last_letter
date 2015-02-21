@@ -11,7 +11,7 @@ init/orientation:  [-0.0000, 0.0039, 0.0000, 1.0000] #NED frame Nortwards
 # init/orientation:  [-0.0000, 0.0039, 1.0000, 0.0000] #NED frame Southwards
 # init/orientation:  [0.000, 0.000, 0.707, 0.707] #NED frame Eastwards
 # init/velLin:   [44.398, -0.000, -2.032] #body frame
-init/velLin:   [10.0, 0.0, 0.0] #body frame
+init/velLin:   [0.0, 0.0, 0.0] #body frame
 init/velAng: [0.000, 0.000, 0.000] #body frame
 init/aileron: 0.000
 # init/elevator: -0.017

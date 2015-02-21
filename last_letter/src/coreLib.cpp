@@ -150,7 +150,8 @@ void ModelPlane::getInput(last_letter::SimPWM inputMsg)
 	input[2] = (double)(inputMsg.value[2]-1000)/1000;
 	input[3] = deltar_max * (double)(inputMsg.value[3]-1500)/500;
 	input[5] = (double)(inputMsg.value[5]-1000)/1000;
-	// std::cout << input[0] << ',' << input[1] << ',' << input[2] << ',' << input[3] << '\n';
+	std::cout << input[5] << ',';
+	std::cout << std::endl;
 	if (inputMsg.value[9] > 1500) {
 		init();
 	}

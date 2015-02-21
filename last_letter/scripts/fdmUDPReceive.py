@@ -29,6 +29,7 @@ def process_ctrl_input(buf):
 	ctrls.value[1] = fdm_ctrls.get('elevator')
 	ctrls.value[2] = fdm_ctrls.get('rpm')
 	ctrls.value[3] = fdm_ctrls.get('rudder')
+	ctrls.value[5] = fdm_ctrls.get('speedbrake')
 	# print ctrls
 	pub.publish(ctrls)
 

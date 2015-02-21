@@ -195,7 +195,7 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 			kFLong = frictForw[tempIndex];
 			kFLat = frictSide[tempIndex];
 
-			if ((parentObj->input[5]!=0) && (i<3)) { // Apply breaks
+			if ((parentObj->input[5]>0.9) && (i<3)) { // Apply breaks
 				kFLong = 1.0;
 			}
 

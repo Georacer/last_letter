@@ -15,8 +15,6 @@
 		<rosparam command="load" file="$(find last_letter)data/parameters/environment.yaml" />
 		<!-- Load global parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/world.yaml" />
-		<!-- Load dashboard parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/dashboard.yaml" />
 	</group>
 
 	<!-- Initialization of services -->

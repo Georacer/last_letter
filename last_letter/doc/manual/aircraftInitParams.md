@@ -1,6 +1,6 @@
 ## Aircraft Initialization Parameters
 
-These are contained in the file `init.yaml` and describe basic initialization quantities of the aircraft.
+These are found in the file `init.yaml` and describe basic initialization quantities of the aircraft.
 
 
 `simRate`: The simulation frame-rate (in Hz)

@@ -7,7 +7,7 @@ Most of `last_letter`'s libraries and executables are initialized (or operate ba
 The main categories of parameters are the following:
 - **aircraft** - The corresponding parameter files can be found at the `last_letter/data/parameters/<aircraft_name>/` folder. The parameters are separated into the following subcategories:
     - [initialization](aircraftInitParams.md)
-    - [rigid body](rigidBody.md)
+    - [rigid body](rigidBodyParams.md)
     - [aerodynamics](aircraftAeroParams.md)
     - [propulsion](aircraftPropParams.md)
     - [ground reactions](aircraftGroundParams.md)
