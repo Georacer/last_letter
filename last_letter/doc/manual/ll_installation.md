@@ -36,7 +36,16 @@ In a console, run:
 roslaunch last_letter launcher.launch
 ```
 This should start the simulator, and open a 3D simulation environment.
-`rqt_gui` application will start as well, which is used to display the avionics instruments, but right now automatic configuration options do not work (WIP).
+`rqt_gui` application will start as well, which is used to display the avionics instruments. **You need to configure this application on this first-time launch**, following the steps below.
+
+1. Navigate to the menu bar of rqt_gui and open the `Perspectives` menu.
+2. Select `Import...`
+3. Navigate to your `last_letter` package files into `<your_ll_clone>/rqt_dashboard` and select the `UAV_dashboard.perspective` file.
+4. Name your newly imported persective with any name you like.
+
+Right now you should see aeronautical gauges appear in you rqt_gui window. If you close rqt_gui, this configuration (ie. perspective) should automatically be reloaded every time you re-open the application.
+Should you need to re-select this perspective, you do not need to re-import it. It is saved in the `Perspectives` sub-menu.
+
 If everything went smoothly, you can close everything and proceed to the instruction manual to learn how to use the `last_letter` simulator.
 
 [back to table of contents](../../../README.md)
