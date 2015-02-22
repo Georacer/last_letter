@@ -13,7 +13,7 @@ from python_qt_binding.QtGui import QWidget
 from PyQt4 import QtGui, QtCore
 from rqt_plot.rosplot import ROSData
 from std_msgs.msg import Float32
-from last_letter.msg import RefCommands
+from last_letter_msgs.msg import RefCommands
 
 class DashboardGrid(QtGui.QWidget):
 	def __init__(self):
