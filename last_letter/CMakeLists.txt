@@ -67,10 +67,10 @@ catkin_package(
 ## Build ##
 ###########
 
-execute_process(
-	COMMAND rospack find last_letter
-	OUTPUT_VARIABLE LAST_LETTER_DIR
-	)
+## Generate package documentation with rosdoc_lite
+execute_process(COMMAND rospack find last_letter
+	OUTPUT_VARIABLE LAST_LETTER_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND rosdoc_lite -o ${LAST_LETTER_DIR}/doc/doxygen ${LAST_LETTER_DIR})
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -98,7 +98,6 @@ include_directories(
 	add_dependencies(quat2euler ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(model ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)
-	# add_dependencies(environment ${PROJECT_NAME}_generate_messages_cpp ROSDOC_LL)
 	add_dependencies(environment ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(virtualJoy ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(autopilot_ll ${PROJECT_NAME}_generate_messages_cpp)
@@ -117,9 +116,12 @@ include_directories(
 
 ## Generate Doxygen files
 	# add_custom_command(OUTPUT rosdoc_ll
-	# 	COMMAND rosdoc_lite ${LAST_LETTER_DIR} -o ${LAST_LETTER_DIR}/doc/doxygen
-	# )
-	# add_custom_target(ROSDOC_LL DEPENDS rosdoc_ll)
+	# 	# COMMAND rosdoc_lite -o ${LAST_LETTER_DIR}/doc/doxygen ${LAST_LETTER_DIR}
+	# 	COMMAND rosdoc_lite ${LAST_LETTER_DIR}
+	# 	# echo ******************"${LAST_LETTER_DIR}"
+	# 	)
+	# add_custom_target(ROSDOC_LL
+	# 	DEPENDS rosdoc_ll)
 
 #############
 ## Install ##
