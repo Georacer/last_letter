@@ -30,8 +30,8 @@ class ModelPlane
 	public:
 	///////////
 	//Variables
-	last_letter::SimStates states; // main simulation states
-	last_letter::Environment environment; // environmental component local to the UAV
+	last_letter_msgs::SimStates states; // main simulation states
+	last_letter_msgs::Environment environment; // environmental component local to the UAV
 	ros::Subscriber subInp, subEnv; // ROS subscribers
 	ros::Publisher pubState, pubForce, pubTorque, pubLinAcc; // ROS publishers
 	ros::Time tprev; // previous ROS time holder
@@ -62,11 +62,11 @@ class ModelPlane
 	 * getInput Read PWM input to the model and store its normalized values
 	 * @param inputMsg Direct servo control commands
 	 */
-	void getInput(last_letter::SimPWM inputMsg);
+	void getInput(last_letter_msgs::SimPWM inputMsg);
 
 	// Perform simulation step
 	void step(void);
 
 	// Read environmental values callback
-	void getEnvironment(last_letter::Environment environment);
+	void getEnvironment(last_letter_msgs::Environment environment);
 };

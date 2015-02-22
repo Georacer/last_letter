@@ -3,9 +3,9 @@
 #include <tf/transform_broadcaster.h>
 #include <sensor_msgs/JointState.h>
 
-#include "last_letter/SimStates.h"
+#include "last_letter_msgs/SimStates.h"
 
-void broadcast(const last_letter::SimStates& states){
+void broadcast(const last_letter_msgs::SimStates& states){
 	static tf::TransformBroadcaster broadcaster;
 	tf::Transform statesTf;
 

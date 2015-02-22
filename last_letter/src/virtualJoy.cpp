@@ -19,13 +19,13 @@ int main(int argc, char **argv)
 	trimInput.axes[3] = (2 * throt -1); //Set throttle
 	ros::Publisher pub = n.advertise<sensor_msgs::Joy>("joy",1);
 	ROS_INFO("virtual Joystick ready");
-	
+
 	while (ros::ok())
 	{
 		ros::spinOnce();
 		trimInput.header.stamp = ros::Time::now();
 		pub.publish(trimInput);
 	}
-	
+
 	return 0;
 }

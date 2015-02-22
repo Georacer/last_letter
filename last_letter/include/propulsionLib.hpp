@@ -12,7 +12,7 @@ class Propulsion
 	geometry_msgs::Wrench wrenchProp;
 
 	///////////
-	//Functions	
+	//Functions
 	Propulsion(ModelPlane *);
 	~Propulsion();
 
@@ -41,12 +41,12 @@ class EngBeard: public Propulsion
 	//Variables
 	double s_prop, c_prop, k_motor, k_t_p, k_omega;
 	double airspeed, rho, deltat;
-	
+
 	///////////
 	//Functions
 	EngBeard(ModelPlane *);
 	~EngBeard();
-	
+
 	void updateRadPS(); //Step the angular speed
 	geometry_msgs::Vector3 getForce(); //Calculate Forces
 	geometry_msgs::Vector3 getTorque(); //Calculate Torques

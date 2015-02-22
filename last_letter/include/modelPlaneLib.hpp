@@ -16,10 +16,10 @@
 #include "uav_utils/uav_utils.hpp"
 
 //Include custom messages
-#include "last_letter/SimStates.h"
-#include "last_letter/SimPWM.h"
-#include "last_letter/Geoid.h"
-#include "last_letter/Environment.h"
+#include "last_letter_msgs/SimStates.h"
+#include "last_letter_msgs/SimPWM.h"
+#include "last_letter_msgs/Geoid.h"
+#include "last_letter_msgs/Environment.h"
 
 
 //Forward class declarations

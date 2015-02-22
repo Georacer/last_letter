@@ -3,19 +3,19 @@
 #include <math.h>
 #include <geometry_msgs/Vector3.h>
 
-#include <last_letter/Environment.h>
-#include <last_letter/SimStates.h>
-#include <last_letter/Geoid.h>
+#include <last_letter_msgs/Environment.h>
+#include <last_letter_msgs/SimStates.h>
+#include <last_letter_msgs/Geoid.h>
 #include <mathutils/mathutils.hpp>
 #include <uav_utils/uav_utils.hpp>
 
 using namespace std;
 
-#define E2_EARTH last_letter::Geoid::WGS84_e2
-#define RP_EARTH last_letter::Geoid::WGS84_Ra*(1.0-E2_EARTH)
+#define E2_EARTH last_letter_msgs::Geoid::WGS84_e2
+#define RP_EARTH last_letter_msgs::Geoid::WGS84_Ra*(1.0-E2_EARTH)
 
 #define grav_const 3.986004418e14
-#define grav_temp (2.0/last_letter::Geoid::WGS84_Ra)*(1.0+last_letter::Geoid::EARTH_flattening+(last_letter::Geoid::EARTH_Omega*last_letter::Geoid::EARTH_Omega)*(last_letter::Geoid::WGS84_Ra*last_letter::Geoid::WGS84_Ra)*RP_EARTH/grav_const)
+#define grav_temp (2.0/last_letter_msgs::Geoid::WGS84_Ra)*(1.0+last_letter_msgs::Geoid::EARTH_flattening+(last_letter_msgs::Geoid::EARTH_Omega*last_letter_msgs::Geoid::EARTH_Omega)*(last_letter_msgs::Geoid::WGS84_Ra*last_letter_msgs::Geoid::WGS84_Ra)*RP_EARTH/grav_const)
 
 #define Rd 287.05307  //Gas constant for dry air, J/kg K
 #define L0 -6.5  //Temperature lapse rate, at sea level deg K/km
@@ -27,8 +27,8 @@ using namespace std;
 class environmentModel
 {
 	public:
-	last_letter::Environment environment;
-	last_letter::SimStates states;
+	last_letter_msgs::Environment environment;
+	last_letter_msgs::SimStates states;
 	double dt, simRate;
 	ros::Time tprev;
 	double allowTurbulence;
@@ -50,7 +50,7 @@ class environmentModel
 	//Constructor
 	environmentModel();
 
-	void callback(const last_letter::SimStates::ConstPtr& InpStates);
+	void callback(const last_letter_msgs::SimStates::ConstPtr& InpStates);
 
 	void calcWind();
 

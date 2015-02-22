@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 	nav_msgs
 	geometry_msgs
 	sensor_msgs
+	last_letter_msgs
 	message_generation
 	uav_utils
 	mathutils
@@ -24,20 +25,6 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate messages in the 'msg' folder
 	add_message_files(FILES
-		Accelerations.msg
-		SimPWM.msg
-		SimServos.msg
-		SimStates.msg
-		Geoid.msg
-		Environment.msg
-		SimSensor.msg
-		SimSensor3.msg
-		SimBarometer.msg
-		SimGPS.msg
-		SimSat.msg
-		SimSats.msg
-		DOP.msg
-		RefCommands.msg
 	)
 
 ## Generate services in the 'srv' folder

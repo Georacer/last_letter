@@ -5,19 +5,19 @@
 
 #include "mathutils/mathutils.hpp"
 #include "uav_utils/uav_utils.hpp"
-#include "last_letter/SimStates.h"
-#include "last_letter/SimPWM.h"
-#include "last_letter/Environment.h"
-#include "last_letter/RefCommands.h"
+#include "last_letter_msgs/SimStates.h"
+#include "last_letter_msgs/SimPWM.h"
+#include "last_letter_msgs/Environment.h"
+#include "last_letter_msgs/RefCommands.h"
 
 class BMcLAttitudeController
 {
 	public:
 	///////////
 	//Variables
-	last_letter::SimStates states;
-	last_letter::Environment environment;
-	last_letter::RefCommands refCommands;
+	last_letter_msgs::SimStates states;
+	last_letter_msgs::Environment environment;
+	last_letter_msgs::RefCommands refCommands;
 	geometry_msgs::Vector3 euler, airdata;
 	double input[10];
 	double output[10];
@@ -38,21 +38,21 @@ class BMcLAttitudeController
 	///////////
 	//Functions
 	void step();
-	void getInput(last_letter::SimPWM inputMsg);
-	void getStates(last_letter::SimStates inpStates);
-	void getReference(last_letter::RefCommands refInp);
+	void getInput(last_letter_msgs::SimPWM inputMsg);
+	void getStates(last_letter_msgs::SimStates inpStates);
+	void getReference(last_letter_msgs::RefCommands refInp);
 	void writePWM(double *output);
-	void getEnvironment(last_letter::Environment envUpdate);
+	void getEnvironment(last_letter_msgs::Environment envUpdate);
 	double aileronControl();
 	double rudderControl();
 	double elevatorControl();
 	double throttleControl();
-	
+
 	//Constructor
 	BMcLAttitudeController(ros::NodeHandle n);
 	//Destructor
 	~BMcLAttitudeController();
-	
+
 	private:
 	///////////
 	//Variables

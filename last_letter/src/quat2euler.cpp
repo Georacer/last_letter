@@ -6,10 +6,10 @@
 #include <math.h>
 
 #include "mathutils/mathutils.hpp"
-#include "last_letter/SimStates.h"
+#include "last_letter_msgs/SimStates.h"
 ros::Publisher pub;
 
-void translate_callback(last_letter::SimStates Odo)
+void translate_callback(last_letter_msgs::SimStates Odo)
 {
 	tf::Quaternion quat = tf::Quaternion(Odo.pose.orientation.x, Odo.pose.orientation.y, Odo.pose.orientation.z, Odo.pose.orientation.w);
 	if ( isnan(quat.length()) ) {
@@ -20,7 +20,7 @@ void translate_callback(last_letter::SimStates Odo)
 //		ROS_ERROR("quaternion too short");
 //		ROS_INFO("Quaterion: %g, %g, %g, %g, len: %g",quat[0], quat[1], quat[2], quat[3], quat.length());
 		quat.normalize();
-	}	
+	}
 //	double phi,theta,psi;
 //	tf::Matrix3x3(quat).getEulerYPR(psi, theta, phi);
 	geometry_msgs::Vector3 eulerVec = quat2euler(Odo.pose.orientation);
@@ -38,6 +38,6 @@ int main(int argc, char **argv)
 	pub = n.advertise<geometry_msgs::Vector3>("euler", 1000);
 	ROS_INFO("quat2euler ready");
 	ros::spin();
-	
+
 	return 0;
 }

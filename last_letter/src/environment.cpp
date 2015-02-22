@@ -12,7 +12,7 @@
 	{
 		int i;
 
-		grav0 = last_letter::Geoid::EARTH_grav;
+		grav0 = last_letter_msgs::Geoid::EARTH_grav;
 		if(!ros::param::getCached("simRate", simRate)) {ROS_FATAL("Invalid parameters for -/simRate- in param server!"); ros::shutdown();}
 		dt = 1.0/simRate;
 		if(!ros::param::getCached("/environment/Dryden/use", allowTurbulence)) {ROS_FATAL("Invalid parameters for -/environment/Dryden/use- in param server!"); ros::shutdown();}
@@ -48,7 +48,7 @@
 
 	////////////////////////////////////////////////
 	//Read input states and publish environment data
-	void environmentModel::callback(const last_letter::SimStates::ConstPtr& InpStates)
+	void environmentModel::callback(const last_letter_msgs::SimStates::ConstPtr& InpStates)
 	{
 		//if (firstcall)
 		//	dt=1.0/simRate;
@@ -171,9 +171,9 @@
 	void environmentModel::calcGrav()
 	{
 		double slat2 = pow(sin(M_PI/180*states.geoid.latitude),2);
-		double Re2 = pow(last_letter::Geoid::WGS84_Ra,2);
+		double Re2 = pow(last_letter_msgs::Geoid::WGS84_Ra,2);
 
-		grav0 = last_letter::Geoid::EARTH_grav * (1.0+0.00193185138639 * slat2) / sqrt(1.0-0.00669437999013 *slat2);
+		grav0 = last_letter_msgs::Geoid::EARTH_grav * (1.0+0.00193185138639 * slat2) / sqrt(1.0-0.00669437999013 *slat2);
 		double gravity = grav0 * (1.0 - grav_temp * states.geoid.altitude + 3.0 *(pow(states.geoid.altitude,2)/Re2) );
 		environment.gravity = gravity;
 	}
@@ -192,7 +192,7 @@ int main(int argc, char **argv)
 	environmentModel env;
 
 	ros::Subscriber sub = n.subscribe("states",1,&environmentModel::callback, &env);
-	env.env_pub = n.advertise<last_letter::Environment>("environment",1);
+	env.env_pub = n.advertise<last_letter_msgs::Environment>("environment",1);
 
 	ros::Duration(3).sleep(); //wait for other nodes to get raised
 	//double simRate;

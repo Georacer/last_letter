@@ -18,7 +18,7 @@ kinematics(this), dynamics(this), airdata(this)
 	//Subscribe and advertize
 	subInp = n.subscribe("ctrlPWM",1,&ModelPlane::getInput, this); //model control input subscriber
 	subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this); //dynamic environment effects subscriber
-	pubState = n.advertise<last_letter::SimStates>("states",1000); //model states publisher
+	pubState = n.advertise<last_letter_msgs::SimStates>("states",1000); //model states publisher
 	pubForce = n.advertise<geometry_msgs::Vector3>("forceInput",1000); // forces publisher
 	pubTorque = n.advertise<geometry_msgs::Vector3>("torqueInput",1000); // torques publisher
 	pubLinAcc = n.advertise<geometry_msgs::Vector3>("linearAcc",1000); // Body frame linear acceleration - no corriolis effect
@@ -139,7 +139,7 @@ void ModelPlane::step(void)
 
 /////////////////////////////////////////////////
 //convert uS PWM values to control surface inputs
-void ModelPlane::getInput(last_letter::SimPWM inputMsg)
+void ModelPlane::getInput(last_letter_msgs::SimPWM inputMsg)
 {
 	if(!ros::param::getCached("airframe/deltaa_max", deltaa_max)) {ROS_FATAL("Invalid parameters for -airframe/deltaa_max- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("airframe/deltae_max", deltae_max)) {ROS_FATAL("Invalid parameters for -airframe/deltae_max- in param server!"); ros::shutdown();}
@@ -159,7 +159,7 @@ void ModelPlane::getInput(last_letter::SimPWM inputMsg)
 
 /////////////////////////////////////////////////
 //Store environmental values
-void ModelPlane::getEnvironment(last_letter::Environment envUpdate)
+void ModelPlane::getEnvironment(last_letter_msgs::Environment envUpdate)
 {
 	environment = envUpdate;
 }

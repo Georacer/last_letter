@@ -235,11 +235,11 @@ geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds)
 double WGS84_RN(double lat)
 {
 	double sfi =sin(lat*M_PI/180);
-	return last_letter::Geoid::WGS84_Ra/sqrt(1-last_letter::Geoid::WGS84_e2*sfi*sfi);
+	return last_letter_msgs::Geoid::WGS84_Ra/sqrt(1-last_letter_msgs::Geoid::WGS84_e2*sfi*sfi);
 }
 
 double WGS84_RM(double lat)
 {
 	double sfi =sin(lat*M_PI/180);
-	return last_letter::Geoid::WGS84_Ra*(1-last_letter::Geoid::WGS84_e2)/pow(1-last_letter::Geoid::WGS84_e2*sfi*sfi,1.5);
+	return last_letter_msgs::Geoid::WGS84_Ra*(1-last_letter_msgs::Geoid::WGS84_e2)/pow(1-last_letter_msgs::Geoid::WGS84_e2*sfi*sfi,1.5);
 }

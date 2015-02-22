@@ -1,5 +1,5 @@
 #include "model.hpp"
-		
+
 ///////////////
 //Main function
 ///////////////
@@ -13,11 +13,11 @@ int main(int argc, char **argv)
 	double simRate;
 	ros::param::get("simRate",simRate); //frame rate in Hz
 	ros::Rate spinner(simRate);
-	
+
 	ModelPlane uav(n); //Create a ModelPlane passing the nodehandle for subscriptions & publicatons
 	spinner.sleep();
 	ROS_INFO("simNode up");
-	
+
 	while (ros::ok())
 	{
 		uav.step();
@@ -25,12 +25,12 @@ int main(int argc, char **argv)
 		spinner.sleep();
 
 		if (isnan(uav.states.velocity.linear.x))
-		{		
+		{
 			ROS_FATAL("State NAN detected on main!");
 			uav.init();
 		}
 	}
-	
+
 	return 0;
-	
+
 }

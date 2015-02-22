@@ -18,7 +18,7 @@
 		subState = n.subscribe("states",1,&BMcLAttitudeController::getStates, this);
 		subEnv = n.subscribe("environment",1,&BMcLAttitudeController::getEnvironment, this);
 		subRef = n.subscribe("refCommands",1,&BMcLAttitudeController::getReference, this);
-		pubCtrl = n.advertise<last_letter::SimPWM>("ctrlPWM",1000);
+		pubCtrl = n.advertise<last_letter_msgs::SimPWM>("ctrlPWM",1000);
 
 		//Create roll to aileron controller
 
@@ -200,14 +200,14 @@
 	//Utilities
 	///////////
 
-	void BMcLAttitudeController::getStates(last_letter::SimStates inpStates)
+	void BMcLAttitudeController::getStates(last_letter_msgs::SimStates inpStates)
 	{
 		states = inpStates;
 	}
 
 	/////////////////////////////////////////////////
 	//convert uS PPM values to control surface inputs
-	void BMcLAttitudeController::getInput(last_letter::SimPWM inputMsg)
+	void BMcLAttitudeController::getInput(last_letter_msgs::SimPWM inputMsg)
 	{
 		//Convert PPM to -1/1 ranges (0/1 for throttle)
 		input[0] = (double)(inputMsg.value[0]-1500)/500;
@@ -219,7 +219,7 @@
 
 	void BMcLAttitudeController::writePWM(double *output)
 	{
-		last_letter::SimPWM channels;
+		last_letter_msgs::SimPWM channels;
 		channels.value[0] = (unsigned int)(output[0]*500+ 1500);
 		channels.value[1] = (unsigned int)(output[1]*500+ 1500);
 		channels.value[2] = (unsigned int)((output[2])*1000+ 1000);
@@ -231,14 +231,14 @@
 
 	/////////////////////////////////////////////////
 	//Store environmental values
-	void BMcLAttitudeController::getEnvironment(last_letter::Environment envUpdate)
+	void BMcLAttitudeController::getEnvironment(last_letter_msgs::Environment envUpdate)
 	{
 		environment = envUpdate;
 	}
 
 	/////////////////////////////////////////////////
 	//Store environmental values
-	void BMcLAttitudeController::getReference(last_letter::RefCommands refInp)
+	void BMcLAttitudeController::getReference(last_letter_msgs::RefCommands refInp)
 	{
 		refCommands = refInp;
 	}
