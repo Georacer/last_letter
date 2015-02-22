@@ -3,26 +3,26 @@
 #include "geometry_msgs/Vector3.h"
 #include <cstdlib>
 #include <math.h>
-#include "last_letter/SimStates.h"
-#include "last_letter/Environment.h"
+#include "last_letter_msgs/SimStates.h"
+#include "last_letter_msgs/Environment.h"
 #include "rqt_dashboard/Dashboard.h"
 
 #define averageN 10
 #define filtCoef 0.9
 
 rqt_dashboard::Dashboard dash;
-last_letter::Environment environment;
-last_letter::SimStates states;
+last_letter_msgs::Environment environment;
+last_letter_msgs::SimStates states;
 ros::Time tprev;
 double altPrev=0;
 //int i=0;
 
-void state_callback(last_letter::SimStates Odo)
+void state_callback(last_letter_msgs::SimStates Odo)
 {
 	states = Odo;
 }
 
-void env_callback(last_letter::Environment env)
+void env_callback(last_letter_msgs::Environment env)
 {
 	environment = env;
 }
