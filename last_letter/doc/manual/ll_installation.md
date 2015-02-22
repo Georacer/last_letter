@@ -1,6 +1,6 @@
 ## Installation
 
-Like any other ROS set of packages, `last_letter` and its companion library packages `uav_utils` and `math_utils` require the (Robotics Operating System)[http://www.ros.org/] to be present on your system.
+Like any other ROS set of packages, `last_letter` and its companion library packages `uav_utils` and `math_utils` require the [Robotics Operating System](http://www.ros.org/) to be present on your system.
 If you have previous experience with ROS, installation is as simple as cloning the package files in your workspace.
 If you are a ROS novice, the following instructions will try to guide you throught the process.
 

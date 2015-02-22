@@ -49,4 +49,4 @@ qtcreator-*
 .#*
 
 # Catkin custom files
-CMakeLists.txt
+./CMakeLists.txt

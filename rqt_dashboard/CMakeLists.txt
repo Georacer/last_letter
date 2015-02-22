@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 	nav_msgs
 	geometry_msgs
 	std_msgs
-#	last_letter
+	last_letter_msgs
 )
 
 ## System dependencies are found with CMake's conventions

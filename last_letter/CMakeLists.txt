@@ -24,8 +24,8 @@ find_package(catkin REQUIRED COMPONENTS
 ################################################
 
 ## Generate messages in the 'msg' folder
-	add_message_files(FILES
-	)
+	# add_message_files(FILES
+	# )
 
 ## Generate services in the 'srv' folder
 	add_service_files(DIRECTORY srv FILES
@@ -39,13 +39,13 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-	generate_messages(
-		DEPENDENCIES
-		std_msgs
-		nav_msgs
-		geometry_msgs
-		sensor_msgs
-	)
+	# generate_messages(
+	# 	DEPENDENCIES
+	# 	std_msgs
+	# 	nav_msgs
+	# 	geometry_msgs
+	# 	sensor_msgs
+	# )
 
 ###################################
 ## catkin specific configuration ##
@@ -66,6 +66,11 @@ catkin_package(
 ###########
 ## Build ##
 ###########
+
+execute_process(
+	COMMAND rospack find last_letter
+	OUTPUT_VARIABLE LAST_LETTER_DIR
+	)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
@@ -93,8 +98,8 @@ include_directories(
 	add_dependencies(quat2euler ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(model ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)
+	# add_dependencies(environment ${PROJECT_NAME}_generate_messages_cpp ROSDOC_LL)
 	add_dependencies(environment ${PROJECT_NAME}_generate_messages_cpp)
-	# add_dependencies(environment ROSLITE_LL)
 	add_dependencies(virtualJoy ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(autopilot_ll ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(autopilot_HCUAV ${PROJECT_NAME}_generate_messages_cpp)
@@ -103,7 +108,6 @@ include_directories(
 	target_link_libraries(uav_publisher ${catkin_LIBRARIES})
 	target_link_libraries(quat2euler mathutils ${catkin_LIBRARIES})
 	target_link_libraries(model mathutils uav_utils modelPlaneLib ${catkin_LIBRARIES})
-	# target_link_libraries(model mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(joy2chan ${catkin_LIBRARIES})
 	target_link_libraries(environment mathutils uav_utils ${catkin_LIBRARIES})
 	target_link_libraries(virtualJoy mathutils uav_utils ${catkin_LIBRARIES})
@@ -113,10 +117,7 @@ include_directories(
 
 ## Generate Doxygen files
 	# add_custom_command(OUTPUT rosdoc_ll
-		# COMMAND rosdoc_lite /home/georgezp/ROS/catkin_ws/src/last_letter -o /home/georgezp/ROS/catkin_ws/src/last_letter/doc
-		# COMMAND echo ***************
-		# COMMAND rosdoc_lite ${DOC_PATH}
-		# echo ******** stars!
+	# 	COMMAND rosdoc_lite ${LAST_LETTER_DIR} -o ${LAST_LETTER_DIR}/doc/doxygen
 	# )
 	# add_custom_target(ROSDOC_LL DEPENDS rosdoc_ll)
 
