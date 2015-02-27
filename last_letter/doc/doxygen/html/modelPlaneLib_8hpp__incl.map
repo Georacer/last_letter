@@ -1,9 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node31" href="$kinematicsLib_8hpp.html" title="kinematicsLib.hpp" alt="" coords="2520,83,2645,112"/>
-<area shape="rect" id="node33" href="$dynamicsLib_8hpp.html" title="dynamicsLib.hpp" alt="" coords="2669,83,2789,112"/>
-<area shape="rect" id="node35" href="$aerodynamicsLib_8hpp.html" title="aerodynamicsLib.hpp" alt="" coords="2813,83,2957,112"/>
-<area shape="rect" id="node37" href="$gravityLib_8hpp.html" title="gravityLib.hpp" alt="" coords="2981,83,3083,112"/>
-<area shape="rect" id="node39" href="$groundReactionLib_8hpp.html" title="groundReactionLib.hpp" alt="" coords="3107,83,3261,112"/>
-<area shape="rect" id="node41" href="$propulsionLib_8hpp.html" title="propulsionLib.hpp" alt="" coords="3285,83,3408,112"/>
-<area shape="rect" id="node43" href="$coreLib_8hpp.html" title="coreLib.hpp" alt="" coords="3432,83,3520,112"/>
-</map>

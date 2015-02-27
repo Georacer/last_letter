@@ -9,7 +9,8 @@ from geometry_msgs.msg import Vector3, Vector3Stamped
 import numpy as np
 import tf.transformations
 from mathutils import quat2Reb, Vector2Array
-from last_letter.msg import SimStates, SimPWM, Environment
+from last_letter_msgs.msg import SimStates, SimPWM, Environment
+
 
 from pymavlink import fgFDM
 import socket, struct, errno
@@ -19,6 +20,7 @@ def interpret_address(addrstr):
     a = addrstr.split(':')
     a[1] = int(a[1])
     return tuple(a)
+
 
 def state_callback(state):
 
@@ -62,12 +64,9 @@ def state_callback(state):
 	fdm.set('psidot', psiDot, units='rps')
 	# rospy.logerr('dot_phi/theta/psi: %g/%g/%g',phiDot, thetaDot, psiDot)
 
-	vcas = np.sqrt(state.velocity.linear.x*state.velocity.linear.x + state.velocity.linear.y*state.velocity.linear.y + state.velocity.linear.z*state.velocity.linear.z)
-	fdm.set('vcas', vcas, units='mps') # Needs to take wind into account!
-	# rospy.logerr('vcas: %g',vcas)
-
 	fdm.set('rpm', state.rotorspeed[0]*np.pi*60)
 	fdm.set('agl', state.geoid.altitude, units='meters')
+
 
 def accel_callback(accel):
 
@@ -80,6 +79,18 @@ def accel_callback(accel):
 	fdm.set('A_Y_pilot', accy, units='mpss')
 	fdm.set('A_Z_pilot', accz, units='mpss')
 	# rospy.logerr('acc_x/y/z: %g/%g/%g',accx, accy, accz)
+
+
+def env_callback(environment):
+
+	global fdm, stateStorage
+	airspeed = Vector3()
+	airspeed.x = stateStorage.velocity.linear.x - environment.wind.x
+	airspeed.y = stateStorage.velocity.linear.y - environment.wind.y
+	airspeed.z = stateStorage.velocity.linear.z - environment.wind.z
+	vcas = np.sqrt(airspeed.x*airspeed.x + airspeed.y*airspeed.y + airspeed.z*airspeed.z)
+	fdm.set('vcas', vcas, units='mps')
+	# rospy.logerr('vcas: %g',vcas)
 
 
 ########
@@ -101,6 +112,7 @@ if __name__ == '__main__':
 		rospy.init_node('fdmUDPSend')
 		rospy.Subscriber('states', SimStates, state_callback, queue_size=1)
 		rospy.Subscriber('linearAcc', Vector3, accel_callback, queue_size=1)
+		rospy.Subscriber('environment', Environment, env_callback, queue_size=1)
 		timer = rospy.Rate(1000)
 		stateStorage = SimStates()
 

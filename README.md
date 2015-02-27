@@ -4,8 +4,7 @@
 This document serves as a table of contents for the documentaiton of this congregation of ROS packages.
 
 ## Gitter chatroom
-####(omnipresence not guaranteed)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Georacer/last_letter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Georacer/last_letter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) **(omnipresence not guaranteed)**
 
 ## Table of Contents
 
@@ -21,6 +20,7 @@ This document serves as a table of contents for the documentaiton of this congre
 - [Important Messages](#important-messages) -->
 
 - How to Run
+    - Launching and arguments
 	- Typical Scenarios
 		- [As Simulator for the ArduPlane SITL](last_letter/doc/manual/ArduPlane_SITL.md)
 

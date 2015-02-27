@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1" href="$classPropulsion.html" title="Propulsion" alt="" coords="5,59,88,88"/>
-<area shape="rect" id="node3" href="$classEngBeard.html" title="EngBeard" alt="" coords="139,5,216,35"/>
-<area shape="rect" id="node5" href="$classNoEngine.html" title="NoEngine" alt="" coords="139,59,216,88"/>
-<area shape="rect" id="node7" href="$classPistonEng.html" title="PistonEng" alt="" coords="136,112,219,141"/>
-</map>

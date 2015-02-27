@@ -1,5 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1" href="$classGroundReaction.html" title="Ground reactions interface class." alt="" coords="7,32,121,61"/>
-<area shape="rect" id="node3" href="$classNoGroundReaction.html" title="No ground reactions, dummy class." alt="" coords="176,5,309,35"/>
-<area shape="rect" id="node5" href="$classPanosContactPoints.html" title="Panos Marantos ground reactions implementation." alt="" coords="172,59,313,88"/>
-</map>

@@ -15,7 +15,6 @@ last_letter_msgs::Environment environment;
 last_letter_msgs::SimStates states;
 ros::Time tprev;
 double altPrev=0;
-//int i=0;
 
 void state_callback(last_letter_msgs::SimStates Odo)
 {

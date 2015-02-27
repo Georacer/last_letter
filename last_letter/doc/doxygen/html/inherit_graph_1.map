@@ -1,6 +1,0 @@
-<map id="G" name="G">
-<area shape="rect" id="node1" href="$classAerodynamics.html" title="Aerodynamics" alt="" coords="7,32,111,61"/>
-<area shape="rect" id="node3" href="$classNoAerodynamics.html" title="NoAerodynamics" alt="" coords="160,5,283,35"/>
-<area shape="rect" id="node5" href="$classStdLinearAero.html" title="StdLinearAero" alt="" coords="169,59,273,88"/>
-<area shape="rect" id="node7" href="$classHCUAVAero.html" title="HCUAVAero" alt="" coords="332,59,428,88"/>
-</map>

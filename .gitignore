@@ -51,3 +51,6 @@ qtcreator-*
 
 # Catkin custom files
 /CMakeLists.txt
+
+# Ignore doxygen files. Each user can generate them for themselves
+/last_letter/doc/doxygen
