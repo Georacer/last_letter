@@ -13,8 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
 	rospy
 	sensor_msgs
 	std_msgs
-    nav_msgs
-    last_letter_msgs
+	nav_msgs
+	last_letter_msgs
 	)
 
 find_package (LAPACK REQUIRED)

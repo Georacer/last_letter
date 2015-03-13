@@ -95,7 +95,7 @@ void calculations(void)
 	dash.airspeed = tempVec.x;
 	dash.alpha = tempVec.y;
 	dash.beta = tempVec.z;
-	dash.climbRate = calcClimb(); //RAW warning!
+	dash.climbRate = states.geoid.velocity.z; //calcClimb(); //RAW warning!
 	dash.altitude = states.geoid.altitude;
 	dash.rotorspeed = states.rotorspeed[0]*60.0/2.0/M_PI; // Convert from RadPS to RPM
 }

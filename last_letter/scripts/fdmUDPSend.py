@@ -30,7 +30,8 @@ def state_callback(state):
 
 	fdm.set('latitude', state.geoid.latitude, units='degrees')
 	fdm.set('longitude', state.geoid.longitude, units='degrees')
-	fdm.set('altitude', state.geoid.altitude, units='meters')
+	fdm.set('altitude', state.geoid.altitude, units='meters') # Should it be asl or initialized altitude?
+	# fdm.set('altitude', -state.pose.position.z, units='meters')
 	# rospy.logerr('Lat/Lon/Alt: %g/%g/%g',state.geoid.latitude, state.geoid.longitude, state.geoid.altitude)
 
 	fdm.set('v_north', state.geoid.velocity.x, units='mps')
@@ -66,6 +67,7 @@ def state_callback(state):
 
 	fdm.set('rpm', state.rotorspeed[0]*np.pi*60)
 	fdm.set('agl', state.geoid.altitude, units='meters')
+	# fdm.set('agl', -state.pose.position.z, units='meters')
 
 
 def accel_callback(accel):
