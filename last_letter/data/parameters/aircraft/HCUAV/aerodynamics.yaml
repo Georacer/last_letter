@@ -14,6 +14,7 @@ airframe/c_lift_deltae: -0.381
 airframe/c_drag_deltae: 0.0
 airframe/c_m_deltae: 1.079
 airframe/mcoeff: 0.0 #not used but required
+airframe/oswald: 0.9
 airframe/alpha_stall: 0.0 #not used but required
 airframe/c_drag_p: 0.0 #not used but required
 airframe/c_n_deltar: 0.0476 #opposite sign than c_y_deltar

@@ -1,10 +1,14 @@
 # `last_letter` : Unmanned Aerial Vehicle simulation and control packages
 
-"last_letter" is a collection of [ROS](http://ros.org/) packages suitable for Unmanned Aerial Vehicle research, control algorithm development, non-linear physics simulation, Software-in-the-Loop (SIL) simulation and Hardware-in-the-Loop (HIL) simulation. It is developed by George Zogopoulos Papaliakos.
-This document serves as a table of contents for the documentaiton of this congregation of ROS packages.
+`last_letter` is a collection of [ROS](http://ros.org/) packages suitable for Unmanned Aerial Vehicle research, control algorithm development, non-linear physics simulation, Software-in-the-Loop (SIL) simulation and Hardware-in-the-Loop (HIL) simulation. It is developed by George Zogopoulos Papaliakos.
+This document serves as a table of contents for the documentation of this congregation of ROS packages.
 
 ## Gitter chatroom
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Georacer/last_letter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) **(omnipresence not guaranteed)**
+
+## Scientific background
+Great effort has been exerted for the simulator to be as realistic as possible. To that goal, the project incorporates bibliography related to flight dynamics, physics modeling and sensor modeling. A congreggated document discussing the modeling of a fixed-wing UAV can be found in the [Modeling a Fixed-Wing UAV](https://github.com/Georacer/uav-modeling) Github project. It is a LaTeX project with a single .pdf output document.
+Although `uav-modeling` is independent of `last-letter`, it will often be referred to in the documentation.
 
 ## Table of Contents
 

@@ -93,7 +93,7 @@ StdLinearAero::StdLinearAero(ModelPlane * parent) : Aerodynamics(parent)
 	if(!ros::param::getCached("airframe/c_drag_p", c_drag_p)) {ROS_FATAL("Invalid parameters for -c_drag_p- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("airframe/c_lift_0", c_lift_0)) {ROS_FATAL("Invalid parameters for -c_lift_0- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("airframe/c_lift_a", c_lift_a0)) {ROS_FATAL("Invalid parameters for -c_lift_a- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("/environment/oswald", oswald)) {ROS_FATAL("Invalid parameters for -oswald- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached("airframe/oswald", oswald)) {ROS_FATAL("Invalid parameters for -oswald- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("airframe/mcoeff", M)) {ROS_FATAL("Invalid parameters for -mcoeff- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("airframe/alpha_stall", alpha0)) {ROS_FATAL("Invalid parameters for -alpha_stall- in param server!"); ros::shutdown();}
 }

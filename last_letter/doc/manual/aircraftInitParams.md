@@ -11,16 +11,16 @@ These are found in the file `init.yaml` and describe basic initialization quanti
 
 `orientation`: The initial orientation of the aircraft in quaternion form; angle is the last argument
 
-`velLin` The initial linear velocity of the aircraft, in body axes (in meters/second)
+`velLin`: The initial linear velocity of the aircraft, in body axes (in meters/second)
 
-`velAng` The initial angular velocity of the aircraft, in body axes (in radians/second)
+`velAng`: The initial angular velocity of the aircraft, in body axes (in radians/second)
 
-`aileron` The initial aileron deflection, normalized in -1/1
+`aileron`: The initial aileron deflection, normalized in -1/1
 
-`elevator` The initial elevator deflection, normalized in -1/1
+`elevator`: The initial elevator deflection, normalized in -1/1
 
-`throttle` The initial throttle setting, normalized in 0/1
+`throttle`: The initial throttle setting, normalized in 0/1
 
-`rudder` The rudder aileron deflection, normalized in -1/1
+`rudder`: The rudder aileron deflection, normalized in -1/1
 
 [back to table of contents](../../../README.md)
