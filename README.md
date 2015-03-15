@@ -54,4 +54,4 @@ The last_letter/launch file contains a few template .launch files which can be u
 
 For this scenario, you will need to have a joystick (or similar device visible to the "joy" ROS package) plugged in to your machine. You may need to configure the /dev/input/js* parameter to point to your controller. Running roslaunch last_letter launcher_ll.launch will start the simulator running the "last_letter" standard aircraft, visible in the rviz visualizer, under direct, manual user control. It will also open the "rqt_dashboard" plugin for rqt_gui, which contains virtual flight instruments. -->
 
-![last letter initial screen](figures/last_letter_init.png)
+![last letter initial screen](last_letter/doc/manual/figures/last_letter_init.png)
