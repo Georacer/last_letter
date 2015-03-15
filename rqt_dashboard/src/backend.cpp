@@ -63,31 +63,6 @@ geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds)
 	return result;
 }
 
-double calcClimb(void)
-{
-	static double buffer[averageN];
-
-	ros::Time now = ros::Time::now();
-	double dt = (now - tprev).toSec();
-	tprev = now;
-	double deltaAlt = (states.geoid.altitude - altPrev);
-	altPrev = states.geoid.altitude;
-	double climbRate = deltaAlt/dt;
-
-	for (int i=0; i<(averageN-1); i++) {
-		buffer[i] = buffer[i+1];
-	}
-	buffer[averageN-1]=climbRate;
-
-	double tempSum = 0.0;
-	for (int i=0; i<averageN; i++) {
-		tempSum += buffer[i];
-	}
-	climbRate = tempSum/averageN;
-
-	return climbRate;
-}
-
 void calculations(void)
 {
 	geometry_msgs::Vector3 tempVec;
@@ -95,7 +70,7 @@ void calculations(void)
 	dash.airspeed = tempVec.x;
 	dash.alpha = tempVec.y;
 	dash.beta = tempVec.z;
-	dash.climbRate = states.geoid.velocity.z; //calcClimb(); //RAW warning!
+	dash.climbRate = states.geoid.velocity.z;
 	dash.altitude = states.geoid.altitude;
 	dash.rotorspeed = states.rotorspeed[0]*60.0/2.0/M_PI; // Convert from RadPS to RPM
 }

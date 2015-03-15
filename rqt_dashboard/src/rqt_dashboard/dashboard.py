@@ -52,7 +52,6 @@ class DashboardGrid(QtGui.QWidget):
 
 		for i in xrange(len(grouped_gauges)):
 			setattr(self, 'column{}'.format(i), QtGui.QVBoxLayout())
-		    # setattr(self, 'column{}'.format(i), [])
 			curr_column = getattr(self, 'column{}'.format(i))
 			for g in grouped_gauges[i]:
 				if g is not None:
