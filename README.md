@@ -7,7 +7,7 @@ This document serves as a table of contents for the documentation of this congre
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Georacer/last_letter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) **(omnipresence not guaranteed)**
 
 ## Scientific background
-Great effort has been exerted for the simulator to be as realistic as possible. To that goal, the project incorporates bibliography related to flight dynamics, physics modeling and sensor modeling. A congreggated document discussing the modeling of a fixed-wing UAV can be found in the [Modeling a Fixed-Wing UAV](https://github.com/Georacer/uav-modeling) Github project. It is a LaTeX project with a single .pdf output document.
+Great effort has been exerted for the simulator to be as realistic as possible. To that goal, the project incorporates bibliography related to flight dynamics, physics modeling and sensor modeling. A congreggated document discussing the modeling of a fixed-wing UAV can be found in the [*Modeling a Fixed-Wing UAV*](https://github.com/Georacer/uav-modeling) Github project. It is a LaTeX project with a single .pdf output document.
 Although `uav-modeling` is independent of `last-letter`, it will often be referred to in the documentation.
 
 ## Table of Contents
@@ -24,7 +24,7 @@ Although `uav-modeling` is independent of `last-letter`, it will often be referr
 - [Important Messages](#important-messages) -->
 
 - How to Run
-    - Launching and arguments
+    - [Launching and arguments](last_letter/doc/manual/launchingAndParams.md)
 	- Typical Scenarios
 		- [As Simulator for the ArduPlane SITL](last_letter/doc/manual/ArduPlane_SITL.md)
 
@@ -40,11 +40,6 @@ Although `uav-modeling` is independent of `last-letter`, it will often be referr
 <!-- - [License](#license) -->
 <!-- - [Contributors](#contributors) -->
 
-
-<!-- ## Compatibility
-
-This collection of packages is being developed and used under Linux Ubuntu 12.04 using ROS Hydro. -->
-
 <!-- ## Packages
 
 ### last_letter
@@ -58,3 +53,5 @@ The last_letter/launch file contains a few template .launch files which can be u
 ### RC Simulator
 
 For this scenario, you will need to have a joystick (or similar device visible to the "joy" ROS package) plugged in to your machine. You may need to configure the /dev/input/js* parameter to point to your controller. Running roslaunch last_letter launcher_ll.launch will start the simulator running the "last_letter" standard aircraft, visible in the rviz visualizer, under direct, manual user control. It will also open the "rqt_dashboard" plugin for rqt_gui, which contains virtual flight instruments. -->
+
+![last letter initial screen](figures/last_letter_init.png)
