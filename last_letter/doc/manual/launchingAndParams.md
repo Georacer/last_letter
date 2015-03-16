@@ -13,15 +13,17 @@ This will raise the simulation executable, the `rqt` avionics panel and the `rvi
 
 Arguments are passed to control the simulation behaviour and operational mode, with the syntax `<argname>:=<argvalue>`.7
 
-Available arguments are:
+###Available arguments are:
 
-**Mutually exclusive**
+**Operation mode arguments (mutually exclusive!)**
 
-    `manualMode`: **(default false)** Control the vehicle via full manual control, using a joystick or gamepad connected to your machine, which is read by the ROS core.
+`manualMode`: **(default false)** Control the vehicle via full manual control, using a joystick or gamepad connected to your machine, which is read by the ROS core.
 
-    `autoMode`: **(default false)** Insert a controller in the loop. Joystick commands are forwarded to the controller, while the controller output feeds the aircraft model inputs. This mode is experimental and not recommended.
+`autoMode`: **(default false)** Insert a controller in the loop. Joystick commands are forwarded to the controller, while the controller output feeds the aircraft model inputs. This mode is experimental and not recommended.
 
-    `ArduPlane`: **(default false)** Raise nodes which establish UDP connection with the ardupilot SITL and configure the aircraft inputs to be controlled by ArduPlane. It is recommended to not set this argument manually, but rather launch the ArduPlane SITL all in one go, by following [these instructions](ArduPlane_SITL.md).
+`ArduPlane`: **(default false)** Raise nodes which establish UDP connection with the ardupilot SITL and configure the aircraft inputs to be controlled by ArduPlane. It is recommended to not set this argument manually, but rather launch the ArduPlane SITL all in one go, by following [these instructions](ArduPlane_SITL.md).
+
+**Aircraft-related arguments**
 
 `uav_name`: **(default HCUAV)** The name of the UAV you are about to fly. This corresponds and must be identical to a folder in `last_letter/data/parameters/aircraft`. The configuration and specification files of the aircraft are found in this folder.
 
