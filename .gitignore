@@ -54,3 +54,7 @@ qtcreator-*
 
 # Ignore doxygen files. Each user can generate them for themselves
 /last_letter/doc/doxygen
+/last_letter_msgs/doc/doxygen
+/uav_utils/doc/doxygen
+/mathutils/doc/doxygen
+/rqt_dashboard/doc/doxygen

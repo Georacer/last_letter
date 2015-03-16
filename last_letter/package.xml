@@ -4,26 +4,17 @@
   <version>0.5.0</version>
   <description>The last_letter package</description>
 
-  <maintainer email="gzogop@mail.ntua.gr">George Zogopoulos Papaliakos</maintainer>
-  <author email="gzogop@mail.ntua.gr">George Zogopoulos Papaliakos</author>
-  <author>Panos Marantos</author>
+  <maintainer email="gzogop@mail.ntua.gr">George Zogopoulos-Papaliakos</maintainer>
 
   <license>MIT</license>
 
-  <url type="repository">https://github.com/Georacer/last_letter</url> 
+  <url type="repository">https://github.com/Georacer/last_letter</url>
 
-  <!-- The *_depend tags are used to specify dependencies -->
-  <!-- Dependencies can be catkin packages or system dependencies -->
-  <!-- Examples: -->
-  <!-- Use build_depend for packages you need at compile time: -->
-  <!--   <build_depend>message_generation</build_depend> -->
-  <!-- Use buildtool_depend for build tool packages: -->
-  <!--   <buildtool_depend>catkin</buildtool_depend> -->
-  <!-- Use run_depend for packages you need at runtime: -->
-  <!--   <run_depend>message_runtime</run_depend> -->
-  <!-- Use test_depend for packages you need only for testing: -->
-  <!--   <test_depend>gtest</test_depend> -->
+  <author email="gzogop@mail.ntua.gr">George Zogopoulos-Papaliakos</author>
+  <author email="marantos@mail.ntua.gr">Panos Marantos</author>
+
   <buildtool_depend>catkin</buildtool_depend>
+
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
@@ -31,20 +22,14 @@
   <build_depend>uav_utils</build_depend>
   <build_depend>mathutils</build_depend>
   <build_depend>joy</build_depend>
+  <build_depend>last_letter_msgs</build_depend>
+
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
-  <run_depend>std_msgs</run_depend>  
+  <run_depend>std_msgs</run_depend>
   <run_depend>uav_utils</run_depend>
   <run_depend>mathutils</run_depend>
   <run_depend>joy</run_depend>
+  <run_depend>last_letter_msgs</run_depend>
 
-
-  <!-- The export tag contains other, unspecified, tags -->
-  <export>
-    <!-- You can specify that this package is a metapackage here: -->
-    <!-- <metapackage/> -->
-
-    <!-- Other tools can request additional information be placed here -->
-  </export>
-  
 </package>

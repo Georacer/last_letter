@@ -4,69 +4,24 @@ project(mathutils)
 set (CMAKE_CXX_FLAGS "-Wall -DBT_USE_DOUBLE_PRECISION")
 
 ## Find catkin macros and libraries
-## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
-## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS tf geometry_msgs roscpp rospy sensor_msgs std_msgs)
-
 find_package (LAPACK REQUIRED)
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-
-## Uncomment this if the package has a setup.py. This macro ensures
-## modules and global scripts declared therein get installed
-## See http://ros.org/doc/groovy/api/catkin/html/user_guide/setup_dot_py.html
 catkin_python_setup()
-
-#######################################
-## Declare ROS messages and services ##
-#######################################
-
-## Generate messages in the 'msg' folder
-#add_message_files(
-#   FILES
-#   SimStates.msg
-# )
-
-## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
-
-## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs
-#   sensor_msgs
-#   std_msgs
-#)
 
 ###################################
 ## catkin specific configuration ##
 ###################################
-## The catkin_package macro generates cmake config files for your package
-## Declare things to be passed to dependent projects
-## LIBRARIES: libraries you create in this project that dependent projects also need
-## CATKIN_DEPENDS: catkin_packages dependent projects also need
-## DEPENDS: system dependencies of this project that dependent projects also need
+
 catkin_package(
    INCLUDE_DIRS include
-#  CATKIN_DEPENDS geometry_msgs roscpp rospy sensor_msgs std_msgs
-#   DEPENDS lm
-
 )
-
-#add_dependencies(ppc_safe ${PROJECT_NAME}_gencfg)
 
 ###########
 ## Build ##
 ###########
 
 ## Specify additional locations of header files
-## Your package locations should be listed before other locations
 include_directories(include
   ${catkin_INCLUDE_DIRS}
   ${LAPACK_INCLUDE_DIRS}
@@ -75,68 +30,19 @@ include_directories(include
 ## Declare a cpp library
 add_library(mathutils src/mathutils.cpp)
 
-## Declare a cpp executable
-# add_executable(helim_stm32f4_node src/helim_stm32f4_node.cpp)
-#add_executable(heli_sim_node src/sim_node.cpp)
-#add_executable(sensor_fusion2 src/nsr_node2.cpp)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(mathutils ROSDOC_MU)
-
 ## Specify libraries to link a library or executable target against
 target_link_libraries(mathutils ${LAPACK_LIBRARIES} ${catkin_LIBRARIES})
 
-## Generate Doxygen files
-	# add_custom_command(OUTPUT rosdoc_mu
-	# 	COMMAND rosdoc_lite $(rospack find mathutils) -o $(rospack find mathutils)/doc
-	# )
-	# add_custom_target(ROSDOC_MU DEPENDS rosdoc_mu)
+## Generate package documentation with rosdoc_lite
+execute_process(COMMAND rospack find mathutils
+	OUTPUT_VARIABLE MATHUTILS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+execute_process(COMMAND rosdoc_lite -o ${MATHUTILS_DIR}/doc/doxygen ${MATHUTILS_DIR})
 
 #############
 ## Install ##
 #############
 
-# all install targets should use catkin DESTINATION variables
-# See http://ros.org/doc/groovy/api/catkin/html/adv_user_guide/variables.html
-
-## Mark executable scripts (Python etc.) for installation
-## in contrast to setup.py, you can choose the destination
- install(PROGRAMS
-   bin/mathutils
-   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
-
-## Mark executables and/or libraries for installation
-# install(TARGETS helim_stm32f4 helim_stm32f4_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
-
-## Mark cpp header files for installation
-# install(DIRECTORY include/${PROJECT_NAME}/
-#   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-#   FILES_MATCHING PATTERN "*.h"
-#   PATTERN ".svn" EXCLUDE
-# )
-
-## Mark other files for installation (e.g. launch and bag files, etc.)
-# install(FILES
-#   # myfile1
-#   # myfile2
-#   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-# )
-
-#############
-## Testing ##
-#############
-
-## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_helim_stm32f4.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
-
-## Add folders to be run by python nosetests
-# catkin_add_nosetests(test)
+install(PROGRAMS
+bin/mathutils
+DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
