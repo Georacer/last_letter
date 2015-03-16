@@ -94,14 +94,14 @@ include_directories(
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
-	add_dependencies(uav_publisher ${catkin_EXPORTED_TARGETS})
-	add_dependencies(quat2euler ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(model ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(joy2chan ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(environment ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(uav_publisher last_letter_msgs_gencpp ${catkin_EXPORTED_TARGETS})
+	add_dependencies(quat2euler last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(model last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(joy2chan last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(environment last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 	add_dependencies(virtualJoy ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(autopilot_ll ${PROJECT_NAME}_generate_messages_cpp)
-	add_dependencies(autopilot_HCUAV ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(autopilot_ll last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+	add_dependencies(autopilot_HCUAV last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 	target_link_libraries(uav_publisher ${catkin_LIBRARIES})

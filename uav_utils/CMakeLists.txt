@@ -17,7 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
 	last_letter_msgs
 	)
 
-find_package (LAPACK REQUIRED)
+find_package(LAPACK REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -93,7 +93,7 @@ add_library(uav_utils src/uav_utils.cpp)
 ## as an example, message headers may need to be generated before nodes
 #add_dependencies(sensor_fusion nsr_generate_messages_cpp)
 # add_dependencies(uav_utils ${PROJECT_NAME}_generate_messages_cpp ROSDOC_UAVU)
-add_dependencies(uav_utils ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(uav_utils last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_utils ${LAPACK_LIBRARIES} ${catkin_LIBRARIES})

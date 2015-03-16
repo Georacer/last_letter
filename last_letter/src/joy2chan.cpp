@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 
-#include "last_letter_msgs/SimPWM.h"
+#include <last_letter_msgs/SimPWM.h>
 
 ros::Publisher pub;
 
