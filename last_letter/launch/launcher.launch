@@ -6,12 +6,14 @@
 	<arg name="autoMode" default="false"/>
 	<arg name="ArduPlane" default="false"/>
 	<arg name="uav_name" default="HCUAV"/>
+	<arg name="log" default="false"/>
 
 	<!-- Launch the simulator /-->
-	<include file="$(find last_letter)/launch/sim_HCUAV.launch" >
+	<include file="$(find last_letter)/launch/simulation.launch" >
 		<arg name="manualMode" value="$(arg manualMode)"/>
 		<arg name="autoMode" value="$(arg autoMode)"/>
 		<arg name="uav_name" value="$(arg uav_name)"/>
+		<arg name="log" value="$(arg log)"/>
 	</include>
 
 	<!-- ArduPlane SITL connection -->
