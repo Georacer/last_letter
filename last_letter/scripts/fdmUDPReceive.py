@@ -9,7 +9,7 @@ from geometry_msgs.msg import Vector3, Vector3Stamped
 import numpy as np
 import tf.transformations
 from mathutils import saturation, quat2Reb, Vector2Array
-from last_letter.msg import SimStates, SimPWM, Environment
+from last_letter_msgs.msg import SimStates, SimPWM, Environment
 
 from pymavlink import fgFDM
 import socket, struct, errno
