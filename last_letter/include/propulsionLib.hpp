@@ -79,3 +79,30 @@ public:
 	geometry_msgs::Vector3 getForce();
 	geometry_msgs::Vector3 getTorque();
 };
+
+// Electric hobby engine
+class ElectricEng : public Propulsion
+{
+public:
+	////////////////
+	// Variables //
+	////////////////
+	double omegaMin, omegaMax;
+	double deltat, propDiam, engInertia;
+	double Kv, Rm, Rs, I0, Cells;
+
+	//////////////
+	// Members //
+	//////////////
+	Polynomial * engPowerPoly, * npPoly, * propPowerPoly;
+
+	////////////////
+	// Functions //
+	////////////////
+	ElectricEng(ModelPlane *);
+	~ElectricEng();
+
+	void updateRadPS();
+	geometry_msgs::Vector3 getForce();
+	geometry_msgs::Vector3 getTorque();
+};

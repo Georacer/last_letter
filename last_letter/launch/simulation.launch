@@ -3,10 +3,10 @@
 <launch>
 
 	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
-	<arg name="manualMode"/>
-	<arg name="autoMode"/>
-	<arg name="uav_name"/>
-	<arg name="log"/>
+	<arg name="manualMode"/>	<!-- Connect model input with joystick -->
+	<arg name="autoMode"/>	<!-- Connect model input with a controller node -->
+	<arg name="uav_name"/>	<!-- uav_name paremter which selects aircraft data file -->
+	<arg name="log"/>	<!-- Enable recorder node for logging -->
 
 	<!-- Initialization of parameters -->
 	<group>

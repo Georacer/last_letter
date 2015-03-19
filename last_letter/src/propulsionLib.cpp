@@ -171,7 +171,7 @@ PistonEng::PistonEng(ModelPlane * parent) : Propulsion(parent)
 PistonEng::~PistonEng()
 {
 	delete npPoly;
-	// delete engPowerPoly;
+	// delete engPowerPoly; //@TODO examine if I need to uncomment this
 	delete propPowerPoly;
 }
 
@@ -233,6 +233,138 @@ geometry_msgs::Vector3 PistonEng::getForce()
 }
 
 geometry_msgs::Vector3 PistonEng::getTorque()
+{
+	if (isnan(wrenchProp.torque.x) || isnan(wrenchProp.torque.y) || isnan(wrenchProp.torque.z)) {
+		ROS_FATAL("State NaN in wrenchProp.torque");
+		ros::shutdown();
+	}
+
+	// Add torque to to force misalignment with CG
+	// r x F, where r is the distance from CoG to CoL
+	// Will potentially add the following code in the future, to support shift of CoG mid-flight
+	// XmlRpc::XmlRpcValue list;
+	// int i;
+	// if(!ros::param::getCached("motor/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/motor/CGOffset- in param server!"); ros::shutdown();}
+	// for (i = 0; i < list.size(); ++i) {
+	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+	// 	CGOffset[i]=list[i];
+	// }
+	wrenchProp.torque.x = wrenchProp.torque.x + CGOffset.y*wrenchProp.force.z - CGOffset.z*wrenchProp.force.y;
+	wrenchProp.torque.y = wrenchProp.torque.y - CGOffset.x*wrenchProp.force.z + CGOffset.z*wrenchProp.force.x;
+	wrenchProp.torque.z = wrenchProp.torque.z - CGOffset.y*wrenchProp.force.x + CGOffset.x*wrenchProp.force.y;
+
+	return wrenchProp.torque;
+}
+
+
+////////////////////////
+// Electric engine model
+////////////////////////
+
+// Constructor
+ElectricEng::ElectricEng(ModelPlane * parent) : Propulsion(parent)
+{
+	XmlRpc::XmlRpcValue list;
+	int i, length;
+	char s[100];
+	if(!ros::param::getCached("prop/propDiam", propDiam)) {ROS_FATAL("Invalid parameters for -propDiam- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached("motor/engInertia", engInertia)) {ROS_FATAL("Invalid parameters for -engInertia- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached("motor/Kv", Kv)) {ROS_FATAL("Invalid parameters for -Kv- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached("motor/Rm", Rm)) {ROS_FATAL("Invalid parameters for -Rm- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached("battery/Rs", Rs)) {ROS_FATAL("Invalid parameters for -Rs- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached("battery/Cells", Cells)) {ROS_FATAL("Invalid parameters for -Cells- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached("motor/I0", I0)) {ROS_FATAL("Invalid parameters for -I0- in param server!"); ros::shutdown();}
+	// Initialize RadPS limits
+	if(!ros::param::getCached("motor/RadPSLimits", list)) {ROS_FATAL("Invalid parameters for -RadPSLimits- in param server!"); ros::shutdown();}
+	ROS_ASSERT(list[0].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+	omegaMin = list[0];
+	omegaMax = list[1];
+
+	Factory factory;
+	// Create propeller efficiency polynomial
+	sprintf(s,"%s","prop/nCoeffPoly");
+	npPoly =  factory.buildPolynomial(s);
+	// Create propeller power polynomial
+	sprintf(s,"%s","prop/powerPoly");
+	propPowerPoly =  factory.buildPolynomial(s);
+
+	omega = omegaMin; // Initialize engine rotational speed
+
+	wrenchProp.force.x = 0.0;
+	wrenchProp.force.y = 0.0;
+	wrenchProp.force.z = 0.0;
+	wrenchProp.torque.x = 0.0;
+	wrenchProp.torque.y = 0.0;
+	wrenchProp.torque.z = 0.0;
+}
+
+// Destructor
+ElectricEng::~ElectricEng()
+{
+	delete npPoly;
+	delete propPowerPoly;
+}
+
+// Update motor rotational speed and calculate thrust
+void ElectricEng::updateRadPS()
+{
+	deltat = parentObj->input[2];
+
+	double Ei = omega/2/M_PI/Kv;
+	double Im = (Cells*4.0*deltat - Ei)/(Rs*deltat + Rm);
+	Im = std::max(Im,0.0); // Current cannot return to the ESC
+	double engPower = Ei*(Im - I0);
+
+	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
+	double npCoeff = npPoly->evaluate(advRatio);
+
+	wrenchProp.force.x = propPower*std::fabs(npCoeff/(parentObj->states.velocity.linear.x+1.0e-10)); // Added epsilon for numerical stability
+
+	// Constrain propeller force to +-5 times the aircraft weight
+	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 5.0*parentObj->kinematics.mass*9.81), -5.0*parentObj->kinematics.mass*9.81);
+	wrenchProp.torque.x = propPower / omega;
+	// We do have static friction now
+	// if (deltat < 0.01) {
+	// 	wrenchProp.force.x = 0;
+	// 	wrenchProp.torque.x = 0;
+	// } // To avoid aircraft rolling while on the ground, since we don't have static friction yet
+	wrenchProp.torque.y = 0.0;
+	wrenchProp.torque.z = 0.0;
+	// double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;
+	double deltaT = (engPower - propPower)/omega;
+	double omegaDot = 1/engInertia*deltaT;
+	omega += omegaDot*parentObj->dt;
+	omega = std::max(std::min(omega, omegaMax), omegaMin); // Constrain omega to working range
+
+	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
+
+	// Printouts
+	// std::cout << deltat << " ";
+	// std::cout << powerHP << " ";
+	// std::cout << engPower << " ";
+	// std::cout << propPower << " ";
+	// std:: cout << advRatio << " ";
+	// std::cout << npCoeff << " ";
+	// std::cout << wrenchProp.force.x << " ";
+	// std::cout << wrenchProp.torque.x << " ";
+	// std::cout << parentObj->kinematics.forceInput.x << " ";
+	// std::cout << omegaDot << " ";
+	// std::cout << omega;
+	// std::cout << std::endl;
+
+}
+
+geometry_msgs::Vector3 ElectricEng::getForce()
+{
+	if (isnan(wrenchProp.force.x) || isnan(wrenchProp.force.y) || isnan(wrenchProp.force.z)) {
+		ROS_FATAL("State NaN in wrenchProp.force");
+		ros::shutdown();
+	}
+	return wrenchProp.force;
+}
+
+geometry_msgs::Vector3 ElectricEng::getTorque()
 {
 	if (isnan(wrenchProp.torque.x) || isnan(wrenchProp.torque.y) || isnan(wrenchProp.torque.z)) {
 		ROS_FATAL("State NaN in wrenchProp.torque");

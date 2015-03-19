@@ -277,6 +277,9 @@ Propulsion * Factory::buildPropulsion(ModelPlane * parent)
 	case 2:
 		std::cout << "selecting piston engine" << std::endl;
 		return new PistonEng(parent);
+	case 3:
+		std::cout << "selecting electric engine" << std::endl;
+		return new ElectricEng(parent);
 	default:
 		ROS_FATAL("Error while constructing Beard motor");
 		ros::shutdown();
