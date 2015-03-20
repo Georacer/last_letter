@@ -11,7 +11,7 @@ roslaunch last_letter launch.launcher <args>
 ```
 This will raise the simulation executable, the `rqt` avionics panel and the `rviz` visualizer.
 
-Arguments are passed to control the simulation behaviour and operational mode, with the syntax `<argname>:=<argvalue>`.7
+Arguments are passed to control the simulation behaviour and operational mode, with the syntax `<argname>:=<argvalue>`.
 
 ###Available arguments are:
 
@@ -22,6 +22,10 @@ Arguments are passed to control the simulation behaviour and operational mode, w
 `autoMode`: **(default false)** Insert a controller in the loop. Joystick commands are forwarded to the controller, while the controller output feeds the aircraft model inputs. This mode is experimental and not recommended.
 
 `ArduPlane`: **(default false)** Raise nodes which establish UDP connection with the ardupilot SITL and configure the aircraft inputs to be controlled by ArduPlane. It is recommended to not set this argument manually, but rather launch the ArduPlane SITL all in one go, by following [these instructions](ArduPlane_SITL.md).
+
+**Logging**
+
+`log`: **(deault false)** Setting this to `true` will request ROS to log all of your messages in a [bag file](http://wiki.ros.org/Bags) and save them into the file `UAV_recording.bag` found in `~/.ros`
 
 **Aircraft-related arguments**
 

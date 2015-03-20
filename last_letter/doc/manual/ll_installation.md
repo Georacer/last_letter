@@ -5,13 +5,13 @@ If you have previous experience with ROS, installation is as simple as cloning t
 If you are a ROS novice, the following instructions will try to guide you through the process.
 
 ### ROS Version Restrictions
-Currently, `last_letter` is developed under ROS Hydro version. It is not guaranteed that it runs smoothly or at all on any other ROS version.
+Currently, `last_letter` is developed under ROS Indigo version. It is not guaranteed that it runs smoothly or at all on any other ROS version.
 
 ### Operating System Restrictions
-Since ROS Hyrdo is compatible only with Ubuntu 12.04, 12.10 and 13.04, you need an Ubuntu Linux machine running one of those Ubuntu versions. It is recommended that you use Ubuntu 12.04, since this is the platform where this package is developed right now.
+Since ROS Indigo is compatible only with Ubuntu 13.10 and 14.04, you need an Ubuntu Linux machine running one of those Ubuntu versions. It is recommended that you use Ubuntu 14.04, since this is the platform where this package is developed right now.
 
 ### ROS Installation
-Follow the [instructions on the ROS website](http://wiki.ros.org/hydro/Installation/Ubuntu) to install ROS Hydro in your machine.
+Follow the [instructions on the ROS website](http://wiki.ros.org/indigo/Installation/Ubuntu) to install ROS Indigo in your machine.
 
 ### Catkin Workspace Creation
 Afterwards, you need to create a ROS Workspace. This is the directory where custom software packages (which are not part of the official ROS repository) are created, copied or edited and this is where the ROS compiler (called `catkin` after ROS version Groovy) looks for your code.

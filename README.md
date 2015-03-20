@@ -13,7 +13,7 @@ Although `uav-modeling` is independent of `last-letter`, it will often be referr
 ## Table of Contents
 
 - [Compatibility](last_letter/doc/manual/compatibility.md)
-- [Installation](last_letter/doc/manual/ll_installation.md)
+- [Installation](last_letter/doc/manual/ll_installation.md) !joyNode!
 - [Updating]
 
 <!-- - [Packages](#packages)
@@ -34,6 +34,11 @@ Although `uav-modeling` is independent of `last-letter`, it will often be referr
 - Frames of Reference and Conventions
 
 <!-- - Logging -->
+
+<!-- Doxygen -->
+
+<!-- Tutorials -->
+    <!-- - Creating your own aircraft -->
 
 <!-- - [Environment Parameters](#environment-parameters) -->
 <!-- - [Controller Parameters](#controller-parameters) -->
