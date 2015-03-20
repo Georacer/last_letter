@@ -56,16 +56,16 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 	XmlRpc::XmlRpcValue list;
 	int i, j, points;
 	char paramMsg[25];
-	double temp[4];
+	double temp[6];
 	// Read contact points number from parameter server
 	if(!ros::param::getCached("airframe/contactPtsNo", contactPtsNo)) {ROS_FATAL("Invalid parameters for -/airframe/contactPtsNo- in param server!"); ros::shutdown();}
 	// Create an appropriately sized matrix to contain contact point information
 	pointCoords = (double*)malloc(sizeof(double) * contactPtsNo*3); // contact points coordinates in the body frame
 	materialIndex = (double*)malloc(sizeof(double) * contactPtsNo*1); // contact points material type index
-
+	springIndex = (double*)malloc(sizeof(double) * contactPtsNo*2); // contact points spring characteristics
 	// Set spring characteristics
-	kspring = 4570.0;
-	mspring = 1300.0;
+	// kspring = 4570.0;
+	// mspring = 1300.0;
 	len=0.2;
 
 	// Set coefficient of friction for each material
@@ -85,7 +85,9 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 		pointCoords[j] = temp[0]; // Save body frame contact point coordinates
 		pointCoords[j + contactPtsNo] = temp[1];
 		pointCoords[j + contactPtsNo*2] = temp[2];
-		materialIndex[j] = temp[3]; // And a separate contact point material index array
+		materialIndex[j] = temp[3]; // A separate contact point material index array
+		springIndex[j] = temp[4]; // And the spring constants
+		springIndex[j + contactPtsNo] = temp[5];
 	}
 
 	// Create and initialize spring contraction container
@@ -114,6 +116,7 @@ PanosContactPoints::~PanosContactPoints()
 	free(sppprev);
 	free(pointCoords);
 	free(materialIndex);
+	free(springIndex);
 }
 
 // Wrench calculation function
@@ -184,7 +187,8 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 			vpoint = Ve+vpoint; // Add vehicle velocity to find total contact point velocity
 
 			// Calculate spring force. Acts only upon Earth z-axis
-			tempE.force.z = -(kspring*spp[i] + mspring*spd[i]);
+			// tempE.force.z = -(kspring*spp[i] + mspring*spd[i]);
+			tempE.force.z = -(springIndex[i]*spp[i] + springIndex[i + contactPtsNo]*spd[i]);
 			// Make spring force negative or zero, as the spring lower end isn't fixed on the ground
 			if (tempE.force.z > 0)
 				tempE.force.z = 0;
