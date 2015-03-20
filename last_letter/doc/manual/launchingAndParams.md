@@ -1,4 +1,4 @@
-##Launching and Parameters
+##Launching and Arguments
 
 Prior to launching `last_letter` you may want to edit the parameter files for the aircraft you are about to use, as well as the `environment.yaml` file. These control the initial conditions of the simulation and are explained in the [parameters section](parameterFiles.md).
 If you don't know how to handle the parameter files, it is perfecty ok to leave them as they are for your first flights, to get a feel of the program.

@@ -9,7 +9,7 @@ sim_vehicle.sh -e --console
 ```
 
 This will run the ArduPlane code, MAVProxy and `last_letter` along with RViz all in one go. The RViz visualizer may take several seconds to start.
-This procedure will automatically invoke the `last_letter` launch file and set the `ArduPlane` parameter to `true` so that the communication nodes between `last_letter` and `ArduPlane`are raised.
+This procedure will automatically invoke the `last_letter` launch file and set the `ArduPlane` parameter to `true` so that the communication nodes between `last_letter` and `ArduPlane` are raised.
 If `last_letter` communicates with ArduPlane correctly, the MAVProxy console should display 3D satellite fix and track 10 satellites.
 
 You can issue commands or rc overrides using MAVProxy normally.

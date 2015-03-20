@@ -2,7 +2,7 @@
 
 Like any other ROS set of packages, `last_letter` and its companion library packages `uav_utils` and `math_utils` require the [Robotics Operating System](http://www.ros.org/) to be present on your system.
 If you have previous experience with ROS, installation is as simple as cloning the package files in your workspace.
-If you are a ROS novice, the following instructions will try to guide you throught the process.
+If you are a ROS novice, the following instructions will try to guide you through the process.
 
 ### ROS Version Restrictions
 Currently, `last_letter` is developed under ROS Hydro version. It is not guaranteed that it runs smoothly or at all on any other ROS version.
@@ -14,7 +14,7 @@ Since ROS Hyrdo is compatible only with Ubuntu 12.04, 12.10 and 13.04, you need 
 Follow the [instructions on the ROS website](http://wiki.ros.org/hydro/Installation/Ubuntu) to install ROS Hydro in your machine.
 
 ### Catkin Workspace Creation
-Afterward, you need to create a ROS Workspace. This is where custom software packages (which are not part of the official ROS repository) are created, copied or edited and this is where the ROS compiler (called `catkin` after ROS version Groovy) looks for your code.
+Afterwards, you need to create a ROS Workspace. This is the directory where custom software packages (which are not part of the official ROS repository) are created, copied or edited and this is where the ROS compiler (called `catkin` after ROS version Groovy) looks for your code.
 Follow [these instructions](http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment#Create_a_ROS_Workspace) to create your workspace. They instruct you to create your workspace under your home folder, but it can also be created elsewhere. Just be sure you have full rights to this folder, so a subfolder in your home folder is a good choice.
 Make sure `$ROS_PACKAGE_PATH` sees your `catkin_ws/src` folder.
 
@@ -40,7 +40,7 @@ In a console, run:
 ```bash
 roslaunch last_letter launcher.launch
 ```
-This should start the simulator, and open a 3D simulation environment using an application called RViz.
+This should start the simulator and open a 3D simulation environment using an application called RViz.
 `rqt_gui` application will start as well, where the avionics instruments are displayed.
 
 If everything went smoothly, you can close everything and proceed to the instruction manual to learn how to use the `last_letter` simulator.

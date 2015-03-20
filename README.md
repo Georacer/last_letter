@@ -33,6 +33,7 @@ Although `uav-modeling` is independent of `last-letter`, it will often be referr
 - [Parameter Files](last_letter/doc/manual/parameterFiles.md)
 - Frames of Reference and Conventions
 
+<!-- - Logging -->
 
 <!-- - [Environment Parameters](#environment-parameters) -->
 <!-- - [Controller Parameters](#controller-parameters) -->
