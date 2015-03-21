@@ -8,7 +8,7 @@ The `record` executable of the `rosbag` file is called in the `last_letter/launc
 ```
 , provided that the `log` argument of the launch file is set to `true`.
 
-This command, starts a [`rosbag/record`](http://wiki.ros.org/rosbag/Commandline#record) executable with the name `recorder`, with the arguments `-O UAV_recording.bag -a`.
+This command starts a [`rosbag/record`](http://wiki.ros.org/rosbag/Commandline#record) executable with the name `recorder`, with the arguments `-O UAV_recording.bag -a`.
 The arguments tells the executable to write a `.bag` file wit the name `UAV_recording.bag` and puts in there **all** of the topics which appear in the simulation.
 
 The `.bag` file is stored in the `~/.ros` directory.
