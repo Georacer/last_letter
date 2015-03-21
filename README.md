@@ -32,7 +32,7 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
 
 - [Frames of Reference and Conventions](last_letter/doc/manual/referenceFrames.md)
 - [Parameter Files](last_letter/doc/manual/parameterFiles.md)
-- [Logging](last_letter/doc/manua/logging.md)
+- [Logging](last_letter/doc/manual/logging.md)
 
 <!-- Doxygen -->
 

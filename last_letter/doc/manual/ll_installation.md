@@ -41,7 +41,7 @@ Compilation may take a while.
 rosdep update
 rosdep install --from-paths /path/to/catkin/ws/src/last_letter --ignore-src
 ```
-*thanks [gvdhoorn!](http://answers.ros.org/users/5184/gvdhoorn/)*
+*thanks [gvdhoorn!](http://answers.ros.org/question/205557/dependencies-on-user_packages/)*
 
 ### Testing everything is installed properly
 In a console, run:
