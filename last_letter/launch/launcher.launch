@@ -2,11 +2,13 @@
 <!--Simulation launcher for the HCAUV aircraft-->
 
 <launch>
+	<!-- Available arguments -->
 	<arg name="manualMode" default="false"/>
 	<arg name="autoMode" default="false"/>
 	<arg name="ArduPlane" default="false"/>
-	<arg name="uav_name" default="HCUAV"/>
+	<arg name="uav_name" default="skywalker_2013"/>
 	<arg name="log" default="false"/>
+	<!-- <arg name="groundCam" default="false"/> -->
 
 	<!-- Launch the simulator /-->
 	<include file="$(find last_letter)/launch/simulation.launch" >
@@ -25,6 +27,7 @@
 	<!-- Launch the visualizers /-->
 	<include file="$(find last_letter)/launch/visualization.launch" >
 		<arg name="uav_name" value="$(arg uav_name)" />
+		<!-- <arg name="groundCam" value="$(arg groundCam" /> -->
 	</include>
 
 </launch>

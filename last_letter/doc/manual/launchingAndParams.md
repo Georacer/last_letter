@@ -26,10 +26,10 @@ Arguments are passed to control the simulation behaviour and operational mode, w
 **Logging**
 
 `log`: **(deault false)** Setting this to `true` will request ROS to log all of your messages in a [bag file](http://wiki.ros.org/Bags) and save them into the file `UAV_recording.bag` found in `~/.ros`
+See also the [logging](logging.md) section.
 
 **Aircraft-related arguments**
 
 `uav_name`: **(default HCUAV)** The name of the UAV you are about to fly. This corresponds and must be identical to a folder in `last_letter/data/parameters/aircraft`. The configuration and specification files of the aircraft are found in this folder.
-
 
 [back to table of contents](../../../README.md)

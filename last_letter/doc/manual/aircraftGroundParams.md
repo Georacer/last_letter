@@ -8,7 +8,7 @@ The contact points are modeled as springs with damping to generate the normal fo
 `contactPtsNo`: The number of contact points you want to model on your aircraft.
 
 `contactPoint#`: (Where # is the increasing, 1-indexed id of your contact point) This is a list of 6 elements, containing information about the contact point.
-This information is.
+This information is:
     1. `x coordinate`: The x coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
     2. `y coordinate`: The y coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
     3. `z coordinate`: The z coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
@@ -16,6 +16,6 @@ This information is.
     5. `spring reaction constant`: The spring constant of the spring which will model the ground contact point.
     6. `spring damping constant`: The damping constant of the spring which will model the ground contact point.
 
-**Note:**Currently, the first 3 contact points are expected to be used for a tri-wheel configuration, with point no 3 being the steerable nose gear. Landing gear is planned to be further parametrized.
+**Note:**Currently, the first 3 contact points are expected to be used for a tri-wheel configuration, with point no3 being the steerable nose gear. Landing gear is planned to be further parametrized.
 
 [back to table of contents](../../../README.md)

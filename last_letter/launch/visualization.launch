@@ -3,6 +3,7 @@
 <launch>
 	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
 	<arg name="uav_name" />
+	<!-- <arg name="groundCam" /> -->
 
 	<!-- apply realtime/simulated clock option -->
 	<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
@@ -17,6 +18,8 @@
 		<!-- Place an upright camera transform broadcaster-->
 		<node pkg="tf" type="static_transform_publisher" name="NED2GrCamera" args="0.0 0.0 0.0 0.0 0.0 3.14 map ground_camera 1" />
 	</group>
+
+	<!-- <node if="$(arg groundCam)" pkg='last_letter' name="cameraController" type="cameraController" /> <!-- control the camera target point --> -->
 
 	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find last_letter)/data/last_letter.rviz" />
 	<node pkg="rqt_dashboard" type="dash_backend" name="dash_backend" ns="$(arg uav_name)" output="screen" />

@@ -2,7 +2,7 @@
 
 This set of parameters controls the behaviour of the environment model, mainly referring to the atmospheric model.
 
-###Barometric Parameters
+###Barometric parameters
 These values parametrise the atmosphere model. For more information, refer to section *Atmosphere Model* of [`Modeling a Fixed-Wing UAV`](https://github.com/Georacer/uav-modeling).
 
 `rho`: The air density at sea level (in kg/m^3).
@@ -11,7 +11,7 @@ These values parametrise the atmosphere model. For more information, refer to se
 
 `groundPres`: The pressure at initialization altitude (in mBar).
 
-###Statis Wind Parameters
+###Static Wind parameters
 By using these parameters you can control the direction and magnitude of the static wind. The wind shear model is exponential, with the velocity of the wind increasing with altitude, as explained in section `Wind Disturbances` of [`Modeling a Fixed-Wing UAV`](https://github.com/Georacer/uav-modeling).
 
 `windRef`: The velocity of the wind at the reference altitude (in m/s).
@@ -22,7 +22,7 @@ By using these parameters you can control the direction and magnitude of the sta
 
 `surfSmooth`: Hellmann exponent, regulating how fast wind picks up as altitude rises.
 
-###Wind Gusts Parameters
+###Wind gusts parameters
 Wind gusts are modelled in 'last_letter' using Dryden transfer functions. These stochastic transfer functions take in white noise of unit power and shape its powre spectrum to match that of real-world measurements. More documentation, indicative values and references can be found at section `Wind Disturbances` of [`Modeling a Fixed-Wing UAV`](https://github.com/Georacer/uav-modeling).
 Gusts
 

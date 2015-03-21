@@ -1,10 +1,10 @@
 ## Compatibility
 
-### ROS Version
+### ROS version
 This package was originally developed under ROS Hydro. As of March 20, 2014 (commit https://github.com/Georacer/last_letter/commit/3e1d32a9c3544fca77fdafe86dd21643f9d37577) development has migrated into ROS Indigo and this is the officially supported version.
 However, given that the migration from Hydro to Indigo required absolutely no changes in the source files, Hydro installations may very well work.
 
-### System Requirements
+### System requirements
 Since this is a native ROS Indigo package, there are restrictions in the OS you can install it. See [here](http://wiki.ros.org/indigo/Installation) for the OS's where ROS Indigo can be installed in.
 
 Mainly **Ubuntu Linux** 13.10 and 14.04 are supported by ROS Indigo.

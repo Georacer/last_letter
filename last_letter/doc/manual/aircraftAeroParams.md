@@ -12,10 +12,10 @@ There are 3 types of aerodynamics models available. These are selected with the 
 - 1: Standard Linear Aerodynamics - model with linear relation to its parameters. This is the most common and classic model found in bibliography, which models the reactions of the air using constant linear coefficients to the aircraft states.
 - 2: Spline Aero - derivative class from 1, which models the lift and drag coefficients as cubic splines. This is useful if you have extracted the lift and drag curves of your aircraft through experiments or FDM simulation but can't quite capture it in a simple parametric model. Cubic splines offer you the possibility to import your data in full resolution.
 
-### Standard Linear Aerodynamics Model
+### Standard linear aerodynamics model
 In general, none of the parameters corresponding to this aerodynamics model needs to be non-zero. By setting values to zero, the corresponding variable has no effect to the aircraft behaviour.
 
-#### Coefficient of Lift in Relation to Angle of Attack Parameters
+#### Coefficient of lift in relation to angle of attack parameters
 The coefficient of lift is modeled using primarily the lead of the book `Small Unmanned Aircraft: Theory and Practice, Randal W. Beard & Timothy W. McLain`. It is modeled as the weigthed sum of two parts, a linear function of angle-of-attack and the coefficient of lift of a flat plate. In the area withing the stall angle the first part dominates. Post-stall, the wing is modeled as a flat plate.
 ```C++
 double sigmoid = ( 1+exp(-M*(alpha-alpha0))+exp(M*(alpha+alpha0)) ) / (1+exp(-M*(alpha-alpha0))) / (1+exp(M*(alpha+alpha0)));
@@ -35,12 +35,12 @@ double result  = linear+flatPlate;
 
 `mcoeff`: A factor related to how abrupt the swith-over between the linear and flat-plate model is.
 
-#### Other Parameters Related to the Coefficient of Lift
+#### Other parameters related to the coefficient of lift
 `c_lift_q`: Pitch-rate to lift coefficient
 
 `c_lift_deltae`: Elevator deflection to lift coefficient
 
-#### Coefficient of Drag in Relation to Angle of Attack Parameters
+#### Coefficient of drag in relation to angle of attack parameters
 The coefficient of drag is modeled as the sum of the parasitic and the induced drag:
 ```
 double c_drag_a = c_drag_p + pow(c_lift_0+c_lift_a0*alpha,2)/(M_PI*oswald*AR);
@@ -48,10 +48,10 @@ double c_drag_a = c_drag_p + pow(c_lift_0+c_lift_a0*alpha,2)/(M_PI*oswald*AR);
 
 `c_drag_p`: The parasitic drag coefficient
 
-#### Other Parameters Related to the Coefficient of Drag
+#### Other parameters related to the coefficient of drag
 `c_drag_q`: Pitch-rate to drag coefficient
 
-#### Other Parameters of the Standard Linear Model
+#### Other parameters of the standard linear model
 `c_l_0`: Bias rolling moment coefficient
 
 `c_l_p`: Rolling moment coefficient in relation to roll rate
@@ -96,7 +96,7 @@ double c_drag_a = c_drag_p + pow(c_lift_0+c_lift_a0*alpha,2)/(M_PI*oswald*AR);
 
 `c_y_deltar`: Side force coefficient in relation to rudder deflection
 
-### Spline Aero Parameters
+### Spline aero parameters
 The following parameters are used to define polynomials or splines to describe the form of the coefficient of lift and drag as a function of angle-of-attack.
 
 `cLiftPoly/polyType`:(**integer**) The type of polynomial to be used for construcint coefficient of lift in relation to angle-of-attack. In this case valid options are 0 (1D polynomial) or 2 (cubic spline)
@@ -110,7 +110,7 @@ In the case where cubic spline is selected, the following parameters are require
 
 `cDragPoly/polyType`, `cDragPoly/breaksNo`, `cDragPoly/breaks`, `cDragPoly/coeffs`: Look above in the `cLiftPoly` parameters.
 
-### Other Parameters
+### Other parameters
 `s`: Wing surface area
 
 `b`: Aircraft wingspan (from tip to tip)

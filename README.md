@@ -8,39 +8,36 @@ This document serves as a table of contents for the documentation of this congre
 
 ## Scientific background
 Great effort has been exerted for the simulator to be as realistic as possible. To that goal, the project incorporates bibliography related to flight dynamics, physics modeling and sensor modeling. A congreggated document discussing the modeling of a fixed-wing UAV can be found in the [*Modeling a Fixed-Wing UAV*](https://github.com/Georacer/uav-modeling) Github project. It is a LaTeX project with a single .pdf output document.
-Although `uav-modeling` is independent of `last-letter`, it will often be referred to in the documentation.
+Although `uav-modeling` is independent of `last_letter`, it will often be referred to in the documentation.
 
 ## Table of Contents
 
 - [Compatibility](last_letter/doc/manual/compatibility.md)
-- [Installation](last_letter/doc/manual/ll_installation.md) !joyNode!
-- [Updating]
+- [Installation](last_letter/doc/manual/ll_installation.md)
 
-<!-- - [Packages](#packages)
-	- [last_letter](#last_letter)
-	- [uav_utils](#uav_utils)
-	- [mathutils](#mathutils)
-	- [rqt_dashboard](#rqt_dashboard)
+<!-- - [Updating] -->
+
+<!-- - [Included Packages](#packages)
+
 - [Important Messages](#important-messages) -->
 
 - How to Run
     - [Launching and arguments](last_letter/doc/manual/launchingAndParams.md)
 	- Typical Scenarios
 		- [As Simulator for the ArduPlane SITL](last_letter/doc/manual/ArduPlane_SITL.md)
+		- [As an RC Simulator](last_letter/doc/manual/RCSimulator.md)
 
-<!-- 		- [RC Simulator](#rc_simulator)
-		- [A Simple Autopilot](#a-simple-autopilot) -->
+<!-- [A Simple Autopilot](#a-simple-autopilot) -->
+
+- [Frames of Reference and Conventions](last_letter/doc/manual/referenceFrames.md)
 - [Parameter Files](last_letter/doc/manual/parameterFiles.md)
-- Frames of Reference and Conventions
-
-<!-- - Logging -->
+- [Logging](last_letter/doc/manua/logging.md)
 
 <!-- Doxygen -->
 
 <!-- Tutorials -->
-    <!-- - Creating your own aircraft -->
+<!-- - Creating your own aircraft -->
 
-<!-- - [Environment Parameters](#environment-parameters) -->
 <!-- - [Controller Parameters](#controller-parameters) -->
 <!-- - [Sensor Parameters](#sensor-parameters) -->
 <!-- - [License](#license) -->
