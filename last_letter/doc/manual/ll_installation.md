@@ -35,12 +35,13 @@ catkin_make #Compile the files
 ```
 Compilation may take a while.
 
-<!-- ### Installing dependencies
+### Installing dependencies
 `last_letter` requires various ROS packages to work properly. You should install them using the `rosdep` utility, typing
 ```bash
 rosdep update
-rosdep install last_letter
-``` -->
+rosdep install --from-paths /path/to/catkin/ws/src/last_letter --ignore-src
+```
+*thanks [gvdhoorn!](http://answers.ros.org/users/5184/gvdhoorn/)*
 
 ### Testing everything is installed properly
 In a console, run:

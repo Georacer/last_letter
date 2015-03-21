@@ -25,7 +25,8 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
     - [Launching and arguments](last_letter/doc/manual/launchingAndParams.md)
 	- Typical Scenarios
 		- [As Simulator for the ArduPlane SITL](last_letter/doc/manual/ArduPlane_SITL.md)
-		- [As an RC Simulator](last_letter/doc/manual/RCSimulator.md)
+
+<!-- - [As an RC Simulator](last_letter/doc/manual/RCSimulator.md) -->
 
 <!-- [A Simple Autopilot](#a-simple-autopilot) -->
 
