@@ -28,11 +28,12 @@ def state_callback(state):
 
 	stateStorage = state
 
+	fdm.set('cur_time', state.header.stamp.to_nsec(), units='seconds') # Add simulation timestamp !!!IN NANOSECONDS!!!
+
 	fdm.set('latitude', state.geoid.latitude, units='degrees')
 	fdm.set('longitude', state.geoid.longitude, units='degrees')
 	fdm.set('altitude', state.geoid.altitude, units='meters') # Should it be asl or initialized altitude?
 	# fdm.set('altitude', -state.pose.position.z, units='meters')
-	# rospy.logerr('Lat/Lon/Alt: %g/%g/%g',state.geoid.latitude, state.geoid.longitude, state.geoid.altitude)
 
 	fdm.set('v_north', state.geoid.velocity.x, units='mps')
 	fdm.set('v_east', state.geoid.velocity.y, units='mps')
@@ -99,9 +100,9 @@ def env_callback(environment):
 ## Setup
 ########
 
-jsb_in_address = "127.0.0.1:5504" # FDM data coming out of the ROS Simulator
-jsb_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-jsb_in.connect(interpret_address(jsb_in_address)) # Should I use connect?
+ros_in_address = "127.0.0.1:5504" # FDM data coming out of the ROS Simulator
+ros_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+ros_in.connect(interpret_address(ros_in_address)) # Should I use connect?
 
 fdm = fgFDM.fgFDM() # Create fdm objects
 
@@ -117,13 +118,17 @@ if __name__ == '__main__':
 		rospy.Subscriber('environment', Environment, env_callback, queue_size=1)
 		timer = rospy.Rate(1000)
 		stateStorage = SimStates()
+		rospy.loginfo('fdmUDPSend node up')
+
 
 		while not rospy.is_shutdown():
 			try:
-				jsb_in.send(fdm.pack())
+				# rospy.loginfo("trying to send fdm packet to runsim.sh")
+				ros_in.send(fdm.pack())
+				# rospy.loginfo('sent fdm packet to runsim.sh')
 			except socket.error as e:
 				if e.errno not in [ errno.ECONNREFUSED ]:
-					print "error on jsb_in sending"
+					print "error on ros_in sending"
 					raise
 			timer.sleep()
 

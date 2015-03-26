@@ -13,8 +13,7 @@
 		int i;
 
 		grav0 = last_letter_msgs::Geoid::EARTH_grav;
-		if(!ros::param::getCached("simRate", simRate)) {ROS_FATAL("Invalid parameters for -/simRate- in param server!"); ros::shutdown();}
-		dt = 1.0/simRate;
+		if(!ros::param::getCached("/world/deltaT", dt)) {ROS_FATAL("Invalid parameters for -deltaT- in param server!"); ros::shutdown();}
 		if(!ros::param::getCached("/environment/Dryden/use", allowTurbulence)) {ROS_FATAL("Invalid parameters for -/environment/Dryden/use- in param server!"); ros::shutdown();}
 
 		//initialize atmosphere stuff
@@ -50,9 +49,6 @@
 	//Read input states and publish environment data
 	void environmentModel::callback(const last_letter_msgs::SimStates::ConstPtr& InpStates)
 	{
-		//if (firstcall)
-		//	dt=1.0/simRate;
-
 		states = *InpStates;
 		calcTemp(); //Run 1st
 		calcGrav();
@@ -62,9 +58,6 @@
 		calcGrav();
 		environment.header.stamp = ros::Time::now();
 		env_pub.publish(environment);
-		dt = (ros::Time::now() - tprev).toSec();
-		tprev = ros::Time::now();
-
 	}
 
 	/////////////////////////////////////
@@ -75,10 +68,10 @@
 		geometry_msgs::Vector3 airspeed;
 		double Va, input, temp[2];
 
-		if (dt > 2/simRate)
-		{
-			dt = 2/simRate;
-		} //Compensate for possible transient frame drops
+		// if (dt > 2/simRate)
+		// {
+		// 	dt = 2/simRate;
+		// } //Compensate for possible transient frame drops
 
 		//calculate bias wind
 		quat2rotmtx(states.pose.orientation, Reb);
@@ -194,10 +187,7 @@ int main(int argc, char **argv)
 	ros::Subscriber sub = n.subscribe("states",1,&environmentModel::callback, &env);
 	env.env_pub = n.advertise<last_letter_msgs::Environment>("environment",1);
 
-	ros::Duration(3).sleep(); //wait for other nodes to get raised
-	//double simRate;
-	//ros::param::get("sim ",simRate); //frame rate in Hz
-	//ros::Rate spinner(simRate);
+	ros::WallDuration(3).sleep(); //wait for other nodes to get raised
 
 	ROS_INFO("environmentNode up");
 	env.tprev = ros::Time::now();

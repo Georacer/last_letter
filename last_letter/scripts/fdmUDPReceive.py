@@ -50,7 +50,7 @@ if __name__ == '__main__':
 	try:
 		rospy.init_node('fdmUDPReceive')
 		# pub = rospy.Publisher('/fw1/ctrlPWM',SimPWM)
-		pub = rospy.Publisher('ctrlPWM',SimPWM)
+		pub = rospy.Publisher('ctrlPWM',SimPWM, queue_size=10)
 
 		timer = rospy.Rate(1000)
 

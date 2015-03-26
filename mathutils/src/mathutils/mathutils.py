@@ -5,7 +5,6 @@ import sys
 import rospy
 import numpy as np
 from math import floor, exp, sqrt, atan2, sin, pi, asin, cos
-import geomag
 from geometry_msgs.msg import Point, Vector3, Quaternion
 
 def block_diag(*arrs):
@@ -33,7 +32,7 @@ def block_diag(*arrs):
         c += cc
     return out
 
-def sign(x): 
+def sign(x):
     return 1 if x >= 0 else -1
 
 def Vector2Array(vector):
@@ -43,7 +42,7 @@ def saturation(val,minval,maxval):
 	return max(minval,min(val,maxval))
 
 def quat_normalize(q):
-	q1=Quaternion()  	
+	q1=Quaternion()
   	qnorm = sqrt(q.w*q.w + q.x*q.x + q.y*q.y + q.z*q.z)
   	q1.w = q.w/qnorm
  	q1.x = q.x/qnorm
@@ -59,7 +58,7 @@ def vectornorm(a,b):
 	return sqrt(cx*cx+cy*cy+cz*cz)
 
 def quat_inverse (q):
-	q_inv=Quaternion() 
+	q_inv=Quaternion()
 	norm = sqrt(q.w*q.w + q.x*q.x + q.y*q.y + q.z*q.z)
   	q_inv.w = +q.w / norm
   	q_inv.x = -q.x / norm
@@ -69,7 +68,7 @@ def quat_inverse (q):
 	return q_inv
 
 def quat_product (qa,qb):
-	qc=Quaternion() 
+	qc=Quaternion()
   	qc.w = qa.w*qb.w - (qa.x*qb.x + qa.y*qb.y + qa.z*qb.z)
   	qc.x = (qa.w*qb.x + qa.x*qb.w + qa.y*qb.z - qa.z*qb.y)
   	qc.y = (qa.w*qb.y - qa.x*qb.z + qa.y*qb.w + qa.z*qb.x)
@@ -91,7 +90,7 @@ def quat2Reb(quat):
   	rotmtx[2][0] = 2.0*(quat.x*quat.z - quat.w*quat.y)
   	rotmtx[2][1] = 2.0*(quat.w*quat.x + quat.y*quat.z)
   	rotmtx[2][2] = quat.w*quat.w - quat.x*quat.x - quat.y*quat.y + quat.z*quat.z
-	
+
 	return rotmtx
 
 def euler2Reb(euler):
@@ -117,10 +116,10 @@ def euler2Reb(euler):
 
 def quat2euler2(q):
 	euler=Vector3()
-	q01 = q.w*q.x	
-	q02 = q.w*q.y	
+	q01 = q.w*q.x
+	q02 = q.w*q.y
 	q03 = q.w*q.z
-	q11 = q.x*q.x	
+	q11 = q.x*q.x
 	q12 = q.x*q.y
 	q13 = q.x*q.z
 	q22 = q.y*q.y
@@ -129,7 +128,7 @@ def quat2euler2(q):
   	euler.z = atan2 (2.0 * (q03 + q12), 1.0 - 2.0 * (q22 - q33))
   	if euler.z<0.0:
    		euler.z+=2.0*pi
-  
+
 	euler.y = asin (2.0 * (q02 - q13))
  	euler.x = atan2 (2.0 * (q01 + q23), 1.0 - 2.0 * (q11 + q22))
 

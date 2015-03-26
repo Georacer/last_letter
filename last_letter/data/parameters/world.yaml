@@ -1,3 +1,12 @@
 #Global Miscellaneous Parameters
 
+#Simulation calculation rate (frame rate)
+/world/simRate: 1000
+
+#Simulation time-step
+/world/deltaT: 0.001
+
+#Simulation time controls
+/world/timeControls: 0
+
 /world/integratorType: 0

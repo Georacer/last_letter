@@ -41,7 +41,7 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
 
 <!-- - [Controller Parameters](#controller-parameters) -->
 <!-- - [Sensor Parameters](#sensor-parameters) -->
-<!-- - [License](#license) -->
+
 <!-- - [Contributors](#contributors) -->
 
 <!-- ## Packages
@@ -57,6 +57,9 @@ The last_letter/launch file contains a few template .launch files which can be u
 ### RC Simulator
 
 For this scenario, you will need to have a joystick (or similar device visible to the "joy" ROS package) plugged in to your machine. You may need to configure the /dev/input/js* parameter to point to your controller. Running roslaunch last_letter launcher_ll.launch will start the simulator running the "last_letter" standard aircraft, visible in the rviz visualizer, under direct, manual user control. It will also open the "rqt_dashboard" plugin for rqt_gui, which contains virtual flight instruments. -->
+
+##License
+The `last_letter` software project, which is a collection of ROS packages, uses the [GPLv3 license](http://choosealicense.com/licenses/gpl-3.0/).
 
 ##Screenshots
 ####Avionics panel and visualization of an aircraft pre-flight

@@ -7,6 +7,7 @@
 #include <geometry_msgs/WrenchStamped.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Quaternion.h>
+#include <rosgraph_msgs/Clock.h>
 #include <cstdlib>
 #include <math.h>
 

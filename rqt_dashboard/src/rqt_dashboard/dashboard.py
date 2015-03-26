@@ -34,7 +34,7 @@ class DashboardGrid(QtGui.QWidget):
 		self.commands.altitude = -initPos[-1]
 		initVa = rospy.get_param('init/velLin',[0,0,0])
 		self.commands.airspeed = math.sqrt(initVa[0]*initVa[0] + initVa[1]*initVa[1] + initVa[2]*initVa[2])
-		self.pub = rospy.Publisher('refCommands', RefCommands)
+		self.pub = rospy.Publisher('refCommands', RefCommands, queue_size=1)
 		self.pubTimer = QtCore.QTimer()
 		self.pubTimer.timeout.connect(self.publishCommands)
 		self.pubTimer.start(1000)

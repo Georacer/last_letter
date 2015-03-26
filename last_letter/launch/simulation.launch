@@ -2,7 +2,6 @@
 
 <launch>
 
-	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
 	<arg name="manualMode"/>	<!-- Connect model input with joystick -->
 	<arg name="autoMode"/>	<!-- Connect model input with a controller node -->
 	<arg name="uav_name"/>	<!-- uav_name paremter which selects aircraft data file -->
@@ -10,8 +9,6 @@
 
 	<!-- Initialization of parameters -->
 	<group>
-		<!-- Select real/simulation Clock -->
-		<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
 		<!-- Load environmental parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/environment.yaml" />
 		<!-- Load global parameters -->
@@ -36,7 +33,7 @@
 		<!-- Raising core nodes -->
 		<group>
 			<node if="$(arg log)" pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag -a"/> <!-- topic activity recorder node -->
-			<node if="$(arg clockSim)" name="clock" pkg="last_letter" type="clock.py"/>
+			<node pkg="last_letter" name="clock" type="simClock" output="screen"/>
 			<node pkg="last_letter" name="plane_model" type="model" output="screen">
 				<remap if="$(arg manualMode)" from="ctrlPWM" to="rawPWM"/>
 			</node>
@@ -65,12 +62,12 @@
 		<!-- Raising controller nodes -->
 		<group if="$(arg autoMode)">
 			<rosparam command="load" file="$(find last_letter)data/parameters/controllers/controller_HCUAV.yaml" />
-				<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
+			<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
 		</group>
 
 		<!-- Input nodes -->
-		<group>
-<!--			<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
+		<group if="$(arg manualMode)">
+<!--		<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
 			<node pkg="joy" type="joy_node" name="joystick" output="screen" >
 				<param name="dev" value="/dev/input/js0" />
 				<param name="deadzone" value="0.01" />

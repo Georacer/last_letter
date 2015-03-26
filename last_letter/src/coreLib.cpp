@@ -11,7 +11,7 @@ using namespace std;
 ModelPlane::ModelPlane (ros::NodeHandle n) :
 kinematics(this), dynamics(this), airdata(this)
 {
-	initTime = -1;
+	if(!ros::param::getCached("/world/deltaT", dt)) {ROS_FATAL("Invalid parameters for -deltaT- in param server!"); ros::shutdown();}
 	init();
 	tprev = ros::Time::now();
 	states.header.stamp = tprev;
@@ -112,23 +112,16 @@ void ModelPlane::init()
 //Make one step of the plane simulation
 void ModelPlane::step(void)
 {
-	if (initTime > 0) {
-		dt = (ros::Time::now() - tprev).toSec();
-		}
-	else {
-		if(!ros::param::getCached("simRate", dt)) {ROS_FATAL("Invalid parameters for -simRate- in param server!"); ros::shutdown();}
-		dt = 1/dt;
-		initTime = 1;
-	}
-	tprev = ros::Time::now();
-	states.header.stamp = tprev;
-
 	// Perform step actions serially
 	dynamics.propulsion->updateRadPS();
 	kinematics.forceInput = dynamics.getForce();
 	kinematics.torqueInput = dynamics.getTorque();
 	kinematics.calcDerivatives();
 	kinematics.integrator->propagation();
+
+	tprev = ros::Time::now();
+	states.header.stamp = tprev;
+
 	airdata.calcAirData();
 	//publish results
 	pubState.publish(states);

@@ -10,6 +10,9 @@
 	<arg name="log" default="false"/>
 	<!-- <arg name="groundCam" default="false"/> -->
 
+	<!-- Enable simulation clock -->
+	<param name="use_sim_time" type="bool" value="true" />
+
 	<!-- Launch the simulator /-->
 	<include file="$(find last_letter)/launch/simulation.launch" >
 		<arg name="manualMode" value="$(arg manualMode)"/>
@@ -20,8 +23,9 @@
 
 	<!-- ArduPlane SITL connection -->
 	<group if="$(arg ArduPlane)" ns="$(arg uav_name)">
-		<node pkg="last_letter" type="fdmUDPSend.py" name="fdmUDPSend" />
-		<node pkg="last_letter" type="fdmUDPReceive.py" name="fdmUDPReceive" />
+		<node pkg="last_letter" type="clock" name="simClock" output="screen"/>
+		<node pkg="last_letter" type="fdmUDPSend.py" name="fdmUDPSend"  output="screen"/>
+		<node pkg="last_letter" type="fdmUDPReceive.py" name="fdmUDPReceive"  output="screen"/>
 	</group>
 
 	<!-- Launch the visualizers /-->
