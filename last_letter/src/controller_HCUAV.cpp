@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "controlNode");
 	ros::NodeHandle n;
 
-	ros::Duration(3).sleep(); //wait for other nodes to get raised
+	ros::WallDuration(3).sleep(); //wait for other nodes to get raised
 	double ctrlRate;
 	ros::param::get("ctrlRate",ctrlRate); //frame rate in Hz
 	ros::Rate spinner(ctrlRate);

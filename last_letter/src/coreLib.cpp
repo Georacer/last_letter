@@ -223,7 +223,7 @@ Integrator * Factory::buildIntegrator(ModelPlane * parent)
 		std::cout << "selecting Forward Euler" << std::endl;
 		return new ForwardEuler(parent);
 	default:
-		ROS_FATAL("Error while constructing integrator");
+		ROS_FATAL("Invalid integrator type!");
 		ros::shutdown();
 		break;
 	}

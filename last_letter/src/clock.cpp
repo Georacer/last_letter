@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 	pub = n.advertise<rosgraph_msgs::Clock>("/clock",1000);
 	sub = n.subscribe("ctrlPWM", 100, controlsCallback);
 
-	ros::WallDuration(3).sleep(); //wait for other nodes to get raised
+	ros::WallDuration(5).sleep(); //wait for other nodes to get raised
 	double simRate;
 	ros::param::get("/world/simRate",simRate); //frame rate in Hz
 	double deltaT;
@@ -58,6 +58,7 @@ int main(int argc, char **argv)
 	{
 		ROS_INFO("Using default real-time simulation clock");
 		sub = n.subscribe("states", 100, stateCallback);
+		ros::WallDuration(3).sleep(); //wait for other nodes to get raised
 		simClock.clock = simTime;
 		pub.publish(simClock);
 		while (ros::ok())

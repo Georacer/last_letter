@@ -25,9 +25,9 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("/clock",1000, stepCallback);
 	uav = new ModelPlane(n); //Create a ModelPlane passing the nodehandle for subscriptions & publicatons
-	ROS_INFO("simNode up");
 
 	ros::WallDuration(3).sleep(); //wait for other nodes to get raised
+	ROS_INFO("simNode up");
 
 	while (ros::ok())
 	{

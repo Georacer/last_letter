@@ -7,6 +7,9 @@
 /world/deltaT: 0.001
 
 #Simulation time controls
-/world/timeControls: 0
+# 0 : default real-time simulation clock
+# 1 : controls-triggered simulation clock
+# 2 : free-spinning simulation clock
+/world/timeControls: 1
 
 /world/integratorType: 0
