@@ -21,12 +21,12 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
 
 - [Important Messages](#important-messages) -->
 
+- [Configuring your input device](last_letter/doc/manual/RCCal.md)
 - How to Run
     - [Launching and arguments](last_letter/doc/manual/launchingAndParams.md)
 	- Typical Scenarios
-		- [As Simulator for the ArduPlane SITL](last_letter/doc/manual/ArduPlane_SITL.md)
-
-<!-- - [As an RC Simulator](last_letter/doc/manual/RCSimulator.md) -->
+		- [As simulator for the ArduPlane SITL](last_letter/doc/manual/ArduPlane_SITL.md)
+        - [As an RC simulator](last_letter/doc/manual/RCSimulator.md)
 
 <!-- [A Simple Autopilot](#a-simple-autopilot) -->
 
@@ -52,11 +52,7 @@ This is the core package, containing the physics and kinematics simulator and co
 
 <!-- ## How to Run
 
-The last_letter/launch file contains a few template .launch files which can be used to raise multiple nodes while reading from several parameter files of your choice. Consult them in order to build your own .launch files. The proposed structure is to split the simulation and visualization launch files, since these two functions are functionally independent anyway.
-
-### RC Simulator
-
-For this scenario, you will need to have a joystick (or similar device visible to the "joy" ROS package) plugged in to your machine. You may need to configure the /dev/input/js* parameter to point to your controller. Running roslaunch last_letter launcher_ll.launch will start the simulator running the "last_letter" standard aircraft, visible in the rviz visualizer, under direct, manual user control. It will also open the "rqt_dashboard" plugin for rqt_gui, which contains virtual flight instruments. -->
+The last_letter/launch file contains a few template .launch files which can be used to raise multiple nodes while reading from several parameter files of your choice. Consult them in order to build your own .launch files. The proposed structure is to split the simulation and visualization launch files, since these two functions are functionally independent anyway. -->
 
 ##License
 The `last_letter` software project, which is a collection of ROS packages, uses the [GPLv3 license](http://choosealicense.com/licenses/gpl-3.0/).

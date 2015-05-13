@@ -13,6 +13,7 @@ The main categories of parameters are the following:
     - [ground reactions](aircraftGroundParams.md)
     - [dashboard](aircraftDashParams.md)
     - There is also a *urdf* folder in each aircraft folder, which contains the visual 3D model file and the *.urdf* file which handles it. More information on this folder will be given in another tutorial.
+- [**HID**](HIDParams.md)
 - [**environment**](environmentParams.md)
 - [**world**](worldParams.md)
 

@@ -145,7 +145,7 @@ void ModelPlane::getInput(last_letter_msgs::SimPWM inputMsg)
 	input[5] = (double)(inputMsg.value[5]-1000)/1000;
 	// std::cout << input[5] << ',';
 	// std::cout << std::endl;
-	if (inputMsg.value[9] > 1500) {
+	if (inputMsg.value[10] > 1500) { // Reset the simulation upon PWM command
 		init();
 	}
 }
