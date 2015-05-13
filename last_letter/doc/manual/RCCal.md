@@ -62,7 +62,7 @@ The input device configuration procedure is complete.
 ### Supported devices
 So far the following devices have been successfuly tested with `last_letter`:
 * Microsoft SideWinder 2 joystick
-![MS SideWinder Joy](figures/microsoftjoy1.jpg){ width: 600px; }
+![MS SideWinder Joy](figures/microsoftjoy1.jpg|width=600px)
 * E-Sky 0905A USB Transmitter
 ![E-Sky 0905A](figures/e-sky_0905a.jpg){ width: 600px; }
 * Digital Element GM-400
