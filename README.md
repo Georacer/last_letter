@@ -14,7 +14,6 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
 
 - [Compatibility](last_letter/doc/manual/compatibility.md)
 - [Installation](last_letter/doc/manual/ll_installation.md)
-
 - [Updating](last_letter/doc/manual/updating.md)
 
 <!-- - [Included Packages](#packages)
