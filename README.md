@@ -15,7 +15,7 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
 - [Compatibility](last_letter/doc/manual/compatibility.md)
 - [Installation](last_letter/doc/manual/ll_installation.md)
 
-<!-- - [Updating] -->
+- [Updating](last_letter/doc/manual/updating.md)
 
 <!-- - [Included Packages](#packages)
 
@@ -42,17 +42,13 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
 <!-- - [Controller Parameters](#controller-parameters) -->
 <!-- - [Sensor Parameters](#sensor-parameters) -->
 
-<!-- - [Contributors](#contributors) -->
+- [Contributors](contributors.md)
 
 <!-- ## Packages
 
 ### last_letter
 
 This is the core package, containing the physics and kinematics simulator and controller nodes. -->
-
-<!-- ## How to Run
-
-The last_letter/launch file contains a few template .launch files which can be used to raise multiple nodes while reading from several parameter files of your choice. Consult them in order to build your own .launch files. The proposed structure is to split the simulation and visualization launch files, since these two functions are functionally independent anyway. -->
 
 ##License
 The `last_letter` software project, which is a collection of ROS packages, uses the [GPLv3 license](http://choosealicense.com/licenses/gpl-3.0/).
