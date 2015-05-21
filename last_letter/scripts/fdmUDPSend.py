@@ -28,7 +28,7 @@ def state_callback(state):
 
 	stateStorage = state
 
-	fdm.set('cur_time', state.header.stamp.to_nsec(), units='seconds') # Add simulation timestamp !!!IN NANOSECONDS!!!
+	# fdm.set('cur_time', state.header.stamp.to_nsec(), units='seconds') # Add simulation timestamp !!!IN NANOSECONDS!!!
 
 	fdm.set('latitude', state.geoid.latitude, units='degrees')
 	fdm.set('longitude', state.geoid.longitude, units='degrees')
