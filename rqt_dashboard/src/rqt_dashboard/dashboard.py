@@ -22,7 +22,7 @@ class DashboardGrid(QtGui.QWidget):
 		self.setWindowTitle('UAV Dashboard')
 		self.setAutoFillBackground(True)
 
-		prefix = '{}dashboard/'.format(rospy.get_namespace())
+		prefix = '{}'.format(rospy.get_namespace())
 		rospack = rospkg.RosPack()
 		filename =  rospack.get_path('last_letter') + '/data/parameters/aircraft' + rospy.get_namespace() + 'dashboard.yaml'
 		data = yaml.load(open(filename).read())

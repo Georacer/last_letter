@@ -1,6 +1,6 @@
 # Yaw gauge
 Gauge1:
-    topic: euler/z
+    topic: dashboard/euler/z
     length: 360.0
     end_angle: -90.0
     min: -180.0
@@ -14,7 +14,7 @@ Gauge1:
 
 # Roll gauge
 Gauge2:
-    topic: euler/x
+    topic: dashboard/euler/x
     length: 360.0
     end_angle: -90.0
     min: -180.0
@@ -28,7 +28,7 @@ Gauge2:
 
 # Pitch gauge
 Gauge3:
-    topic: euler/y
+    topic: dashboard/euler/y
     length: 180.0
     end_angle: 90.0
     min: -90.0
@@ -42,7 +42,7 @@ Gauge3:
 
 # Airspeed gauge
 Gauge4:
-    topic: airspeed
+    topic: dashboard/airspeed
     length: 300.0
     end_angle: -60.0
     min : 0.0
@@ -56,7 +56,7 @@ Gauge4:
 
 # Climb rate gauge
 Gauge5:
-    topic: climbRate
+    topic: dashboard/climbRate
     length: 180.0
     end_angle: 90.0
     min : -10.0
@@ -70,7 +70,7 @@ Gauge5:
 
 # Altitude gauge
 Gauge6:
-    topic: altitude
+    topic: dashboard/altitude
     length: 360.0
     end_angle: -90.0
     min : 0.0
@@ -84,7 +84,7 @@ Gauge6:
 
 # Alpha gauge
 Gauge7:
-    topic: alpha
+    topic: dashboard/alpha
     length: 180.0
     end_angle: 90.0
     min : -90.0
@@ -98,7 +98,7 @@ Gauge7:
 
 # Beta gauge
 Gauge8:
-    topic: beta
+    topic: dashboard/beta
     length: 180.0
     end_angle: 0.0
     min : -90.0
@@ -112,7 +112,7 @@ Gauge8:
 
 # Rotorspeed gauge
 Gauge9:
-    topic: rotorspeed
+    topic: dashboard/rotorspeed
     length: 300.0
     end_angle: -60.0
     min : 0.0
