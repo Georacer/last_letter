@@ -179,16 +179,22 @@ PistonEng::~PistonEng()
 void PistonEng::updateRadPS()
 {
 	deltat = parentObj->input[2];
+	rho = parentObj->environment.density;
 
 	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
 	double engPower = deltat * powerHP * 745.7; // Calculate current engine power
 
 	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
 	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
 	double npCoeff = npPoly->evaluate(advRatio);
-
 	// wrenchProp.force.x = propPower*std::fabs(npCoeff)/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
 	wrenchProp.force.x = propPower*std::fabs(npCoeff/(parentObj->states.velocity.linear.x+1.0e-10)); // Added epsilon for numerical stability
+
+	double fadeFactor = (exp(-parentObj->states.velocity.linear.x*3/12));
+	double staticThrust = 0.9*fadeFactor*pow(M_PI/2.0*propDiam*propDiam*rho*engPower*engPower,1.0/3); //static thrust fades at 5% at 12m/s
+	// ROS_INFO("engPower: %g, staticThrust: %g, regForce: %g", engPower, staticThrust, wrenchProp.force.x);
+	wrenchProp.force.x = wrenchProp.force.x + staticThrust;
 
 	// Constrain propeller force to +-2 times the aircraft weight
 	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 2.0*parentObj->kinematics.mass*9.81), -2.0*parentObj->kinematics.mass*9.81);
@@ -196,7 +202,7 @@ void PistonEng::updateRadPS()
 	if (deltat < 0.01) {
 		wrenchProp.force.x = 0;
 		wrenchProp.torque.x = 0;
-	} // To avoid aircraft rolling while on the ground, since we don't have static friction yet
+	} // To avoid aircraft rolling and turning on the ground while throttle is off
 	wrenchProp.torque.y = 0.0;
 	wrenchProp.torque.z = 0.0;
 	// double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;
@@ -309,6 +315,8 @@ ElectricEng::~ElectricEng()
 void ElectricEng::updateRadPS()
 {
 	deltat = parentObj->input[2];
+	rho = parentObj->environment.density;
+
 
 	double Ei = omega/2/M_PI/Kv;
 	double Im = (Cells*4.0*deltat - Ei)/(Rs*deltat + Rm);
@@ -316,19 +324,23 @@ void ElectricEng::updateRadPS()
 	double engPower = Ei*(Im - I0);
 
 	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	// advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
 	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
 	double npCoeff = npPoly->evaluate(advRatio);
 
 	wrenchProp.force.x = propPower*std::fabs(npCoeff/(parentObj->states.velocity.linear.x+1.0e-10)); // Added epsilon for numerical stability
 
+	double fadeFactor = (exp(-parentObj->states.velocity.linear.x*3/12));
+	double staticThrust = 0.9*fadeFactor*pow(M_PI/2.0*propDiam*propDiam*rho*engPower*engPower,1.0/3); //static thrust fades at 5% at 12m/s
+	wrenchProp.force.x = wrenchProp.force.x + staticThrust;
+
 	// Constrain propeller force to +-5 times the aircraft weight
 	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 5.0*parentObj->kinematics.mass*9.81), -5.0*parentObj->kinematics.mass*9.81);
 	wrenchProp.torque.x = propPower / omega;
-	// We do have static friction now
-	// if (deltat < 0.01) {
-	// 	wrenchProp.force.x = 0;
-	// 	wrenchProp.torque.x = 0;
-	// } // To avoid aircraft rolling while on the ground, since we don't have static friction yet
+	if (deltat < 0.01) {
+		wrenchProp.force.x = 0;
+		wrenchProp.torque.x = 0;
+	} // To avoid aircraft rolling and turning on the ground while throttle is off
 	wrenchProp.torque.y = 0.0;
 	wrenchProp.torque.z = 0.0;
 	// double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;

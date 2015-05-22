@@ -71,7 +71,7 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 	// Set coefficient of friction for each material
 	frictForw[0] = 0.7; frictSide[0] = 0.7;
 	frictForw[1] = 0.4; frictSide[1] = 0.4;
-	frictForw[2] = 0.01; frictSide[2] = 1.0;
+	frictForw[2] = 0.1; frictSide[2] = 1.0;
 	frictForw[3] = 0.4; frictSide[3] = 0.4; //To update composite to ground firction coefficients!
 
 	// Read contact points location and material from parameter server

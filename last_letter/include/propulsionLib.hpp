@@ -59,7 +59,7 @@ public:
 	////////////
 	// Variables
 	double omegaMin, omegaMax;
-	double deltat, propDiam, engInertia;
+	double deltat, propDiam, engInertia, rho;
 
 	//////////
 	// Members
@@ -88,7 +88,7 @@ public:
 	// Variables //
 	////////////////
 	double omegaMin, omegaMax;
-	double deltat, propDiam, engInertia;
+	double deltat, propDiam, engInertia, rho;
 	double Kv, Rm, Rs, I0, Cells;
 
 	//////////////
