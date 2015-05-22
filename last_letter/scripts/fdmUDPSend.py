@@ -74,7 +74,7 @@ def receive_input(sock, fdm, pub):
         return False
     servos = struct.unpack('<16H', buf)
     ctrls = SimPWM()
-    for i in range(6):
+    for i in range(11):
         ctrls.value[i] = servos[i]
     pub.publish(ctrls)
     return True
