@@ -5,14 +5,12 @@
 import roslib
 import sys
 import rospy
-from geometry_msgs.msg import Vector3, Vector3Stamped
-import numpy as np
+from pymavlink.rotmat import Vector3, Matrix3
+from geometry_msgs.msg import Vector3 as RosVector3
 import tf.transformations
-from mathutils import quat2Reb, Vector2Array
+from rosgraph_msgs.msg import Clock
 from last_letter_msgs.msg import SimStates, SimPWM, Environment
 
-
-from pymavlink import fgFDM
 import socket, struct, errno
 
 def interpret_address(addrstr):
@@ -21,119 +19,117 @@ def interpret_address(addrstr):
     a[1] = int(a[1])
     return tuple(a)
 
+class fdmState(object):
+    def __init__(self):
+        self.latitude = 0
+        self.longitude = 0
+        self.altitude = 0
+        self.heading = 0
+        self.velocity = Vector3()
+        self.accel = Vector3()
+        self.gyro = Vector3()
+        self.attitude = Vector3()
+        self.airspeed = 0
+        self.dcm = Matrix3()
+        self.timestamp_us = 1
 
 def state_callback(state):
+	global fdm
+        fdm.latitude = state.geoid.latitude
+	fdm.longitude = state.geoid.longitude
+	fdm.altitude = state.geoid.altitude
+        fdm.velocity = Vector3(state.geoid.velocity.x,
+                               state.geoid.velocity.y,
+                               state.geoid.velocity.z)
 
-	global fdm, stateStorage
-
-	stateStorage = state
-
-	# fdm.set('cur_time', state.header.stamp.to_nsec(), units='seconds') # Add simulation timestamp !!!IN NANOSECONDS!!!
-
-	fdm.set('latitude', state.geoid.latitude, units='degrees')
-	fdm.set('longitude', state.geoid.longitude, units='degrees')
-	fdm.set('altitude', state.geoid.altitude, units='meters') # Should it be asl or initialized altitude?
-	# fdm.set('altitude', -state.pose.position.z, units='meters')
-
-	fdm.set('v_north', state.geoid.velocity.x, units='mps')
-	fdm.set('v_east', state.geoid.velocity.y, units='mps')
-	fdm.set('v_down', -state.geoid.velocity.z, units='mps') # Downwards velocity
-	# rospy.logerr('vn/ve/vd: %g/%g/%g',state.geoid.velocity.x, state.geoid.velocity.y, -state.geoid.velocity.z)
-
-	# Calculate accelerometer felt accelerations
-	# Reb = quat2Reb(state.pose.orientation)
-	# accx = (state.acceleration.linear.x - 9.80665*Reb[2][0])
-	# accy = (state.acceleration.linear.y - 9.80665*Reb[2][1])
-	# accz = (state.acceleration.linear.z - 9.80665*Reb[2][2])
-	# fdm.set('A_X_pilot', accx, units='mpss')
-	# fdm.set('A_Y_pilot', accy, units='mpss')
-	# fdm.set('A_Z_pilot', accz, units='mpss')
-	# rospy.logerr('acc_x/y/z: %g/%g/%g',accx, accy, accz)
-
-	(yaw, pitch, roll) = tf.transformations.euler_from_quaternion([state.pose.orientation.x, state.pose.orientation.y, state.pose.orientation.z, state.pose.orientation.w],'rzyx')
-	fdm.set('phi', roll, units='radians')
-	fdm.set('theta', pitch, units='radians')
-	fdm.set('psi', yaw, units='radians')
-	# rospy.logerr('r/p/y: %4.1f/%4.1f/%4.1f',180/np.pi*roll, 180/np.pi*pitch, 180/np.pi*yaw)
-
-	(p, q, r) = (state.velocity.angular.x, state.velocity.angular.y, state.velocity.angular.z)
-	phiDot = p + np.tan(pitch)*np.sin(roll)*q + np.tan(pitch)*np.cos(roll)*r
-	thetaDot = np.cos(roll)*q - np.sin(roll)*r
-	psiDot = np.sin(roll)/np.cos(pitch)*q + np.cos(roll)/np.cos(pitch)*r
-
-	fdm.set('phidot', phiDot, units='rps')
-	fdm.set('thetadot', thetaDot, units='rps')
-	fdm.set('psidot', psiDot, units='rps')
-	# rospy.logerr('dot_phi/theta/psi: %g/%g/%g',phiDot, thetaDot, psiDot)
-
-	fdm.set('rpm', state.rotorspeed[0]*np.pi*60)
-	fdm.set('agl', state.geoid.altitude, units='meters')
-	# fdm.set('agl', -state.pose.position.z, units='meters')
-
+	(yaw, pitch, roll) = tf.transformations.euler_from_quaternion([state.pose.orientation.x,
+                                                                       state.pose.orientation.y,
+                                                                       state.pose.orientation.z,
+                                                                       state.pose.orientation.w],'rzyx')
+        fdm.attitude = Vector3(roll, pitch, yaw)
+        fdm.gyro = Vector3(state.velocity.angular.x, state.velocity.angular.y, state.velocity.angular.z)
+	fdm.dcm.from_euler(roll, pitch, yaw)
 
 def accel_callback(accel):
-
-	global fdm, stateStorage
-	Reb = quat2Reb(stateStorage.pose.orientation)
-	accx = (accel.x - 9.80665*Reb[2][0])
-	accy = (accel.y - 9.80665*Reb[2][1])
-	accz = (accel.z - 9.80665*Reb[2][2])
-	fdm.set('A_X_pilot', accx, units='mpss')
-	fdm.set('A_Y_pilot', accy, units='mpss')
-	fdm.set('A_Z_pilot', accz, units='mpss')
-	# rospy.logerr('acc_x/y/z: %g/%g/%g',accx, accy, accz)
-
+	global fdm
+        accel = Vector3(accel.x, accel.y, accel.z)
+        accel = fdm.dcm * accel
+        accel.z -= 9.80665
+        accel = fdm.dcm.transposed() * accel
+        fdm.accel = accel
 
 def env_callback(environment):
+	global fdm
+        wind = Vector3(environment.wind.x, environment.wind.y, environment.wind.z)
+        fdm.airspeed = (fdm.velocity - wind).length()
 
-	global fdm, stateStorage
-	airspeed = Vector3()
-	airspeed.x = stateStorage.velocity.linear.x - environment.wind.x
-	airspeed.y = stateStorage.velocity.linear.y - environment.wind.y
-	airspeed.z = stateStorage.velocity.linear.z - environment.wind.z
-	vcas = np.sqrt(airspeed.x*airspeed.x + airspeed.y*airspeed.y + airspeed.z*airspeed.z)
-	fdm.set('vcas', vcas, units='mps')
-	# rospy.logerr('vcas: %g',vcas)
+def clock_callback(clock):
+	global fdm
+        fdm.timestamp_us = int(clock.clock.secs * 1e6 + clock.clock.nsecs/1000)
 
 
-########
-## Setup
-########
+def receive_input(sock, fdm, pub):
+    buf = sock.recv(32)
+    if len(buf) != 32:
+        return False
+    servos = struct.unpack('<16H', buf)
+    ctrls = SimPWM()
+    for i in range(6):
+        ctrls.value[i] = servos[i]
+    pub.publish(ctrls)
+    return True
 
-ros_in_address = "127.0.0.1:5504" # FDM data coming out of the ROS Simulator
-ros_in = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-ros_in.connect(interpret_address(ros_in_address)) # Should I use connect?
-
-fdm = fgFDM.fgFDM() # Create fdm objects
+def send_output(sock, fdm):
+    '''send output to SITL'''
+    buf = struct.pack('<Q17d',
+                      fdm.timestamp_us,
+                      fdm.latitude,
+                      fdm.longitude,
+                      fdm.altitude,
+                      fdm.heading,
+                      fdm.velocity.x,
+                      fdm.velocity.y,
+                      fdm.velocity.z,
+                      fdm.accel.x,
+                      fdm.accel.y,
+                      fdm.accel.z,
+                      fdm.gyro.x,
+                      fdm.gyro.y,
+                      fdm.gyro.z,
+                      fdm.attitude.x,
+                      fdm.attitude.y,
+                      fdm.attitude.z,
+                      fdm.airspeed)
+    sock.send(buf)
 
 ###############
 ## Main Program
 ###############
 
 if __name__ == '__main__':
-	try:
-		rospy.init_node('fdmUDPSend')
-		rospy.Subscriber('states', SimStates, state_callback, queue_size=1)
-		rospy.Subscriber('linearAcc', Vector3, accel_callback, queue_size=1)
-		rospy.Subscriber('environment', Environment, env_callback, queue_size=1)
-		timer = rospy.Rate(1000)
-		stateStorage = SimStates()
-		rospy.loginfo('fdmUDPSend node up')
+    fdm = fdmState()
 
-
-		while not rospy.is_shutdown():
-			try:
-				# rospy.loginfo("trying to send fdm packet to runsim.sh")
-				ros_in.send(fdm.pack())
-				# rospy.loginfo('sent fdm packet to runsim.sh')
-			except socket.error as e:
-				if e.errno not in [ errno.ECONNREFUSED ]:
-					print "error on ros_in sending"
-					raise
-			timer.sleep()
-
-		print "this node is pretty much dead"
-
-	except rospy.ROSInterruptException:
-		print "something bad happened"
-		pass
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.bind(('127.0.0.1', 9002))
+    sock.connect(('127.0.0.1', 9003))
+    
+    rospy.init_node('fdmUDPSend')
+    rospy.Subscriber('states', SimStates, state_callback, queue_size=1)
+    rospy.Subscriber('linearAcc', RosVector3, accel_callback, queue_size=1)
+    rospy.Subscriber('environment', Environment, env_callback, queue_size=1)
+    rospy.Subscriber('/clock', Clock, clock_callback, queue_size=1)
+    pub = rospy.Publisher('ctrlPWM',SimPWM, queue_size=10)
+    
+    timer = rospy.Rate(500)
+    rospy.loginfo('fdmUDPSend node up')
+    
+    while not rospy.is_shutdown():
+        try:
+            if receive_input(sock, fdm, pub):
+                send_output(sock, fdm)
+        except socket.error as e:
+            if e.errno not in [ errno.ECONNREFUSED ]:
+                print("error in sending: %s" % e)
+                raise
+        timer.sleep()
+    print "this node is dead"
