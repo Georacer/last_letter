@@ -211,11 +211,11 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 
 			// Calculate the magnitude of the friction force in the Earth frame
 			double frictionLong = fabs(sqrt(kFLong*(kFLong*cos(trackAngle)*cos(trackAngle)+kFLat*sin(trackAngle)*sin(trackAngle)))*tempE.force.z);
-			frictionLong = std::max(frictionLong - 0.01*frictionLong/sqrt(vpoint.x*vpoint.x + vpoint.y*vpoint.y + 0.001), 0.0); //Aply static friction
+			frictionLong = std::max(frictionLong - 0.05*frictionLong/sqrt(vpoint.x*vpoint.x + vpoint.y*vpoint.y + 0.001), 0.0); //Aply static friction
 			frictionLong = frictionLong*cos(trackAngle);
 
 			double frictionLat = fabs(sqrt(kFLat*(kFLat*sin(trackAngle)*sin(trackAngle)+kFLong*cos(trackAngle)*cos(trackAngle)))*tempE.force.z);
-			frictionLat = std::max(frictionLat - 0.01*frictionLat/sqrt(vpoint.x*vpoint.x + vpoint.y*vpoint.y + 0.001), 0.0); //Aply static friction
+			frictionLat = std::max(frictionLat - 0.05*frictionLat/sqrt(vpoint.x*vpoint.x + vpoint.y*vpoint.y + 0.001), 0.0); //Aply static friction
 			frictionLat = frictionLat*sin(trackAngle);
 
 			tempE.force.x = -frictionLong*cos(Euler.z)-frictionLat*sin(Euler.z);

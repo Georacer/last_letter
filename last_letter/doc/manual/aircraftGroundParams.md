@@ -9,6 +9,7 @@ The contact points are modeled as springs with damping to generate the normal fo
 
 `contactPoint#`: (Where # is the increasing, 1-indexed id of your contact point) This is a list of 6 elements, containing information about the contact point.
 This information is:
+
     1. `x coordinate`: The x coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
     2. `y coordinate`: The y coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
     3. `z coordinate`: The z coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
