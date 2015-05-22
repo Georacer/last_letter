@@ -1,10 +1,10 @@
 #Global Miscellaneous Parameters
 
 #Simulation calculation rate (frame rate)
-/world/simRate: 1000
+/world/simRate: 500
 
 #Simulation time-step
-/world/deltaT: 0.001
+/world/deltaT: 0.002
 
 #Simulation time controls
 # 0 : default real-time simulation clock
