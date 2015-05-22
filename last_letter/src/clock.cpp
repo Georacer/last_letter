@@ -7,8 +7,11 @@ ros::Publisher pub;
 ros::Subscriber sub;
 
 ros::Time simTime(0.0);
+ros::WallTime realTimePrev = ros::WallTime::now(), realTimeNow;
 ros::Duration dt;
+ros::WallDuration wallCounter;
 rosgraph_msgs::Clock simClock;
+unsigned long frameCounter = 0;
 
 ////////////////////////////////////
 // Control input trigger callback //
@@ -18,6 +21,7 @@ void controlsCallback(const last_letter_msgs::SimPWM pwm)
 	simTime = simTime + dt;
 	simClock.clock = simTime;
 	pub.publish(simClock);
+	frameCounter++;
 }
 
 ///////////////////////////////////////
@@ -28,6 +32,7 @@ void stateCallback(const last_letter_msgs::SimStates state)
 	simTime = simTime + dt;
 	simClock.clock = simTime;
 	pub.publish(simClock);
+	frameCounter++;
 }
 
 ///////////////
@@ -45,7 +50,7 @@ int main(int argc, char **argv)
 	double simRate;
 	ros::param::get("/world/simRate",simRate); //frame rate in Hz
 	double deltaT;
-	ros::param::get("/world/deltaT",deltaT); //frame rate in Hz
+	ros::param::get("/world/deltaT",deltaT); //simulation time step in seconds
 	int timeControls;
 	ros::param::get("/world/timeControls",timeControls); //frame rate in Hz
 
@@ -63,8 +68,16 @@ int main(int argc, char **argv)
 		pub.publish(simClock);
 		while (ros::ok())
 		{
+			realTimeNow = ros::WallTime::now();
+			wallCounter = realTimeNow - realTimePrev;
+			if (wallCounter.toSec() > 5) {
+				ROS_INFO("Simulation rate: %lu Hz", frameCounter/5);
+				realTimePrev = realTimeNow;
+				frameCounter=0;
+			}
 			ros::spinOnce();
 			spinner.sleep();
+
 		}
 	}
 	else if (timeControls==1) // Simulation waits for controls message
@@ -75,7 +88,15 @@ int main(int argc, char **argv)
 		pub.publish(simClock);
 		while (ros::ok())
 		{
-			ros::spin();
+			realTimeNow = ros::WallTime::now();
+			wallCounter = realTimeNow - realTimePrev;
+			if (wallCounter.toSec() > 5) {
+				ROS_INFO("Simulation rate: %lu Hz", frameCounter/5);
+				realTimePrev = realTimeNow;
+				frameCounter=0;
+			}
+			ros::spinOnce();
+
 		}
 	}
 	else if (timeControls==2) // Simulation runs as fast as possible
@@ -87,7 +108,14 @@ int main(int argc, char **argv)
 		pub.publish(simClock);
 		while (ros::ok())
 		{
-			ros::spin();
+			realTimeNow = ros::WallTime::now();
+			wallCounter = realTimeNow - realTimePrev;
+			if (wallCounter.toSec() > 5) {
+				ROS_INFO("Simulation rate: %lu Hz", frameCounter/5);
+				realTimePrev = realTimeNow;
+				frameCounter=0;
+			}
+			ros::spinOnce();
 		}
 	}
 	else {

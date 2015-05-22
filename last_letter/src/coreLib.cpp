@@ -95,6 +95,7 @@ void ModelPlane::init()
 	input[2] = 0;
 	input[3] = 0;
 	input[5] = 0;
+	input[6] = 0;
 
 	// Initialize environment
 	environment.wind.x = 0;
@@ -145,7 +146,7 @@ void ModelPlane::getInput(last_letter_msgs::SimPWM inputMsg)
 	input[5] = (double)(inputMsg.value[5]-1000)/1000;
 	// std::cout << input[5] << ',';
 	// std::cout << std::endl;
-	if (inputMsg.value[7] > 1500) { // Reset the simulation upon PWM command
+	if (inputMsg.value[6] > 1500) { // Reset the simulation upon PWM command
 		init();
 	}
 }
