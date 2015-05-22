@@ -5,10 +5,10 @@
 import roslib
 import sys
 import rospy
-from pymavlink.rotmat import Vector3
+from pymavlink.rotmat import Vector3, Matrix3
 from geometry_msgs.msg import Vector3 as RosVector3
 import tf.transformations
-from mathutils import quat2Reb
+from rosgraph_msgs.msg import Clock
 from last_letter_msgs.msg import SimStates, SimPWM, Environment
 
 import socket, struct, errno
@@ -30,12 +30,11 @@ class fdmState(object):
         self.gyro = Vector3()
         self.attitude = Vector3()
         self.airspeed = 0
-        self.Reb = None
+        self.dcm = Matrix3()
         self.timestamp_us = 1
 
 def state_callback(state):
 	global fdm
-        fdm.timestamp_us = state.header.stamp.to_nsec() / 1000
         fdm.latitude = state.geoid.latitude
 	fdm.longitude = state.geoid.longitude
 	fdm.altitude = state.geoid.altitude
@@ -49,21 +48,24 @@ def state_callback(state):
                                                                        state.pose.orientation.w],'rzyx')
         fdm.attitude = Vector3(roll, pitch, yaw)
         fdm.gyro = Vector3(state.velocity.angular.x, state.velocity.angular.y, state.velocity.angular.z)
-	fdm.Reb = quat2Reb(state.pose.orientation)
+	fdm.dcm.from_euler(roll, pitch, yaw)
 
 def accel_callback(accel):
 	global fdm
-        if fdm.Reb is None:
-            return
-	accx = (accel.x - 9.80665*fdm.Reb[2][0])
-	accy = (accel.y - 9.80665*fdm.Reb[2][1])
-	accz = (accel.z - 9.80665*fdm.Reb[2][2])
-        fdm.accel = Vector3(accx, accy, accz)
+        accel = Vector3(accel.x, accel.y, accel.z)
+        accel = fdm.dcm * accel
+        accel.z -= 9.80665
+        accel = fdm.dcm.transposed() * accel
+        fdm.accel = accel
 
 def env_callback(environment):
 	global fdm
         wind = Vector3(environment.wind.x, environment.wind.y, environment.wind.z)
         fdm.airspeed = (fdm.velocity - wind).length()
+
+def clock_callback(clock):
+	global fdm
+        fdm.timestamp_us = int(clock.clock.secs * 1e6 + clock.clock.nsecs/1000)
 
 
 def receive_input(sock, fdm, pub):
@@ -115,6 +117,7 @@ if __name__ == '__main__':
     rospy.Subscriber('states', SimStates, state_callback, queue_size=1)
     rospy.Subscriber('linearAcc', RosVector3, accel_callback, queue_size=1)
     rospy.Subscriber('environment', Environment, env_callback, queue_size=1)
+    rospy.Subscriber('/clock', Clock, clock_callback, queue_size=1)
     pub = rospy.Publisher('ctrlPWM',SimPWM, queue_size=10)
     
     timer = rospy.Rate(500)
