@@ -34,38 +34,38 @@ class fdmState(object):
         self.timestamp_us = 1
 
 def state_callback(state):
-	global fdm
-        fdm.latitude = state.geoid.latitude
-	fdm.longitude = state.geoid.longitude
-	fdm.altitude = state.geoid.altitude
-        fdm.velocity = Vector3(state.geoid.velocity.x,
+    global fdm
+    fdm.latitude = state.geoid.latitude
+    fdm.longitude = state.geoid.longitude
+    fdm.altitude = state.geoid.altitude
+    fdm.velocity = Vector3(state.geoid.velocity.x,
                                state.geoid.velocity.y,
                                state.geoid.velocity.z)
 
-	(yaw, pitch, roll) = tf.transformations.euler_from_quaternion([state.pose.orientation.x,
+    (yaw, pitch, roll) = tf.transformations.euler_from_quaternion([state.pose.orientation.x,
                                                                        state.pose.orientation.y,
                                                                        state.pose.orientation.z,
                                                                        state.pose.orientation.w],'rzyx')
-        fdm.attitude = Vector3(roll, pitch, yaw)
-        fdm.gyro = Vector3(state.velocity.angular.x, state.velocity.angular.y, state.velocity.angular.z)
-	fdm.dcm.from_euler(roll, pitch, yaw)
+    fdm.attitude = Vector3(roll, pitch, yaw)
+    fdm.gyro = Vector3(state.velocity.angular.x, state.velocity.angular.y, state.velocity.angular.z)
+    fdm.dcm.from_euler(roll, pitch, yaw)
 
 def accel_callback(accel):
-	global fdm
-        accel = Vector3(accel.x, accel.y, accel.z)
-        accel = fdm.dcm * accel
-        accel.z -= 9.80665
-        accel = fdm.dcm.transposed() * accel
-        fdm.accel = accel
+    global fdm
+    accel = Vector3(accel.x, accel.y, accel.z)
+    accel = fdm.dcm * accel
+    accel.z -= 9.80665
+    accel = fdm.dcm.transposed() * accel
+    fdm.accel = accel
 
 def env_callback(environment):
-	global fdm
-        wind = Vector3(environment.wind.x, environment.wind.y, environment.wind.z)
-        fdm.airspeed = (fdm.velocity - wind).length()
+    global fdm
+    wind = Vector3(environment.wind.x, environment.wind.y, environment.wind.z)
+    fdm.airspeed = (fdm.velocity - wind).length()
 
 def clock_callback(clock):
-	global fdm
-        fdm.timestamp_us = int(clock.clock.secs * 1e6 + clock.clock.nsecs/1000)
+    global fdm
+    fdm.timestamp_us = int(clock.clock.secs * 1e6 + clock.clock.nsecs/1000)
 
 
 def receive_input(sock, fdm, pub):
@@ -112,17 +112,17 @@ if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('127.0.0.1', 9002))
     sock.connect(('127.0.0.1', 9003))
-    
+
     rospy.init_node('fdmUDPSend')
     rospy.Subscriber('states', SimStates, state_callback, queue_size=1)
     rospy.Subscriber('linearAcc', RosVector3, accel_callback, queue_size=1)
     rospy.Subscriber('environment', Environment, env_callback, queue_size=1)
     rospy.Subscriber('/clock', Clock, clock_callback, queue_size=1)
     pub = rospy.Publisher('ctrlPWM',SimPWM, queue_size=10)
-    
+
     timer = rospy.Rate(500)
     rospy.loginfo('fdmUDPSend node up')
-    
+
     while not rospy.is_shutdown():
         try:
             if receive_input(sock, fdm, pub):
