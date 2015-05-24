@@ -41,7 +41,7 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
 <!-- - [Controller Parameters](#controller-parameters) -->
 <!-- - [Sensor Parameters](#sensor-parameters) -->
 
-- [Contributors](contributors.md)
+- [Contributors](last_letter/doc/manual/contributors.md)
 
 <!-- ## Packages
 
