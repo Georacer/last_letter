@@ -13,12 +13,14 @@ from last_letter_msgs.msg import SimStates, SimPWM, Environment
 
 import socket, struct, errno
 
+# decode a string for IP and port
 def interpret_address(addrstr):
     '''interpret a IP:port string'''
     a = addrstr.split(':')
     a[1] = int(a[1])
     return tuple(a)
 
+# The data carrier class
 class fdmState(object):
     def __init__(self):
         self.latitude = 0
@@ -33,6 +35,7 @@ class fdmState(object):
         self.dcm = Matrix3()
         self.timestamp_us = 1
 
+# Passes the new state data to the fdmState structure every new state update
 def state_callback(state):
     global fdm
     fdm.latitude = state.geoid.latitude
@@ -50,6 +53,7 @@ def state_callback(state):
     fdm.gyro = Vector3(state.velocity.angular.x, state.velocity.angular.y, state.velocity.angular.z)
     fdm.dcm.from_euler(roll, pitch, yaw)
 
+# Passes new bootstrapped accelerometer data to the fdmState structure every new update
 def accel_callback(accel):
     global fdm
     accel = Vector3(accel.x, accel.y, accel.z)
@@ -58,16 +62,18 @@ def accel_callback(accel):
     accel = fdm.dcm.transposed() * accel
     fdm.accel = accel
 
+# Passes new wind and airspeed data to the fdmState structure every new update
 def env_callback(environment):
     global fdm
     wind = Vector3(environment.wind.x, environment.wind.y, environment.wind.z)
     fdm.airspeed = (fdm.velocity - wind).length()
 
+# Passes new timestamp data to the fdmState structure every new update
 def clock_callback(clock):
     global fdm
     fdm.timestamp_us = int(clock.clock.secs * 1e6 + clock.clock.nsecs/1000)
 
-
+# Receive control inputs from the APM SITL and publishes them in a SimPWM topic
 def receive_input(sock, fdm, pub):
     buf = sock.recv(32)
     if len(buf) != 32:
@@ -76,9 +82,11 @@ def receive_input(sock, fdm, pub):
     ctrls = SimPWM()
     for i in range(11):
         ctrls.value[i] = servos[i]
+    ctrls.header.stamp = rospy.Time.now()
     pub.publish(ctrls)
     return True
 
+# Packages the fdmState data and sends it to the APM SITL
 def send_output(sock, fdm):
     '''send output to SITL'''
     buf = struct.pack('<Q17d',
@@ -109,10 +117,12 @@ def send_output(sock, fdm):
 if __name__ == '__main__':
     fdm = fdmState()
 
+    # Setup network infrastructure
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(('127.0.0.1', 9002))
     sock.connect(('127.0.0.1', 9003))
 
+    # Setup ROS node infrastructure
     rospy.init_node('fdmUDPSend')
     rospy.Subscriber('states', SimStates, state_callback, queue_size=1)
     rospy.Subscriber('linearAcc', RosVector3, accel_callback, queue_size=1)
@@ -120,7 +130,9 @@ if __name__ == '__main__':
     rospy.Subscriber('/clock', Clock, clock_callback, queue_size=1)
     pub = rospy.Publisher('ctrlPWM',SimPWM, queue_size=10)
 
-    timer = rospy.Rate(500)
+    rate = rospy.get_param("/world/simRate");
+
+    timer = rospy.Rate(rate)
     rospy.loginfo('fdmUDPSend node up')
 
     while not rospy.is_shutdown():
@@ -129,7 +141,7 @@ if __name__ == '__main__':
                 send_output(sock, fdm)
         except socket.error as e:
             if e.errno not in [ errno.ECONNREFUSED ]:
-                print("error in sending: %s" % e)
+                print("error in sending fdm packet: %s" % e)
                 raise
         timer.sleep()
-    print "this node is dead"
+    print "fdmUDPSend node now closes"

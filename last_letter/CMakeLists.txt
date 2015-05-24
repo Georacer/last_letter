@@ -54,6 +54,7 @@ add_executable(virtualJoy src/virtualJoy.cpp)
 add_executable(autopilot_ll src/controller_ll.cpp)
 add_executable(autopilot_HCUAV src/controller_HCUAV.cpp)
 add_executable(simClock src/clock.cpp)
+add_executable(ctrlInjector src/ctrlInjector.cpp)
 # add_executable(cameraController src/cameraController.cpp)
 
 ## Add cmake target dependencies of the executable/library
@@ -66,6 +67,7 @@ add_dependencies(virtualJoy ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(autopilot_ll last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(autopilot_HCUAV last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(simClock src/clock.cpp last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(ctrlInjector last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 # add_dependencies(cameraController last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
@@ -79,6 +81,7 @@ target_link_libraries(autopilot_ll mathutils uav_utils ${catkin_LIBRARIES})
 target_link_libraries(autopilot_HCUAV mathutils uav_utils ${catkin_LIBRARIES})
 target_link_libraries(modelPlaneLib mathutils ${catkin_LIBRARIES})
 target_link_libraries(simClock ${catkin_LIBRARIES})
+target_link_libraries(ctrlInjector ${catkin_LIBRARIES})
 # target_link_libraries(cameraController ${catkin_LIBRARIES})
 
 ## Generate package documentation with rosdoc_lite

@@ -24,6 +24,7 @@
 	<!-- ArduPlane SITL connection -->
 	<group if="$(arg ArduPlane)" ns="$(arg uav_name)">
 		<node pkg="last_letter" type="fdmUDPSend.py" name="fdmUDPSend"  output="screen"/>
+		<node pkg="last_letter" type="ctrlInjector" name="injector" output="screen"/>
 	</group>
 
 	<!-- Launch the visualizers /-->
