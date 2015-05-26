@@ -94,6 +94,7 @@ void ModelPlane::init()
 	input[1] = 0;
 	input[2] = 0;
 	input[3] = 0;
+	input[4] = 0;
 	input[5] = 0;
 	input[6] = 0;
 
@@ -143,6 +144,7 @@ void ModelPlane::getInput(last_letter_msgs::SimPWM inputMsg)
 	input[1] = deltae_max * (double)(inputMsg.value[1]-1500)/500;
 	input[2] = (double)(inputMsg.value[2]-1000)/1000;
 	input[3] = deltar_max * (double)(inputMsg.value[3]-1500)/500;
+	input[4] = (double)(inputMsg.value[4]-1500)/500;
 	input[5] = (double)(inputMsg.value[5]-1000)/1000;
 	// std::cout << input[5] << ',';
 	// std::cout << std::endl;

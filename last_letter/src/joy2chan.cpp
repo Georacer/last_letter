@@ -32,7 +32,7 @@ void joy2chan(sensor_msgs::Joy joyMsg)
 	channels.value[1] = (unsigned int)(input[1]*500+ 1500); // Elevator channel
 	channels.value[2] = (unsigned int)((input[2]+1)*500+ 1000); // Throttle channel
 	channels.value[3] = (unsigned int)(input[3]*500+ 1500); // Rudder channel
-	channels.value[4] = (unsigned int)(input[4]*500 + 1500); // Generic channel
+	channels.value[4] = (unsigned int)(input[4]*500 + 1500); // Steering gear channel
 	channels.value[5] = (unsigned int)(input[5]*1000 + 1000); // Breaks channel
 	channels.value[6] = (unsigned int)(input[6]*500 + 1500); // Generic channel
 	channels.value[7] = (unsigned int)(input[7]*500 + 1500); // Generic channel

@@ -206,7 +206,7 @@ geometry_msgs::Vector3 PanosContactPoints::getForce()
 			// Convert friction coefficients to the Earth frame
 			double trackAngle = Euler.z - atan2(vpoint.y, vpoint.x);
 			if (i==2) { // Apply steeering
-				trackAngle = trackAngle + parentObj->input[3]*3.14/3.0;
+				trackAngle = trackAngle + parentObj->input[4]*3.14/3.0;
 			}
 
 			// Calculate the magnitude of the friction force in the Earth frame
