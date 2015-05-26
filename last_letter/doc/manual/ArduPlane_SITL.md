@@ -5,7 +5,7 @@ Follow the [ArduPlane SITL instructions](http://dev.ardupilot.com/wiki/setting-u
 When everything is done, enter the ArduPlane directory, usually using `cd ~/ardupilot/ArduPlane`
 and execute the SITL, using the external simulator:
 ```
-sim_vehicle.sh -e --console
+sim_vehicle.sh -f last_letter --console --map
 ```
 
 This will run the ArduPlane code, MAVProxy and `last_letter` along with RViz all in one go. The RViz visualizer may take several seconds to start.
