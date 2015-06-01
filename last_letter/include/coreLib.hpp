@@ -7,9 +7,10 @@ class Airdata
 	ModelPlane * parentObj;
 	Airdata(ModelPlane *);
 	~Airdata();
-	double airspeed;
-	double alpha;
-	double beta;
+	double u_r, v_r, w_r; // relative wind vector elements
+	double airspeed; // relative airspeed
+	double alpha; // angle of attach
+	double beta; // angle of sideslip
 	void calcAirData();
 };
 

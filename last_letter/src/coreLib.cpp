@@ -78,6 +78,7 @@ void ModelPlane::init()
 	// Initialize rotorspeed array
 	states.rotorspeed.clear();
 	states.rotorspeed.push_back((double) 0);
+	dynamics.propulsion->omega = 0.01; // A small non-zero value
 
 	// Initialize WGS coordinates
 	if(!ros::param::getCached("init/coordinates", list)) {ROS_FATAL("Invalid parameters for -init/coordinates- in param server!"); ros::shutdown();}
@@ -115,7 +116,7 @@ void ModelPlane::init()
 void ModelPlane::step(void)
 {
 	// Perform step actions serially
-	dynamics.propulsion->updateRadPS();
+	dynamics.propulsion->stepEngine();
 	kinematics.forceInput = dynamics.getForce();
 	kinematics.torqueInput = dynamics.getTorque();
 	kinematics.calcDerivatives();
@@ -189,24 +190,24 @@ Airdata::~Airdata()
 //Caclulate airspeed and aerodynamics angles
 void Airdata::calcAirData()
 {
-	double u = parentObj->states.velocity.linear.x;
-	double v = parentObj->states.velocity.linear.y;
-	double w = parentObj->states.velocity.linear.z;
+	u_r = parentObj->states.velocity.linear.x - parentObj->environment.wind.x;
+	v_r = parentObj->states.velocity.linear.y - parentObj->environment.wind.y;
+	w_r = parentObj->states.velocity.linear.z - parentObj->environment.wind.z;
 
-	airspeed = sqrt(pow(u,2)+pow(v,2)+pow(w,2));
-	alpha = atan2(w,u);
+	airspeed = sqrt(pow(u_r,2)+pow(v_r,2)+pow(w_r,2));
+	alpha = atan2(w_r,u_r);
 
-	if (u==0) {
-		if (v==0) {
+	if (u_r==0) {
+		if (v_r==0) {
 			beta=0;
 		}
 		else {
-			beta=asin(v/abs(v));
+			beta=asin(v_r/abs(v_r));
 		}
 
 	}
 	else {
-		beta = atan2(v,u);
+		beta = atan2(v_r,u_r);
 	}
 }
 

@@ -15,12 +15,123 @@ Propulsion::Propulsion(ModelPlane * parent)
 	CGOffset.x = list[0];
 	CGOffset.y = list[1];
 	CGOffset.z = list[2];
+
+	if(!ros::param::getCached("motor/mountOrientation", list)) {ROS_FATAL("Invalid parameters for -motor/mountOrientation- in param server!"); ros::shutdown();}
+	for (i = 0; i < list.size(); ++i) {
+		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+	}
+	// !!! Order mixed because tf::Quaternion::setEuler seems to work with PRY, instead of YPR
+	mountOrientation.y = list[0];
+	mountOrientation.z = list[1];
+	mountOrientation.x = list[2];
+
+	theta = 0; // Initialize propeller angle
+
 }
 
 // Destructor
 Propulsion::~Propulsion()
 {
 	delete parentObj;
+}
+
+// Engine physics step, container for the generic class
+void Propulsion::stepEngine()
+{
+	rotateWind();
+	updateRadPS();
+	rotateProp();
+	rotateForce();
+	rotateTorque();
+}
+
+
+// Convert the relateive wind from body axes to propeller axes
+void Propulsion::rotateWind()
+{
+
+	tf::Quaternion tempQuat;
+	// Construct transformation from body axes to mount frame
+	tempQuat.setEuler(mountOrientation.z, mountOrientation.y, mountOrientation.x);
+	body_to_mount.setOrigin(tf::Vector3(CGOffset.x, CGOffset.y, CGOffset.z));
+	body_to_mount.setRotation(tempQuat);
+
+	// Construct transformation to apply gimbal movement. Gimbal rotation MUST be aligned with the resulting z-axis!
+	// !!! Order mixed because tf::Quaternion::setEuler seems to work with PRY, instead of YPR
+	tempQuat.setEuler(0.0, 0.0, 3.14*parentObj->input[3]);
+	mount_to_gimbal.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+	mount_to_gimbal.setRotation(tempQuat);
+
+	// Transform the relative wind from body axes to propeller axes
+	tf::Vector3 bodyWind(parentObj->airdata.u_r, parentObj->airdata.v_r, parentObj->airdata.w_r);
+	tf::Vector3 tempVect;
+	tempVect = mount_to_gimbal * (body_to_mount * bodyWind);
+	// tempVect = mount_to_gimbal * (body_to_mount * bodyWind);
+
+	relativeWind.x = tempVect.getX();
+	relativeWind.y = tempVect.getY();
+	relativeWind.z = tempVect.getZ();
+
+	normalWind = relativeWind.x;
+
+}
+
+void Propulsion::rotateProp() // Update propeller angle
+{
+	theta += omega*parentObj->dt;
+	if (theta > 2.0*M_PI) theta -= 2*M_PI;
+	if (theta < 0.0) theta += 2*M_PI;
+
+	tf::Quaternion tempQuat;
+	// !!! Order mixed because tf::Quaternion::setEuler seems to work with PRY, instead of YPR
+	tempQuat.setEuler(0.0, theta, 0.0);
+
+	gimbal_to_prop.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+	gimbal_to_prop.setRotation(tempQuat);
+
+	body_to_prop = (body_to_mount * mount_to_gimbal) * gimbal_to_prop;
+	broadcaster.sendTransform(tf::StampedTransform(body_to_prop, ros::Time::now(), "base_link", "propeller"));
+
+}
+
+ // Convert the resulting force to the body axes
+void Propulsion::rotateForce()
+{
+
+	tf::Vector3 tempVect(wrenchProp.force.x, wrenchProp.force.y, wrenchProp.force.z);
+	tempVect = body_to_prop * tempVect; // I'm not sure why this works and not inverted
+
+	wrenchProp.force.x = tempVect.getX();
+	wrenchProp.force.y = tempVect.getY();
+	wrenchProp.force.z = tempVect.getZ();
+
+}
+
+// Convert the resulting torque to the body axes
+void Propulsion::rotateTorque()
+{
+
+	tf::Vector3 tempVect(wrenchProp.torque.x, wrenchProp.torque.y, wrenchProp.torque.z);
+	tempVect = body_to_prop * tempVect;
+
+	wrenchProp.torque.x = tempVect.getX();
+	wrenchProp.torque.y = tempVect.getY();
+	wrenchProp.torque.z = tempVect.getZ();
+
+	// Add torque to to force misalignment with CG
+	// r x F, where r is the distance from CoG to CoL
+	// Will potentially add the following code in the future, to support shift of CoG mid-flight
+	// XmlRpc::XmlRpcValue list;
+	// int i;
+	// if(!ros::param::getCached("motor/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/motor/CGOffset- in param server!"); ros::shutdown();}
+	// for (i = 0; i < list.size(); ++i) {
+	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+	// 	CGOffset[i]=list[i];
+	// }
+	wrenchProp.torque.x = wrenchProp.torque.x + CGOffset.y*wrenchProp.force.z - CGOffset.z*wrenchProp.force.y;
+	wrenchProp.torque.y = wrenchProp.torque.y - CGOffset.x*wrenchProp.force.z + CGOffset.z*wrenchProp.force.x;
+	wrenchProp.torque.z = wrenchProp.torque.z - CGOffset.y*wrenchProp.force.x + CGOffset.x*wrenchProp.force.y;
+
 }
 
 //////////////////
@@ -109,20 +220,6 @@ geometry_msgs::Vector3 EngBeard::getTorque()
 	wrenchProp.torque.x = -k_t_p*pow(omega,2);
 	wrenchProp.torque.y = 0;
 	wrenchProp.torque.z = 0;
-
-	// Add torque to to force misalignment with CG
-	// r x F, where r is the distance from CoG to CoL
-	// Will potentially add the following code in the future, to support shift of CoG mid-flight
-	// XmlRpc::XmlRpcValue list;
-	// int i;
-	// if(!ros::param::getCached("motor/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/motor/CGOffset- in param server!"); ros::shutdown();}
-	// for (i = 0; i < list.size(); ++i) {
-	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-	// 	CGOffset[i]=list[i];
-	// }
-	wrenchProp.torque.x = wrenchProp.torque.x + CGOffset.y*wrenchProp.force.z - CGOffset.z*wrenchProp.force.y;
-	wrenchProp.torque.y = wrenchProp.torque.y - CGOffset.x*wrenchProp.force.z + CGOffset.z*wrenchProp.force.x;
-	wrenchProp.torque.z = wrenchProp.torque.z - CGOffset.y*wrenchProp.force.x + CGOffset.x*wrenchProp.force.y;
 
 	return wrenchProp.torque;
 }
@@ -245,20 +342,6 @@ geometry_msgs::Vector3 PistonEng::getTorque()
 		ros::shutdown();
 	}
 
-	// Add torque to to force misalignment with CG
-	// r x F, where r is the distance from CoG to CoL
-	// Will potentially add the following code in the future, to support shift of CoG mid-flight
-	// XmlRpc::XmlRpcValue list;
-	// int i;
-	// if(!ros::param::getCached("motor/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/motor/CGOffset- in param server!"); ros::shutdown();}
-	// for (i = 0; i < list.size(); ++i) {
-	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-	// 	CGOffset[i]=list[i];
-	// }
-	wrenchProp.torque.x = wrenchProp.torque.x + CGOffset.y*wrenchProp.force.z - CGOffset.z*wrenchProp.force.y;
-	wrenchProp.torque.y = wrenchProp.torque.y - CGOffset.x*wrenchProp.force.z + CGOffset.z*wrenchProp.force.x;
-	wrenchProp.torque.z = wrenchProp.torque.z - CGOffset.y*wrenchProp.force.x + CGOffset.x*wrenchProp.force.y;
-
 	return wrenchProp.torque;
 }
 
@@ -317,26 +400,28 @@ void ElectricEng::updateRadPS()
 	deltat = parentObj->input[2];
 	rho = parentObj->environment.density;
 
-
 	double Ei = omega/2/M_PI/Kv;
 	double Im = (Cells*4.0*deltat - Ei)/(Rs*deltat + Rm);
 	Im = std::max(Im,0.0); // Current cannot return to the ESC
 	double engPower = Ei*(Im - I0);
 
-	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double advRatio = normalWind / (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	// advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
 	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
 	double npCoeff = npPoly->evaluate(advRatio);
 
-	wrenchProp.force.x = propPower*std::fabs(npCoeff/(parentObj->states.velocity.linear.x+1.0e-10)); // Added epsilon for numerical stability
+	wrenchProp.force.x = propPower*std::fabs(npCoeff/(normalWind+1.0e-10)); // Added epsilon for numerical stability
+	wrenchProp.force.y = 0.0;
+	wrenchProp.force.z = 0.0;
 
-	double fadeFactor = (exp(-parentObj->states.velocity.linear.x*3/12));
+	double fadeFactor = (exp(-normalWind*3/12));
 	double staticThrust = 0.9*fadeFactor*pow(M_PI/2.0*propDiam*propDiam*rho*engPower*engPower,1.0/3); //static thrust fades at 5% at 12m/s
 	wrenchProp.force.x = wrenchProp.force.x + staticThrust;
 
 	// Constrain propeller force to +-5 times the aircraft weight
 	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 5.0*parentObj->kinematics.mass*9.81), -5.0*parentObj->kinematics.mass*9.81);
 	wrenchProp.torque.x = propPower / omega;
+
 	if (deltat < 0.01) {
 		wrenchProp.force.x = 0;
 		wrenchProp.torque.x = 0;
@@ -351,6 +436,7 @@ void ElectricEng::updateRadPS()
 
 	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
 
+
 	// Printouts
 	// std::cout << deltat << " ";
 	// std::cout << powerHP << " ";
@@ -359,10 +445,14 @@ void ElectricEng::updateRadPS()
 	// std:: cout << advRatio << " ";
 	// std::cout << npCoeff << " ";
 	// std::cout << wrenchProp.force.x << " ";
+	// std::cout << wrenchProp.force.z << " ";
 	// std::cout << wrenchProp.torque.x << " ";
 	// std::cout << parentObj->kinematics.forceInput.x << " ";
 	// std::cout << omegaDot << " ";
 	// std::cout << omega;
+	// std::cout << tempVect.getX() << " ";
+	// std::cout << tempVect.getZ() << " ";
+	// std::cout << parentObj->input[3] << " ";
 	// std::cout << std::endl;
 
 }
@@ -382,20 +472,6 @@ geometry_msgs::Vector3 ElectricEng::getTorque()
 		ROS_FATAL("State NaN in wrenchProp.torque");
 		ros::shutdown();
 	}
-
-	// Add torque to to force misalignment with CG
-	// r x F, where r is the distance from CoG to CoL
-	// Will potentially add the following code in the future, to support shift of CoG mid-flight
-	// XmlRpc::XmlRpcValue list;
-	// int i;
-	// if(!ros::param::getCached("motor/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/motor/CGOffset- in param server!"); ros::shutdown();}
-	// for (i = 0; i < list.size(); ++i) {
-	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-	// 	CGOffset[i]=list[i];
-	// }
-	wrenchProp.torque.x = wrenchProp.torque.x + CGOffset.y*wrenchProp.force.z - CGOffset.z*wrenchProp.force.y;
-	wrenchProp.torque.y = wrenchProp.torque.y - CGOffset.x*wrenchProp.force.z + CGOffset.z*wrenchProp.force.x;
-	wrenchProp.torque.z = wrenchProp.torque.z - CGOffset.y*wrenchProp.force.x + CGOffset.x*wrenchProp.force.y;
 
 	return wrenchProp.torque;
 }

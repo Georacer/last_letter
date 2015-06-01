@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 	message_generation
 	uav_utils
 	mathutils
+	tf
 )
 
 ################################################
@@ -66,7 +67,7 @@ add_dependencies(environment last_letter_msgs_gencpp ${PROJECT_NAME}_generate_me
 add_dependencies(virtualJoy ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(autopilot_ll last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(autopilot_HCUAV last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(simClock src/clock.cpp last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(simClock last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(ctrlInjector last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 # add_dependencies(cameraController last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 

@@ -1,6 +1,12 @@
-// Propulsion class related declarations
+///////////////////////////////////////////
+// Propulsion class related declarations //
+///////////////////////////////////////////
 
-// Propulsion interface class declaration
+#include <tf/transform_broadcaster.h>
+
+////////////////////////////////////////////
+// Propulsion interface class declaration //
+////////////////////////////////////////////
 class Propulsion
 {
 	public:
@@ -8,20 +14,34 @@ class Propulsion
 	//Variables
 	ModelPlane * parentObj; // pointer to parent ModelPlane class
 	geometry_msgs::Vector3 CGOffset; // vector from CG to engine coordinates
+	geometry_msgs::Vector3 mountOrientation;
+	geometry_msgs::Vector3 relativeWind; // relative wind vector in the propeller frame
 	double omega; // motor angular speed in rad/s
+	double theta; // propeller angle in rads
+	double normalWind; // scalar wind normal to propeller disc
 	geometry_msgs::Wrench wrenchProp;
+
+	tf::TransformBroadcaster broadcaster; // Transformations broadcaster object
+	tf::Transform body_to_mount, mount_to_gimbal, gimbal_to_prop, body_to_prop; // Transformations in the propeller assembly
 
 	///////////
 	//Functions
 	Propulsion(ModelPlane *);
 	~Propulsion();
 
+	void stepEngine(); // engine physics step, container for the generic class
+	void rotateWind(); // convert the wind to the propeller axes
 	virtual void updateRadPS() =0; // Step the angular speed
+	void rotateProp(); // Update the propeller angle
+	void rotateForce(); // convert the resulting force to the body axes
+	void rotateTorque(); // convert the resulting torque to the body axes
 	virtual geometry_msgs::Vector3 getForce() =0; // Calculate Forces
 	virtual geometry_msgs::Vector3 getTorque() =0; //Calculate Torques
 };
 
-// No engine, dummy class
+////////////////////////////
+// No engine, dummy class //
+////////////////////////////
 class NoEngine: public Propulsion
 {
 public:
@@ -33,7 +53,9 @@ public:
 	geometry_msgs::Vector3 getTorque();
 };
 
-// Electric engine model found in R. Beard's book
+////////////////////////////////////////////////////
+// Electric engine model found in R. Beard's book //
+////////////////////////////////////////////////////
 class EngBeard: public Propulsion
 {
 	public:
@@ -52,7 +74,9 @@ class EngBeard: public Propulsion
 	geometry_msgs::Vector3 getTorque(); //Calculate Torques
 };
 
-// Piston engine
+///////////////////
+// Piston engine //
+///////////////////
 class PistonEng : public Propulsion
 {
 public:
@@ -80,7 +104,9 @@ public:
 	geometry_msgs::Vector3 getTorque();
 };
 
-// Electric hobby engine
+///////////////////////////
+// Electric hobby engine //
+///////////////////////////
 class ElectricEng : public Propulsion
 {
 public:

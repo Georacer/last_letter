@@ -13,5 +13,19 @@
 		</visual>
 	</link>
 
+	<link name="propeller">
+		<visual>
+			<geometry>
+				<mesh filename="package://last_letter/data/parameters/aircraft/skywalker_2013/urdf/10x4.7.stl"/>
+			</geometry>
+			<material name="greenSprite"/>
+		</visual>
+	</link>
+
+	<joint name="motor_mount" type="floating">
+		<parent link="base_link"/>
+		<child link="propeller"/>
+	</joint>
+
 </robot>
 
