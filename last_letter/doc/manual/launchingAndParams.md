@@ -17,7 +17,7 @@ Arguments are passed to control the simulation behaviour and operational mode, w
 
 **Operation mode arguments (mutually exclusive!)**
 
-`manualMode`: **(default false)** Control the vehicle via full manual control, using a joystick or gamepad connected to your machine, which is read by the ROS core. Every Human Interface Device that can be read by the [joy_node](http://wiki.ros.org/joy) can be used, but the "radio calibration" should be done in the [HID.yaml](HIDParams.md) parameter file, according to [this guide](RCCal.md).
+`manualMode`: **(default true)** Control the vehicle via full manual control, using a joystick or gamepad connected to your machine, which is read by the ROS core. Every Human Interface Device that can be read by the [joy_node](http://wiki.ros.org/joy) can be used, but the "radio calibration" should be done in the [HID.yaml](HIDParams.md) parameter file, according to [this guide](RCCal.md).
 
 `autoMode`: **(default false)** Insert a controller in the loop. Joystick commands are forwarded to the controller, while the controller output feeds the aircraft model inputs. This mode is experimental and not recommended.
 
