@@ -41,6 +41,11 @@ NoAerodynamics::~NoAerodynamics()
 {
 }
 
+// Store input for force calculation - unnecessary in this object
+void NoAerodynamics::getInput()
+{
+}
+
 // Force calculation function
 geometry_msgs::Vector3 NoAerodynamics::getForce()
 {
@@ -96,6 +101,16 @@ StdLinearAero::StdLinearAero(ModelPlane * parent) : Aerodynamics(parent)
 	if(!ros::param::getCached("airframe/oswald", oswald)) {ROS_FATAL("Invalid parameters for -oswald- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("airframe/mcoeff", M)) {ROS_FATAL("Invalid parameters for -mcoeff- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("airframe/alpha_stall", alpha0)) {ROS_FATAL("Invalid parameters for -alpha_stall- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached("airframe/chanAileron", chanAileron)) {ROS_INFO("No AILERON channel selected"); chanAileron=-1;}
+	if(!ros::param::getCached("airframe/chanElevator", chanElevator)) {ROS_INFO("No ELEVATOR channel selected"); chanElevator=-1;}
+	if(!ros::param::getCached("airframe/chanRudder", chanRudder)) {ROS_INFO("No RUDDER channel selected"); chanRudder=-1;}
+	if(!ros::param::getCached("airframe/deltaa_max", deltaa_max)) {ROS_INFO("No deltaa_max value selected"); deltaa_max=0;}
+	if(!ros::param::getCached("airframe/deltae_max", deltae_max)) {ROS_INFO("No deltae_max value selected"); deltae_max=0;}
+	if(!ros::param::getCached("airframe/deltar_max", deltar_max)) {ROS_INFO("No deltar_max value selected"); deltar_max=0;}
+
+	inputAileron = 0.0;
+	inputElevator = 0.0;
+	inputRudder = 0.0;
 }
 
 // Class destructor
@@ -103,15 +118,21 @@ StdLinearAero::~StdLinearAero()
 {
 }
 
+
+void StdLinearAero::getInput()
+{
+	ros::param::getCached("airframe/deltaa_max", deltaa_max);
+	ros::param::getCached("airframe/deltae_max", deltae_max);
+	ros::param::getCached("airframe/deltar_max", deltar_max);
+	//Convert PPM to radians
+	if (chanAileron>-1) {inputAileron = deltaa_max * (double)(parentObj->input.value[chanAileron]-1500)/500;}
+	if (chanElevator>-1) {inputElevator = deltae_max * (double)(parentObj->input.value[chanElevator]-1500)/500;}
+	if (chanRudder>-1) {inputRudder = deltar_max * (double)(parentObj->input.value[chanRudder]-1500)/500;}
+}
+
 // Force calculation function
 geometry_msgs::Vector3 StdLinearAero::getForce()
 {
-	//split control input values
-	double deltaa = parentObj->input[0];
-	double deltae = parentObj->input[1];
-	double deltat = parentObj->input[2];
-	double deltar = parentObj->input[3];
-
 	// Read airdata
 	double airspeed = parentObj->airdata.airspeed;
 	double alpha = parentObj->airdata.alpha;
@@ -149,10 +170,10 @@ geometry_msgs::Vector3 StdLinearAero::getForce()
 	}
 	else
 	{
-		ax = qbar*(c_x_a + c_x_q*c*q/(2*airspeed) - c_drag_deltae*cos(alpha)*fabs(deltae) + c_lift_deltae*sin(alpha)*deltae);
+		ax = qbar*(c_x_a + c_x_q*c*q/(2*airspeed) - c_drag_deltae*cos(alpha)*fabs(inputElevator) + c_lift_deltae*sin(alpha)*inputElevator);
 		// split c_x_deltae to include "abs" term
-		ay = qbar*(c_y_0 + c_y_b*beta + c_y_p*b*p/(2*airspeed) + c_y_r*b*r/(2*airspeed) + c_y_deltaa*deltaa + c_y_deltar*deltar);
-		az = qbar*(c_z_a + c_z_q*c*q/(2*airspeed) - c_drag_deltae*sin(alpha)*fabs(deltae) - c_lift_deltae*cos(alpha)*deltae);
+		ay = qbar*(c_y_0 + c_y_b*beta + c_y_p*b*p/(2*airspeed) + c_y_r*b*r/(2*airspeed) + c_y_deltaa*inputAileron + c_y_deltar*inputRudder);
+		az = qbar*(c_z_a + c_z_q*c*q/(2*airspeed) - c_drag_deltae*sin(alpha)*fabs(inputElevator) - c_lift_deltae*cos(alpha)*inputElevator);
 		// split c_z_deltae to include "abs" term
 	}
 
@@ -161,7 +182,6 @@ geometry_msgs::Vector3 StdLinearAero::getForce()
 	wrenchAero.force.z = az;
 
 	// Printouts
-	// std::cout << deltar << " ";
 	// std::cout << rho << " ";
 	// std::cout << airspeed << " ";
 	// std::cout << pow(airspeed,2) << " ";
@@ -178,12 +198,6 @@ geometry_msgs::Vector3 StdLinearAero::getForce()
 // Torque calculation function
 geometry_msgs::Vector3 StdLinearAero::getTorque()
 {
-	//split control input values
-	double deltaa = parentObj->input[0];
-	double deltae = parentObj->input[1];
-	double deltat = parentObj->input[2];
-	double deltar = parentObj->input[3];
-
 	// Read airdata
 	double airspeed = parentObj->airdata.airspeed;
 	double alpha = parentObj->airdata.alpha;
@@ -208,9 +222,9 @@ geometry_msgs::Vector3 StdLinearAero::getTorque()
 	}
 	else
 	{
-		la = qbar*b*(c_l_0 + c_l_b*beta + c_l_p*b*p/(2*airspeed) + c_l_r*b*r/(2*airspeed) + c_l_deltaa*deltaa + c_l_deltar*deltar);
-		ma = qbar*c*(c_m_0 + c_m_a*alpha + c_m_q*c*q/(2*airspeed) + c_m_deltae*deltae);
-		na = qbar*b*(c_n_0 + c_n_b*beta + c_n_p*b*p/(2*airspeed) + c_n_r*b*r/(2*airspeed) + c_n_deltaa*deltaa + c_n_deltar*deltar);
+		la = qbar*b*(c_l_0 + c_l_b*beta + c_l_p*b*p/(2*airspeed) + c_l_r*b*r/(2*airspeed) + c_l_deltaa*inputAileron + c_l_deltar*inputRudder);
+		ma = qbar*c*(c_m_0 + c_m_a*alpha + c_m_q*c*q/(2*airspeed) + c_m_deltae*inputElevator);
+		na = qbar*b*(c_n_0 + c_n_b*beta + c_n_p*b*p/(2*airspeed) + c_n_r*b*r/(2*airspeed) + c_n_deltaa*inputAileron + c_n_deltar*inputRudder);
 	}
 
 	wrenchAero.torque.x = la;

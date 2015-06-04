@@ -13,7 +13,7 @@
 		</visual>
 	</link>
 
-	<link name="propeller">
+	<link name="propeller_1">
 		<visual>
 			<geometry>
 				<mesh filename="package://last_letter/data/parameters/aircraft/skywalker_2013/urdf/10x4.7.stl"/>
@@ -24,7 +24,7 @@
 
 	<joint name="motor_mount" type="floating">
 		<parent link="base_link"/>
-		<child link="propeller"/>
+		<child link="propeller_1"/>
 	</joint>
 
 </robot>

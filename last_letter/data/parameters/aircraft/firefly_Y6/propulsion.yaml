@@ -2,26 +2,80 @@
 # Motor types: 0 No motor, 1 Beard Engine, 2 Piston engine, 3 Electric Engine
 # Polynomial types: 0 1D, 1 2D, 2 cubic spline
 
-motor/nMotors: 1
+motor/nMotors: 3
 
-motor1/CGOffset: [-0.25, 0.0, -0.13] # location offset of the motor mount relative to CG
-motor1/mountOrientation: [1.57, 0.0, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
+
+motor1/chanMotor: 2
+motor1/chanGimbal: -1
+motor1/gimbalAngle_max: 0.0
+
+motor1/CGOffset: [0.3, 0.3, -0.13] # location offset of the motor mount relative to CG
+motor1/mountOrientation: [0.0, 1.57, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
 
 motor1/motorType: 3
-motor1/Kv: 13.333 # in RPS/V
+motor1/Kv: 2 # in RPS/V
 motor1/Rm: 0.041 # in Ohms
 motor1/I0: 0.9 # in Amperes
 
-motor1/RadPSLimits: [0.01, 1000.0]
+motor1/RadPSLimits: [0.01, 100.0]
 motor1/engInertia: 0.008 # in kg*m^3
 
-prop1/propDiam: 0.305 # in m
+prop1/propDiam: 0.05 # in m
 prop1/nCoeffPoly/polyType: 0
 prop1/nCoeffPoly/polyNo: 4
 prop1/nCoeffPoly/coeffs: [0.0, 3.19, -12.15, 27.83, -21.82]
 prop1/powerPoly/polyType: 0
 prop1/powerPoly/polyNo: 3
-prop1/powerPoly/coeffs: [0.0661, -0.1647, 0.2958, -0.2355]
+prop1/powerPoly/coeffs: [0.0220, -0.0549, 0.0986, -0.0785]
+
+
+motor2/chanMotor: 2
+motor2/chanGimbal: -1
+motor2/gimbalAngle_max: 0.0
+
+motor2/CGOffset: [0.3, -0.3, -0.13] # location offset of the motor mount relative to CG
+motor2/mountOrientation: [0.0, 1.57, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
+
+motor2/motorType: 3
+motor2/Kv: 2 # in RPS/V
+motor2/Rm: 0.041 # in Ohms
+motor2/I0: 0.9 # in Amperes
+
+motor2/RadPSLimits: [0.01, 100.0]
+motor2/engInertia: 0.008 # in kg*m^3
+
+prop2/propDiam: 0.05 # in m
+prop2/nCoeffPoly/polyType: 0
+prop2/nCoeffPoly/polyNo: 4
+prop2/nCoeffPoly/coeffs: [0.0, 3.19, -12.15, 27.83, -21.82]
+prop2/powerPoly/polyType: 0
+prop2/powerPoly/polyNo: 3
+prop2/powerPoly/coeffs: [0.0220, -0.0549, 0.0986, -0.0785]
+
+
+motor3/chanMotor: 2
+motor3/chanGimbal: 3
+motor3/gimbalAngle_max: 0.79
+
+motor3/CGOffset: [-0.55, 0.0, -0.13] # location offset of the motor mount relative to CG
+motor3/mountOrientation: [0.0, 1.57, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
+
+motor3/motorType: 3
+motor3/Kv: 2.0 # in RPS/V
+motor3/Rm: 0.041 # in Ohms
+motor3/I0: 0.9 # in Amperes
+
+motor3/RadPSLimits: [0.01, 100.0]
+motor3/engInertia: 0.008 # in kg*m^3
+
+prop3/propDiam: 0.1 # in m
+prop3/nCoeffPoly/polyType: 0
+prop3/nCoeffPoly/polyNo: 4
+prop3/nCoeffPoly/coeffs: [0.0, 3.19, -12.15, 27.83, -21.82]
+prop3/powerPoly/polyType: 0
+prop3/powerPoly/polyNo: 3
+prop3/powerPoly/coeffs: [0.0220, -0.0549, 0.0986, -0.0785]
+
 
 battery/Rs: 0.0 # in Ohms
 battery/Cells: 3 # number of LiPo cells

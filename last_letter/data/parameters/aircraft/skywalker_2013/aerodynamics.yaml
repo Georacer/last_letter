@@ -41,3 +41,7 @@ airframe/c_n_deltar: 0.1 #opposite sign than c_y_deltar
 airframe/deltaa_max: 0.3491
 airframe/deltae_max: 0.3491
 airframe/deltar_max: 0.3491
+
+airframe/chanAileron: 0
+airframe/chanElevator: 1
+airframe/chanRudder: 3

@@ -32,13 +32,14 @@ class ModelPlane
 	///////////
 	//Variables
 	last_letter_msgs::SimStates states; // main simulation states
+	last_letter_msgs::SimPWM input; // PWM input to the model
 	last_letter_msgs::Environment environment; // environmental component local to the UAV
 	ros::Subscriber subInp, subEnv; // ROS subscribers
 	ros::Publisher pubState, pubForce, pubTorque, pubLinAcc; // ROS publishers
 	ros::Time tprev; // previous ROS time holder
 	double dt; // simulation timestep in s
 	int initTime; // first simulation loop flag
-	double input[4], deltaa_max, deltae_max, deltar_max; // Control inputs and maximum surface deflections
+	int chanReset;
 
 	/////////
 	//Members

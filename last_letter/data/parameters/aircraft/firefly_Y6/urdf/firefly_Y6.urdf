@@ -21,9 +21,37 @@
 		</visual>
 	</link>
 
-	<joint name="motor_mount" type="floating">
+	<link name="propeller_2">
+		<visual>
+			<geometry>
+				<mesh filename="package://last_letter/data/parameters/aircraft/firefly_Y6/urdf/10x4.7.stl"/>
+			</geometry>
+			<material name="redYouth"/>
+		</visual>
+	</link>
+
+	<link name="propeller_3">
+		<visual>
+			<geometry>
+				<mesh filename="package://last_letter/data/parameters/aircraft/firefly_Y6/urdf/10x4.7.stl"/>
+			</geometry>
+			<material name="redYouth"/>
+		</visual>
+	</link>
+
+	<joint name="motor_mount_1" type="floating">
 		<parent link="base_link"/>
 		<child link="propeller_1"/>
+	</joint>
+
+	<joint name="motor_mount_2" type="floating">
+		<parent link="base_link"/>
+		<child link="propeller_2"/>
+	</joint>
+
+	<joint name="motor_mount_3" type="floating">
+		<parent link="base_link"/>
+		<child link="propeller_3"/>
 	</joint>
 
 </robot>

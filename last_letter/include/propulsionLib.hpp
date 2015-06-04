@@ -17,6 +17,9 @@ class Propulsion
 	geometry_msgs::Vector3 CGOffset; // vector from CG to engine coordinates
 	geometry_msgs::Vector3 mountOrientation;
 	geometry_msgs::Vector3 relativeWind; // relative wind vector in the propeller frame
+	double inputMotor, inputGimbal; // control input (0-1)
+	double gimbalAngle_max;
+	int chanMotor, chanGimbal;
 	double omega; // motor angular speed in rad/s
 	double theta; // propeller angle in rads
 	double normalWind; // scalar wind normal to propeller disc
@@ -30,6 +33,7 @@ class Propulsion
 	Propulsion(ModelPlane *, int);
 	~Propulsion();
 
+	void getInput(); // store control input
 	void stepEngine(); // engine physics step, container for the generic class
 	void rotateWind(); // convert the wind to the propeller axes
 	virtual void updateRadPS() =0; // Step the angular speed
@@ -63,7 +67,7 @@ class EngBeard: public Propulsion
 	///////////
 	//Variables
 	double s_prop, c_prop, k_motor, k_t_p, k_omega;
-	double airspeed, rho, deltat;
+	double airspeed, rho;
 
 	///////////
 	//Functions
@@ -84,7 +88,7 @@ public:
 	////////////
 	// Variables
 	double omegaMin, omegaMax;
-	double deltat, propDiam, engInertia, rho;
+	double propDiam, engInertia, rho;
 
 	//////////
 	// Members
@@ -115,7 +119,7 @@ public:
 	// Variables //
 	////////////////
 	double omegaMin, omegaMax;
-	double deltat, propDiam, engInertia, rho;
+	double propDiam, engInertia, rho;
 	double Kv, Rm, Rs, I0, Cells;
 
 	//////////////

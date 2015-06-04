@@ -9,9 +9,10 @@ class Dynamics
 	~Dynamics();
 	Aerodynamics * aerodynamics;
 	Gravity * gravity;
-	int nMotors;
+	int nMotors; // number of motors mounted on the aircraft
 	Propulsion ** propulsion;
 	GroundReaction * groundReaction;
+	void getInput(); // store and convert new input values
 	geometry_msgs::Vector3 getForce(); // Access class members and gather resulting forces
 	geometry_msgs::Vector3 getTorque(); // Access class members and gather resulting torques
 };

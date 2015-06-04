@@ -92,15 +92,6 @@ void ModelPlane::init()
 	states.geoid.longitude = temp[1];
 	states.geoid.altitude = temp[2] - states.pose.position.z;
 
-	// Initialize control inputs
-	input[0] = 0;
-	input[1] = 0;
-	input[2] = 0;
-	input[3] = 0;
-	input[4] = 0;
-	input[5] = 0;
-	input[6] = 0;
-
 	// Initialize environment
 	environment.wind.x = 0;
 	environment.wind.y = 0;
@@ -111,6 +102,8 @@ void ModelPlane::init()
 	if(!ros::param::getCached("/environment/groundTemp", environment.temperature)) {ROS_FATAL("Invalid parameters for -/environment/groundTemp- in param server!"); ros::shutdown();}
 	// Set initial gravity in case environment node isn't up yet
 	environment.gravity = 9.81;
+
+	if(!ros::param::getCached("init/chanReset", chanReset)) {ROS_INFO("No RESET channel selected"); chanReset=-1;}
 }
 
 ///////////////////////////////////////
@@ -141,20 +134,13 @@ void ModelPlane::step(void)
 //convert uS PWM values to control surface inputs
 void ModelPlane::getInput(last_letter_msgs::SimPWM inputMsg)
 {
-	if(!ros::param::getCached("airframe/deltaa_max", deltaa_max)) {ROS_FATAL("Invalid parameters for -airframe/deltaa_max- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/deltae_max", deltae_max)) {ROS_FATAL("Invalid parameters for -airframe/deltae_max- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/deltar_max", deltar_max)) {ROS_FATAL("Invalid parameters for -airframe/deltar_max- in param server!"); ros::shutdown();}
-	//Convert PPM to radians (0/1 for throttle)
-	input[0] = deltaa_max * (double)(inputMsg.value[0]-1500)/500;
-	input[1] = deltae_max * (double)(inputMsg.value[1]-1500)/500;
-	input[2] = (double)(inputMsg.value[2]-1000)/1000;
-	input[3] = deltar_max * (double)(inputMsg.value[3]-1500)/500;
-	input[4] = (double)(inputMsg.value[4]-1500)/500;
-	input[5] = (double)(inputMsg.value[5]-1000)/1000;
-	// std::cout << input[5] << ',';
-	// std::cout << std::endl;
-	if (inputMsg.value[6] > 1500) { // Reset the simulation upon PWM command
-		init();
+	input = inputMsg;
+	dynamics.getInput();
+
+	if (chanReset>-1) { // If a rest channel is set
+		if (input.value[chanReset] > 1500) { // Reset the simulation upon PWM command
+			init();
+		}
 	}
 }
 

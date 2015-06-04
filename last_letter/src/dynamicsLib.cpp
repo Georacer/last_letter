@@ -34,6 +34,16 @@
 		delete parentObj;
 	}
 
+	// Order subsystems to store control input
+	void Dynamics::getInput()
+	{
+		for (int i=0; i<nMotors; i++) {
+			propulsion[i]->getInput();
+		}
+		groundReaction->getInput();
+		aerodynamics->getInput();
+	}
+
 	// Collect forces from underlying models
 	geometry_msgs::Vector3 Dynamics::getForce()
 	{

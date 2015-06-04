@@ -14,3 +14,5 @@ init/aileron: 0.000
 init/elevator: 0.0
 init/throttle: 0.0
 init/rudder: -0.000
+
+init/chanReset: 9

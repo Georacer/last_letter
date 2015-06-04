@@ -31,12 +31,31 @@ Propulsion::Propulsion(ModelPlane * parent, int ID)
 
 	theta = 0; // Initialize propeller angle
 
+	sprintf(paramMsg, "motor%i/chanMotor", id);
+	if(!ros::param::getCached(paramMsg, chanMotor)) {ROS_INFO("No MOTOR%i channel selected", id); chanMotor=-1;}
+	sprintf(paramMsg, "motor%i/chanGimbal", id);
+	if(!ros::param::getCached(paramMsg, chanGimbal)) {ROS_INFO("No GIMBAL%i channel selected", id); chanGimbal=-1;}
+	sprintf(paramMsg, "motor%i/gimbalAngle_max", id);
+	if(!ros::param::getCached(paramMsg, gimbalAngle_max)) {ROS_INFO("No GIMBALANGLE_MAX%i value selected", id); gimbalAngle_max=0.0;}
+
+	inputMotor = 0.0;
+	inputGimbal = 0.0;
+
 }
 
 // Destructor
 Propulsion::~Propulsion()
 {
 	delete parentObj;
+}
+
+void Propulsion::getInput()
+{
+	char paramMsg[50];
+	sprintf(paramMsg, "motor%i/gimbalAngle_max", id);
+	ros::param::getCached(paramMsg, gimbalAngle_max);
+	if (chanMotor>-1) {inputMotor = (double)(parentObj->input.value[chanMotor]-1000)/1000; }
+	if (chanGimbal>-1) {inputGimbal = gimbalAngle_max * (double)(parentObj->input.value[chanGimbal]-1500)/500; }
 }
 
 // Engine physics step, container for the generic class
@@ -62,7 +81,7 @@ void Propulsion::rotateWind()
 
 	// Construct transformation to apply gimbal movement. Gimbal rotation MUST be aligned with the resulting z-axis!
 	// !!! Order mixed because tf::Quaternion::setEuler seems to work with PRY, instead of YPR
-	tempQuat.setEuler(0.0, 0.0, 3.14*parentObj->input[3]);
+	tempQuat.setEuler(0.0, 0.0, inputGimbal);
 	mount_to_gimbal.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
 	mount_to_gimbal.setRotation(tempQuat);
 
@@ -209,10 +228,9 @@ EngBeard::~EngBeard()
 void EngBeard::updateRadPS()
 {
 	rho = parentObj->environment.density;
-	deltat = parentObj->input[2]; // Read thrust command input
 	airspeed = parentObj->airdata.airspeed; // Read vehicle airspeed
 	// Propagate rotational speed with a first order response
-	omega = 1 / (0.5 + parentObj->dt) * (0.5 * omega + parentObj->dt * deltat * k_omega); // Maximum omega set to 300 rad/s
+	omega = 1 / (0.5 + parentObj->dt) * (0.5 * omega + parentObj->dt * inputMotor * k_omega); // Maximum omega set to 300 rad/s
 	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
 }
 
@@ -291,11 +309,10 @@ PistonEng::~PistonEng()
 // Update motor rotational speed and calculate thrust
 void PistonEng::updateRadPS()
 {
-	deltat = parentObj->input[2];
 	rho = parentObj->environment.density;
 
 	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
-	double engPower = deltat * powerHP * 745.7; // Calculate current engine power
+	double engPower = inputMotor * powerHP * 745.7; // Calculate current engine power
 
 	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
@@ -312,7 +329,7 @@ void PistonEng::updateRadPS()
 	// Constrain propeller force to +-2 times the aircraft weight
 	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 2.0*parentObj->kinematics.mass*9.81), -2.0*parentObj->kinematics.mass*9.81);
 	wrenchProp.torque.x = propPower / omega;
-	if (deltat < 0.01) {
+	if (inputMotor < 0.01) {
 		wrenchProp.force.x = 0;
 		wrenchProp.torque.x = 0;
 	} // To avoid aircraft rolling and turning on the ground while throttle is off
@@ -420,11 +437,10 @@ ElectricEng::~ElectricEng()
 // Update motor rotational speed and calculate thrust
 void ElectricEng::updateRadPS()
 {
-	deltat = parentObj->input[2];
 	rho = parentObj->environment.density;
 
 	double Ei = omega/2/M_PI/Kv;
-	double Im = (Cells*4.0*deltat - Ei)/(Rs*deltat + Rm);
+	double Im = (Cells*4.0*inputMotor - Ei)/(Rs*inputMotor + Rm);
 	Im = std::max(Im,0.0); // Current cannot return to the ESC
 	double engPower = Ei*(Im - I0);
 
@@ -445,7 +461,7 @@ void ElectricEng::updateRadPS()
 	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 5.0*parentObj->kinematics.mass*9.81), -5.0*parentObj->kinematics.mass*9.81);
 	wrenchProp.torque.x = propPower / omega;
 
-	if (deltat < 0.01) {
+	if (inputMotor < 0.01) {
 		wrenchProp.force.x = 0;
 		wrenchProp.torque.x = 0;
 	} // To avoid aircraft rolling and turning on the ground while throttle is off

@@ -37,7 +37,7 @@ void joy2chan(sensor_msgs::Joy joyMsg)
 	channels.value[6] = (unsigned int)(input[6]*500 + 1500); // Generic channel
 	channels.value[7] = (unsigned int)(input[7]*500 + 1500); // Generic channel
 	channels.value[8] = (unsigned int)(input[8]*500 + 1500); // Generic channel
-	channels.value[9] = (unsigned int)(input[9]*500 + 1500); // Generic channel
+	channels.value[9] = (unsigned int)(input[9]*1000 + 1000); // Init channel
 	channels.value[10] = (unsigned int)(input[10]*1000 + 1000); // Reset channel
 	channels.header.stamp = ros::Time::now();
 	pub.publish(channels);
