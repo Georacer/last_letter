@@ -55,7 +55,7 @@ PanosContactPoints::PanosContactPoints(ModelPlane * parent) : GroundReaction(par
 {
 	XmlRpc::XmlRpcValue list;
 	int i, j, points;
-	char paramMsg[25];
+	char paramMsg[50];
 	double temp[6];
 	// Read contact points number from parameter server
 	if(!ros::param::getCached("airframe/contactPtsNo", contactPtsNo)) {ROS_FATAL("Invalid parameters for -/airframe/contactPtsNo- in param server!"); ros::shutdown();}

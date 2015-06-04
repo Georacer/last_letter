@@ -13,6 +13,7 @@ class Propulsion
 	///////////
 	//Variables
 	ModelPlane * parentObj; // pointer to parent ModelPlane class
+	int id; // The current motor ID
 	geometry_msgs::Vector3 CGOffset; // vector from CG to engine coordinates
 	geometry_msgs::Vector3 mountOrientation;
 	geometry_msgs::Vector3 relativeWind; // relative wind vector in the propeller frame
@@ -26,7 +27,7 @@ class Propulsion
 
 	///////////
 	//Functions
-	Propulsion(ModelPlane *);
+	Propulsion(ModelPlane *, int);
 	~Propulsion();
 
 	void stepEngine(); // engine physics step, container for the generic class
@@ -45,7 +46,7 @@ class Propulsion
 class NoEngine: public Propulsion
 {
 public:
-	NoEngine(ModelPlane *);
+	NoEngine(ModelPlane *, int);
 	~NoEngine();
 
 	void updateRadPS();
@@ -66,7 +67,7 @@ class EngBeard: public Propulsion
 
 	///////////
 	//Functions
-	EngBeard(ModelPlane *);
+	EngBeard(ModelPlane *, int);
 	~EngBeard();
 
 	void updateRadPS(); //Step the angular speed
@@ -96,7 +97,7 @@ public:
 
 	////////////
 	// Functions
-	PistonEng(ModelPlane *);
+	PistonEng(ModelPlane *, int);
 	~PistonEng();
 
 	void updateRadPS();
@@ -125,7 +126,7 @@ public:
 	////////////////
 	// Functions //
 	////////////////
-	ElectricEng(ModelPlane *);
+	ElectricEng(ModelPlane *, int);
 	~ElectricEng();
 
 	void updateRadPS();

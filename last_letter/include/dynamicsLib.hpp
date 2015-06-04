@@ -9,7 +9,8 @@ class Dynamics
 	~Dynamics();
 	Aerodynamics * aerodynamics;
 	Gravity * gravity;
-	Propulsion * propulsion;
+	int nMotors;
+	Propulsion ** propulsion;
 	GroundReaction * groundReaction;
 	geometry_msgs::Vector3 getForce(); // Access class members and gather resulting forces
 	geometry_msgs::Vector3 getTorque(); // Access class members and gather resulting torques

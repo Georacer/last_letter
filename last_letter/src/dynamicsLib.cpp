@@ -10,7 +10,14 @@
 		Factory factory;
 		aerodynamics = factory.buildAerodynamics(parentObj);
 		gravity = new Gravity(parentObj);
-		propulsion = factory.buildPropulsion(parentObj);
+
+		// Create and initialize motor objects array
+		if(!ros::param::getCached("motor/nMotors", nMotors)) {ROS_FATAL("Invalid parameters for -motor/nMotors- in param server!"); ros::shutdown();}
+		propulsion = new Propulsion*[nMotors];
+		for (int i=0; i<nMotors; i++) {
+			propulsion[i] = factory.buildPropulsion(parentObj,i+1); // Create a new propulsion object, id's are 1-indexed
+		}
+
 		groundReaction = factory.buildGroundReaction(parentObj);
 	}
 
@@ -19,7 +26,10 @@
 	{
 		delete aerodynamics;
 		delete gravity;
-		delete propulsion;
+		for (int i=0; i<nMotors; i++){
+			delete propulsion[i]; // delete all propulsion objects
+		}
+		delete propulsion; // Must also separately delete the array of object pointers
 		delete groundReaction;
 		delete parentObj;
 	}
@@ -28,9 +38,11 @@
 	geometry_msgs::Vector3 Dynamics::getForce()
 	{
 		geometry_msgs::Vector3 tempVect;
-		tempVect = propulsion->getForce();
+		tempVect = gravity->getForce();
+		for (int i=0; i<nMotors; i++){
+			tempVect = propulsion[i]->getForce() + tempVect;
+		}
 		tempVect = groundReaction->getForce() + tempVect;
-		tempVect = gravity->getForce() + tempVect;
 		tempVect = aerodynamics->getForce() + tempVect;
 
 		return tempVect;
@@ -42,7 +54,9 @@
 		geometry_msgs::Vector3 tempVect;
 		tempVect = aerodynamics->getTorque();
 		tempVect = gravity->getTorque() + tempVect;
-		tempVect = propulsion->getTorque() + tempVect;
+		for (int i=0; i<nMotors; i++){
+			tempVect = propulsion[i]->getTorque() + tempVect;
+		}
 		tempVect = groundReaction->getTorque() + tempVect;
 
 		return tempVect;

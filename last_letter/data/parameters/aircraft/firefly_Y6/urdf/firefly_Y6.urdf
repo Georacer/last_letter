@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+
+<robot name="plane">
+	<link name="base_link">
+		<visual>
+			<geometry>
+				<mesh filename="package://last_letter/data/parameters/aircraft/firefly_Y6/urdf/firefly_Y6.stl" scale="0.02621 0.02621 0.02621"/>
+			</geometry>
+			<material name="redYouth">
+				<color rgba="1.0 0.0 0.0 1"/>
+			</material>
+		</visual>
+	</link>
+
+	<link name="propeller_1">
+		<visual>
+			<geometry>
+				<mesh filename="package://last_letter/data/parameters/aircraft/firefly_Y6/urdf/10x4.7.stl"/>
+			</geometry>
+			<material name="redYouth"/>
+		</visual>
+	</link>
+
+	<joint name="motor_mount" type="floating">
+		<parent link="base_link"/>
+		<child link="propeller_1"/>
+	</joint>
+
+</robot>
+

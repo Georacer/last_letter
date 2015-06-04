@@ -78,7 +78,9 @@ void ModelPlane::init()
 	// Initialize rotorspeed array
 	states.rotorspeed.clear();
 	states.rotorspeed.push_back((double) 0);
-	dynamics.propulsion->omega = 0.01; // A small non-zero value
+	for (i=0; i<dynamics.nMotors; i++) {
+		dynamics.propulsion[i]->omega = 0.01; // A small non-zero value
+	}
 
 	// Initialize WGS coordinates
 	if(!ros::param::getCached("init/coordinates", list)) {ROS_FATAL("Invalid parameters for -init/coordinates- in param server!"); ros::shutdown();}
@@ -116,7 +118,9 @@ void ModelPlane::init()
 void ModelPlane::step(void)
 {
 	// Perform step actions serially
-	dynamics.propulsion->stepEngine();
+	for (int i=0; i<dynamics.nMotors; i++) {
+		dynamics.propulsion[i]->stepEngine();
+	}
 	kinematics.forceInput = dynamics.getForce();
 	kinematics.torqueInput = dynamics.getTorque();
 	kinematics.calcDerivatives();
@@ -258,25 +262,27 @@ Aerodynamics * Factory::buildAerodynamics(ModelPlane * parent)
 }
 
 // Build engine model
-Propulsion * Factory::buildPropulsion(ModelPlane * parent)
+Propulsion * Factory::buildPropulsion(ModelPlane * parent, int id)
 {
 	int i;
-	if(!ros::param::getCached("motor/motorType", i)) {ROS_FATAL("Invalid parameters for -motorType- in param server!"); ros::shutdown();}
+	char paramMsg[50];
+	sprintf(paramMsg, "motor%i/motorType", id);
+	if(!ros::param::getCached(paramMsg, i)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	std::cout<< "building engine model: ";
 	switch (i)
 	{
 	case 0:
 		std::cout << "selecting no engine" << std::endl;
-		return new NoEngine(parent);
+		return new NoEngine(parent, id);
 	case 1:
 		std::cout << "selecting Beard engine" << std::endl;
-		return new EngBeard(parent);
+		return new EngBeard(parent, id);
 	case 2:
 		std::cout << "selecting piston engine" << std::endl;
-		return new PistonEng(parent);
+		return new PistonEng(parent, id);
 	case 3:
 		std::cout << "selecting electric engine" << std::endl;
-		return new ElectricEng(parent);
+		return new ElectricEng(parent, id);
 	default:
 		ROS_FATAL("Error while constructing Beard motor");
 		ros::shutdown();
@@ -312,17 +318,17 @@ Polynomial * Factory::buildPolynomial(char * baseParam)
 	XmlRpc::XmlRpcValue list;
 	char parameter[100];
 	sprintf(parameter, "%s/%s",baseParam,"polyType");
-	if(!ros::param::getCached(parameter, i)) {ROS_FATAL("Invalid parameters for -*/polyType- in param server!"); ros::shutdown();}
+	if(!ros::param::getCached(parameter, i)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 	std::cout<< "building a new polynomial: ";
 	switch (i)
 	{
 	case 0: {
 		std::cout << "selecting 1D polynomial" << std::endl;
 		sprintf(parameter, "%s/%s",baseParam,"polyNo");
-		if(!ros::param::getCached(parameter, i)) {ROS_FATAL("Invalid parameters for -polyNo- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached(parameter, i)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		int polyNo = i;
 		sprintf(parameter, "%s/%s",baseParam,"coeffs");
-		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for -coeffs- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		double coeffs[polyNo+1];
 		if (polyNo+1!=list.size()) {ROS_FATAL("Polynomial order and provided coefficient number do not match"); ros::shutdown();}
 		for (i = 0; i <=polyNo; i++) {
@@ -334,12 +340,12 @@ Polynomial * Factory::buildPolynomial(char * baseParam)
 	case 1: {
 		std::cout << "selecting 2D polynomial" << std::endl;
 		sprintf(parameter, "%s/%s",baseParam,"polyNo");
-		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for -polyNo- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		ROS_ASSERT(list[0].getType() == XmlRpc::XmlRpcValue::TypeInt);
 		int polyOrder1 = list[0];
 		int polyOrder2 = list[1];
 		sprintf(parameter, "%s/%s",baseParam,"coeffs");
-		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for -coeffs- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		int length = list.size();
 		if ((2*polyOrder2 + 2*polyOrder1*polyOrder2 + polyOrder1 - polyOrder1*polyOrder1 + 2)/2 != length) {
 			ROS_FATAL("Engine power polynomial order and provided coefficient number do not match");
@@ -355,10 +361,10 @@ Polynomial * Factory::buildPolynomial(char * baseParam)
 	case 2: {
 		std::cout << "selecting cubic spline" << std::endl;
 		sprintf(parameter, "%s/%s",baseParam,"breaksNo");
-		if(!ros::param::getCached(parameter, i)) {ROS_FATAL("Invalid parameters for -breaksNo- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached(parameter, i)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		int breaksNo = i;
 		sprintf(parameter, "%s/%s",baseParam,"breaks");
-		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for -breaks- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		if ((breaksNo+1) != list.size()) {
 			ROS_FATAL("breaks order and provided breaks number do not match");
 			ros::shutdown();
@@ -369,7 +375,7 @@ Polynomial * Factory::buildPolynomial(char * baseParam)
 			breaks[i]=list[i];
 		}
 		sprintf(parameter, "%s/%s",baseParam,"coeffs");
-		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for -coeffs- in param server!"); ros::shutdown();}
+		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		if (breaksNo*4 != list.size()) {
 			ROS_FATAL("breaks order and provided coeffs number do not match");
 			ros::shutdown();

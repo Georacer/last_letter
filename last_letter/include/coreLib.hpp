@@ -20,7 +20,7 @@ class Factory
 	public:
 	Integrator * buildIntegrator(ModelPlane *);
 	Aerodynamics * buildAerodynamics(ModelPlane *);
-	Propulsion * buildPropulsion(ModelPlane *);
+	Propulsion * buildPropulsion(ModelPlane *, int);
 	GroundReaction * buildGroundReaction(ModelPlane *);
 	Polynomial * buildPolynomial(char * parameter);
 };

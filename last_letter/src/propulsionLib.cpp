@@ -3,12 +3,15 @@
 //////////////////////////////
 
 // Constructor
-Propulsion::Propulsion(ModelPlane * parent)
+Propulsion::Propulsion(ModelPlane * parent, int ID)
 {
 	parentObj = parent;
+	id = ID;
 	XmlRpc::XmlRpcValue list;
 	int i;
-	if(!ros::param::getCached("motor/CGOffset", list)) {ROS_FATAL("Invalid parameters for -motor/CGOffset- in param server!"); ros::shutdown();}
+	char paramMsg[50];
+	sprintf(paramMsg, "motor%i/CGOffset", id);
+	if(!ros::param::getCached(paramMsg, list)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	for (i = 0; i < list.size(); ++i) {
 		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 	}
@@ -16,7 +19,8 @@ Propulsion::Propulsion(ModelPlane * parent)
 	CGOffset.y = list[1];
 	CGOffset.z = list[2];
 
-	if(!ros::param::getCached("motor/mountOrientation", list)) {ROS_FATAL("Invalid parameters for -motor/mountOrientation- in param server!"); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/mountOrientation", id);
+	if(!ros::param::getCached(paramMsg, list)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	for (i = 0; i < list.size(); ++i) {
 		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 	}
@@ -90,7 +94,9 @@ void Propulsion::rotateProp() // Update propeller angle
 	gimbal_to_prop.setRotation(tempQuat);
 
 	body_to_prop = (body_to_mount * mount_to_gimbal) * gimbal_to_prop;
-	broadcaster.sendTransform(tf::StampedTransform(body_to_prop, ros::Time::now(), "base_link", "propeller"));
+	char prop_frame[50];
+	sprintf(prop_frame, "propeller_%i", id);
+	broadcaster.sendTransform(tf::StampedTransform(body_to_prop, ros::Time::now(), "base_link", prop_frame));
 
 }
 
@@ -139,7 +145,7 @@ void Propulsion::rotateTorque()
 //////////////////
 
 // Constructor
-NoEngine::NoEngine(ModelPlane * parent) : Propulsion(parent)
+NoEngine::NoEngine(ModelPlane * parent, int id) : Propulsion(parent, id)
 {
 	wrenchProp.force.x = 0.0;
 	wrenchProp.force.y = 0.0;
@@ -176,16 +182,22 @@ geometry_msgs::Vector3 NoEngine::getTorque()
 ////////////////////////////////////////
 
 // Constructor
-EngBeard::EngBeard(ModelPlane * parent):Propulsion(parent)
+EngBeard::EngBeard(ModelPlane * parent, int ID):Propulsion(parent, ID)
 {
 	std::cout << "reading parameters for new Beard engine" << std::endl;
 	omega = 0; // Initialize engine rotational speed
 	// Read engine data from parameter server
-	if(!ros::param::getCached("motor/s_prop", s_prop)) {ROS_FATAL("Invalid parameters for -s_prop- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/c_prop", c_prop)) {ROS_FATAL("Invalid parameters for -c_prop- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/k_motor", k_motor)) {ROS_FATAL("Invalid parameters for -k_motor- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/k_t_p", k_t_p)) {ROS_FATAL("Invalid parameters for -k_t_p- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/k_omega", k_omega)) {ROS_FATAL("Invalid parameters for -k_omega- in param server!"); ros::shutdown();}
+	char paramMsg[50];
+	sprintf(paramMsg, "motor%i/s_prop", id);
+	if(!ros::param::getCached(paramMsg, s_prop)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/c_prop", id);
+	if(!ros::param::getCached(paramMsg, c_prop)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/k_motor", id);
+	if(!ros::param::getCached(paramMsg, k_motor)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/k_t_p", id);
+	if(!ros::param::getCached(paramMsg, k_t_p)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/k_omega", id);
+	if(!ros::param::getCached(paramMsg, k_omega)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 }
 
 // Destructor
@@ -229,28 +241,32 @@ geometry_msgs::Vector3 EngBeard::getTorque()
 ///////////////////////////////////////////////////
 
 // Constructor
-PistonEng::PistonEng(ModelPlane * parent) : Propulsion(parent)
+PistonEng::PistonEng(ModelPlane * parent, int ID) : Propulsion(parent, ID)
 {
 	XmlRpc::XmlRpcValue list;
 	int i, length;
 	char s[100];
-	if(!ros::param::getCached("motor/propDiam", propDiam)) {ROS_FATAL("Invalid parameters for -propDiam- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/engInertia", engInertia)) {ROS_FATAL("Invalid parameters for -engInertia- in param server!"); ros::shutdown();}
+	char paramMsg[50];
+	sprintf(paramMsg, "motor%i/propDiam", id);
+	if(!ros::param::getCached(paramMsg, propDiam)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/engInertia", id);
+	if(!ros::param::getCached(paramMsg, engInertia)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	// Initialize RadPS limits
-	if(!ros::param::getCached("motor/RadPSLimits", list)) {ROS_FATAL("Invalid parameters for -RadPSLimits- in param server!"); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/RadPSLimits", id);
+	if(!ros::param::getCached(paramMsg, list)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	ROS_ASSERT(list[0].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 	omegaMin = list[0];
 	omegaMax = list[1];
 
 	Factory factory;
 	// Create engine power polynomial
-	sprintf(s,"%s","motor/engPowerPoly");
+	sprintf(s,"%s%i/%s","motor", id, "engPowerPoly");
 	engPowerPoly =  factory.buildPolynomial(s);
 	// Create propeller efficiency polynomial
-	sprintf(s,"%s","motor/nCoeffPoly");
+	sprintf(s,"%s%i/%s","motor", id , "nCoeffPoly");
 	npPoly =  factory.buildPolynomial(s);
 	// Create propeller power polynomial
-	sprintf(s,"%s","motor/propPowerPoly");
+	sprintf(s,"%s%i/%s","motor", id, "propPowerPoly");
 	propPowerPoly =  factory.buildPolynomial(s);
 
 	omega = omegaMin; // Initialize engine rotational speed
@@ -351,30 +367,37 @@ geometry_msgs::Vector3 PistonEng::getTorque()
 ////////////////////////
 
 // Constructor
-ElectricEng::ElectricEng(ModelPlane * parent) : Propulsion(parent)
+ElectricEng::ElectricEng(ModelPlane * parent, int ID) : Propulsion(parent, ID)
 {
 	XmlRpc::XmlRpcValue list;
 	int i, length;
 	char s[100];
-	if(!ros::param::getCached("prop/propDiam", propDiam)) {ROS_FATAL("Invalid parameters for -propDiam- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/engInertia", engInertia)) {ROS_FATAL("Invalid parameters for -engInertia- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/Kv", Kv)) {ROS_FATAL("Invalid parameters for -Kv- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/Rm", Rm)) {ROS_FATAL("Invalid parameters for -Rm- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("battery/Rs", Rs)) {ROS_FATAL("Invalid parameters for -Rs- in param server!"); ros::shutdown();}
+	char paramMsg[50];
+	sprintf(paramMsg, "prop%i/propDiam", id);
+	if(!ros::param::getCached(paramMsg, propDiam)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/engInertia", id);
+	if(!ros::param::getCached(paramMsg, engInertia)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/Kv", id);
+	if(!ros::param::getCached(paramMsg, Kv)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/Rm", id);
+	if(!ros::param::getCached(paramMsg, Rm)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	if(!ros::param::getCached("battery/Rs", Rs)) {ROS_FATAL("Invalid parameters for -Cells- in param server!"); ros::shutdown();}
 	if(!ros::param::getCached("battery/Cells", Cells)) {ROS_FATAL("Invalid parameters for -Cells- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("motor/I0", I0)) {ROS_FATAL("Invalid parameters for -I0- in param server!"); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/I0", id);
+	if(!ros::param::getCached(paramMsg, I0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	// Initialize RadPS limits
-	if(!ros::param::getCached("motor/RadPSLimits", list)) {ROS_FATAL("Invalid parameters for -RadPSLimits- in param server!"); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/RadPSLimits", id);
+	if(!ros::param::getCached(paramMsg, list)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	ROS_ASSERT(list[0].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 	omegaMin = list[0];
 	omegaMax = list[1];
 
 	Factory factory;
 	// Create propeller efficiency polynomial
-	sprintf(s,"%s","prop/nCoeffPoly");
+	sprintf(s,"%s%i/%s","prop", id , "nCoeffPoly");
 	npPoly =  factory.buildPolynomial(s);
 	// Create propeller power polynomial
-	sprintf(s,"%s","prop/powerPoly");
+	sprintf(s,"%s%i/%s","prop", id, "powerPoly");
 	propPowerPoly =  factory.buildPolynomial(s);
 
 	omega = omegaMin; // Initialize engine rotational speed
