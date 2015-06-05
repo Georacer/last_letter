@@ -88,4 +88,4 @@ target_link_libraries(ctrlInjector ${catkin_LIBRARIES})
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find last_letter
 	OUTPUT_VARIABLE LAST_LETTER_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND rosdoc_lite -o ${LAST_LETTER_DIR}/doc/doxygen ${LAST_LETTER_DIR})
+execute_process(COMMAND rosdoc_lite -o ${LAST_LETTER_DIR}/doc/doxygen_rosdoc_lite ${LAST_LETTER_DIR} )

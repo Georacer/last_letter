@@ -36,7 +36,7 @@ target_link_libraries(mathutils ${LAPACK_LIBRARIES} ${catkin_LIBRARIES})
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find mathutils
 	OUTPUT_VARIABLE MATHUTILS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND rosdoc_lite -o ${MATHUTILS_DIR}/doc/doxygen ${MATHUTILS_DIR})
+execute_process(COMMAND rosdoc_lite -o ${MATHUTILS_DIR}/doc/doxygen_rosdoc_liter ${MATHUTILS_DIR})
 
 #############
 ## Install ##

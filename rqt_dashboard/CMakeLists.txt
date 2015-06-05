@@ -54,7 +54,7 @@ target_link_libraries(dash_backend ${catkin_LIBRARIES})
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find rqt_dashboard
 	OUTPUT_VARIABLE RQT_DASHBOARD_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND rosdoc_lite -o ${RQT_DASHBOARD_DIR}/doc/doxygen ${RQT_DASHBOARD_DIR})
+execute_process(COMMAND rosdoc_lite -o ${RQT_DASHBOARD_DIR}/doc/doxygen_rosdoc_lite ${RQT_DASHBOARD_DIR})
 
 #############
 ## Install ##

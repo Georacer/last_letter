@@ -50,7 +50,7 @@ target_link_libraries(uav_utils ${LAPACK_LIBRARIES} ${catkin_LIBRARIES})
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find uav_utils
 	OUTPUT_VARIABLE UAV_UTILS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND rosdoc_lite -o ${UAV_UTILS_DIR}/doc/doxygen ${UAV_UTILS_DIR})
+execute_process(COMMAND rosdoc_lite -o ${UAV_UTILS_DIR}/doc/doxygen_rosdoc_lite ${UAV_UTILS_DIR})
 
 #############
 ## Install ##

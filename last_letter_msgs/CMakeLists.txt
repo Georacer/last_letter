@@ -57,4 +57,4 @@ catkin_package(
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find last_letter_msgs
 	OUTPUT_VARIABLE LAST_LETTER_MSGS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND rosdoc_lite -o ${LAST_LETTER_MSGS_DIR}/doc/doxygen ${LAST_LETTER_MSGS_DIR})
+execute_process(COMMAND rosdoc_lite -o ${LAST_LETTER_MSGS_DIR}/doc/doxygen_rosdoc_lite ${LAST_LETTER_MSGS_DIR})
