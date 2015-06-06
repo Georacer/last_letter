@@ -41,6 +41,9 @@ Propulsion::Propulsion(ModelPlane * parent, int ID)
 	inputMotor = 0.0;
 	inputGimbal = 0.0;
 
+	sprintf(paramMsg, "motor%i/rotationDir", id);
+	if(!ros::param::getCached(paramMsg, rotationDir)) {ROS_INFO("No ROTATION_DIR%i value selected", id); rotationDir=1.0;}
+
 }
 
 // Destructor
@@ -236,10 +239,10 @@ EngBeard::~EngBeard()
 void EngBeard::updateRadPS()
 {
 	rho = parentObj->environment.density;
-	airspeed = parentObj->airdata.airspeed; // Read vehicle airspeed
+	airspeed = normalWind; // Read vehicle airspeed
 	// Propagate rotational speed with a first order response
-	omega = 1 / (0.5 + parentObj->dt) * (0.5 * omega + parentObj->dt * inputMotor * k_omega); // Maximum omega set to 300 rad/s
-	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
+	omega = rotationDir * 1 / (0.5 + parentObj->dt) * (0.5 * omega + parentObj->dt * inputMotor * k_omega);
+	parentObj->states.rotorspeed[0]=std::fabs(omega); // Write engine speed to states message
 }
 
 // Calculate propulsion forces
@@ -322,14 +325,14 @@ void PistonEng::updateRadPS()
 	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
 	double engPower = inputMotor * powerHP * 745.7; // Calculate current engine power
 
-	double advRatio = parentObj->states.velocity.linear.x/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double advRatio = normalWind/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
 	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
 	double npCoeff = npPoly->evaluate(advRatio);
 	// wrenchProp.force.x = propPower*std::fabs(npCoeff)/(parentObj->states.velocity.linear.x+1.0e-10); // Added epsilon for numerical stability
-	wrenchProp.force.x = propPower*std::fabs(npCoeff/(parentObj->states.velocity.linear.x+1.0e-10)); // Added epsilon for numerical stability
+	wrenchProp.force.x = propPower*std::fabs(npCoeff/(normalWind+1.0e-10)); // Added epsilon for numerical stability
 
-	double fadeFactor = (exp(-parentObj->states.velocity.linear.x*3/12));
+	double fadeFactor = (exp(-normalWind*3/12));
 	double staticThrust = 0.9*fadeFactor*pow(M_PI/2.0*propDiam*propDiam*rho*engPower*engPower,1.0/3); //static thrust fades at 5% at 12m/s
 	// ROS_INFO("engPower: %g, staticThrust: %g, regForce: %g", engPower, staticThrust, wrenchProp.force.x);
 	wrenchProp.force.x = wrenchProp.force.x + staticThrust;
@@ -346,10 +349,10 @@ void PistonEng::updateRadPS()
 	// double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;
 	double deltaT = (engPower - propPower)/omega;
 	double omegaDot = 1/engInertia*deltaT;
-	omega += omegaDot*parentObj->dt;
-	omega = std::max(std::min(omega, omegaMax), omegaMin); // Constrain omega to working range
+	omega += rotationDir * omegaDot * parentObj->dt;
+	omega = rotationDir * std::max(std::min(std::fabs(omega), omegaMax), omegaMin); // Constrain omega to working range
 
-	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
+	parentObj->states.rotorspeed[0]=std::fabs(omega); // Write engine speed to states message
 
 	// Printouts
 	// std::cout << deltat << " ";
@@ -447,14 +450,14 @@ void ElectricEng::updateRadPS()
 {
 	rho = parentObj->environment.density;
 
-	double Ei = omega/2/M_PI/Kv;
+	double Ei = std::fabs(omega)/2/M_PI/Kv;
 	double Im = (Cells*4.0*inputMotor - Ei)/(Rs*inputMotor + Rm);
 	Im = std::max(Im,0.0); // Current cannot return to the ESC
 	double engPower = Ei*(Im - I0);
 
-	double advRatio = normalWind / (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double advRatio = normalWind / (std::fabs(omega)/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	// advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
-	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
+	double propPower = propPowerPoly->evaluate(advRatio) * parentObj->environment.density * pow(std::fabs(omega)/2.0/M_PI,3) * pow(propDiam,5);
 	double npCoeff = npPoly->evaluate(advRatio);
 
 	wrenchProp.force.x = propPower*std::fabs(npCoeff/(normalWind+1.0e-10)); // Added epsilon for numerical stability
@@ -476,12 +479,12 @@ void ElectricEng::updateRadPS()
 	wrenchProp.torque.y = 0.0;
 	wrenchProp.torque.z = 0.0;
 	// double deltaP = parentObj->kinematics.forceInput.x * parentObj->states.velocity.linear.x / npCoeff;
-	double deltaT = (engPower - propPower)/omega;
+	double deltaT = (engPower - propPower)/std::fabs(omega);
 	double omegaDot = 1/engInertia*deltaT;
-	omega += omegaDot*parentObj->dt;
-	omega = std::max(std::min(omega, omegaMax), omegaMin); // Constrain omega to working range
+	omega += rotationDir * omegaDot * parentObj->dt;
+	omega = rotationDir * std::max(std::min(std::fabs(omega), omegaMax), omegaMin); // Constrain omega to working range
 
-	parentObj->states.rotorspeed[0]=omega; // Write engine speed to states message
+	parentObj->states.rotorspeed[0]=std::fabs(omega); // Write engine speed to states message
 
 
 	// Printouts

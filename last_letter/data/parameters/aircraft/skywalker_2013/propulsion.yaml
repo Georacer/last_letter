@@ -11,6 +11,7 @@ motor1/gimbalAngle_max: 0.0
 
 motor1/CGOffset: [-0.25, 0.0, -0.13] # location offset of the motor mount relative to CG
 motor1/mountOrientation: [0.0, 0.0, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
+motor1/rotationDir: 1.0
 
 motor1/motorType: 3
 motor1/Kv: 13.333 # in RPS/V

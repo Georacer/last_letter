@@ -21,6 +21,7 @@ class Propulsion
 	double gimbalAngle_max;
 	int chanMotor, chanGimbal;
 	double omega; // motor angular speed in rad/s
+	double rotationDir; // motor direction of rotation
 	double theta; // propeller angle in rads
 	double normalWind; // scalar wind normal to propeller disc
 	geometry_msgs::Wrench wrenchProp;
