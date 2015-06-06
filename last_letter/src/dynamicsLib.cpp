@@ -47,28 +47,28 @@
 	// Collect forces from underlying models
 	geometry_msgs::Vector3 Dynamics::getForce()
 	{
-		geometry_msgs::Vector3 tempVect;
-		tempVect = gravity->getForce();
+		geometry_msgs::Vector3 accumulator;
+		accumulator = gravity->getForce();
 		for (int i=0; i<nMotors; i++){
-			tempVect = propulsion[i]->getForce() + tempVect;
+			accumulator = propulsion[i]->getForce() + accumulator;
 		}
-		tempVect = groundReaction->getForce() + tempVect;
-		tempVect = aerodynamics->getForce() + tempVect;
+		accumulator = groundReaction->getForce() + accumulator;
+		accumulator = aerodynamics->getForce() + accumulator;
 
-		return tempVect;
+		return accumulator;
 	}
 
 	// Collect torques from underlying models
 	geometry_msgs::Vector3 Dynamics::getTorque()
 	{
-		geometry_msgs::Vector3 tempVect;
-		tempVect = aerodynamics->getTorque();
-		tempVect = gravity->getTorque() + tempVect;
+		geometry_msgs::Vector3 tempVect, accumulator;
+		accumulator = aerodynamics->getTorque();
+		accumulator = gravity->getTorque() + accumulator;
 		for (int i=0; i<nMotors; i++){
-			tempVect = propulsion[i]->getTorque() + tempVect;
+			accumulator = propulsion[i]->getTorque() + accumulator;
 		}
-		tempVect = groundReaction->getTorque() + tempVect;
+		accumulator = groundReaction->getTorque() + accumulator;
 
-		return tempVect;
+		return accumulator;
 	}
 

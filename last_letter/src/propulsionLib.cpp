@@ -143,6 +143,14 @@ void Propulsion::rotateTorque()
 	wrenchProp.torque.y = tempVect.getY();
 	wrenchProp.torque.z = tempVect.getZ();
 
+	// Convert the torque from the motor frame to the body frame
+	double ratio = parentObj->kinematics.J[0] / (parentObj->kinematics.J[0] + parentObj->kinematics.mass * CGOffset.x*CGOffset.x);
+	wrenchProp.torque.x =  ratio * wrenchProp.torque.x;
+	ratio = parentObj->kinematics.J[4] / (parentObj->kinematics.J[4] + parentObj->kinematics.mass * CGOffset.y*CGOffset.y);
+	wrenchProp.torque.y =  ratio * wrenchProp.torque.y;
+	ratio = parentObj->kinematics.J[8] / (parentObj->kinematics.J[8] + parentObj->kinematics.mass * CGOffset.z*CGOffset.z);
+	wrenchProp.torque.z =  ratio * wrenchProp.torque.z;
+
 	// Add torque to to force misalignment with CG
 	// r x F, where r is the distance from CoG to CoL
 	// Will potentially add the following code in the future, to support shift of CoG mid-flight
