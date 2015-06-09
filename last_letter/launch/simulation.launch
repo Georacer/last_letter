@@ -23,6 +23,9 @@
 	<!-- First UAV Group -->
 	<group ns="$(arg uav_name)">
 
+		<!-- Load this before the aircraft init.yaml so it can be overridden. -->
+		<rosparam param="init/coordinates" subst_value="True">[$(arg location)]</rosparam>
+
 		<!-- Initialization of the parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/init.yaml" /> <!-- load state initialization parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/rigidBody.yaml" /> <!-- load rigid body parameters -->
@@ -30,8 +33,6 @@
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/propulsion.yaml" /> <!-- load propulsion parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/contactPts.yaml" /> <!-- load contact points parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" />
-
-		<rosparam param="init/coordinates" subst_value="True">[$(arg location)]</rosparam>
 
 		<!-- Raising core nodes -->
 		<group>
