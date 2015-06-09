@@ -8,6 +8,7 @@
 	<arg name="ArduPlane" default="false"/>
 	<arg name="uav_name" default="skywalker_2013"/>
 	<arg name="log" default="false"/>
+	<arg name="location" default="37.889063, 23.731863, 0.0"/>
 	<!-- <arg name="groundCam" default="false"/> -->
 
 	<!-- Enable simulation clock -->
@@ -19,6 +20,7 @@
 		<arg name="autoMode" value="$(arg autoMode)"/>
 		<arg name="uav_name" value="$(arg uav_name)"/>
 		<arg name="log" value="$(arg log)"/>
+		<arg name="location" value="$(arg location)"/>
 	</include>
 
 	<!-- ArduPlane SITL connection -->

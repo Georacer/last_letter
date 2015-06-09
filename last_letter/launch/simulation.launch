@@ -6,6 +6,7 @@
 	<arg name="autoMode"/>	<!-- Connect model input with a controller node -->
 	<arg name="uav_name"/>	<!-- uav_name paremter which selects aircraft data file -->
 	<arg name="log"/>	<!-- Enable recorder node for logging -->
+	<arg name="location"/>
 
 	<!-- Initialization of parameters -->
 	<group>
@@ -29,6 +30,8 @@
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/propulsion.yaml" /> <!-- load propulsion parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/contactPts.yaml" /> <!-- load contact points parameters -->
 		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" />
+
+		<rosparam param="init/coordinates" subst_value="True">[$(arg location)]</rosparam>
 
 		<!-- Raising core nodes -->
 		<group>

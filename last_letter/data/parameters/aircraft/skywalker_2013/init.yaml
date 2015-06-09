@@ -3,7 +3,7 @@
 #All units are in S.I. unless otherwise stated
 
 #Initial State
-init/coordinates: [37.889063, 23.731863, 0.0] #latitude, longitude, altitude coordinates. Altitude for now should be ground elevation
+# init/coordinates: [37.889063, 23.731863, 0.0] #latitude, longitude, altitude coordinates. Altitude for now should be ground elevation
 init/position: [0.0, 0.0, -0.3] #NED frame
 init/orientation:  [-0.0000, 0.0039, 0.0000, 1.0000] #NED frame Nortwards
 # init/orientation:  [-0.0000, 0.0039, 1.0000, 0.0000] #NED frame Southwards
