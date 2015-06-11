@@ -187,7 +187,13 @@ int main(int argc, char **argv)
 	ros::Subscriber sub = n.subscribe("states",1,&environmentModel::callback, &env);
 	env.env_pub = n.advertise<last_letter_msgs::Environment>("environment",1);
 
-	ros::WallDuration(3).sleep(); //wait for other nodes to get raised
+	int statusModel=0;
+	ros::param::set("nodeStatus/environment", 1);
+	while (statusModel!=1) {
+		ros::param::get("nodeStatus/model", statusModel);
+	}
+
+	// ros::WallDuration(3).sleep(); //wait for other nodes to get raised
 
 	ROS_INFO("environmentNode up");
 	env.tprev = ros::Time::now();

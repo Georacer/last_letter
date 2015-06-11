@@ -12,7 +12,6 @@ ModelPlane::ModelPlane (ros::NodeHandle n) :
 kinematics(this), dynamics(this), airdata(this)
 {
 	if(!ros::param::getCached("/world/deltaT", dt)) {ROS_FATAL("Invalid parameters for -deltaT- in param server!"); ros::shutdown();}
-	init();
 	tprev = ros::Time::now();
 	states.header.stamp = tprev;
 	//Subscribe and advertize

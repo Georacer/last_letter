@@ -46,7 +46,15 @@ int main(int argc, char **argv)
 	pub = n.advertise<rosgraph_msgs::Clock>("/clock",1000);
 	sub = n.subscribe("ctrlPWM", 100, controlsCallback);
 
-	ros::WallDuration(5).sleep(); //wait for other nodes to get raised
+	int statusModel=0;
+	ros::param::set("nodeStatus/clock", 1);
+	while (statusModel!=1) {
+		ros::param::get("nodeStatus/model",statusModel);
+	}
+
+	// ros::WallDuration(5).sleep(); //wait for other nodes to get raised
+
+
 	double simRate;
 	ros::param::get("/world/simRate",simRate); //frame rate in Hz
 	double deltaT;
