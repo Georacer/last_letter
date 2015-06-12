@@ -57,6 +57,7 @@ add_executable(autopilot_HCUAV src/controller_HCUAV.cpp)
 add_executable(simClock src/clock.cpp)
 add_executable(ctrlInjector src/ctrlInjector.cpp)
 # add_executable(cameraController src/cameraController.cpp)
+add_executable(argumentHandler src/argumentHandler.cpp)
 
 ## Add cmake target dependencies of the executable/library
 add_dependencies(uav_publisher last_letter_msgs_gencpp ${catkin_EXPORTED_TARGETS})
@@ -70,6 +71,7 @@ add_dependencies(autopilot_HCUAV last_letter_msgs_gencpp ${PROJECT_NAME}_generat
 add_dependencies(simClock last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(ctrlInjector last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 # add_dependencies(cameraController last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(argumentHandler last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_publisher ${catkin_LIBRARIES})
@@ -84,6 +86,7 @@ target_link_libraries(modelPlaneLib mathutils ${catkin_LIBRARIES})
 target_link_libraries(simClock ${catkin_LIBRARIES})
 target_link_libraries(ctrlInjector ${catkin_LIBRARIES})
 # target_link_libraries(cameraController ${catkin_LIBRARIES})
+target_link_libraries(argumentHandler ${catkin_LIBRARIES})
 
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find last_letter

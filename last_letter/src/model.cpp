@@ -26,16 +26,18 @@ int main(int argc, char **argv)
 	ros::Subscriber sub = n.subscribe("/clock",1000, stepCallback);
 	uav = new ModelPlane(n); //Create a ModelPlane passing the nodehandle for subscriptions & publicatons
 
-	int statusClock=0, statusEnv=0;
+	int statusClock=0, statusEnv=0, statusArg=0;
 	while (statusClock!=1) {
 		ros::param::get("nodeStatus/clock", statusClock);
 	}
 	while (statusEnv!=1) {
 		ros::param::get("nodeStatus/environment", statusEnv);
 	}
+	while (statusArg!=1) {
+		ros::param::get("nodeStatus/argumentHandler", statusArg);
+	}
 
 	ros::param::set("nodeStatus/model", 1);
-
 
 	// ros::WallDuration(3).sleep(); //wait for other nodes to get raised
 
