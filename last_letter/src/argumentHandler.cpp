@@ -16,6 +16,7 @@ int main(int argc, char **argv)
 	std::string s;
 	int i;
 	double f;
+	bool b;
 	XmlRpc::XmlRpcValue list;
 
 	// // Read initial NED coordinates
@@ -80,6 +81,20 @@ int main(int argc, char **argv)
 	}
 	else {
 		ROS_ERROR("deltaT is string but not nan");
+	}
+
+
+	if(ros::param::get("argumentHandler/ArduPlane",b)) {
+		if (b==true) {
+			ros::param::set("/world/timeControls", 1);
+			ROS_INFO("Overwrote /world/timeControls to 1");
+		}
+		else {
+			ROS_INFO("ArduPlane argument was set to false");
+		}
+	}
+	else {
+		ROS_ERROR("ArduPlane parameter is not available");
 	}
 
 	ros::param::set("nodeStatus/argumentHandler", 1);

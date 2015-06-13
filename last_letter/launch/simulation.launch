@@ -6,6 +6,7 @@
 	<arg name="autoMode"/>	<!-- Connect model input with a controller node -->
 	<arg name="uav_name"/>	<!-- uav_name paremter which selects aircraft data file -->
 	<arg name="log"/>	<!-- Enable recorder node for logging -->
+	<arg name="ArduPlane"/> <!-- Let APM:SITL produce the control input -->
 
 	<!-- External optional arguments -->
 	<arg name="home"/>
@@ -37,10 +38,11 @@
 
 		<!-- Raising core nodes -->
 		<group>
-			<node pkg="last_letter" name="argumentHandler" type="argumentHandler" output="screen">
+			<node pkg="last_letter" name="argumentHandler" type="argumentHandler" output="screen"> <!-- Node which handles last-minute changes in the parameter server. Always last after any parameter loads -->
 				<rosparam param="home" subst_value="true">$(arg home)</rosparam>
 				<param name="simRate" value="$(arg simRate)"/>
 				<param name="deltaT" value="$(arg deltaT)"/>
+				<param name="ArduPlane" value="$(arg ArduPlane)"/>
 			</node>
 			<node if="$(arg log)" pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag -a"/> <!-- topic activity recorder node -->
 			<node pkg="last_letter" name="clock" type="simClock" output="screen"/>
@@ -75,15 +77,17 @@
 
 		<!-- Input nodes -->
 		<group if="$(arg manualMode)">
-<!--		<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
-			<rosparam command="load" file="$(find last_letter)data/parameters/HID.yaml" />
-			<node pkg="joy" type="joy_node" name="joystick" output="screen" >
-				<param name="dev" value="/dev/input/js0" />
-				<param name="deadzone" value="0.01" />
-			</node>
-			<node pkg="last_letter" name="joy2chan" type="joy2chan" output="screen" >
-				<remap from="rawPWM" to="ctrlPWM"/>
-			</node>
+			<group unless="$(arg ArduPlane)">
+	<!--		<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
+				<rosparam command="load" file="$(find last_letter)data/parameters/HID.yaml" />
+				<node pkg="joy" type="joy_node" name="joystick" output="screen" >
+					<param name="dev" value="/dev/input/js0" />
+					<param name="deadzone" value="0.01" />
+				</node>
+				<node pkg="last_letter" name="joy2chan" type="joy2chan" output="screen" >
+					<remap from="rawPWM" to="ctrlPWM"/>
+				</node>
+			</group>
 		</group>
 
 	</group>
