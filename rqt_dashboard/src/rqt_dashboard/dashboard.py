@@ -11,7 +11,7 @@ from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
 from python_qt_binding.QtGui import QWidget
 from PyQt4 import QtGui, QtCore
-from rqt_plot.rosplot import ROSData
+from rqt_plot.rosplot import ROSData, RosPlotException
 from std_msgs.msg import Float32
 from last_letter_msgs.msg import RefCommands
 
@@ -306,12 +306,16 @@ class GaugeSimple(QtGui.QWidget):
 		self.update()
 
 	def update_plot(self):
-		dump, value = self._rosdata.next()
-		self.value_uncap = round(value.pop(),1)
-		#print value
-		if len(value)>0:
-			self.set_gauge(self.value_uncap)
-		self.update_plot_timer.start(self.redraw_interval)
+		try:
+			dump, value = self._rosdata.next()
+			if value:
+				self.value_uncap = round(value.pop(),1)
+				#print value
+				if len(value)>0:
+					self.set_gauge(self.value_uncap)
+				self.update_plot_timer.start(self.redraw_interval)
+		except RosPlotException as e:
+			QtCore.qWarning('PlotWidget.update_plot(): error in rosplot: %s' % e)
 
 	def set_gauge(self, value):
 		#Clamp between [min, max]
