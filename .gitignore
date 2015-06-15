@@ -26,6 +26,10 @@ msg/_.*\.py$
 # Ignore generated docs
 .dox$
 .wikidoc$
+/rqt_dashboard/doc
+/uav_utils/doc
+/mathutils/doc
+/last_letter_msgs/doc
 
 # eclipse stuff
 .project
