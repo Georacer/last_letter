@@ -535,3 +535,13 @@ bool isnan(geometry_msgs::Quaternion q)
   }
   return false;
 }
+
+bool isnan_mtx(double * R, int n)
+{
+  for (int i=0; i<n; i++){
+    if (isnan(R[i])){
+      return true;
+    }
+  }
+  return false;
+}

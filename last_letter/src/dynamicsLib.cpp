@@ -49,15 +49,20 @@
 	{
 		geometry_msgs::Vector3 accumulator, tempVect;
 
-		tempVect = gravity->getForce();
-		if (isnan(tempVect)) {ROS_FATAL("NaN member in gravity force vector"); ros::shutdown();}
-		accumulator = tempVect;
+		accumulator.x = 0;
+		accumulator.y = 0;
+		accumulator.z = 0;
 
 		for (int i=0; i<nMotors; i++){
-			tempVect = propulsion[i]->getForce();
+			tempVect = propulsion[i]->wrenchProp.force;
 			if (isnan(tempVect)) {ROS_FATAL("NaN member in propulsion%i force vector",i+1); ros::shutdown();}
 			accumulator = tempVect + accumulator;
 		}
+		// std::cout << "In body frame: " << accumulator.x << " " << accumulator.y << " " << accumulator.z << std::endl;
+
+		tempVect = gravity->getForce();
+		if (isnan(tempVect)) {ROS_FATAL("NaN member in gravity force vector"); ros::shutdown();}
+		accumulator = tempVect + accumulator;
 
 		tempVect = aerodynamics->getForce();
 		if (isnan(tempVect)) {ROS_FATAL("NaN member in aerodynamics force vector"); ros::shutdown();}
@@ -84,7 +89,7 @@
 		accumulator = accumulator + tempVect;
 
 		for (int i=0; i<nMotors; i++){
-			tempVect = propulsion[i]->getTorque();
+			tempVect = propulsion[i]->wrenchProp.torque;
 			if (isnan(tempVect)) {ROS_FATAL("NaN member in propulsion%i torque vector",i+1); ros::shutdown();}
 			accumulator = tempVect + accumulator;
 		}

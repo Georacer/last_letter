@@ -135,3 +135,4 @@ void WGS84_NM(double lat,double *NE, double *ME);
 /////////////////////////////////////////
 bool isnan(geometry_msgs::Vector3 vec);
 bool isnan(geometry_msgs::Quaternion q);
+bool isnan_mtx(double * R, int n);
