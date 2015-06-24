@@ -81,15 +81,19 @@ void Propulsion::rotateWind()
 	tf::Quaternion tempQuat;
 	// Construct transformation from body axes to mount frame
 	tempQuat.setEuler(mountOrientation.z, mountOrientation.y, mountOrientation.x);
+
 	body_to_mount.setOrigin(tf::Vector3(CGOffset.x, CGOffset.y, CGOffset.z));
 	body_to_mount.setRotation(tempQuat);
+	body_to_mount_rot.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
 	body_to_mount_rot.setRotation(tempQuat);
 
 	// Construct transformation to apply gimbal movement. Gimbal rotation MUST be aligned with the resulting z-axis!
 	// !!! Order mixed because tf::Quaternion::setEuler seems to work with PRY, instead of YPR
 	tempQuat.setEuler(0.0, 0.0, inputGimbal);
+
 	mount_to_gimbal.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
 	mount_to_gimbal.setRotation(tempQuat);
+	mount_to_gimbal_rot.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
 	mount_to_gimbal_rot.setRotation(tempQuat);
 
 	// Transform the relative wind from body axes to propeller axes
@@ -102,7 +106,8 @@ void Propulsion::rotateWind()
 	relativeWind.z = tempVect.getZ();
 
 	normalWind = relativeWind.x;
-
+	if (!std::isfinite(normalWind)) {ROS_FATAL("propulsion.cpp: NaN value in normalWind"); ros::shutdown();}
+	if (std::fabs(normalWind)>1e+160) {ROS_FATAL("propulsion.cpp/rotateWind: normalWind over 1e+160"); ros::shutdown();}
 }
 
 void Propulsion::rotateProp() // Update propeller angle
@@ -117,6 +122,7 @@ void Propulsion::rotateProp() // Update propeller angle
 
 	gimbal_to_prop.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
 	gimbal_to_prop.setRotation(tempQuat);
+	gimbal_to_prop_rot.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
 	gimbal_to_prop_rot.setRotation(tempQuat);
 
 	// body_to_prop = (body_to_mount * mount_to_gimbal) * gimbal_to_prop;
@@ -135,8 +141,6 @@ void Propulsion::rotateForce()
 
 	tf::Vector3 tempVect(wrenchProp.force.x, wrenchProp.force.y, wrenchProp.force.z);
 	tempVect = body_to_prop_rot * tempVect; // I'm not sure why this works and not inverted
-
-	// std::cout << "In body frame: " << tempVect.getX() << " " << tempVect.getY() << " " << tempVect.getZ() << std::endl;
 
 	wrenchProp.force.x = tempVect.getX();
 	wrenchProp.force.y = tempVect.getY();
@@ -247,6 +251,7 @@ void EngBeard::updateRadPS()
 {
 	rho = parentObj->environment.density;
 	airspeed = normalWind; // Read vehicle airspeed
+	if (!std::isfinite(airspeed)) {ROS_FATAL("propulsion.cpp: EngBeard airspeed is not finite"); ros::shutdown();}
 	// Propagate rotational speed with a first order response
 	// omega = rotationDir * 1 / (0.5 + parentObj->dt) * (0.5 * omega + parentObj->dt * inputMotor * k_omega);
 	omega = rotationDir * inputMotor * k_omega;
@@ -259,6 +264,7 @@ void EngBeard::getForce()
 	wrenchProp.force.x = 1.0/2.0*rho*s_prop*c_prop*(pow(inputMotor * k_motor,2)-pow(airspeed,2));
 	wrenchProp.force.y = 0;
 	wrenchProp.force.z = 0;
+	if (!myisfinite(wrenchProp.force)) {ROS_FATAL("propulsion.cpp/EngBeard: State NaN in wrenchProp.force"); ros::shutdown();}
 }
 
 // Calculate propulsion torques
@@ -267,6 +273,7 @@ void EngBeard::getTorque()
 	wrenchProp.torque.x = -rotationDir * k_t_p*pow(omega,2);
 	wrenchProp.torque.y = 0;
 	wrenchProp.torque.z = 0;
+	if (!myisfinite(wrenchProp.torque)) {ROS_FATAL("propulsion.cpp/EngBeard: State NaN in wrenchProp.torque"); ros::shutdown();}
 }
 
 ///////////////////////////////////////////////////
@@ -376,18 +383,12 @@ void PistonEng::updateRadPS()
 
 void PistonEng::getForce()
 {
-	if (isnan(wrenchProp.force.x) || isnan(wrenchProp.force.y) || isnan(wrenchProp.force.z)) {
-		ROS_FATAL("State NaN in wrenchProp.force");
-		ros::shutdown();
-	}
+	if (!myisfinite(wrenchProp.force)) {ROS_FATAL("propulsion.cpp: State NaN in wrenchProp.force"); ros::shutdown();}
 }
 
 void PistonEng::getTorque()
 {
-	if (isnan(wrenchProp.torque.x) || isnan(wrenchProp.torque.y) || isnan(wrenchProp.torque.z)) {
-		ROS_FATAL("State NaN in wrenchProp.torque");
-		ros::shutdown();
-	}
+	if (!myisfinite(wrenchProp.torque)) {ROS_FATAL("propulsion.cpp: State NaN in wrenchProp.torque"); ros::shutdown();}
 }
 
 
@@ -527,16 +528,10 @@ void ElectricEng::updateRadPS()
 
 void ElectricEng::getForce()
 {
-	if (isnan(wrenchProp.force.x) || isnan(wrenchProp.force.y) || isnan(wrenchProp.force.z)) {
-		ROS_FATAL("State NaN in wrenchProp.force");
-		ros::shutdown();
-	}
+	if (!myisfinite(wrenchProp.force)) {ROS_FATAL("propulsion.cpp: State NaN in wrenchProp.force"); ros::shutdown();}
 }
 
 void ElectricEng::getTorque()
 {
-	if (isnan(wrenchProp.torque.x) || isnan(wrenchProp.torque.y) || isnan(wrenchProp.torque.z)) {
-		ROS_FATAL("State NaN in wrenchProp.torque");
-		ros::shutdown();
-	}
+	if (!myisfinite(wrenchProp.torque)) {ROS_FATAL("propulsion.cpp: State NaN in wrenchProp.torque"); ros::shutdown();}
 }

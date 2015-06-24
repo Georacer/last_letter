@@ -545,3 +545,44 @@ bool isnan_mtx(double * R, int n)
   }
   return false;
 }
+
+bool myisfinite(const geometry_msgs::Vector3 vec)
+{
+  if (!std::isfinite(vec.x)) {
+    return false;
+  }
+  if (!std::isfinite(vec.y)) {
+    return false;
+  }
+  if (!std::isfinite(vec.z)) {
+    return false;
+  }
+  return true;
+}
+
+bool myisfinite(const geometry_msgs::Quaternion q)
+{
+  if (!std::isfinite(q.x)) {
+    return false;
+  }
+  if (!std::isfinite(q.y)) {
+    return false;
+  }
+  if (!std::isfinite(q.z)) {
+    return false;
+  }
+  if (!std::isfinite(q.w)) {
+    return false;
+  }
+  return true;
+}
+
+bool myisfnite_mtx(double * R, int n)
+{
+  for (int i=0; i<n; i++){
+    if (!std::isfinite(R[i])){
+      return false;
+    }
+  }
+  return true;
+}
