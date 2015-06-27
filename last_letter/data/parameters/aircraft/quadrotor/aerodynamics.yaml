@@ -1,0 +1,47 @@
+#Airframe Aerodynamic Parameters
+airframe/aerodynamicsType: 1
+airframe/s: 0.09
+airframe/b: 0.4
+airframe/c: 0.4
+
+airframe/c_lift_0: 0.0
+airframe/c_lift_deltae: 0.0
+airframe/c_lift_a: 1.0
+airframe/c_lift_q: 0.0
+airframe/mcoeff: 50.0
+airframe/oswald: 0.9
+airframe/alpha_stall: 0.17
+airframe/c_drag_q: 0.0
+airframe/c_drag_deltae: 0.0
+airframe/c_drag_p: 0.0
+airframe/c_y_0: 0.0
+airframe/c_y_b: 0.0
+airframe/c_y_p: 0.0
+airframe/c_y_r: 0.0
+airframe/c_y_deltaa: 0.0
+airframe/c_y_deltar: 0.0 #opposite sign than c_n_deltar
+
+airframe/c_l_0: 0.0
+airframe/c_l_p: -10.0
+airframe/c_l_b: 0.0
+airframe/c_l_r: 0.0
+airframe/c_l_deltaa: 0.0
+airframe/c_l_deltar: 0.0
+airframe/c_m_0: 0.0
+airframe/c_m_a: 0.0
+airframe/c_m_q: -18.0
+airframe/c_m_deltae: 0.0
+airframe/c_n_0: 0.0
+airframe/c_n_b: 0.0
+airframe/c_n_p: 0.0
+airframe/c_n_r: -10.0
+airframe/c_n_deltaa: 0.0
+airframe/c_n_deltar: 0.0 #opposite sign than c_y_deltar
+
+airframe/deltaa_max: 0.0
+airframe/deltae_max: 0.0
+airframe/deltar_max: 0.0
+
+airframe/chanAileron: -1
+airframe/chanElevator: -1
+airframe/chanRudder: -1
