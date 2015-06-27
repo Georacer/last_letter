@@ -125,7 +125,6 @@ void Propulsion::rotateProp() // Update propeller angle
 	gimbal_to_prop_rot.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
 	gimbal_to_prop_rot.setRotation(tempQuat);
 
-	// body_to_prop = (body_to_mount * mount_to_gimbal) * gimbal_to_prop;
 	body_to_prop = body_to_mount * (mount_to_gimbal * gimbal_to_prop);
 	body_to_prop_rot = body_to_mount_rot * (mount_to_gimbal_rot * gimbal_to_prop_rot);
 

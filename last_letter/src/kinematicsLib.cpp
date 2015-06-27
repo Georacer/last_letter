@@ -22,12 +22,30 @@ Kinematics::Kinematics(ModelPlane * parent)
 	if(!ros::param::getCached("airframe/j_xz", j_xz)) {ROS_FATAL("Invalid parameters for -j_xz- in param server!"); ros::shutdown();}
 
 	// Calculate inertia matrix...
-	double G = j_x*j_z-pow(j_xz,2);
-	if (G==0) {ROS_FATAL("Inertia matrix is not invertible!"); ros::shutdown();}
 	J[0] = j_x; J[1] = 0; J[2] = -j_xz;
 	J[3] = 0; J[4] = j_y; J[5] = 0;
 	J[6] = -j_xz; J[7] = 0; J[8] = j_z;
-	// ... and its iverse
+
+	int res = is_pos_def(J);
+	if (!(res==0)) {
+		switch (res) {
+			case -1:
+				ROS_FATAL("Matrix of inertia is singular");
+				ros::shutdown();
+				break;
+			case -2:
+				ROS_FATAL("Matrix of inertia is not positive definite");
+				ros::shutdown();
+				break;
+			default:
+				break;
+		}
+
+	}
+
+	// ... and its inverse
+	double G = j_x*j_z-pow(j_xz,2);
+
 	Jinv[0] = j_z/G; Jinv[1] = 0; Jinv[2] = j_xz/G;
 	Jinv[3] = 0; Jinv[4] = 1/j_y; Jinv[5] = 0;
 	Jinv[6] = j_xz/G; Jinv[7] = 0; Jinv[8] = j_x/G;

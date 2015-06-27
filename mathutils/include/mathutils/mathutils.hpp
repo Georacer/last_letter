@@ -141,3 +141,9 @@ bool isnan_mtx(double * R, int n);
 bool myisfinite(const geometry_msgs::Vector3 vec);
 bool myisfinite(const geometry_msgs::Quaternion q);
 bool myisfinite_mtx(double * R, int n);
+
+//////////////////////////////////////////////
+// Check if 3x3 matrix is positive definite //
+//////////////////////////////////////////////
+
+int is_pos_def(double * R);

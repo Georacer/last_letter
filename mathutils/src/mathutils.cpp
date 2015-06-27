@@ -586,3 +586,25 @@ bool myisfnite_mtx(double * R, int n)
   }
   return true;
 }
+
+//////////////////////////////////////////////
+// Check if 3x3 matrix is positive definite //
+//////////////////////////////////////////////
+// Uses Sylvester's Criterion: https://en.wikipedia.org/wiki/Sylvester%27s_criterion
+int is_pos_def(double * R)
+{
+  // Calculate determinant
+  double det = R[0]*R[4]*R[8] - R[0]*R[5]*R[7] - R[1]*R[3]*R[8] + R[1]*R[5]*R[6] + R[2]*R[3]*R[7] - R[2]*R[4]*R[6];
+  if (det==0) {
+    return -1; // Matrix is singular
+  }
+
+  // Matrix is not positive definite
+  if (R[0]<0) {return -2;}
+  if ((R[0]*R[4] - R[1]*R[3])<0) {return -2;}
+  if (det<0) {return -2;}
+
+  // Matrix is positive definite
+  return 0;
+}
+
