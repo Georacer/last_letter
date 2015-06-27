@@ -10,6 +10,6 @@ airframe/contactPoint5: [-0.0832, -0.9671, -0.1683, 0.0, 500.0, 25.0]
 airframe/contactPoint6: [0.3785, 0.0, 0.017, 0.0, 500.0, 25.0]
 airframe/contactPoint7: [-0.9328, 0.0, -0.2196, 0.0, 500.0, 25.0]
 
-airframe/chanSteer: 4
+airframe/chanSteer: 11
 airframe/steerAngle_max: 0.79
-airframe/chanBrake: 5
+airframe/chanBrake: 12

@@ -15,4 +15,4 @@ init/elevator: 0.0
 init/throttle: 0.0
 init/rudder: -0.000
 
-init/chanReset: 9
+init/chanReset: 13

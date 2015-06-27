@@ -42,6 +42,6 @@ airframe/deltaa_max: 0.3491
 airframe/deltae_max: 0.3491
 airframe/deltar_max: 0.3491
 
-airframe/chanAileron: 0
-airframe/chanElevator: 1
+airframe/chanAileron: 8
+airframe/chanElevator: 9
 airframe/chanRudder: -1

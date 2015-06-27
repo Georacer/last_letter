@@ -7,7 +7,7 @@ motor/nMotors: 6
 
 # top-right motor
 motor1/chanMotor: 0
-motor1/chanGimbal: -1
+motor1/chanGimbal: -1 #11
 motor1/gimbalAngle_max: 0.0
 
 motor1/CGOffset: [0.1905, 0.2435, -0.05] # location offset of the motor mount relative to CG
@@ -25,7 +25,7 @@ motor1/c_prop: 1.0
 
 # bottom-right motor
 motor2/chanMotor: 1
-motor2/chanGimbal: -1
+motor2/chanGimbal: -1 #11
 motor2/gimbalAngle_max: 0.0
 
 motor2/CGOffset: [0.1905, 0.2435, 0.05] # location offset of the motor mount relative to CG
@@ -79,7 +79,7 @@ motor4/c_prop: 1.0
 
 # top-left motor
 motor5/chanMotor: 4
-motor5/chanGimbal: -1
+motor5/chanGimbal: -1 #11
 motor5/gimbalAngle_max: 0.0
 
 motor5/CGOffset: [0.1905, -0.2435, -0.05] # location offset of the motor mount relative to CG
@@ -97,7 +97,7 @@ motor5/c_prop: 1.0
 
 # bottom-left motor
 motor6/chanMotor: 5
-motor6/chanGimbal: -1
+motor6/chanGimbal: -1 #11
 motor6/gimbalAngle_max: 0.79
 
 motor6/CGOffset: [0.1905, -0.2435, 0.05] # location offset of the motor mount relative to CG

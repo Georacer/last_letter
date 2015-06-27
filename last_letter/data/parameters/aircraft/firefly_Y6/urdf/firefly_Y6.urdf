@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
-<robot name="plane">
+<robot name="hybrid">
 	<link name="base_link">
 		<visual>
 			<geometry>
