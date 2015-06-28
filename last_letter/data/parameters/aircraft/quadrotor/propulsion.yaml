@@ -24,7 +24,7 @@ motor1/c_prop: 1.0
 
 
 # front-left motor
-motor2/chanMotor: 1
+motor2/chanMotor: 2
 motor2/chanGimbal: -1
 motor2/gimbalAngle_max: 0.0
 
@@ -42,13 +42,13 @@ motor2/c_prop: 1.0
 
 
 # rear-right motor
-motor3/chanMotor: 2
+motor3/chanMotor: 3
 motor3/chanGimbal: -1
 motor3/gimbalAngle_max: 0.79
 
 motor3/CGOffset: [-0.3, 0.3, -0.1] # location offset of the motor mount relative to CG
 motor3/mountOrientation: [0.0, 1.57, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
-motor3/rotationDir: -1.0
+motor3/rotationDir: 1.0
 
 motor3/motorType: 1
 
@@ -60,13 +60,13 @@ motor3/c_prop: 1.0
 
 
 # rear-left motor
-motor4/chanMotor: 3
+motor4/chanMotor: 1
 motor4/chanGimbal: -1
 motor4/gimbalAngle_max: 0.0
 
 motor4/CGOffset: [-0.3, -0.3, -0.1] # location offset of the motor mount relative to CG
 motor4/mountOrientation: [0.0, 1.57, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
-motor4/rotationDir: 1.0
+motor4/rotationDir: -1.0
 
 motor4/motorType: 1
 
