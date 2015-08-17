@@ -37,7 +37,13 @@ void multi_mtx_mtx_3Xn(double *a, double *b, double *res,int n);
 void multi_mtxT_mtx_3X3 (double *a, double *b, double *res);
 void multi_mtxT_mtx_3Xn(double *a, double *b, double *res,int n);
 
+
+//////////////////////////
+// 3D Vector operations //
+//////////////////////////
+double vector3_norm(geometry_msgs::Vector3 a);
 void vector3_cross(geometry_msgs::Vector3 a, geometry_msgs::Vector3 b, geometry_msgs::Vector3 *c);
+geometry_msgs::Vector3 vector3_normalize(geometry_msgs::Vector3 a);
 
 geometry_msgs::Vector3 operator+(const geometry_msgs::Vector3& a, geometry_msgs::Vector3& b);
 geometry_msgs::Vector3 operator-(geometry_msgs::Vector3& vec);
@@ -45,6 +51,7 @@ geometry_msgs::Vector3 operator-(geometry_msgs::Vector3& a,geometry_msgs::Vector
 geometry_msgs::Vector3 operator*(const double *mtx, geometry_msgs::Vector3& vec);
 geometry_msgs::Vector3 operator*(const double a, geometry_msgs::Vector3& vec);
 geometry_msgs::Vector3 operator/(const double *mtx, geometry_msgs::Vector3& vec);
+
 
 int inverse(double* A, double* Ainv, int N);
 

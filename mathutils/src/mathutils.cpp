@@ -207,6 +207,11 @@ void multi_mtxT_mtx_3Xn(double *a, double *b, double *res,int n)
   }
 }
 
+double vector3_norm(geometry_msgs::Vector3 a)
+{
+  return sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
+}
+
 
 void vector3_cross(geometry_msgs::Vector3 a, geometry_msgs::Vector3 b, geometry_msgs::Vector3 *c)
 {
@@ -215,14 +220,34 @@ void vector3_cross(geometry_msgs::Vector3 a, geometry_msgs::Vector3 b, geometry_
 	c->z = a.x*b.y - a.y*b.x;
 }
 
+geometry_msgs::Vector3 vector3_normalize(geometry_msgs::Vector3 a)
+{
+  geometry_msgs::Vector3 b;
+  double norm;
+  b = a;
+  norm = vector3_norm(a);
+  if (norm!=0)
+  {
+    b.x = b.x / norm;
+    b.y = b.y / norm;
+    b.z = b.z / norm;
+    return b;
+  }
+  else
+  {
+    return a;
+  }
+
+}
+
 geometry_msgs::Vector3 operator+(const geometry_msgs::Vector3& a, geometry_msgs::Vector3& b)
 {
-    geometry_msgs::Vector3 c;
-    c.x = a.x+b.x;
-    c.y = a.y+b.y;
-    c.z = a.z+b.z;
+  geometry_msgs::Vector3 c;
+  c.x = a.x+b.x;
+  c.y = a.y+b.y;
+  c.z = a.z+b.z;
 
-    return c;
+  return c;
 }
 
 //geometry_msgs::Vector3 operator+(geometry_msgs::Vector3& a, geometry_msgs::Vector3& b)
@@ -237,71 +262,71 @@ geometry_msgs::Vector3 operator+(const geometry_msgs::Vector3& a, geometry_msgs:
 
 geometry_msgs::Vector3 operator-(geometry_msgs::Vector3& vec)
 {
-    geometry_msgs::Vector3 c;
-    c.x = -vec.x;
-    c.y = -vec.y;
-    c.z = -vec.z;
+  geometry_msgs::Vector3 c;
+  c.x = -vec.x;
+  c.y = -vec.y;
+  c.z = -vec.z;
 
-    return c;
+  return c;
 }
 
 geometry_msgs::Vector3 operator-(geometry_msgs::Vector3& a,geometry_msgs::Vector3& b)
 {
-    geometry_msgs::Vector3 c;
-    c.x = a.x-b.x;
-    c.y = a.y-b.y;
-    c.z = a.z-b.z;
+  geometry_msgs::Vector3 c;
+  c.x = a.x-b.x;
+  c.y = a.y-b.y;
+  c.z = a.z-b.z;
 
-    return c;
+  return c;
 }
 
 geometry_msgs::Vector3 operator*(const double *mtx, geometry_msgs::Vector3& vec)
 {
-    geometry_msgs::Vector3 c;
-    c.x = mtx[0]*vec.x+mtx[1]*vec.y+mtx[2]*vec.z;
-    c.y = mtx[3]*vec.x+mtx[4]*vec.y+mtx[5]*vec.z;
-    c.z = mtx[6]*vec.x+mtx[7]*vec.y+mtx[8]*vec.z;
+  geometry_msgs::Vector3 c;
+  c.x = mtx[0]*vec.x+mtx[1]*vec.y+mtx[2]*vec.z;
+  c.y = mtx[3]*vec.x+mtx[4]*vec.y+mtx[5]*vec.z;
+  c.z = mtx[6]*vec.x+mtx[7]*vec.y+mtx[8]*vec.z;
 
-    return c;
+  return c;
 }
 
 geometry_msgs::Vector3 operator*(const double a, geometry_msgs::Vector3& vec)
 {
-    geometry_msgs::Vector3 c;
-    c.x = a*vec.x;
-    c.y = a*vec.y;
-    c.z = a*vec.z;
+  geometry_msgs::Vector3 c;
+  c.x = a*vec.x;
+  c.y = a*vec.y;
+  c.z = a*vec.z;
 
-    return c;
+  return c;
 }
 
 geometry_msgs::Vector3 operator/(const double *mtx, geometry_msgs::Vector3& vec)
 {
-    geometry_msgs::Vector3 c;
-    c.x = mtx[0]*vec.x+mtx[3]*vec.y+mtx[6]*vec.z;
-    c.y = mtx[1]*vec.x+mtx[4]*vec.y+mtx[7]*vec.z;
-    c.z = mtx[2]*vec.x+mtx[5]*vec.y+mtx[8]*vec.z;
+  geometry_msgs::Vector3 c;
+  c.x = mtx[0]*vec.x+mtx[3]*vec.y+mtx[6]*vec.z;
+  c.y = mtx[1]*vec.x+mtx[4]*vec.y+mtx[7]*vec.z;
+  c.z = mtx[2]*vec.x+mtx[5]*vec.y+mtx[8]*vec.z;
 
-    return c;
+  return c;
 }
 
 int inverse(double* A, double* Ainv, int N)
 {
-    int *IPIV = new int[N+1];
-    int LWORK = N*N;
-    double *WORK = new double[LWORK];
-    int INFO;
+  int *IPIV = new int[N+1];
+  int LWORK = N*N;
+  double *WORK = new double[LWORK];
+  int INFO;
 
-    memcpy(Ainv,A,LWORK*sizeof(double));
+  memcpy(Ainv,A,LWORK*sizeof(double));
 
 
-    dgetrf_(&N,&N,Ainv,&N,IPIV,&INFO);
-    dgetri_(&N,Ainv,&N,IPIV,WORK,&LWORK,&INFO);
+  dgetrf_(&N,&N,Ainv,&N,IPIV,&INFO);
+  dgetri_(&N,Ainv,&N,IPIV,WORK,&LWORK,&INFO);
 
-    delete IPIV;
-    delete WORK;
+  delete IPIV;
+  delete WORK;
 
-    return INFO;
+  return INFO;
 }
 
 ////////////////////
