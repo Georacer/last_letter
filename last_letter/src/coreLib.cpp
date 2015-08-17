@@ -116,6 +116,7 @@ void ModelPlane::step(void)
 	for (int i=0; i<dynamics.nMotors; i++) {
 		dynamics.propulsion[i]->stepEngine();
 	}
+	dynamics.calcWrench();
 	kinematics.forceInput = dynamics.getForce();
 	kinematics.torqueInput = dynamics.getTorque();
 	kinematics.calcDerivatives();
@@ -292,6 +293,9 @@ GroundReaction * Factory::buildGroundReaction(ModelPlane * parent)
 	case 1:
 		std::cout << "selecting Panos ground reactions" << std::endl;
 		return new PanosContactPoints(parent);
+	case 2:
+		std::cout << "selecting PointFriction ground reactions" << std::endl;
+		return new PointFriction(parent);
 	default:
 		ROS_FATAL("Error while constructing ground reactions");
 		ros::shutdown();
