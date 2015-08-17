@@ -39,6 +39,10 @@ catkin_package(
 ## Specify additional locations of header files
 include_directories(
 	include
+	include/groundReactions
+	include/propulsion
+	src/groundReactions
+	src/propulsion
 	${catkin_INCLUDE_DIRS}
 )
 

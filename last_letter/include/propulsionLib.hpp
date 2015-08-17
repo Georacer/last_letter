@@ -47,98 +47,10 @@ class Propulsion
 	virtual void getTorque() =0; //Calculate Torques
 };
 
-////////////////////////////
-// No engine, dummy class //
-////////////////////////////
-class NoEngine: public Propulsion
-{
-public:
-	NoEngine(ModelPlane *, int);
-	~NoEngine();
+#include "noEngine.hpp"
 
-	void updateRadPS();
-	void getForce();
-	void getTorque();
-};
+#include "beardEngine.hpp"
 
-////////////////////////////////////////////////////
-// Electric engine model found in R. Beard's book //
-////////////////////////////////////////////////////
-class EngBeard: public Propulsion
-{
-	public:
-	///////////
-	//Variables
-	double s_prop, c_prop, k_motor, k_t_p, k_omega;
-	double airspeed, rho;
+#include "pistonEngine.hpp"
 
-	///////////
-	//Functions
-	EngBeard(ModelPlane *, int);
-	~EngBeard();
-
-	void updateRadPS(); //Step the angular speed
-	void getForce();
-	void getTorque();
-};
-
-///////////////////
-// Piston engine //
-///////////////////
-class PistonEng : public Propulsion
-{
-public:
-	////////////
-	// Variables
-	double omegaMin, omegaMax;
-	double propDiam, engInertia, rho;
-
-	//////////
-	// Members
-	Polynomial * engPowerPoly;
-	Polynomial * npPoly;
-	Polynomial * propPowerPoly;
-	// Polynomial1D * npPoly;
-	// Polynomial1D * propPowerPoly;
-	// Polynomial2D * engPowerPoly;
-
-	////////////
-	// Functions
-	PistonEng(ModelPlane *, int);
-	~PistonEng();
-
-	void updateRadPS();
-	void getForce();
-	void getTorque();
-};
-
-///////////////////////////
-// Electric hobby engine //
-///////////////////////////
-class ElectricEng : public Propulsion
-{
-public:
-	////////////////
-	// Variables //
-	////////////////
-	double omegaMin, omegaMax;
-	double propDiam, engInertia, rho;
-	double Kv, Rm, Rs, I0, Cells;
-	last_letter_msgs::ElectricEng message;
-	ros::Publisher pub;
-
-	//////////////
-	// Members //
-	//////////////
-	Polynomial * engPowerPoly, * npPoly, * propPowerPoly;
-
-	////////////////
-	// Functions //
-	////////////////
-	ElectricEng(ModelPlane *, int);
-	~ElectricEng();
-
-	void updateRadPS();
-	void getForce();
-	void getTorque();
-};
+#include "electricEngine.hpp"
