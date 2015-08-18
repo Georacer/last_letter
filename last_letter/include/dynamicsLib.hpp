@@ -9,7 +9,8 @@ class Dynamics
 	geometry_msgs::Vector3 torque, torqueGrav, torqueAero, torqueProp, torqueGround;
 	Dynamics(ModelPlane *);
 	~Dynamics();
-	Aerodynamics * aerodynamics;
+	Aerodynamics ** aerodynamics;
+	int nWings; // number of airfoils mounted on the aircraft
 	Gravity * gravity;
 	int nMotors; // number of motors mounted on the aircraft
 	Propulsion ** propulsion;

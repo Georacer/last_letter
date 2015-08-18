@@ -110,12 +110,9 @@ void ModelPlane::init()
 void ModelPlane::step(void)
 {
 	// Perform step actions serially
-	//
+
 	airdata.calcAirData();
 
-	for (int i=0; i<dynamics.nMotors; i++) {
-		dynamics.propulsion[i]->stepEngine();
-	}
 	dynamics.calcWrench();
 	kinematics.forceInput = dynamics.getForce();
 	kinematics.torqueInput = dynamics.getTorque();
@@ -227,24 +224,26 @@ Integrator * Factory::buildIntegrator(ModelPlane * parent)
 }
 
 // Build aerodynamics model
-Aerodynamics * Factory::buildAerodynamics(ModelPlane * parent)
+Aerodynamics * Factory::buildAerodynamics(ModelPlane * parent, int id)
 {
 	int i;
-	if(!ros::param::getCached("airframe/aerodynamicsType", i)) {ROS_FATAL("Invalid parameters for -aerodynamicsType- in param server!"); ros::shutdown();}
+	char paramMsg[50];
+	sprintf(paramMsg, "airfoil%i/aerodynamicsType", id);
+	if(!ros::param::getCached(paramMsg, i)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	std::cout<< "building aerodynamics model: ";
 	switch (i)
 	{
 	case 0:
 		std::cout << "selecting no aerodynamics model" << std::endl;
-		return new NoAerodynamics(parent);
+		return new NoAerodynamics(parent, id);
 	case 1:
 		std::cout << "selecting StdLinearAero aerodynamics" << std::endl;
-		return new StdLinearAero(parent);
+		return new StdLinearAero(parent, id);
 	case 2:
 		std::cout << "selecting HCUAVAero aerodynamics" << std::endl;
-		return new HCUAVAero(parent);
+		return new HCUAVAero(parent, id);
 	default:
-		ROS_FATAL("Error while constructing StdLinearAero aerodynamics");
+		ROS_FATAL("Error while constructing aerodynamics");
 		ros::shutdown();
 		break;
 	}
@@ -273,7 +272,7 @@ Propulsion * Factory::buildPropulsion(ModelPlane * parent, int id)
 		std::cout << "selecting electric engine" << std::endl;
 		return new ElectricEng(parent, id);
 	default:
-		ROS_FATAL("Error while constructing Beard motor");
+		ROS_FATAL("Error while constructing motor");
 		ros::shutdown();
 		break;
 	}

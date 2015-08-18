@@ -2,18 +2,47 @@
 // Define Aerodynamics class
 //////////////////////////
 
-Aerodynamics::Aerodynamics(ModelPlane * parent)
+Aerodynamics::Aerodynamics(ModelPlane * parent, int ID)
 {
 	parentObj = parent;
+	id = ID;
 	XmlRpc::XmlRpcValue list;
 	int i;
-	if(!ros::param::getCached("airframe/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/airframe/CGOffset- in param server!"); ros::shutdown();}
+	char paramMsg[50];
+	sprintf(paramMsg, "airfoil%i/CGOffset", id);
+	if(!ros::param::getCached(paramMsg, list)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	for (i = 0; i < list.size(); ++i) {
 		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 	}
 	CGOffset.x = list[0];
 	CGOffset.y = list[1];
 	CGOffset.z = list[2];
+
+	sprintf(paramMsg, "airfoil%i/mountOrientation", id);
+	if(!ros::param::getCached(paramMsg, list)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	for (i = 0; i < list.size(); ++i) {
+		ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+	}
+	// !!! Order mixed because tf::Quaternion::setEuler seems to work with PRY, instead of YPR
+	mountOrientation.y = list[0];
+	mountOrientation.z = list[1];
+	mountOrientation.x = list[2];
+
+	sprintf(paramMsg, "airfoil%i/chanAileron", id);
+	if(!ros::param::getCached(paramMsg, chanAileron)) {ROS_INFO("No AILERON%i channel selected", id); chanAileron=-1;}
+	sprintf(paramMsg, "airfoil%i/chanElevator", id);
+	if(!ros::param::getCached(paramMsg, chanElevator)) {ROS_INFO("No ELEVATOR%i channel selected", id); chanElevator=-1;}
+	sprintf(paramMsg, "airfoil%i/chanRudder", id);
+	if(!ros::param::getCached(paramMsg, chanRudder)) {ROS_INFO("No RUDDER%i channel selected", id); chanRudder=-1;}
+	sprintf(paramMsg, "airfoil%i/chanGimbal", id);
+	if(!ros::param::getCached(paramMsg, chanGimbal)) {ROS_INFO("No AIRFOIL GIMBAL%i channel set, selecting default", id); chanGimbal=-1;}
+	sprintf(paramMsg, "airfoil%i/gimbalAngle_max", id);
+	if(!ros::param::getCached(paramMsg, gimbalAngle_max)) {ROS_INFO("No AIRFOIL GIMBALANGLE_MAX%i value set, selecting default", id); gimbalAngle_max=0.0;}
+
+	inputAileron = 0.0;
+	inputElevator = 0.0;
+	inputRudder = 0.0;
+	inputGimbal = 0.0;
 }
 
 Aerodynamics::~Aerodynamics()
@@ -21,12 +50,146 @@ Aerodynamics::~Aerodynamics()
 	delete parentObj;
 }
 
+void Aerodynamics::getInput()
+{
+	char paramMsg[50];
+	sprintf(paramMsg, "airfoil%i/gimbalAngle_max", id);
+	ros::param::getCached(paramMsg, gimbalAngle_max);
+	sprintf(paramMsg, "airfoil%i/deltaa_max", id);
+	ros::param::getCached(paramMsg, deltaa_max);
+	sprintf(paramMsg, "airfoil%i/deltae_max", id);
+	ros::param::getCached(paramMsg, deltae_max);
+	sprintf(paramMsg, "airfoil%i/deltar_max", id);
+	ros::param::getCached(paramMsg, deltar_max);
+	//Convert PPM to radians
+	if (chanAileron>-1) {inputAileron = deltaa_max * (double)(parentObj->input.value[chanAileron]-1500)/500;}
+	if (chanElevator>-1) {inputElevator = deltae_max * (double)(parentObj->input.value[chanElevator]-1500)/500;}
+	if (chanRudder>-1) {inputRudder = deltar_max * (double)(parentObj->input.value[chanRudder]-1500)/500;}
+	if (chanGimbal>-1) {inputGimbal = gimbalAngle_max * (double)(parentObj->input.value[chanGimbal]-1500)/500; }
+}
+
+// One step in the physics engine
+void Aerodynamics::stepDynamics()
+{
+	rotateWind();
+	getForce();
+	getTorque();
+	rotateForce();
+	rotateTorque();
+}
+
+// Convert the relateive wind from body axes to airfoil axes
+void Aerodynamics::rotateWind()
+{
+
+	tf::Quaternion tempQuat;
+	// Construct transformation from body axes to mount frame
+	tempQuat.setEuler(mountOrientation.z, mountOrientation.y, mountOrientation.x);
+
+	body_to_mount.setOrigin(tf::Vector3(CGOffset.x, CGOffset.y, CGOffset.z));
+	body_to_mount.setRotation(tempQuat);
+	body_to_mount_rot.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+	body_to_mount_rot.setRotation(tempQuat);
+
+	// Construct transformation to apply gimbal movement. Gimbal rotation MUST be aligned with (be applied on) the resulting z-axis!
+	// !!! Order mixed because tf::Quaternion::setEuler seems to work with PRY, instead of YPR
+	tempQuat.setEuler(0.0, 0.0, inputGimbal);
+
+	mount_to_gimbal.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+	mount_to_gimbal.setRotation(tempQuat);
+	mount_to_gimbal_rot.setOrigin(tf::Vector3(0.0, 0.0, 0.0));
+	mount_to_gimbal_rot.setRotation(tempQuat);
+
+	body_to_gimbal = body_to_mount * mount_to_gimbal;
+	body_to_gimbal_rot = body_to_mount_rot * mount_to_gimbal_rot;
+
+	// Publish the airfoil transformation to the transform tree
+	char foil_frame[50];
+	sprintf(foil_frame, "airfoil%i", id);
+	broadcaster.sendTransform(tf::StampedTransform(body_to_gimbal, ros::Time::now(), "base_link", foil_frame));
+
+	// Transform the relative wind from body axes to airfoil axes
+	tf::Vector3 bodyWind(parentObj->airdata.u_r, parentObj->airdata.v_r, parentObj->airdata.w_r);
+	tf::Vector3 tempVect;
+	tempVect = mount_to_gimbal_rot * (body_to_mount_rot * bodyWind);
+
+	relativeWind.x = tempVect.getX();
+	relativeWind.y = tempVect.getY();
+	relativeWind.z = tempVect.getZ();
+
+	// Calculate the new, relative air data
+	geometry_msgs::Vector3 tempVect2;
+	tempVect2 = getAirData(relativeWind);
+	airspeed = tempVect2.x; // Redundant, but we leave this here for now
+	alpha = tempVect2.y;
+	beta = tempVect2.z;
+
+	// std::cout << "airspeed: " << airspeed << " alpha: " << alpha << " beta: " << beta << std::endl;
+
+
+	if (!std::isfinite(airspeed)) {ROS_FATAL("aerodynamicsLib.cpp/rotateWind: NaN value in airspeed"); ros::shutdown();}
+	if (std::fabs(airspeed)>1e+160) {ROS_FATAL("aerodynamicsLib.cpp/rotateWind: normalWind over 1e+160"); ros::shutdown();}
+}
+
+ // Convert the resulting force to the body axes
+void Aerodynamics::rotateForce()
+{
+
+	// std::cout << "Aeroforces before: " << wrenchAero.force.x << " " << wrenchAero.force.y << " " << wrenchAero.force.z << std::endl;
+
+	tf::Vector3 tempVect(wrenchAero.force.x, wrenchAero.force.y, wrenchAero.force.z);
+	tempVect = body_to_gimbal_rot * tempVect; // I'm not sure why this works and not inverted
+
+	wrenchAero.force.x = tempVect.getX();
+	wrenchAero.force.y = tempVect.getY();
+	wrenchAero.force.z = tempVect.getZ();
+
+	// std::cout << "Aeroforces after: " << wrenchAero.force.x << " " << wrenchAero.force.y << " " << wrenchAero.force.z << std::endl;
+
+}
+
+// Convert the resulting torque to the body axes
+void Aerodynamics::rotateTorque()
+{
+
+	tf::Vector3 tempVect(wrenchAero.torque.x, wrenchAero.torque.y, wrenchAero.torque.z);
+	tempVect = body_to_gimbal_rot * tempVect;
+
+	wrenchAero.torque.x = tempVect.getX();
+	wrenchAero.torque.y = tempVect.getY();
+	wrenchAero.torque.z = tempVect.getZ();
+
+
+	// Convert the torque from the motor frame to the body frame
+	double ratio = parentObj->kinematics.J[0] / (parentObj->kinematics.J[0] + parentObj->kinematics.mass * CGOffset.x*CGOffset.x);
+	wrenchAero.torque.x =  ratio * wrenchAero.torque.x;
+	ratio = parentObj->kinematics.J[4] / (parentObj->kinematics.J[4] + parentObj->kinematics.mass * CGOffset.y*CGOffset.y);
+	wrenchAero.torque.y =  ratio * wrenchAero.torque.y;
+	ratio = parentObj->kinematics.J[8] / (parentObj->kinematics.J[8] + parentObj->kinematics.mass * CGOffset.z*CGOffset.z);
+	wrenchAero.torque.z =  ratio * wrenchAero.torque.z;
+
+	// Add torque to to force misalignment with CG
+	// r x F, where r is the distance from CoG to CoL
+	// Will potentially add the following code in the future, to support shift of CoG mid-flight
+	// XmlRpc::XmlRpcValue list;
+	// int i;
+	// if(!ros::param::getCached("motor/CGOffset", list)) {ROS_FATAL("Invalid parameters for -/motor/CGOffset- in param server!"); ros::shutdown();}
+	// for (i = 0; i < list.size(); ++i) {
+	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+	// 	CGOffset[i]=list[i];
+	// }
+	wrenchAero.torque.x = wrenchAero.torque.x + CGOffset.y*wrenchAero.force.z - CGOffset.z*wrenchAero.force.y;
+	wrenchAero.torque.y = wrenchAero.torque.y - CGOffset.x*wrenchAero.force.z + CGOffset.z*wrenchAero.force.x;
+	wrenchAero.torque.z = wrenchAero.torque.z - CGOffset.y*wrenchAero.force.x + CGOffset.x*wrenchAero.force.y;
+
+}
+
 /////////////////////////////
 // Define NoAerodynamics class
 /////////////////////////////
 
 // Class constructor
-NoAerodynamics::NoAerodynamics(ModelPlane * parent) : Aerodynamics(parent)
+NoAerodynamics::NoAerodynamics(ModelPlane * parent, int id) : Aerodynamics(parent, id)
 {
 	wrenchAero.force.x = 0.0;
 	wrenchAero.force.y = 0.0;
@@ -41,21 +204,14 @@ NoAerodynamics::~NoAerodynamics()
 {
 }
 
-// Store input for force calculation - unnecessary in this object
-void NoAerodynamics::getInput()
-{
-}
-
 // Force calculation function
-geometry_msgs::Vector3 NoAerodynamics::getForce()
+void NoAerodynamics::getForce()
 {
-	return wrenchAero.force;
 }
 
 // Torque calculation function
-geometry_msgs::Vector3 NoAerodynamics::getTorque()
+void NoAerodynamics::getTorque()
 {
-	return wrenchAero.torque;
 }
 
 /////////////////////////////
@@ -63,54 +219,87 @@ geometry_msgs::Vector3 NoAerodynamics::getTorque()
 /////////////////////////////
 
 // Class constructor
-StdLinearAero::StdLinearAero(ModelPlane * parent) : Aerodynamics(parent)
+StdLinearAero::StdLinearAero(ModelPlane * parent, int id) : Aerodynamics(parent, id)
 {
 	// Read aerodynamic coefficients from parameter server
-	if(!ros::param::getCached("airframe/c_lift_q", c_lift_q)) {ROS_FATAL("Invalid parameters for -c_lift_q- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_lift_deltae", c_lift_deltae)) {ROS_FATAL("Invalid parameters for -c_lift_deltae- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_drag_q", c_lift_q)) {ROS_FATAL("Invalid parameters for -c_drag_q- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_drag_deltae", c_drag_deltae)) {ROS_FATAL("Invalid parameters for -c_drag_deltae- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c", c)) {ROS_FATAL("Invalid parameters for -c- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/b", b)) {ROS_FATAL("Invalid parameters for -b- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/s", s)) {ROS_FATAL("Invalid parameters for -s- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_y_0", c_y_0)) {ROS_FATAL("Invalid parameters for -c_y_0- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_y_b", c_y_b)) {ROS_FATAL("Invalid parameters for -c_y_b- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_y_p", c_y_p)) {ROS_FATAL("Invalid parameters for -c_y_p- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_y_r", c_y_r)) {ROS_FATAL("Invalid parameters for -c_y_r- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_y_deltaa", c_y_deltaa)) {ROS_FATAL("Invalid parameters for -c_y_deltaa- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_y_deltar", c_y_deltar)) {ROS_FATAL("Invalid parameters for -c_y_deltar- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_l_0", c_l_0)) {ROS_FATAL("Invalid parameters for -c_l_0- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_l_b", c_l_b)) {ROS_FATAL("Invalid parameters for -c_l_b- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_l_p", c_l_p)) {ROS_FATAL("Invalid parameters for -c_l_p- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_l_r", c_l_r)) {ROS_FATAL("Invalid parameters for -c_l_r- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_l_deltaa", c_l_deltaa)) {ROS_FATAL("Invalid parameters for -c_l_deltaa- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_l_deltar", c_l_deltar)) {ROS_FATAL("Invalid parameters for -c_l_deltar- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_m_0", c_m_0)) {ROS_FATAL("Invalid parameters for -c_m_0- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_m_a", c_m_a)) {ROS_FATAL("Invalid parameters for -c_m_a- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_m_q", c_m_q)) {ROS_FATAL("Invalid parameters for -c_m_q- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_m_deltae", c_m_deltae)) {ROS_FATAL("Invalid parameters for -c_m_deltae- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_n_0", c_n_0)) {ROS_FATAL("Invalid parameters for -c_n_0- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_n_b", c_n_b)) {ROS_FATAL("Invalid parameters for -c_n_b- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_n_p", c_n_p)) {ROS_FATAL("Invalid parameters for -c_n_p- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_n_r", c_n_r)) {ROS_FATAL("Invalid parameters for -c_n_r- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_n_deltaa", c_n_deltaa)) {ROS_FATAL("Invalid parameters for -c_n_deltaa- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_n_deltar", c_n_deltar)) {ROS_FATAL("Invalid parameters for -c_n_deltar- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_drag_p", c_drag_p)) {ROS_FATAL("Invalid parameters for -c_drag_p- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_lift_0", c_lift_0)) {ROS_FATAL("Invalid parameters for -c_lift_0- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/c_lift_a", c_lift_a0)) {ROS_FATAL("Invalid parameters for -c_lift_a- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/oswald", oswald)) {ROS_FATAL("Invalid parameters for -oswald- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/mcoeff", M)) {ROS_FATAL("Invalid parameters for -mcoeff- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/alpha_stall", alpha0)) {ROS_FATAL("Invalid parameters for -alpha_stall- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("airframe/chanAileron", chanAileron)) {ROS_INFO("No AILERON channel selected"); chanAileron=-1;}
-	if(!ros::param::getCached("airframe/chanElevator", chanElevator)) {ROS_INFO("No ELEVATOR channel selected"); chanElevator=-1;}
-	if(!ros::param::getCached("airframe/chanRudder", chanRudder)) {ROS_INFO("No RUDDER channel selected"); chanRudder=-1;}
-	if(!ros::param::getCached("airframe/deltaa_max", deltaa_max)) {ROS_INFO("No deltaa_max value selected"); deltaa_max=0;}
-	if(!ros::param::getCached("airframe/deltae_max", deltae_max)) {ROS_INFO("No deltae_max value selected"); deltae_max=0;}
-	if(!ros::param::getCached("airframe/deltar_max", deltar_max)) {ROS_INFO("No deltar_max value selected"); deltar_max=0;}
+	char paramMsg[50];
+	sprintf(paramMsg, "airfoil%i/c_lift_q", id);
+	if(!ros::param::getCached(paramMsg, c_lift_q)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_lift_deltae", id);
+	if(!ros::param::getCached(paramMsg, c_lift_deltae)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_drag_q", id);
+	if(!ros::param::getCached(paramMsg, c_lift_q)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_drag_deltae", id);
+	if(!ros::param::getCached(paramMsg, c_drag_deltae)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c", id);
+	if(!ros::param::getCached(paramMsg, c)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/b", id);
+	if(!ros::param::getCached(paramMsg, b)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/s", id);
+	if(!ros::param::getCached(paramMsg, s)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_y_0", id);
+	if(!ros::param::getCached(paramMsg, c_y_0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_y_b", id);
+	if(!ros::param::getCached(paramMsg, c_y_b)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_y_p", id);
+	if(!ros::param::getCached(paramMsg, c_y_p)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_y_r", id);
+	if(!ros::param::getCached(paramMsg, c_y_r)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_y_deltaa", id);
+	if(!ros::param::getCached(paramMsg, c_y_deltaa)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_y_deltar", id);
+	if(!ros::param::getCached(paramMsg, c_y_deltar)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_l_0", id);
+	if(!ros::param::getCached(paramMsg, c_l_0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_l_b", id);
+	if(!ros::param::getCached(paramMsg, c_l_b)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_l_p", id);
+	if(!ros::param::getCached(paramMsg, c_l_p)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_l_r", id);
+	if(!ros::param::getCached(paramMsg, c_l_r)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_l_deltaa", id);
+	if(!ros::param::getCached(paramMsg, c_l_deltaa)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_l_deltar", id);
+	if(!ros::param::getCached(paramMsg, c_l_deltar)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_m_0", id);
+	if(!ros::param::getCached(paramMsg, c_m_0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_m_a", id);
+	if(!ros::param::getCached(paramMsg, c_m_a)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_m_q", id);
+	if(!ros::param::getCached(paramMsg, c_m_q)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_m_deltae", id);
+	if(!ros::param::getCached(paramMsg, c_m_deltae)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_n_0", id);
+	if(!ros::param::getCached(paramMsg, c_n_0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_n_b", id);
+	if(!ros::param::getCached(paramMsg, c_n_b)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_n_p", id);
+	if(!ros::param::getCached(paramMsg, c_n_p)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_n_r", id);
+	if(!ros::param::getCached(paramMsg, c_n_r)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_n_deltaa", id);
+	if(!ros::param::getCached(paramMsg, c_n_deltaa)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_n_deltar", id);
+	if(!ros::param::getCached(paramMsg, c_n_deltar)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_drag_p", id);
+	if(!ros::param::getCached(paramMsg, c_drag_p)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_lift_0", id);
+	if(!ros::param::getCached(paramMsg, c_lift_0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/c_lift_a", id);
+	if(!ros::param::getCached(paramMsg, c_lift_a0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/oswald", id);
+	if(!ros::param::getCached(paramMsg, oswald)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/mcoeff", id);
+	if(!ros::param::getCached(paramMsg, M)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/alpha_stall", id);
+	if(!ros::param::getCached(paramMsg, alpha0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "airfoil%i/deltaa_max", id);
+	if(!ros::param::getCached(paramMsg, deltaa_max)) {ROS_INFO("No -%s- value selected", paramMsg); deltaa_max=0;}
+	sprintf(paramMsg, "airfoil%i/deltae_max", id);
+	if(!ros::param::getCached(paramMsg, deltae_max)) {ROS_INFO("No -%s- value selected", paramMsg); deltae_max=0;}
+	sprintf(paramMsg, "airfoil%i/deltar_max", id);
+	if(!ros::param::getCached(paramMsg, deltar_max)) {ROS_INFO("No -%s- value selected", paramMsg); deltar_max=0;}
 
-	inputAileron = 0.0;
-	inputElevator = 0.0;
-	inputRudder = 0.0;
 }
 
 // Class destructor
@@ -119,25 +308,9 @@ StdLinearAero::~StdLinearAero()
 }
 
 
-void StdLinearAero::getInput()
-{
-	ros::param::getCached("airframe/deltaa_max", deltaa_max);
-	ros::param::getCached("airframe/deltae_max", deltae_max);
-	ros::param::getCached("airframe/deltar_max", deltar_max);
-	//Convert PPM to radians
-	if (chanAileron>-1) {inputAileron = deltaa_max * (double)(parentObj->input.value[chanAileron]-1500)/500;}
-	if (chanElevator>-1) {inputElevator = deltae_max * (double)(parentObj->input.value[chanElevator]-1500)/500;}
-	if (chanRudder>-1) {inputRudder = deltar_max * (double)(parentObj->input.value[chanRudder]-1500)/500;}
-}
-
 // Force calculation function
-geometry_msgs::Vector3 StdLinearAero::getForce()
+void StdLinearAero::getForce()
 {
-	// Read airdata
-	double airspeed = parentObj->airdata.airspeed;
-	double alpha = parentObj->airdata.alpha;
-	double beta = parentObj->airdata.beta;
-
 	// Read air density
 	rho = parentObj->environment.density;
 
@@ -180,29 +353,11 @@ geometry_msgs::Vector3 StdLinearAero::getForce()
 	wrenchAero.force.x = ax;
 	wrenchAero.force.y = ay;
 	wrenchAero.force.z = az;
-
-	// Printouts
-	// std::cout << rho << " ";
-	// std::cout << airspeed << " ";
-	// std::cout << pow(airspeed,2) << " ";
-	// std::cout << s<< " ";
-	// std::cout << alpha << " ";
-	// std::cout << c_lift_a << " ";
-	// std::cout << c_drag_a << " ";
-	// std::cout << c_x_a << " ";
-	// std::cout<< ay << std::endl;
-
-	return wrenchAero.force;
 }
 
 // Torque calculation function
-geometry_msgs::Vector3 StdLinearAero::getTorque()
+void StdLinearAero::getTorque()
 {
-	// Read airdata
-	double airspeed = parentObj->airdata.airspeed;
-	double alpha = parentObj->airdata.alpha;
-	double beta = parentObj->airdata.beta;
-
 	// Read air density
 	rho = parentObj->environment.density;
 
@@ -241,11 +396,11 @@ geometry_msgs::Vector3 StdLinearAero::getTorque()
 	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 	// 	CGOffset[i]=list[i];
 	// }
-	wrenchAero.torque.x = wrenchAero.torque.x + CGOffset.y*wrenchAero.force.z - CGOffset.z*wrenchAero.force.y;
-	wrenchAero.torque.y = wrenchAero.torque.y - CGOffset.x*wrenchAero.force.z + CGOffset.z*wrenchAero.force.x;
-	wrenchAero.torque.z = wrenchAero.torque.z - CGOffset.y*wrenchAero.force.x + CGOffset.x*wrenchAero.force.y;
 
-	return wrenchAero.torque;
+	// Removing torque calculation, because the CG effect is now being taken into account in the 'rotateTorque' function
+	// wrenchAero.torque.x = wrenchAero.torque.x + CGOffset.y*wrenchAero.force.z - CGOffset.z*wrenchAero.force.y;
+	// wrenchAero.torque.y = wrenchAero.torque.y - CGOffset.x*wrenchAero.force.z + CGOffset.z*wrenchAero.force.x;
+	// wrenchAero.torque.z = wrenchAero.torque.z - CGOffset.y*wrenchAero.force.x + CGOffset.x*wrenchAero.force.y;
 }
 
 //////////////////////////
@@ -275,15 +430,16 @@ double StdLinearAero::dragCoeff (double alpha)
 /////////////////////////
 
 // Class constructor
-HCUAVAero::HCUAVAero (ModelPlane * parent) : StdLinearAero(parent)
+HCUAVAero::HCUAVAero (ModelPlane * parent, int ID) : StdLinearAero(parent, ID)
 {
+	int id = ID;
 	char s[100];
 	Factory factory;
 	// Create CLift polynomial
-	sprintf(s,"%s","airframe/cLiftPoly");
+	sprintf(s,"airfoil%i/cLiftPoly",id);
 	liftCoeffPoly =  factory.buildPolynomial(s);
 	// Create CDrag polynomial
-	sprintf(s,"%s","airframe/cDragPoly");
+	sprintf(s,"airfoil%i/cDragPoly",id);
 	dragCoeffPoly =  factory.buildPolynomial(s);
 }
 

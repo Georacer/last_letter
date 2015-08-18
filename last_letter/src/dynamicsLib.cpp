@@ -8,7 +8,14 @@
 	{
 		parentObj = parent;
 		Factory factory;
-		aerodynamics = factory.buildAerodynamics(parentObj);
+		// Create and initialize aerodynamic objects array
+		if(!ros::param::getCached("airfoil/nWings", nWings)) {ROS_FATAL("Invalid parameters for -airfoil/nWings- in param server!"); ros::shutdown();}
+		aerodynamics = new Aerodynamics*[nWings];
+		for (int i=0; i<nWings; i++) {
+			aerodynamics[i] = factory.buildAerodynamics(parentObj,i+1); // Create a new aerodynamics object, id's are 1-indexed
+		}
+
+		// Create and initialize gravity object
 		gravity = new Gravity(parentObj);
 
 		// Create and initialize motor objects array
@@ -18,13 +25,16 @@
 			propulsion[i] = factory.buildPropulsion(parentObj,i+1); // Create a new propulsion object, id's are 1-indexed
 		}
 
+		// Create and initialize ground reactions object
 		groundReaction = factory.buildGroundReaction(parentObj);
 	}
 
 	//Class Destructor
 	Dynamics::~Dynamics()
 	{
-		delete aerodynamics;
+		for (int i=0; i<nWings; i++){
+			delete aerodynamics[i]; // delete all aerodynamics objects
+		}
 		delete gravity;
 		for (int i=0; i<nMotors; i++){
 			delete propulsion[i]; // delete all propulsion objects
@@ -40,38 +50,38 @@
 		for (int i=0; i<nMotors; i++) {
 			propulsion[i]->getInput();
 		}
+		for (int i=0; i<nWings; i++) {
+			aerodynamics[i]->getInput();
+		}
 		groundReaction->getInput();
-		aerodynamics->getInput();
 	}
 
 	// Calculate the forces and torques for each wrench source
 	void Dynamics::calcWrench()
 	{
-
-		geometry_msgs::Vector3 accumulator, tempVect;
-		accumulator.x = 0;
-		accumulator.y = 0;
-		accumulator.z = 0;
+		geometry_msgs::Vector3 tempVect;
 
 		// Call gravity calculation routines
 		forceGrav = gravity->getForce();
 		if (isnan(forceGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity force vector"); ros::shutdown();}
-		// std::cout << "gravity: " << forceGrav.x << " " << forceGrav.y << " " << forceGrav.z << std::endl;
 
 		torqueGrav = gravity->getTorque();
 		if (isnan(torqueGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity torque vector"); ros::shutdown();}
 
 
 		// Call  motors routines
+
+		// Execute one step in the motor dynamics
+		for (int i=0; i<nMotors; i++) {
+			propulsion[i]->stepEngine();
+		}
+
 		forceProp.x = 0; forceProp.y = 0; forceProp.z = 0;
 		for (int i=0; i<nMotors; i++){
 			tempVect = propulsion[i]->wrenchProp.force;
 			if (isnan(tempVect)) {ROS_FATAL("dynamicsLib.cpp: NaN member in propulsion%i force vector",i+1); ros::shutdown();}
 			forceProp = tempVect + forceProp;
-			// std::cout << " ||propulsion " << i << ": " << tempVect.z;
 		}
-		// std::cout << std::endl;
-		// std::cout << "propulsion accumulator: " << forceProp.x << " " << forceProp.y << " " << forceProp.z << std::endl;
 
 		torqueProp.x = 0; torqueProp.y = 0; torqueProp.z = 0;
 		for (int i=0; i<nMotors; i++){
@@ -84,13 +94,40 @@
 		// std::cout << std::endl;
 
 
-		// Call aerodynamics routines
-		forceAero = aerodynamics->getForce();
-		if (isnan(forceAero)) {ROS_FATAL("dynamicsLib.cpp: NaN member in aerodynamics force vector"); ros::shutdown();}
-		// std::cout << "aerodynamics: " << forceAero.x << " " << forceAero.y << " " << forceAero.z << std::endl;
+		// Call  aerodynamics routines
 
-		torqueAero = aerodynamics->getTorque();
-		if (isnan(torqueAero)) {ROS_FATAL("dynamicsLib.cpp: NaN member in aerodynamics torque vector"); ros::shutdown();}
+		// Execute one step in the aerodynamics
+		for (int i=0; i<nWings; i++) {
+			aerodynamics[i]->stepDynamics();
+		}
+
+		forceAero.x = 0; forceAero.y = 0; forceAero.z = 0;
+		for (int i=0; i<nWings; i++){
+			tempVect = aerodynamics[i]->wrenchAero.force;
+			if (isnan(tempVect)) {ROS_FATAL("dynamicsLib.cpp: NaN member in airfoil%i force vector",i+1); ros::shutdown();}
+			forceAero = tempVect + forceAero;
+			// std::cout << " ||airfoil " << i << ": " << tempVect.z;
+		}
+		// std::cout << std::endl;
+		// std::cout << "aerodynamics accumulator: " << forceAero.x << " " << forceAero.y << " " << forceAero.z << std::endl;
+
+		torqueAero.x = 0; torqueAero.y = 0; torqueAero.z = 0;
+		for (int i=0; i<nWings; i++){
+			tempVect = aerodynamics[i]->wrenchAero.torque;
+			if (isnan(tempVect)) {ROS_FATAL("dynamicsLib.cpp: NaN member in airfoil%i torque vector",i+1); ros::shutdown();}
+			torqueAero = tempVect + torqueAero;
+			// std::cout << " ||propulsion " << i << ": " << tempVect.x << " " << tempVect.y << " " << tempVect.z << std::endl;
+		}
+		// std::cout << "accumulator: " << torqueProp.x << " " << torqueProp.y << " " << torqueProp.z << std::endl;
+		// std::cout << std::endl;
+
+		// // Call aerodynamics routines
+		// forceAero = aerodynamics->getForce();
+		// if (isnan(forceAero)) {ROS_FATAL("dynamicsLib.cpp: NaN member in aerodynamics force vector"); ros::shutdown();}
+		// // std::cout << "aerodynamics: " << forceAero.x << " " << forceAero.y << " " << forceAero.z << std::endl;
+
+		// torqueAero = aerodynamics->getTorque();
+		// if (isnan(torqueAero)) {ROS_FATAL("dynamicsLib.cpp: NaN member in aerodynamics torque vector"); ros::shutdown();}
 
 
 		// Call ground reactions routines - MUST BE CALLED LAST!!!
