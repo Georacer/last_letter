@@ -19,16 +19,6 @@ int main(int argc, char **argv)
 	bool b;
 	XmlRpc::XmlRpcValue list;
 
-	// // Read initial NED coordinates
-	// if(!ros::param::getCached("init/position", list)) {ROS_FATAL("Invalid parameters for -init/position- in param server!"); ros::shutdown();}
-	// for (i = 0; i < list.size(); ++i) {
-	// 	ROS_ASSERT(list[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-	// 	temp[i]=list[i];
-	// }
-	// states.pose.position.x=temp[0];
-	// states.pose.position.y=temp[1];
-	// states.pose.position.z=temp[2];
-
 	if(!ros::param::get("argumentHandler/simRate",s)) {
 		ROS_INFO("simRate is not (string)nan");
 		if (!ros::param::get("argumentHandler/simRate",f)) {

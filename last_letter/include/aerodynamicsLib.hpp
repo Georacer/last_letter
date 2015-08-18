@@ -17,7 +17,9 @@ class Aerodynamics
 	geometry_msgs::Vector3 CGOffset; // vector from CG to engine coordinates
 	geometry_msgs::Vector3 mountOrientation; // YPR mounting orientation of the wing
 	geometry_msgs::Vector3 relativeWind; // relative wind vector in the wing frame
-	double airspeed, alpha, beta; // airdata quantities
+	double airspeed, alpha, beta; // rotated airdata quantities
+	geometry_msgs::Vector3 relativeRates; // rotated angular rate container vector
+	double p, q, r; // rotated angular rates
 	double deltaa_max, deltae_max, deltar_max, gimbalAngle_max; // Control inputs and maximum surface deflections
 	double inputAileron, inputElevator, inputRudder, inputGimbal;
 	int chanAileron, chanElevator, chanRudder, chanGimbal;
@@ -33,7 +35,7 @@ class Aerodynamics
 	~Aerodynamics();
 	void getInput();
 	void stepDynamics(); // perform one step in the aerodynamics
-	void rotateWind(); // convert the wind to the propeller axes
+	void rotateFrame(); // convert the wind to the propeller axes
 	void rotateForce(); // convert the resulting force to the body axes
 	void rotateTorque(); // convert the resulting torque to the body axes
 	virtual void getForce() = 0;

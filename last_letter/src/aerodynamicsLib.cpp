@@ -71,7 +71,7 @@ void Aerodynamics::getInput()
 // One step in the physics engine
 void Aerodynamics::stepDynamics()
 {
-	rotateWind();
+	rotateFrame();
 	getForce();
 	getTorque();
 	rotateForce();
@@ -79,7 +79,7 @@ void Aerodynamics::stepDynamics()
 }
 
 // Convert the relative wind from body axes to airfoil axes
-void Aerodynamics::rotateWind()
+void Aerodynamics::rotateFrame()
 {
 
 	tf::Quaternion tempQuat;
@@ -118,17 +118,24 @@ void Aerodynamics::rotateWind()
 	relativeWind.z = tempVect.getZ();
 
 	// Calculate the new, relative air data
-	geometry_msgs::Vector3 tempVect2;
-	tempVect2 = getAirData(relativeWind);
-	airspeed = tempVect2.x; // Redundant, but we leave this here for now
-	alpha = tempVect2.y;
-	beta = tempVect2.z;
-
+	relativeWind = getAirData(relativeWind);
+	airspeed = relativeWind.x; // Redundant, but we leave this here for now
+	alpha = relativeWind.y;
+	beta = relativeWind.z;
 	// std::cout << "airspeed: " << airspeed << " alpha: " << alpha << " beta: " << beta << std::endl;
-
 
 	if (!std::isfinite(airspeed)) {ROS_FATAL("aerodynamicsLib.cpp/rotateWind: NaN value in airspeed"); ros::shutdown();}
 	if (std::fabs(airspeed)>1e+160) {ROS_FATAL("aerodynamicsLib.cpp/rotateWind: normalWind over 1e+160"); ros::shutdown();}
+
+	// Rotate angular rates from the body frame to the airfoil frame
+	tf::Vector3 bodyRates(parentObj->states.velocity.angular.x, parentObj->states.velocity.angular.y, parentObj->states.velocity.angular.z);
+	tempVect = mount_to_gimbal_rot * (body_to_mount_rot * bodyRates);
+	relativeRates.x = tempVect.getX();
+	p = relativeRates.x;
+	relativeRates.y = tempVect.getY();
+	q = relativeRates.y;
+	relativeRates.z = tempVect.getZ();
+	r = relativeRates.z;
 }
 
  // Convert the resulting force to the body axes
@@ -324,11 +331,6 @@ void StdLinearAero::getForce()
 	//read orientation
 	geometry_msgs::Quaternion quat = parentObj->states.pose.orientation;
 
-	//read angular rates
-	double p = parentObj->states.velocity.angular.x;
-	double q = parentObj->states.velocity.angular.y;
-	double r = parentObj->states.velocity.angular.z;
-
 	//calculate aerodynamic force
 	double qbar = 1.0/2.0*rho*pow(airspeed,2)*s; //Calculate dynamic pressure
 	double ax, ay, az;
@@ -357,11 +359,6 @@ void StdLinearAero::getTorque()
 {
 	// Read air density
 	rho = parentObj->environment.density;
-
-	//read angular rates
-	double p = parentObj->states.velocity.angular.x;
-	double q = parentObj->states.velocity.angular.y;
-	double r = parentObj->states.velocity.angular.z;
 
 	//calculate aerodynamic torque
 	double qbar = 1.0/2.0*rho*pow(airspeed,2)*s; //Calculate dynamic pressure
