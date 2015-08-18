@@ -1,4 +1,5 @@
 #Contact points array
+#Ground reaction model types: 0 no ground reactions, 1 PanosGroundReaction, 2 PointFriction
 #Material types: 0 foam, 1 metal, 2 rubber wheel, 3 composites
 airframe/groundReactionType: 1
 airframe/contactPtsNo: 7
