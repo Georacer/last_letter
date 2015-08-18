@@ -78,7 +78,7 @@ void Aerodynamics::stepDynamics()
 	rotateTorque();
 }
 
-// Convert the relateive wind from body axes to airfoil axes
+// Convert the relative wind from body axes to airfoil axes
 void Aerodynamics::rotateWind()
 {
 
@@ -105,7 +105,7 @@ void Aerodynamics::rotateWind()
 
 	// Publish the airfoil transformation to the transform tree
 	char foil_frame[50];
-	sprintf(foil_frame, "airfoil%i", id);
+	sprintf(foil_frame, "airfoil_%i", id);
 	broadcaster.sendTransform(tf::StampedTransform(body_to_gimbal, ros::Time::now(), "base_link", foil_frame));
 
 	// Transform the relative wind from body axes to airfoil axes
@@ -135,7 +135,6 @@ void Aerodynamics::rotateWind()
 void Aerodynamics::rotateForce()
 {
 
-	// std::cout << "Aeroforces before: " << wrenchAero.force.x << " " << wrenchAero.force.y << " " << wrenchAero.force.z << std::endl;
 
 	tf::Vector3 tempVect(wrenchAero.force.x, wrenchAero.force.y, wrenchAero.force.z);
 	tempVect = body_to_gimbal_rot * tempVect; // I'm not sure why this works and not inverted
@@ -144,7 +143,6 @@ void Aerodynamics::rotateForce()
 	wrenchAero.force.y = tempVect.getY();
 	wrenchAero.force.z = tempVect.getZ();
 
-	// std::cout << "Aeroforces after: " << wrenchAero.force.x << " " << wrenchAero.force.y << " " << wrenchAero.force.z << std::endl;
 
 }
 
@@ -158,7 +156,6 @@ void Aerodynamics::rotateTorque()
 	wrenchAero.torque.x = tempVect.getX();
 	wrenchAero.torque.y = tempVect.getY();
 	wrenchAero.torque.z = tempVect.getZ();
-
 
 	// Convert the torque from the motor frame to the body frame
 	double ratio = parentObj->kinematics.J[0] / (parentObj->kinematics.J[0] + parentObj->kinematics.mass * CGOffset.x*CGOffset.x);
@@ -228,7 +225,7 @@ StdLinearAero::StdLinearAero(ModelPlane * parent, int id) : Aerodynamics(parent,
 	sprintf(paramMsg, "airfoil%i/c_lift_deltae", id);
 	if(!ros::param::getCached(paramMsg, c_lift_deltae)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	sprintf(paramMsg, "airfoil%i/c_drag_q", id);
-	if(!ros::param::getCached(paramMsg, c_lift_q)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	if(!ros::param::getCached(paramMsg, c_drag_q)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	sprintf(paramMsg, "airfoil%i/c_drag_deltae", id);
 	if(!ros::param::getCached(paramMsg, c_drag_deltae)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	sprintf(paramMsg, "airfoil%i/c", id);

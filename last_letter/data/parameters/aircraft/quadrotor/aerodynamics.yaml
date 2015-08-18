@@ -1,47 +1,56 @@
 #Airframe Aerodynamic Parameters
-airframe/aerodynamicsType: 1
-airframe/s: 0.09
-airframe/b: 0.4
-airframe/c: 0.4
 
-airframe/c_lift_0: 0.0
-airframe/c_lift_deltae: 0.0
-airframe/c_lift_a: 1.0
-airframe/c_lift_q: 0.0
-airframe/mcoeff: 50.0
-airframe/oswald: 0.9
-airframe/alpha_stall: 0.17
-airframe/c_drag_q: 0.0
-airframe/c_drag_deltae: 0.0
-airframe/c_drag_p: 0.0
-airframe/c_y_0: 0.0
-airframe/c_y_b: 0.0
-airframe/c_y_p: 0.0
-airframe/c_y_r: 0.0
-airframe/c_y_deltaa: 0.0
-airframe/c_y_deltar: 0.0 #opposite sign than c_n_deltar
+airfoil/nWings: 1
 
-airframe/c_l_0: 0.0
-airframe/c_l_p: -10.0
-airframe/c_l_b: 0.0
-airframe/c_l_r: 0.0
-airframe/c_l_deltaa: 0.0
-airframe/c_l_deltar: 0.0
-airframe/c_m_0: 0.0
-airframe/c_m_a: 0.0
-airframe/c_m_q: -18.0
-airframe/c_m_deltae: 0.0
-airframe/c_n_0: 0.0
-airframe/c_n_b: 0.0
-airframe/c_n_p: 0.0
-airframe/c_n_r: -10.0
-airframe/c_n_deltaa: 0.0
-airframe/c_n_deltar: 0.0 #opposite sign than c_y_deltar
+airfoil1/chanGimbal: -1
+airfoil1/gimbalAngle_max: 0.0
 
-airframe/deltaa_max: 0.0
-airframe/deltae_max: 0.0
-airframe/deltar_max: 0.0
+airfoil1/CGOffset: [-0.02, 0.0, -0.05] # vector from CG to CoL
+airfoil1/mountOrientation: [0.0, 0.0, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
 
-airframe/chanAileron: -1
-airframe/chanElevator: -1
-airframe/chanRudder: -1
+airfoil1/aerodynamicsType: 0
+airfoil1/s: 0.09
+airfoil1/b: 0.4
+airfoil1/c: 0.4
+
+airfoil1/c_lift_0: 0.0
+airfoil1/c_lift_deltae: 0.0
+airfoil1/c_lift_a: 1.0
+airfoil1/c_lift_q: 0.0
+airfoil1/mcoeff: 50.0
+airfoil1/oswald: 0.9
+airfoil1/alpha_stall: 0.17
+airfoil1/c_drag_q: 0.0
+airfoil1/c_drag_deltae: 0.0
+airfoil1/c_drag_p: 0.0
+airfoil1/c_y_0: 0.0
+airfoil1/c_y_b: 0.0
+airfoil1/c_y_p: 0.0
+airfoil1/c_y_r: 0.0
+airfoil1/c_y_deltaa: 0.0
+airfoil1/c_y_deltar: 0.0 #opposite sign than c_n_deltar
+
+airfoil1/c_l_0: 0.0
+airfoil1/c_l_p: -10.0
+airfoil1/c_l_b: 0.0
+airfoil1/c_l_r: 0.0
+airfoil1/c_l_deltaa: 0.0
+airfoil1/c_l_deltar: 0.0
+airfoil1/c_m_0: 0.0
+airfoil1/c_m_a: 0.0
+airfoil1/c_m_q: -18.0
+airfoil1/c_m_deltae: 0.0
+airfoil1/c_n_0: 0.0
+airfoil1/c_n_b: 0.0
+airfoil1/c_n_p: 0.0
+airfoil1/c_n_r: -10.0
+airfoil1/c_n_deltaa: 0.0
+airfoil1/c_n_deltar: 0.0 #opposite sign than c_y_deltar
+
+airfoil1/deltaa_max: 0.0
+airfoil1/deltae_max: 0.0
+airfoil1/deltar_max: 0.0
+
+airfoil1/chanAileron: -1
+airfoil1/chanElevator: -1
+airfoil1/chanRudder: -1

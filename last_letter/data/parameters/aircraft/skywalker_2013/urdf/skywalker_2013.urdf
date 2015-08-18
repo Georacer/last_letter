@@ -4,7 +4,7 @@
 	<link name="base_link">
 		<visual>
 			<geometry>
-				<!-- <mesh filename="package://last_letter/urdf/skywalker_2013.dae"/> -->
+				<!-- <mesh filename="package://last_letter/data/parameters/aircraft/skywalker_2013/urdf/skywalker_2013.dae"/> -->
 				<mesh filename="package://last_letter/data/parameters/aircraft/skywalker_2013/urdf/skywalker_2013.stl" scale="0.02621 0.02621 0.02621"/>
 			</geometry>
 			<material name="greenSprite">
@@ -18,7 +18,9 @@
 			<geometry>
 				<mesh filename="package://last_letter/data/parameters/aircraft/skywalker_2013/urdf/10x4.7.stl"/>
 			</geometry>
-			<material name="greenSprite"/>
+			<material name="whitePurity">
+				<color rgba="1.0 1.0 1.0 1.0"/>
+			</material>
 		</visual>
 	</link>
 
