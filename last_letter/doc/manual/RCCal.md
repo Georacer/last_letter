@@ -45,15 +45,15 @@ buttons: [0, 0, 0]
 
 Notice that the `/joy` topic has an `axes` and a `buttons` field, which will have variable size, depending on your device. These fields are **zero-based** arrays.
 
-In the following section, you will re-map your device axes to match the following order of the virtual PWM input, which `last_letter` passes to the physics model:
+In the following section, you will re-map your device axes to match the following order of the virtual PWM input, which `last_letter` passes to the physics model. Each aircraft model assigns the PWM channels individually in its .yaml parameter files, but for airplanes in general the channel order is _aileron_,_elevator_,_throttle_ and _rudder_.
 
-Move the stick that corresponds to the roll axis at full deflection, in the direction which rolls your aircraft to the right. Take a note of **the (zero-based!) index** of the *axes* array element that changed and its **value**. This value should normally be between -1 and 1. Copy the **index** at the `/HID/axes[0]` array element and the **value** at the `/HID/throws[0]` array element.
+Move the stick that corresponds to the channel 0 at full deflection; for airplanes, this usually is the one which controlls the roll axis, in the direction which rolls your aircraft to the right. Take a note of **the (zero-based!) index** of the *axes* array element that changed and its **value**. This value should normally be between -1 and 1. Copy the **index** at the `/HID/axes[0]` array element and the **value** at the `/HID/throws[0]` array element.
 
-Do the same for the elevator axis, by giving full deflection in the direction that pitches the aircaft upwards, and filling the `/HID/axes[1]` and `/HID/throws[1]` entries.
+Do the same for channel 1 (elevator axis), by giving full deflection in the direction that pitches the aircaft upwards, and filling the `/HID/axes[1]` and `/HID/throws[1]` entries.
 
-Do the same for the throttle axis, by opening the throttle at its maximum throw and filling the `/HID/axes[2]` and `/HID/throws[2]` entries.
+Do the same for the channel 2(throttle axis), by opening the throttle at its maximum throw and filling the `/HID/axes[2]` and `/HID/throws[2]` entries.
 
-Do the same for the rudder axis, by giving full deflection towards the direction that yaws your aircraft to the right. Fill the entries `/HID/axes[3]` and `/HID/throws[3]`.
+Do the same for the channel 3 (rudder axis), by giving full deflection towards the direction that yaws your aircraft to the right. Fill the entries `/HID/axes[3]` and `/HID/throws[3]`.
 
 Leave the `/HID/buttons` array and the rest of the `/HID/axes` and `/HID/throws` elements intact. They do not need to change for basic RC flight.
 
@@ -70,5 +70,13 @@ So far the following devices have been successfuly tested with `last_letter`:
 
 Configuration parameters for those devices can already be found on the `HID.yaml` file. In order to use them, leave only the corresponding lines uncommented.
 
+### Mixing support
+There is some rudimentary support for channel mixing, for the case of more complex aircraft or multirotors. You can enable a mixing scheme by uncommenting the `/HID/mixerid` parameter in the `HID.yaml` parameter file. Currently, there are 3 types of mixers implemented.
+0: No mixing - the aircraft model will receive the channels exactly as they are remapped and scaled by the calibration procedure.
+1: Airplane mixing - The throttle channel will be re-scaled from [-1 1] to [0 1] to be used by a motor and channel 0 will be also be mapped from [-1 1] to [0 1], in order to suitably control the simulation reset function.
+2: Quadrotor mixing - The first 4 channels are mixed with each other to produce meaningful motor signals for an X-frame quadrotor. A reset channel is also configured.
+3: Firefly Y6 mixing - Mixing suitable for a somewhat clunky control scheme of the Firefly Y6 hybrid vehicle.
+
+You can add more mixing schemes by yourself in the `last_letter/last_letter/src/joy2chan.cpp` file. Re-compilation of the code is required.
 
 [back to table of contents](../../../README.md)

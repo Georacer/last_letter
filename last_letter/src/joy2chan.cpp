@@ -59,7 +59,7 @@ last_letter_msgs::SimPWM mixer(double * input, int mixerid)
 		channels.value[7] = (unsigned int)(input[7]*500 + 1500); // Generic channel
 		channels.value[8] = (unsigned int)(input[8]*500 + 1500); // Generic channel
 		channels.value[9] = (unsigned int)(input[9]*1000 + 1000); // Reset channel
-		channels.value[10] = (unsigned int)(input[10]*1000 + 1000); // Generic channel
+		channels.value[10] = (unsigned int)(input[10]*500 + 1500); // Generic channel
 		return channels;
 	case 2: // Quadrotor mixing
 		channels.value[0] = (unsigned int)(500*((input[2]+1) -0.11*input[0] +0.11*input[1] -0.11*input[3]) +1000);

@@ -137,7 +137,7 @@ void ModelPlane::getInput(last_letter_msgs::SimPWM inputMsg)
 	dynamics.getInput();
 
 	if (chanReset>-1) { // If a rest channel is set
-		if (input.value[chanReset] > 1500) { // Reset the simulation upon PWM command
+		if (input.value[chanReset] > 1600) { // Reset the simulation upon PWM command
 			init();
 		}
 	}
