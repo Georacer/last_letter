@@ -21,3 +21,6 @@
 # /HID/axes: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ]
 # /HID/buttons: [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 ]
 # /HID/throws: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 ]
+
+# Mixer id number: 0 for no mixing, 1 for airplane mixing, 2, for quadrotor mixing. See joy2chan.cpp code
+init/mixerid: 1
