@@ -17,8 +17,10 @@ ElectricEng::ElectricEng(ModelPlane * parent, int ID) : Propulsion(parent, ID)
 	if(!ros::param::getCached(paramMsg, Kv)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	sprintf(paramMsg, "motor%i/Rm", id);
 	if(!ros::param::getCached(paramMsg, Rm)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
-	if(!ros::param::getCached("battery/Rs", Rs)) {ROS_FATAL("Invalid parameters for -Cells- in param server!"); ros::shutdown();}
-	if(!ros::param::getCached("battery/Cells", Cells)) {ROS_FATAL("Invalid parameters for -Cells- in param server!"); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/Rs", id);
+	if(!ros::param::getCached(paramMsg, Rs)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
+	sprintf(paramMsg, "motor%i/Cells", id);
+	if(!ros::param::getCached(paramMsg, Cells)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	sprintf(paramMsg, "motor%i/I0", id);
 	if(!ros::param::getCached(paramMsg, I0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	// Initialize RadPS limits
@@ -30,10 +32,10 @@ ElectricEng::ElectricEng(ModelPlane * parent, int ID) : Propulsion(parent, ID)
 
 	Factory factory;
 	// Create propeller efficiency polynomial
-	sprintf(s,"%s%i/%s","prop", id , "nCoeffPoly");
+	sprintf(s,"motor%i/nCoeffPoly", id);
 	npPoly =  factory.buildPolynomial(s);
 	// Create propeller power polynomial
-	sprintf(s,"%s%i/%s","prop", id, "powerPoly");
+	sprintf(s,"motor%i/propPowerPoly", id);
 	propPowerPoly =  factory.buildPolynomial(s);
 
 	omega = omegaMin; // Initialize engine rotational speed

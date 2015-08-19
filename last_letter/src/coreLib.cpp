@@ -339,7 +339,7 @@ Polynomial * Factory::buildPolynomial(char * baseParam)
 		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		int length = list.size();
 		if ((2*polyOrder2 + 2*polyOrder1*polyOrder2 + polyOrder1 - polyOrder1*polyOrder1 + 2)/2 != length) {
-			ROS_FATAL("Engine power polynomial order and provided coefficient number do not match");
+			ROS_FATAL("Polynomial order and provided coefficient number do not match");
 			ros::shutdown();
 		}
 		double coeffs[length];
@@ -357,7 +357,7 @@ Polynomial * Factory::buildPolynomial(char * baseParam)
 		sprintf(parameter, "%s/%s",baseParam,"breaks");
 		if(!ros::param::getCached(parameter, list)) {ROS_FATAL("Invalid parameters for %s in param server!", parameter); ros::shutdown();}
 		if ((breaksNo+1) != list.size()) {
-			ROS_FATAL("breaks order and provided breaks number do not match");
+			ROS_FATAL("Spline breaks order and provided breaks number do not match");
 			ros::shutdown();
 		}
 		double breaks[list.size()];

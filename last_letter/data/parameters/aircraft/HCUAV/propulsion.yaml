@@ -2,15 +2,7 @@
 # Motor types: 0 No motor, 1 Beard Engine, 2 Piston engine, 3 Electric Engine
 # Polynomial types: 0 1D, 1 2D, 2 cubic spline
 motor/CGOffset: [0.0, 0.0, 0.0]
-# motor/motorType: 0
 
-# motor/motorType: 1
-# motor/s_prop: 1.0
-# motor/k_motor: 0.150
-# motor/k_t_p: 0.0
-# motor/k_omega: 366.0
-# motor/c_prop: 1.0
-#
 motor/motorType: 2
 motor/engPowerPoly/polyType: 2
 motor/engPowerPoly/breaksNo: 8

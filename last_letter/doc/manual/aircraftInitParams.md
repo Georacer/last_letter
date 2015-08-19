@@ -18,6 +18,8 @@ These are found in the file `init.yaml` and describe basic initialization quanti
 
 `throttle`: The initial throttle setting, normalized in 0/1
 
-`rudder`: The rudder aileron deflection, normalized in -1/1
+`rudder`: The initial rudder aileron deflection, normalized in -1/1
+
+`chanReset`: The channel which will cause the simulation to reset, should its value exceed 1600. If set to -1 reset will be inactive.
 
 [back to table of contents](../../../README.md)

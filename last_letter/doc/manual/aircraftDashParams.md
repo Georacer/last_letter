@@ -1,19 +1,19 @@
 ##Dashboard Configuration Parameters
 
-Along with the aircraft model characteristics, you can control the appearance of the `rqt` dashboard window, an avionics panel which appears each time you launch `last_letter`.
+Along with the aircraft model characteristics, you can specify the appearance of the `rqt` dashboard window, an avionics panel which appears each time you launch `last_letter`.
 The panel is made up of multiple gauges (which are grouped in 3 columns) and each gauge has a similar description, which uses the following parameters:
 
-`topic`: The ROS topic which this gauge should be bound to. This should lead to a topic containing a scalar value and be relatively referenced, under the `uav_name/dashboard` topic directory.
-Available topics are:
+`topic`: The ROS topic which this gauge should be bound to. This can be any topic under the current `roscore`. Optionally, this can be a topic under the `uav_name/dashboard` topic directory.
+Available topics under this directory are:
 `euler.x`: Roll angle (in degrees)
 `euler.y`: Pitch angle (in degrees)
 `euler.z`: Yaw angle (in degrees)
 `airspeed`: Airspeed (in m/s)
 `alpha`: Angle of attack (in degrees)
 `beta`: Angle of sideslip (in degrees)
-`climbRate`: Climbrate (in m/s)
+`climbRate`: Climb rate (in m/s)
 `altitude`: GPS altitude (in m)
-`rotorspeed`: Propeller rotational speed (in RPM)
+`rotorspeed`: Propeller_1 rotational speed (in RPM)
 
 `length`: The length of the arc of the gauge (in degrees).
 

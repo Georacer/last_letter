@@ -53,10 +53,11 @@ PistonEng::~PistonEng()
 // Update motor rotational speed and calculate thrust
 void PistonEng::updateRadPS()
 {
-	rho = parentObj->environment.density;
+	rho = parentObj->environment.density; // Read current air density
 
+	// Calculate current engine power
 	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
-	double engPower = inputMotor * powerHP * 745.7; // Calculate current engine power
+	double engPower = inputMotor * powerHP * 745.7;
 
 	double advRatio = normalWind/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model

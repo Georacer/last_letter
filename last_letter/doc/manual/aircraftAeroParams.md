@@ -2,15 +2,35 @@
 
 This file contains the parameters of the aerodynamics model.
 
-The aerodynamics model assumes that all of the aircraft is fused into one lift, drag and moment model, ie separate wing surfaces are not modeled and calculated separately. This is not uncommon to the aircraft identification bibliography. Essentially, what this means is that you cannot provide NACA numbers for your main and tail wing and expect them to be incorporated. This is DATCOM turf!
+The aerodynamics model assumes that the aircraft aerodynamic response can be modeled as the some of a number of airfoils. This method allows for various common modelling approaches such as:
+- Fusing the aircraft aerodynamics into one lift, drag and moment airfoil model, ie separate wing surfaces are not modeled and calculated separately. This is not uncommon to the aircraft identification bibliography
+- Specifying different airfoils for the main wing and the stabilizer, each with its own aerodynamics model and location on the airframe relative to the Center of Gravity. Their contributions are summed up to provide the overall response of the aircraft.
 
-There are 3 types of aerodynamics models available. These are selected with the variable
+`nWings`: The total number of airfoils that the aircraft contains.
 
-`aerodynamicsType`(**integer**)
+**Note** The following parameters are referring to a single airfoil. They are groupped under the prefix `airfoilX/`, where `X` is the number-id of the airfoil, starting from 1 for a single-airfoil aircraft (eg `airfoil1/CGOffset`).
 
-- 0: Selects an empty aerodynamics model, which has no interactions with the surrounding air. Useful for modeling a rock falling in the void!
+`CGOffset`: The location of the center of lift in terms of the center of gravity, in X/Y/Z body frame coordinates. Negative X means that the CoL is behind the CoG. Positive Y means that the CoL is to the right of the CoG. Negative Z means that the CoL is above the CoG.
+
+`mountOrientation`: The rotation Roll-Pitch-Yaw (in this sequence) rotation angles which rotate the airfoil from the Body Frame to its actual Airfoil Frame fixture. If the whole aircraft is modelled as a single airfoil, this should be [0.0,0.0,0.0]
+
+`chanGimbal`: The input channel which controls the airfoil gimbal. Set to -1 for no gimballing action.
+
+`gimbalAxis`: Selects the axis of the [**Airfoil Frame*](referenceFrames.md) around which the gimbal rotation is applied. Available options are:
+0 - x-axis, the axis collinear with the wing chord and towards the front
+1 - y-axis, the axis collinear with the wing span and towards the right
+2 - z-axis, the remaining, orthogonal axis for a right-handed system, perpendicular to the x-y plane and downwards.
+
+`gimbalAngle_max`: The maximum throw angle (in radians) that the gimbal is providing when given full input.
+
+There are 3 types of airfoil aerodynamic models available. These are selected with the variable
+`aerodynamicsType`:(**integer**)
+- 0: Selects an empty aerodynamics model, which has no interactions with the surrounding air. Useful for adding a dummy wing on your aircraft, or modeling a rock falling in the void!
 - 1: Standard Linear Aerodynamics - model with linear relation to its parameters. This is the most common and classic model found in bibliography, which models the reactions of the air using constant linear coefficients to the aircraft states.
 - 2: Spline Aero - derivative class from 1, which models the lift and drag coefficients as cubic splines. This is useful if you have extracted the lift and drag curves of your aircraft through experiments or FDM simulation but can't quite capture it in a simple parametric model. Cubic splines offer you the possibility to import your data in full resolution.
+
+### No aerodynamics model
+No parameters need to be defined regarding this model.
 
 ### Standard linear aerodynamics model
 In general, none of the parameters corresponding to this aerodynamics model needs to be non-zero. By setting values to zero, the corresponding variable has no effect to the aircraft behaviour.
@@ -97,18 +117,13 @@ double c_drag_a = c_drag_p + pow(c_lift_0+c_lift_a0*alpha,2)/(M_PI*oswald*AR);
 `c_y_deltar`: Side force coefficient in relation to rudder deflection
 
 ### Spline aero parameters
-The following parameters are used to define polynomials or splines to describe the form of the coefficient of lift and drag as a function of angle-of-attack.
+The following parameters are used to define polynomials or splines which describe the coefficient of lift and drag as a 1-D function of the angle-of-attack. Two parameter groups are required, `cLiftPoly` and `cDragpoly`.
 
-`cLiftPoly/polyType`:(**integer**) The type of polynomial to be used for construcint coefficient of lift in relation to angle-of-attack. In this case valid options are 0 (1D polynomial) or 2 (cubic spline)
+`cLiftPoly`: A 1-variable (1D) polynomial describing the coefficient of lift (non-dimensional), as a function of angle of attack (in radians). This is a parameter group and all the related polynomial parameters must be set as a parameter under this group. A spline polynomial spanning the whole [-pi, pi] interval is suggested.
+More information on the related parameters can be found in the [polynomial parameters page](polynomialParams.md).
 
-In the case where cubic spline is selected, the following parameters are required:
-`cLiftPoly/breaksNo`:(**integer**) The number of transition points of the coefficient of lift spline.
-
-`cLiftPoly/breaks`: The values of the transition points. The length of this list should be `breaksNo+1` with the first element acting as a lower bound for your expected range.
-
-`cLiftPoly/coeffs`: The array holding the cubic spline coefficients for each spline section. Each row has four elements, starting from the zero-order term up to the 3rd order term. This array has `4*breaksNo` elements.
-
-`cDragPoly/polyType`, `cDragPoly/breaksNo`, `cDragPoly/breaks`, `cDragPoly/coeffs`: Look above in the `cLiftPoly` parameters.
+`cDragpoly`: A 1-variable (1D) polynomial describing the coefficient of drag (non-dimensional), as a function of angle of attach (in radians). This is a parameter group and all the related polynomial parameters must be set as a parameter under this group. A spline polynomial spanning the whole [-pi, pi] interval is suggested.
+More information on the related parameters can be found in the [polynomial parameters page](polynomialParams.md).
 
 ### Other parameters
 `s`: Wing surface area
@@ -122,6 +137,12 @@ In the case where cubic spline is selected, the following parameters are require
 `c_deltae_max`: Maximum elevator deflection (in radians)
 
 `c_deltar_max`: Maximum rudder deflection (in radians)
+
+`chanAileron`: The input channel which controls the ailerons. Set to -1 for no aileron effect.
+
+`chanElevator`: The input channel which controls the elevator. Set to -1 for no elevator effect.
+
+`chanRudder`: The input channel which controls the rudder. Set to -1 for no rudder effect.
 
 [back to table of contents](../../../README.md)
 

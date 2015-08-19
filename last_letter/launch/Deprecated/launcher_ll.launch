@@ -1,0 +1,18 @@
+<!-- Top-Level launch file for bundled launching /-->
+<!--Simulation launcher for the custom "last_letter" aircraft-->
+
+<launch>
+	<arg name="manualMode" default="false"/>
+	<arg name="autoMode" default="false"/>
+	<!-- Launch the simulator /-->
+	<include file="$(find last_letter)/launch/sim_ll.launch" >
+		<arg name="manualMode" value="$(arg manualMode)"/>
+		<arg name="autoMode" value="$(arg autoMode)"/>
+	</include>
+
+	<!-- Launch the visualizers /-->
+	<include file="$(find last_letter)/launch/visualization.launch" >
+		<arg name="model" value="skywalker" />
+	</include>
+
+</launch>

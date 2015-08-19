@@ -2,11 +2,12 @@
 
 airfoil/nWings: 1
 
-airfoil1/chanGimbal: -1
-airfoil1/gimbalAngle_max: 0.0
-
 airfoil1/CGOffset: [-0.02, 0.00, -0.05] # vector from CG to CoL
 airfoil1/mountOrientation: [0.0, 0.0, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
+
+airfoil1/chanGimbal: -1
+airfoil1/gimbalAxis: 0
+airfoil1/gimbalAngle_max: 0.0
 
 airfoil1/aerodynamicsType: 1
 airfoil1/s: 0.45

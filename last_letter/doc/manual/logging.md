@@ -2,7 +2,7 @@
 
 `last_letter` uses the ROS [bag system](http://wiki.ros.org/Bags) to record logs.
 
-The `record` executable of the `rosbag` file is called in the `last_letter/launch/simulation.launch` file with the argument
+The `record` executable of the `rosbag` package is called in the `last_letter/launch/simulation.launch` file with the argument
 ```xml
 <node if="$(arg log)" pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag -a"/> <!-- topic activity recorder node -->
 ```
