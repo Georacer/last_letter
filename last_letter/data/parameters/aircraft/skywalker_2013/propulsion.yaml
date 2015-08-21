@@ -31,5 +31,5 @@ motor1/propPowerPoly/polyNo: 3
 motor1/propPowerPoly/coeffs: [0.0661, -0.1647, 0.2958, -0.2355]
 
 
-battery/Rs: 0.0 # in Ohms
-battery/Cells: 3 # number of LiPo cells
+battery1/Rs: 0.0 # in Ohms
+battery1/Cells: 3 # number of LiPo cells

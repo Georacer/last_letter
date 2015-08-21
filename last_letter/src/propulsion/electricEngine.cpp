@@ -9,7 +9,7 @@ ElectricEng::ElectricEng(ModelPlane * parent, int ID) : Propulsion(parent, ID)
 	int i, length;
 	char s[100];
 	char paramMsg[50];
-	sprintf(paramMsg, "prop%i/propDiam", id);
+	sprintf(paramMsg, "motor%i/propDiam", id);
 	if(!ros::param::getCached(paramMsg, propDiam)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	sprintf(paramMsg, "motor%i/engInertia", id);
 	if(!ros::param::getCached(paramMsg, engInertia)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
@@ -17,9 +17,9 @@ ElectricEng::ElectricEng(ModelPlane * parent, int ID) : Propulsion(parent, ID)
 	if(!ros::param::getCached(paramMsg, Kv)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	sprintf(paramMsg, "motor%i/Rm", id);
 	if(!ros::param::getCached(paramMsg, Rm)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
-	sprintf(paramMsg, "motor%i/Rs", id);
+	sprintf(paramMsg, "battery%i/Rs", id);
 	if(!ros::param::getCached(paramMsg, Rs)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
-	sprintf(paramMsg, "motor%i/Cells", id);
+	sprintf(paramMsg, "battery%i/Cells", id);
 	if(!ros::param::getCached(paramMsg, Cells)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
 	sprintf(paramMsg, "motor%i/I0", id);
 	if(!ros::param::getCached(paramMsg, I0)) {ROS_FATAL("Invalid parameters for -%s- in param server!", paramMsg); ros::shutdown();}
