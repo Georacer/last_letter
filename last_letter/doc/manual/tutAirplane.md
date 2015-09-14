@@ -190,60 +190,134 @@ The oswald number is related to the air properties and affects the induced drag.
 Set the stall angle of your airplane, in radians.
 `airfoil1/alpha_stall:` `a_stall`
 
+Now let's move to the drag coefficients. The parasitic drag will be set to
+`airfoil1/c_drag_p:` `s_prop*(k_motor^2 - V_m^2)/(V_m^2*s) - (c_lift_0*(1+10*a_m))^2/(pi*oswald*b^2/s)`
 
+We don't want neither pitching rate nor elevator to produce any drag.
 `airfoil1/c_drag_q:` `0`
 `airfoil1/c_drag_deltae:` `0`
-`airfoil1/c_drag_p:` `s_prop*(k_motor^2 - V_m^2)/(V_m^2*s) - (c_lift_0*(1+10*a_m))^2/(pi*oswald*b^2/s)`
+
+On to the lateral force, there is no constant force pushing the aircaft laterally. We consider our airplane completely symmetric in the x-z plane.
 `airfoil1/c_y_0:` `0`
+
+However, we need sideslip to produce force, roughly proportional to the sidereal area, with a section of an angled cube (https://en.wikipedia.org/wiki/Drag_coefficient)
 `airfoil1/c_y_b:` `-l*h/s * 0.8/(pi/2)`
+
+We set the coefficients on roll rate and yaw rate to zero, as well as the dependency on aileron deflection.
 `airfoil1/c_y_p:` `0`
 `airfoil1/c_y_r:` `0`
 `airfoil1/c_y_deltaa:` `0`
+
+Finally, we choose a quasi-arbitrary value for the effect of rudder on the side force. Keep in mind that this is not the efficiency of the rudder on the yawing action; instead this is how much the airplane will move to the side when the rudder is deflected.
 `airfoil1/c_y_deltar:` `c_y_b/5`
 
+Next, we proceed onto the coefficients that generate moments.
+Firstly, the bias rolling moment should be zero for well-designed airplanes.
 `airfoil1/c_l_0:` `0`
+
+Then, we calculate the coefficient of rolling moment in terms of roll rate. This is a damping action caused by the air resisting fast roll rates to build up.
 `airfoil1/c_l_p:` `-j_x/(qbar*s*b*t_r/3)`
-`airfoil1/c_l_b:` `C_l_p/10`
+
+This is the coefficient which implements the dihedral effect. We choose an arbitrary value which we might as well change. Some dihedral alleviates some pilot effort when flying completely manually.
+`airfoil1/c_l_b:` `c_l_p/10`
+
+We don't want yaw rate to haveyany effect on the rolling moment.
 `airfoil1/c_l_r:` `0`
-`airfoil1/c_l_deltaa:` `j_x*p_max/(qbar*s*b*t_r/3*da_max)`
+
+Neither should the rudder.
 `airfoil1/c_l_deltar:` `0`
+
+Finally, we specify the efficacy of the aileron, which is the primary source of rolling moment.
+`airfoil1/c_l_deltaa:` `j_x*p_max/(qbar*s*b*t_r/3*da_max)`
+
+The pitching moment components are now laid down.
+We start by defining the effect of AoA on pitching moment. We start with a value of -0.5. Make it more negative if you want your airplane to be more stable in the longitudinal axis. Make it more positive if you want it to be more maneuverable.
 `airfoil1/c_m_a:` `-0.5`
+
+Calculate the static pitching moment.
 `airfoil1/c_m_0:` `-c_m_a*a_c`
+
+Find the coefficient of pitching moment in terms of pitching rate, which dampens excess pitching rates.
 `airfoil1/c_m_q:` `-j_y/(qbar*s*c*t_p/3)`
+
+And calculate the effect of elevator in the pitchin rate.
 `airfoil1/c_m_deltae:` `j_y*q_max/(qbar*S*c*t_p/3*de_max)`
+
+Now we have come as far as defining the yawing moment coefficients.
+From the get go, we nullify the bias term.
 `airfoil1/c_n_0:` `0`
+
+We select an arbitrary, but initially suitable value for the "weathervane effect" of our vertical tail section.
 `airfoil1/c_n_b:` `0.25`
+
+We don't want the roll rate to have any cross-coupling to the yawing rate.
 `airfoil1/c_n_p:` `0`
+
+Afterwards, we proceed by defining the damping effect of the yaw rate.
 `airfoil1/c_n_r:` `-j_z/(qbar*S*b*t_y/3)`
+
+We conclude by removing the effect of ailerons to the yaw rate.
 `airfoil1/c_n_deltaa:` `0`
+
+And defining the effect of rudder as the primary yaw source.
 `airfoil1/c_n_deltar:` `I_z*r_max/(qbar*S*b*t_y/3*dr_max)`
 
+To bring aerodynamics to a close, we define the maximum aileron, elevator and rudder deflections in radians.
 `airfoil1/deltaa_max:` `da_max`
 `airfoil1/deltae_max:` `de_max`
 `airfoil1/deltar_max:` `dr_max`
 
+And map the aileron, elevator and rudder inputs to channels 0, 1 and 3 respectively.
 `airfoil1/chanAileron:` `0`
 `airfoil1/chanElevator:` `1`
 `airfoil1/chanRudder:` `3`
 
 ### Contact points
 
-`dx:` `0.05`
-`k:` `m*g/(2*dx)`
-`d:` `2*0.6*sqrt(k*m)`
+In this section we define the contact points we want our airframe to have.
 
+For starters, we select the ground reactions model. We want to use the `panosGroundReactions` (don't ask about the name). It is a simple-ish model and useable for airplanes. It makes the plane "slide" slightly when it rests immobile on the ground, but in manual flight it's no big deal. Other ground friction models have been implemented, but they are more experimental for now.
 `airframe/groundReactionType:` `1`
-`airframe/contactPtsNo:` `7`
-`airframe/contactPoint1:` `[0.162, -0.2324, 0.2214, 2.0, k, 3.5]`
-`airframe/contactPoint2:` `[0.162, 0.2324, 0.2214, 2.0, k, 3.5]`
-`airframe/contactPoint3:` `[-0.8639, 0.0, 0.0522, 2.0, k, 3.5]`
-`airframe/contactPoint4:` `[-0.0832, 0.9671, -0.1283, 0.0, k, 3.5]`
-`airframe/contactPoint5:` `[-0.0832, -0.9671, -0.1683, 0.0, k, 3.5]`
-`airframe/contactPoint6:` `[0.3785, 0.0, 0.017, 0.0, k, 3.5]`
-`airframe/contactPoint7:` `[-0.9328, 0.0, -0.2196, 0.0, k, 3.5]`
 
+The principle on which this ground reaction model is based (and also all of the other models) is that we surround the airframe with springs which are always vertical to the ground and let them generate the necessary normal force which keeps the airplane above the ground plane.
+So we begin by choosing how much we want those sprigs to contract (in meters) before they can generate the necessary force to counter gravity. If you want your landing gear to "give" a certain amount before it manages to support your airframe, this is the plance to put it!
+`dx:` `0.05`
+
+Then we define the spring constant which produces the reactive force.
+Let `n` be the number of contact points that support the aircraft weight at any given time.
+This number will usually be 2, for the case when the aircraft weight rests mainly on the main landing gear.
+Thus, we select a spring coefficient which will work well during the nominal situation.
+`k:` `m*g/(n*dx)`
+
+Last but not least, we select a spring damping constant. This needs to always be non-zero, otherwise the aircraft will bounce eternally on the ground.
+`d:` `2*0.6*sqrt(k*m)`
+This is an initial value, but it is bound to not be a very suitable one. Test fly your aircraft and observe its behaviour on the ground.
+If it makes oscillations of large amplitude and sags into the ground a lot, then double the damping coefficient.
+If the aircraft is very "nervous" on the ground, hopping and trembling, reduce the damping value to half.
+
+To the meat of things, we proceed to define the number of contact points our aircraft will have.
+`airframe/contactPtsNo:` `7`
+
+Each contact point is defined in a line entry, with the following fields:
+x-coordinate, y-coordinate, z-coordinate, material, spring coefficient, damping coefficient.
+The geometric coordinates are expressed in the Body Frame.
+The material defines the friction coefficient. Choose the index 2.0 for rubber wheels and 0.0 for foam edges.
+
+Here is a proposed list of contact points. Notice the syntax on the parameter names. In general, each contact point can have different spring coefficients, but the same numbers across the board can also defitely work.
+`airframe/contactPoint1:` `[0.162, -0.2324, 0.2214, 2.0, k, d]`
+`airframe/contactPoint2:` `[0.162, 0.2324, 0.2214, 2.0, k, d]`
+`airframe/contactPoint3:` `[-0.8639, 0.0, 0.0522, 2.0, k, d]`
+`airframe/contactPoint4:` `[-0.0832, 0.9671, -0.1283, 0.0, k, d]`
+`airframe/contactPoint5:` `[-0.0832, -0.9671, -0.1683, 0.0, k, d]`
+`airframe/contactPoint6:` `[0.3785, 0.0, 0.017, 0.0, k, d]`
+`airframe/contactPoint7:` `[-0.9328, 0.0, -0.2196, 0.0, k, d]`
+
+Steering is supported on the 3rd contact point (hardcoded for now) and you can link an input channel to control it.
 `airframe/chanSteer:` `4`
+Define the maximum steering angle of the steering gear.
 `airframe/steerAngle_max:` `0.79`
+
+Finally, choose an input channel to trigger the brakes or leave to -1 for no brakes.
 `airframe/chanBrake:` `5`
 
 ### Dashboard

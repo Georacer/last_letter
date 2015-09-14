@@ -35,8 +35,8 @@ Although `uav-modeling` is independent of `last_letter`, it will often be referr
 
 <!-- Doxygen -->
 
-<!-- Tutorials -->
-<!-- - Creating your own aircraft -->
+Tutorials
+- [Creating your own aircraft](last_letter/doc/manual/tutAirplane.md)
 
 <!-- - [Controller Parameters](#controller-parameters) -->
 <!-- - [Sensor Parameters](#sensor-parameters) -->
