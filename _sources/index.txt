@@ -1,0 +1,27 @@
+.. last_letter documentation master file, created by
+   sphinx-quickstart on Wed Sep 16 16:56:01 2015.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to last_letter's documentation!
+=======================================
+
+.. toctree::
+	:maxdepth: 2
+
+	getting_started/index
+	launching/index
+	theory_elements/index
+	parameters/index
+	utilities/index
+	tutorials/index
+	contributors
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
