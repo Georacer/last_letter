@@ -322,49 +322,35 @@ Finally, choose an input channel to trigger the brakes or leave to -1 for no bra
 
 ### Dashboard
 
-`last_letter` allows you to customize the HUD screen, which appears as a plugin in the `rqt_gui` screen. The description file for the dashboard is the `dashboard.yaml`.
-
-This tutorial airplane folder already has a pre-configured dashboard file. It implements 9 gauges for: yaw, roll, pitch, airspeed, climb rate, altitude, AoA, AoS and propeller speed.
-
-We will go over the .yaml description for the roll gauge. The rest of the gauges can be defined similarly.
-
-This is the .yaml field for the second gauge:
-`Gauge2:`
-`    topic: dashboard/euler/x`
+Yaw gauge
+`Gauge1:`
+`    topic: dashboard/euler/z`
 `    length: 360.0`
 `    end_angle: -90.0`
 `    min: -180.0`
 `    max: 180.0`
-`    main_points : 24`
-`    warning : [-45, -30, 30, 45]`
-`    danger : [-180, -45, 45, 180]`
+`    main_points : 8`
+`    warning: []`
+`    danger: []`
 `    multiplier: ''`
 `    units: degrees`
-`    description: Roll`
+`    description: Yaw`
 
-The first line is a dictionary item, which must follow the syntax `Gauge#`.
+Roll gauge
 
-The `topic` string field specifies which ROS topic should be plotted in this gauge. It uses a relative namespace under the `uav_name` environment.
+Pitch gauge
 
-The `length` double field specifies the angle of the gauge arc in degrees.
+Airspeed gauge
 
-The `end_angle` double field specifies the end angle of the gauge arc. Angle 0 is at "3 o'clock". The arc is drawn counter-clockwise.
+Climb rate gauge
 
-The `min` field specifies the minimum value of the gauge.
+Altitude gauge
 
-The `max` field specifies the maximum value of the gauge.
+Alpha gauge
 
-The `main_points` is the tick count of the gauge. This automatically applies numbering to the tick marks.
+Beta gauge
 
-The `warning` field is a list with an even amount of elements. It reads value areas of the gauge you want to paint yellow, as a sign of warning. In the example above, the intervals from -45 to -30 and from 30 to 45 will be painted yellow. For each pair, the first value must always be lower.
-
-The `danger` field is a list with an even amount of elements. It reads value areas of the gauge you want to paint red, as a sign of danger. In the example above, the intervals from -180 to -45 and from 45 to 180 will be painted red. For each pair, the first value must always be lower.
-
-The `multiplier` string field is painted on the gauge face and you can use it to display a multiplier for the gauge numbers.
-
-The `units` string field is used to display the gauge units.
-
-The `description` string field is used to display additional information about the gauge.
+Rotorspeed gauge
 
 ### Initialization options
 
@@ -380,6 +366,8 @@ The `description` string field is used to display additional information about t
 `init/chanReset:` `9`
 
 ### The URDF
+
+
 
 ### Example values
 
