@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Launching and Arguments &mdash; last_letter 0.5 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
+        <link rel="up" title="Launching" href="index.html"/>
+        <link rel="next" title="Scenarios" href="../scenarios/index.html"/>
+        <link rel="prev" title="Launching" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> last_letter
+        
+
+        
+        </a>
+
+        
+          
+          
+            <div class="version">
+              0.5
+            </div>
+          
+        
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Launching</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Launching and Arguments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#available-arguments">Available arguments</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/index.html">Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">last_letter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Launching</a> &raquo;</li>
+      
+    <li>Launching and Arguments</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="launching-and-arguments">
+<h1>Launching and Arguments<a class="headerlink" href="#launching-and-arguments" title="Permalink to this headline">¶</a></h1>
+<p>Prior to launching last_letter you may want to edit the parameter files for the aircraft you are about to use, as well as the <tt class="docutils literal"><span class="pre">environment.yaml</span></tt> and <tt class="docutils literal"><span class="pre">world.yaml</span></tt> files. These control the initial conditions of the simulation and are explained in the <a class="reference external" href="ROSParameterFiles">parameters section</a>.</p>
+<p>If you don&#8217;t know how to handle the parameter files, it is perfecty ok to leave them as they are for your first flights, to get a feel of the program.</p>
+<p>In order to launch the last_letter simulator a ROS <em>launch file</em> is used, which invokes the rest of the executables and organizes the simulation.</p>
+<p>To launch the simulation, from any directory of your system enter</p>
+<div class="highlight-bash"><div class="highlight"><pre>roslaunch last_letter launch.launcher &lt;args&gt;
+</pre></div>
+</div>
+<p>This will raise the simulation executable, the <tt class="docutils literal"><span class="pre">rqt</span></tt> avionics panel and the <tt class="docutils literal"><span class="pre">rviz</span></tt> visualizer.</p>
+<p>Arguments are passed to control the simulation behaviour and operational mode, with the syntax <tt class="docutils literal"><span class="pre">&lt;argname&gt;:=&lt;argvalue&gt;</span></tt>.</p>
+<div class="section" id="available-arguments">
+<h2>Available arguments<a class="headerlink" href="#available-arguments" title="Permalink to this headline">¶</a></h2>
+<p><strong>Operation mode arguments (mutually exclusive!)</strong></p>
+<p><tt class="docutils literal"><span class="pre">manualMode</span></tt>: <strong>(default true)</strong> Control the vehicle via full manual control, using a joystick or gamepad connected to your machine, which is read by the ROS core. Every Human Interface Device that can be read by the <a class="reference external" href="http://wiki.ros.org/joy">joy_node</a> can be used, but the &#8220;radio calibration&#8221; should be done in the <a class="reference external" href="../parameters/HIDParams.html">HID.yaml</a> parameter file, according to <a class="reference external" href="../getting_started/RCCal.html">this guide</a>.</p>
+<p><tt class="docutils literal"><span class="pre">autoMode</span></tt>: <strong>(default false)</strong> Insert a controller in the loop. Joystick commands are forwarded to the controller, while the controller output feeds the aircraft model inputs. This mode is experimental and not recommended.</p>
+<p><tt class="docutils literal"><span class="pre">ArduPlane</span></tt>: <strong>(default false)</strong> Raise nodes which establish UDP connection with the ardupilot SITL and configure the aircraft inputs to be controlled by ArduPlane. It is recommended to not set this argument manually, but rather launch the ArduPlane SITL all in one go, by following <a class="reference external" href="../scenarios/ArduPlane_SITL.rst">these instructions</a>.</p>
+<p><strong>Simulation configuration arguments (optional)</strong></p>
+<p><tt class="docutils literal"><span class="pre">home</span></tt>: <strong>(default nan)</strong> Overwrite the default initialization coordinates, as found in the aircraft <tt class="docutils literal"><span class="pre">init.yaml</span></tt> parameter file. The correct syntax is <tt class="docutils literal"><span class="pre">home:=[x.x,x.x]</span></tt>, that is, two floating point numbers separated by a comma, enclosed in curly brackets.</p>
+<p><tt class="docutils literal"><span class="pre">simRate</span></tt>: <strong>(default nan)</strong> Overwrite the default simulation rate, found in <tt class="docutils literal"><span class="pre">world.yaml</span></tt>. A smaller rate can make the simulation run more easilly in a less-powerful computer. A good interval to pick from is [500-1000].</p>
+<p><tt class="docutils literal"><span class="pre">deltaT</span></tt>: <strong>(default nan)</strong> Overwrite the default simulation time step in seconds, found in <tt class="docutils literal"><span class="pre">yaml.yaml</span></tt>. This time step is used by the kinematics integrator of the physics engine. Too large of a time step can lead to instability of the simulation and cause crashes caused by NaN errors.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">You can control the time multiplier of the simulation by manipulating the <tt class="docutils literal"><span class="pre">deltaT</span></tt> and <tt class="docutils literal"><span class="pre">simRate</span></tt> parameters. Start by selecting a <tt class="docutils literal"><span class="pre">deltaT</span></tt> value that will lead to a stable simulation. Values between 0.002 and 0.001 are a good pick. Then select the <tt class="docutils literal"><span class="pre">simRate</span></tt> value: If <tt class="docutils literal"><span class="pre">simRate</span></tt> * <tt class="docutils literal"><span class="pre">deltaT</span></tt> =1, then the simulation will run in real time, if your computer can keep up. If <tt class="docutils literal"><span class="pre">simRate</span></tt> * <tt class="docutils literal"><span class="pre">deltaT</span></tt> &lt;1, then the simulation will run in slow motion. If <tt class="docutils literal"><span class="pre">simRate</span></tt> * <tt class="docutils literal"><span class="pre">deltaT</span></tt> &gt;1 then the simulation will run in fast forward.</p>
+</div>
+<p><strong>Aircraft-related arguments</strong></p>
+<p><tt class="docutils literal"><span class="pre">uav_name</span></tt>: <strong>(default skywalker_2013)</strong> The name of the UAV you are about to fly. This corresponds and must be identical to a folder in <tt class="docutils literal"><span class="pre">last_letter/data/parameters/aircraft</span></tt>. The configuration and specification files of the aircraft are found in this folder.</p>
+<p><strong>Logging</strong></p>
+<p><tt class="docutils literal"><span class="pre">log</span></tt>: <strong>(deault false)</strong> Setting this to <tt class="docutils literal"><span class="pre">true</span></tt> will request ROS to log all of your messages in a <a class="reference external" href="http://wiki.ros.org/Bags">bag file</a> and save them into the file <tt class="docutils literal"><span class="pre">UAV_recording.bag</span></tt> found in <tt class="docutils literal"><span class="pre">~/.ros</span></tt>
+See also the <a class="reference external" href="../utilities/logging.html">logging</a> section.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../scenarios/index.html" class="btn btn-neutral float-right" title="Scenarios" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Launching" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
+
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Launching%20and%20Arguments%20-%20&body=URL:%20../launching/launchingAndParams%0ATitle:%20Launching%20and%20Arguments%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+
+    <p>
+
+    </p>
+  </div>
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

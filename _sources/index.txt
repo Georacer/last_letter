@@ -43,6 +43,7 @@ Screenshots
 
 	getting_started/index
 	launching/index
+	scenarios/index
 	theory_elements/index
 	parameters/index
 	utilities/index
