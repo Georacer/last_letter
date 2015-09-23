@@ -1,4 +1,4 @@
-### RC Simulator
+### Using last_letter as an RC simulator
 
 For this scenario, you will need to have a joystick (or similar device visible to the "joy" ROS package) plugged in to your machine. If this is the fist time you interface `last_letter` with an input device, you will need to configure it, according to [this guide](RCCal.md).
 

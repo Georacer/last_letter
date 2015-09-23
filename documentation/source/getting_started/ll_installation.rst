@@ -28,7 +28,7 @@ Make sure ``$ROS_PACKAGE_PATH`` sees your ``catkin_ws/src`` folder.
 
 .. note::
 
-	You probably don't want to source your workspace path every time you open a new console. To avoid this, add the following line to your `/home/<username>/.bashrc` file, assuming that you create your catkin workspace directly under your home folder.
+	You probably don't want to source your workspace path every time you open a new console. To avoid this, add the following line to your ``/home/<username>/.bashrc`` file, assuming that you create your catkin workspace directly under your home folder.
 
 	.. code-block:: bash
 
