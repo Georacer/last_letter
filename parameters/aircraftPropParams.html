@@ -1,0 +1,310 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Aircraft Propulsion Parameters &mdash; last_letter 0.5 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
+        <link rel="up" title="Aircraft Parameters" href="aircraftParams.html"/>
+        <link rel="next" title="Ground Contact Point Parameters" href="aircraftGroundParams.html"/>
+        <link rel="prev" title="Aircraft Aerodynamic Parameters" href="aircraftAeroParams.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> last_letter
+        
+
+        
+        </a>
+
+        
+          
+          
+            <div class="version">
+              0.5
+            </div>
+          
+        
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Parameters</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aircraftInitParams.html">Aircraft Initialization Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftBodyParams.html">Rigid Body Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftAeroParams.html">Aircraft Aerodynamic Parameters</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Aircraft Propulsion Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#no-thruster-model">No thruster model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#beard-thruster-model">Beard thruster model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#internal-combustion-engine">Internal combustion engine</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#electric-motor">Electric motor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftGroundParams.html">Ground Contact Point Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftDashParams.html">Dashboard Configuration Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftURDFParams.html">The URDF file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HIDParams.html">Human Interface Device (HID) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html">Environment Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="worldParams.html">World Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html">Ponynomial object parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">last_letter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">last_letter parameters</a> &raquo;</li>
+      
+          <li><a href="aircraftParams.html">Aircraft Parameters</a> &raquo;</li>
+      
+    <li>Aircraft Propulsion Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="aircraft-propulsion-parameters">
+<h1>Aircraft Propulsion Parameters<a class="headerlink" href="#aircraft-propulsion-parameters" title="Permalink to this headline">¶</a></h1>
+<p>This file contains the parameters of the propulsion model.</p>
+<p>The propulsion of aircraft in last_letter is modelled as the sum of separate thrusters, placed on arbitrary points on the airframe and in arbitrary orientations. In that manner, a single forward-facing motor can model an airplane power plant, just as easilly as four upwards-facing motors can be used to simulate a quadrotor.</p>
+<p><tt class="docutils literal"><span class="pre">motor/nMotors</span></tt>: The number of thrusters mounted on the aircraft.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The following parameters are referring to a single thruster. They are groupped under the prefix <tt class="docutils literal"><span class="pre">motorX/</span></tt>, where <tt class="docutils literal"><span class="pre">X</span></tt> is the number-id of the thruster, starting from 1 for a single-thruster aircraft (eg <tt class="docutils literal"><span class="pre">motor1/CGOffset</span></tt>)</p>
+</div>
+<p><tt class="docutils literal"><span class="pre">chanMotor</span></tt>: The input channel which controls the thruster output. Set to -1 for no thruster control.</p>
+<p><tt class="docutils literal"><span class="pre">CGOffset</span></tt>: The location of the thrust application point in terms of the center of gravity, in X/Y/Z body frame coordinates. Negative X means that the application point is behind the CoG. Positive Y means that the point is to the right of the CoG. Negative Z means that the point is above the CoG.</p>
+<p><tt class="docutils literal"><span class="pre">mountOrientation</span></tt>: The rotation Roll-Pitch-Yaw (in this sequence) rotation angles which rotate the thruster body from the Body Frame to its actual <a class="reference external" href="../theory_elements/referenceFrames.html">Propeller Frame</a> fixture. Since thrust is mostly generated towards the positive-x direction of the <a class="reference external" href="../theory_elements/referenceFrames.html">Propeller Frame</a>, for a simplified airplane motor installation on the CoG, this should be [0.0,0.0,0.0].
+Care is needed at this point, in case this thruster is gimballed. last_letter gimbals thrusters around the <a class="reference external" href="../theory_elements/referenceFrames.html">Propeller Frame</a> z-axis. Consequently, <tt class="docutils literal"><span class="pre">mountOrientation</span></tt> should be selected in such a way that gimballing will end-up occuring around the correct axis.</p>
+<p><tt class="docutils literal"><span class="pre">chanGimbal</span></tt>: The input channel which controls the thruster gimbal. Set to -1 for no gimballing action.</p>
+<p><tt class="docutils literal"><span class="pre">gimbalAngle_max</span></tt>: The maximum throw angle (in radians) that the gimbal is providing when given full input.</p>
+<p><tt class="docutils literal"><span class="pre">rotationDir</span></tt>: The direction at which the thruster propeller is rotating. This is used both for visualization, as well as for counter-torque calculation purposes. <strong>Valid values are 1 or -1</strong>.</p>
+<p>There are 4 types of thruster models available. These are selected with the variable
+<tt class="docutils literal"><span class="pre">motorType</span></tt>:</p>
+<ul class="simple">
+<li>0: Selects dummy thruster model, which has no interactions with the surrounding air. Useful for debugging.</li>
+<li>1: Beard Engine - Simplified electric motor - propeller model, as provided in the book <em>Small Unmanned Aircraft: Theory and Practice, Randal W. Beard &amp; Timothy W. McLain</em>.</li>
+<li>2: Internal combustion engine - This model combines an IC engine model with a propeller model. Torque curves are specified for the engine, as well as propeller power and efficiency curves.</li>
+<li>3: Electric motor - This model combines an electric motor model with a propeller model. This configuration is common to many small-scale RC aircraft. A 3-parameter model is used for the electric motor and power and efficiency curves are used for the propeller modelling.</li>
+</ul>
+<div class="section" id="no-thruster-model">
+<h2>No thruster model<a class="headerlink" href="#no-thruster-model" title="Permalink to this headline">¶</a></h2>
+<p>No parameters need to be defined regarding this model.</p>
+</div>
+<div class="section" id="beard-thruster-model">
+<h2>Beard thruster model<a class="headerlink" href="#beard-thruster-model" title="Permalink to this headline">¶</a></h2>
+<p>The thrust and torque models for this engine are</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="n">wrenchProp</span><span class="p">.</span><span class="n">force</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="mf">1.0</span><span class="o">/</span><span class="mf">2.0</span><span class="o">*</span><span class="n">rho</span><span class="o">*</span><span class="n">s_prop</span><span class="o">*</span><span class="n">c_prop</span><span class="o">*</span><span class="p">(</span><span class="n">pow</span><span class="p">(</span><span class="n">inputMotor</span> <span class="o">*</span> <span class="n">k_motor</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">pow</span><span class="p">(</span><span class="n">airspeed</span><span class="p">,</span><span class="mi">2</span><span class="p">));</span>
+<span class="n">wrenchProp</span><span class="p">.</span><span class="n">torque</span><span class="p">.</span><span class="n">x</span> <span class="o">=</span> <span class="o">-</span><span class="n">rotationDir</span> <span class="o">*</span> <span class="n">k_t_p</span><span class="o">*</span><span class="n">pow</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The related parameters are:</p>
+<p><tt class="docutils literal"><span class="pre">s_prop</span></tt>: The propeller disc area</p>
+<p><tt class="docutils literal"><span class="pre">k_motor</span></tt>: A thruster coefficient multiplying the control input, related to the thrust output</p>
+<p><tt class="docutils literal"><span class="pre">k_t_p</span></tt>: Coefficient of moment produced by the thruster, multiplied by the square of the angular velocity of the motor.</p>
+<p><tt class="docutils literal"><span class="pre">k_omega</span></tt>: Coefficient which multiplies the control input (which has a range of [0,1]) to produce the motor angular velocity.</p>
+<p><tt class="docutils literal"><span class="pre">c_prop</span></tt>: Parameter reflecting the thrust efficiency of the thruster. This can be set to 1.0 and have its effect merged in <tt class="docutils literal"><span class="pre">s_prop</span></tt>.</p>
+</div>
+<div class="section" id="internal-combustion-engine">
+<h2>Internal combustion engine<a class="headerlink" href="#internal-combustion-engine" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">engPowerPoly</span></tt>: A 1-variable (1D) polynomial describing the engine horsepower (HP) as a function of the motor RPM, HP=f(RPM). This is a parameter group and all the related polynomial parameters must be set as a parameter under this group.
+More information on the related parameters can be found in the <a class="reference external" href="polynomialParams.html">polynomial parameters page</a>.</p>
+<p><tt class="docutils literal"><span class="pre">nCoeffPoly</span></tt>: A 1-variable (1D) polynomial describing the propeller efficiency factor (non-dimensional) as a function of the <em>advance ratio</em>. This is a parameter group and all the related parameters must be set as a parameter under this group.
+More information on the related parameters can be found in the <a class="reference external" href="polynomialParams.html">polynomial parameters page</a>.</p>
+<p><tt class="docutils literal"><span class="pre">propPowerPoly</span></tt>: A 1-variable (1D) polynomial describing the power coefficient of the propeller (non-dimensional) as a function of the <em>advance ratio</em>. This is a parameter group and all the related parameters must be set as a parameter under this group.
+More information on the related parameters can be found in the <a class="reference external" href="polynomialParams.html">polynomial parameters page</a>.</p>
+<p><tt class="docutils literal"><span class="pre">RadPSLimits</span></tt>: The engine radians-per-second lower and upper limit, provided in a list, eg <tt class="docutils literal"><span class="pre">RadPSLimits:</span> <span class="pre">[314.16,</span> <span class="pre">733.04]</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">propDiam</span></tt>: The propeller diameter in meters.</p>
+<p><tt class="docutils literal"><span class="pre">engInertia</span></tt>: The combined engine and propeller moment of inertia, in kg*m^3.</p>
+</div>
+<div class="section" id="electric-motor">
+<h2>Electric motor<a class="headerlink" href="#electric-motor" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="motor-specifications">
+<h3>Motor specifications<a class="headerlink" href="#motor-specifications" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">Kv</span></tt>: The well-known KV rating of electric motors, which is the number of revolutions per volt applied on the terminals, on a unloaded motor, in RPS/V.</p>
+<p><tt class="docutils literal"><span class="pre">Rm</span></tt>: The internal resistance of the motor, in Ohms.</p>
+<p><tt class="docutils literal"><span class="pre">I0</span></tt>: The activation current of the motor, Amperes</p>
+<p><tt class="docutils literal"><span class="pre">RadPSLimits</span></tt>: he engine radians-per-second lower and upper limit, provided in a list, eg <tt class="docutils literal"><span class="pre">RadPSLimits:</span> <span class="pre">[0.01,</span> <span class="pre">1000.0]</span></tt>.</p>
+</div>
+<div class="section" id="propeller-specifications">
+<h3>Propeller specifications<a class="headerlink" href="#propeller-specifications" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">propDiam</span></tt>: The propeller diameter in meters.</p>
+<p><tt class="docutils literal"><span class="pre">nCoeffPoly</span></tt>: A 1-variable (1D) polynomial describing the propeller efficiency factor (non-dimensional) as a function of the <em>advance ratio</em>. This is a parameter group and all the related parameters must be set as a parameter under this group.
+More information on the related parameters can be found in the <a class="reference external" href="polynomialParams.html">polynomial parameters page</a>.</p>
+<p><tt class="docutils literal"><span class="pre">propPowerPoly</span></tt>: A 1-variable (1D) polynomial describing the power coefficient of the propeller () as a function of the <em>advance ratio</em>. This is a parameter group and all the related parameters must be set as a parameter under this group.
+More information on the related parameters can be found in the <a class="reference external" href="polynomialParams.html">polynomial parameters page</a>.</p>
+</div>
+<div class="section" id="other-specifications">
+<h3>Other specifications<a class="headerlink" href="#other-specifications" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">engInertia</span></tt>: The combined engine and propeller moment of inertia, in kg*m^3.</p>
+<p><tt class="docutils literal"><span class="pre">Rs</span></tt>: Battery internal resistance in Ohms.</p>
+<p><tt class="docutils literal"><span class="pre">Cells</span></tt>:(<strong>integer</strong>) Battery number of LiPo cells.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="aircraftGroundParams.html" class="btn btn-neutral float-right" title="Ground Contact Point Parameters" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="aircraftAeroParams.html" class="btn btn-neutral" title="Aircraft Aerodynamic Parameters" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
+
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Aircraft%20Propulsion%20Parameters%20-%20&body=URL:%20../parameters/aircraftPropParams%0ATitle:%20Aircraft%20Propulsion%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+
+    <p>
+
+    </p>
+  </div>
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

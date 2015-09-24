@@ -1,0 +1,280 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Ground Contact Point Parameters &mdash; last_letter 0.5 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
+        <link rel="up" title="Aircraft Parameters" href="aircraftParams.html"/>
+        <link rel="next" title="Dashboard Configuration Parameters" href="aircraftDashParams.html"/>
+        <link rel="prev" title="Aircraft Propulsion Parameters" href="aircraftPropParams.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> last_letter
+        
+
+        
+        </a>
+
+        
+          
+          
+            <div class="version">
+              0.5
+            </div>
+          
+        
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Parameters</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aircraftInitParams.html">Aircraft Initialization Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftBodyParams.html">Rigid Body Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftAeroParams.html">Aircraft Aerodynamic Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftPropParams.html">Aircraft Propulsion Parameters</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Ground Contact Point Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#no-ground-reactions">No ground reactions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#panos-ground-reactions">Panos Ground reactions</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftDashParams.html">Dashboard Configuration Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftURDFParams.html">The URDF file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HIDParams.html">Human Interface Device (HID) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html">Environment Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="worldParams.html">World Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html">Ponynomial object parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">last_letter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">last_letter parameters</a> &raquo;</li>
+      
+          <li><a href="aircraftParams.html">Aircraft Parameters</a> &raquo;</li>
+      
+    <li>Ground Contact Point Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="ground-contact-point-parameters">
+<h1>Ground Contact Point Parameters<a class="headerlink" href="#ground-contact-point-parameters" title="Permalink to this headline">¶</a></h1>
+<p>This file contains information about the location of the contact points, their material and their spring-like behaviour.
+The contact points are modeled as springs with damping to generate the normal force. Longitudinal and lateral friction coefficients are applied to that point to generate friction between the aircraft and the ground.
+All of the followng parameters need to be prefixed with <tt class="docutils literal"><span class="pre">airframe/</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">groundReactionType</span></tt>: This parameter selects the friction model.
+* 0: No ground reactions. This selection disables the ground reactions and the aircraft falls throught the grounds.
+* 1: This option selects the <tt class="docutils literal"><span class="pre">PanosGroundReactions</span></tt> class to model ground reactions. This model supports wheels and is more suitable for fixed-wing aircraft. However, static friction is inaccurate and the aircraft slides slightly when it rests unmoving on the ground. This model applies friction force as a function of the contact point velocity.
+* 2: Point friction model. This model applies friction as a reaction to the rest of the forces that are exerted upon the aircraft, which has more accuracy in the case of static friction. Less slide is experienced than the <tt class="docutils literal"><span class="pre">PanosGroundReactions</span></tt> model. However, this rolling and steering wheels are not modelled in this class.</p>
+<div class="section" id="no-ground-reactions">
+<h2>No ground reactions<a class="headerlink" href="#no-ground-reactions" title="Permalink to this headline">¶</a></h2>
+<p>No further parameters need to be specified for this class</p>
+</div>
+<div class="section" id="panos-ground-reactions">
+<h2>Panos Ground reactions<a class="headerlink" href="#panos-ground-reactions" title="Permalink to this headline">¶</a></h2>
+<p>The following parameters need to be specified when using this class:
+<tt class="docutils literal"><span class="pre">contactPtsNo</span></tt>: The number of contact points you want to model on your aircraft.</p>
+<p><tt class="docutils literal"><span class="pre">contactPoint#</span></tt>: (Where # is the increasing, 1-indexed id of your contact point) This is a list of 6 elements, containing information about the contact point.
+This information is:
+1. <tt class="docutils literal"><span class="pre">x</span> <span class="pre">coordinate</span></tt>: The x coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
+2. <tt class="docutils literal"><span class="pre">y</span> <span class="pre">coordinate</span></tt>: The y coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
+3. <tt class="docutils literal"><span class="pre">z</span> <span class="pre">coordinate</span></tt>: The z coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
+4. <tt class="docutils literal"><span class="pre">material</span> <span class="pre">type</span></tt>: This parameter defines the material of the contact point. Available options are 0 for foam, 1 for metal, 2 for rubber wheel and 3 for composites.
+5. <tt class="docutils literal"><span class="pre">spring</span> <span class="pre">reaction</span> <span class="pre">constant</span></tt>: The spring constant of the spring which will model the ground contact point.
+6. <tt class="docutils literal"><span class="pre">spring</span> <span class="pre">damping</span> <span class="pre">constant</span></tt>: The damping constant of the spring which will model the ground contact point.
+An example contact point specification is:
+<tt class="docutils literal"><span class="pre">contactPoint1:</span> <span class="pre">[0.162,</span> <span class="pre">-0.2324,</span> <span class="pre">0.2214,</span> <span class="pre">2.0,</span> <span class="pre">500.0,</span> <span class="pre">25.0]</span></tt></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Currently, the first 3 contact points are expected to be used for a tri-wheel configuration, with point no3 being the steerable nose gear. Landing gear is planned to be further parametrized.</p>
+</div>
+<p><tt class="docutils literal"><span class="pre">chanSteer</span></tt>: The input channel which controls the steering wheel. Set to -1 to diable steering.</p>
+<p><tt class="docutils literal"><span class="pre">steerAngle_max</span></tt>: The maximum turning angle of the steering wheel.</p>
+<p><tt class="docutils literal"><span class="pre">chanBrake</span></tt>: The input channel which controls the brakes of the aircraft. Set to -1 for no braking action.</p>
+<div class="section" id="point-friction">
+<h3>Point friction<a class="headerlink" href="#point-friction" title="Permalink to this headline">¶</a></h3>
+<p>The following parameters need to be specified when using this class:
+<tt class="docutils literal"><span class="pre">contactPtsNo</span></tt>: The number of contact points you want to model on your aircraft.</p>
+<p><tt class="docutils literal"><span class="pre">contactPoint#</span></tt>: (Where # is the increasing, 1-indexed id of your contact point) This is a list of 6 elements, containing information about the contact point.
+This information is:
+1. <tt class="docutils literal"><span class="pre">x</span> <span class="pre">coordinate</span></tt>: The x coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
+2. <tt class="docutils literal"><span class="pre">y</span> <span class="pre">coordinate</span></tt>: The y coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
+3. <tt class="docutils literal"><span class="pre">z</span> <span class="pre">coordinate</span></tt>: The z coordinate of the location of the contact point in terms of the center of gravity, in the body frame.
+4. <tt class="docutils literal"><span class="pre">material</span> <span class="pre">type</span></tt>: This parameter defines the material of the contact point. Available options are 0 for foam, 1 for metal, 2 for rubber and 3 for composites.
+5. <tt class="docutils literal"><span class="pre">spring</span> <span class="pre">reaction</span> <span class="pre">constant</span></tt>: The spring constant of the spring which will model the ground contact point.
+6. <tt class="docutils literal"><span class="pre">spring</span> <span class="pre">damping</span> <span class="pre">constant</span></tt>: The damping constant of the spring which will model the ground contact point.
+An example contact point specification is:
+<tt class="docutils literal"><span class="pre">contactPoint1:</span> <span class="pre">[0.162,</span> <span class="pre">-0.2324,</span> <span class="pre">0.2214,</span> <span class="pre">2.0,</span> <span class="pre">500.0,</span> <span class="pre">25.0]</span></tt></p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="aircraftDashParams.html" class="btn btn-neutral float-right" title="Dashboard Configuration Parameters" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="aircraftPropParams.html" class="btn btn-neutral" title="Aircraft Propulsion Parameters" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
+
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Ground%20Contact%20Point%20Parameters%20-%20&body=URL:%20../parameters/aircraftGroundParams%0ATitle:%20Ground%20Contact%20Point%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+
+    <p>
+
+    </p>
+  </div>
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

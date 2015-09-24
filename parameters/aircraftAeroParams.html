@@ -1,0 +1,336 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Aircraft Aerodynamic Parameters &mdash; last_letter 0.5 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
+        <link rel="up" title="Aircraft Parameters" href="aircraftParams.html"/>
+        <link rel="next" title="Utilities" href="../utilities/index.html"/>
+        <link rel="prev" title="Rigid Body Parameters" href="aircraftBodyParams.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> last_letter
+        
+
+        
+        </a>
+
+        
+          
+          
+            <div class="version">
+              0.5
+            </div>
+          
+        
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Parameters</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aircraftInitParams.html">Aircraft Initialization Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftBodyParams.html">Rigid Body Parameters</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Aircraft Aerodynamic Parameters</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#no-aerodynamics-model">No aerodynamics model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#standard-linear-aerodynamics-model">Standard linear aerodynamics model</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spline-aero-parameters">Spline aero parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#other-parameters">Other parameters</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">last_letter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">last_letter parameters</a> &raquo;</li>
+      
+          <li><a href="aircraftParams.html">Aircraft Parameters</a> &raquo;</li>
+      
+    <li>Aircraft Aerodynamic Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="aircraft-aerodynamic-parameters">
+<h1>Aircraft Aerodynamic Parameters<a class="headerlink" href="#aircraft-aerodynamic-parameters" title="Permalink to this headline">¶</a></h1>
+<p>This file contains the parameters of the aerodynamics model.</p>
+<p>The aerodynamics model assumes that the aircraft aerodynamic response can be modeled as the some of a number of airfoils. This method allows for various common modelling approaches such as:</p>
+<ul class="simple">
+<li>Fusing the aircraft aerodynamics into one lift, drag and moment airfoil model, ie separate wing surfaces are not modeled and calculated separately. This is not uncommon to the aircraft identification bibliography</li>
+<li>Specifying different airfoils for the main wing and the stabilizer, each with its own aerodynamics model and location on the airframe relative to the Center of Gravity. Their contributions are summed up to provide the overall response of the aircraft.</li>
+</ul>
+<p><tt class="docutils literal"><span class="pre">nWings</span></tt>: The total number of airfoils that the aircraft contains.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The following parameters are referring to a single airfoil. They are groupped under the prefix <tt class="docutils literal"><span class="pre">airfoilX/</span></tt>, where <tt class="docutils literal"><span class="pre">X</span></tt> is the number-id of the airfoil, starting from 1 for a single-airfoil aircraft (eg <tt class="docutils literal"><span class="pre">airfoil1/CGOffset</span></tt>).</p>
+</div>
+<p><tt class="docutils literal"><span class="pre">CGOffset</span></tt>: The location of the center of lift in terms of the center of gravity, in X/Y/Z body frame coordinates. Negative X means that the CoL is behind the CoG. Positive Y means that the CoL is to the right of the CoG. Negative Z means that the CoL is above the CoG.</p>
+<p><tt class="docutils literal"><span class="pre">mountOrientation</span></tt>: The rotation Roll-Pitch-Yaw (in this sequence) rotation angles which rotate the airfoil from the Body Frame to its actual Airfoil Frame fixture. If the whole aircraft is modelled as a single airfoil, this should be [0.0,0.0,0.0]</p>
+<p><tt class="docutils literal"><span class="pre">chanGimbal</span></tt>: The input channel which controls the airfoil gimbal. Set to -1 for no gimballing action.</p>
+<p><tt class="docutils literal"><span class="pre">gimbalAxis</span></tt>: Selects the axis of the <a class="reference external" href="../theory_elements/rerenceFrames.html">Airfoil Frame</a> around which the gimbal rotation is applied. Available options are:
+0 - x-axis, the axis collinear with the wing chord and towards the front
+1 - y-axis, the axis collinear with the wing span and towards the right
+2 - z-axis, the remaining, orthogonal axis for a right-handed system, perpendicular to the x-y plane and downwards.</p>
+<p><tt class="docutils literal"><span class="pre">gimbalAngle_max</span></tt>: The maximum throw angle (in radians) that the gimbal is providing when given full input.</p>
+<p>There are 3 types of airfoil aerodynamic models available. These are selected with the variable
+<tt class="docutils literal"><span class="pre">aerodynamicsType</span></tt>:(<strong>integer</strong>)
+- 0: Selects an empty aerodynamics model, which has no interactions with the surrounding air. Useful for adding a dummy wing on your aircraft, or modeling a rock falling in the void!
+- 1: Standard Linear Aerodynamics - model with linear relation to its parameters. This is the most common and classic model found in bibliography, which models the reactions of the air using constant linear coefficients to the aircraft states.
+- 2: Spline Aero - derivative class from 1, which models the lift and drag coefficients as cubic splines. This is useful if you have extracted the lift and drag curves of your aircraft through experiments or FDM simulation but can&#8217;t quite capture it in a simple parametric model. Cubic splines offer you the possibility to import your data in full resolution.</p>
+<div class="section" id="no-aerodynamics-model">
+<h2>No aerodynamics model<a class="headerlink" href="#no-aerodynamics-model" title="Permalink to this headline">¶</a></h2>
+<p>No parameters need to be defined regarding this model.</p>
+</div>
+<div class="section" id="standard-linear-aerodynamics-model">
+<h2>Standard linear aerodynamics model<a class="headerlink" href="#standard-linear-aerodynamics-model" title="Permalink to this headline">¶</a></h2>
+<p>In general, none of the parameters corresponding to this aerodynamics model needs to be non-zero. By setting values to zero, the corresponding variable has no effect to the aircraft behaviour.</p>
+<div class="section" id="coefficient-of-lift-in-relation-to-angle-of-attack-parameters">
+<h3>Coefficient of lift in relation to angle of attack parameters<a class="headerlink" href="#coefficient-of-lift-in-relation-to-angle-of-attack-parameters" title="Permalink to this headline">¶</a></h3>
+<p>The coefficient of lift is modeled using primarily the lead of the book <em>Small Unmanned Aircraft: Theory and Practice, Randal W. Beard &amp; Timothy W. McLain</em>. It is modeled as the weigthed sum of two parts, a linear function of angle-of-attack and the coefficient of lift of a flat plate. In the area withing the stall angle the first part dominates. Post-stall, the wing is modeled as a flat plate.</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="kt">double</span> <span class="n">sigmoid</span> <span class="o">=</span> <span class="p">(</span> <span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">M</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">-</span><span class="n">alpha0</span><span class="p">))</span><span class="o">+</span><span class="n">exp</span><span class="p">(</span><span class="n">M</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">+</span><span class="n">alpha0</span><span class="p">))</span> <span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">M</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">-</span><span class="n">alpha0</span><span class="p">)))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">exp</span><span class="p">(</span><span class="n">M</span><span class="o">*</span><span class="p">(</span><span class="n">alpha</span><span class="o">+</span><span class="n">alpha0</span><span class="p">)));</span>
+<span class="kt">double</span> <span class="n">linear</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">sigmoid</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">c_lift_0</span> <span class="o">+</span> <span class="n">c_lift_a0</span><span class="o">*</span><span class="n">alpha</span><span class="p">);</span> <span class="c1">//Lift at small AoA</span>
+<span class="kt">double</span> <span class="n">flatPlate</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">copysign</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">alpha</span><span class="p">)</span><span class="o">*</span><span class="n">pow</span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">alpha</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">alpha</span><span class="p">));</span> <span class="c1">//Lift beyond stall</span>
+
+<span class="kt">double</span> <span class="n">result</span>  <span class="o">=</span> <span class="n">linear</span><span class="o">+</span><span class="n">flatPlate</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">alpha_stall</span></tt>: Stall angle-of-attack of the aircraft.</p>
+<p><tt class="docutils literal"><span class="pre">c_lift_0</span></tt>: Zero angle-of-attack lift coefficient.</p>
+<p><tt class="docutils literal"><span class="pre">c_lift_a</span></tt>: Angle-of-attack-related factor of the lift coefficient.</p>
+<p><tt class="docutils literal"><span class="pre">oswald</span></tt>: <a class="reference external" href="http://en.wikipedia.org/wiki/Oswald_efficiency_number">Oswald efficiency factor</a>, related to the efficiency of the wing geometry. Used in the <cite>Standard linear aerodynamics model</cite>.</p>
+<p><tt class="docutils literal"><span class="pre">mcoeff</span></tt>: A factor related to how abrupt the swith-over between the linear and flat-plate model is.</p>
+</div>
+<div class="section" id="other-parameters-related-to-the-coefficient-of-lift">
+<h3>Other parameters related to the coefficient of lift<a class="headerlink" href="#other-parameters-related-to-the-coefficient-of-lift" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">c_lift_q</span></tt>: Pitch-rate to lift coefficient</p>
+<p><tt class="docutils literal"><span class="pre">c_lift_deltae</span></tt>: Elevator deflection to lift coefficient</p>
+</div>
+<div class="section" id="coefficient-of-drag-in-relation-to-angle-of-attack-parameters">
+<h3>Coefficient of drag in relation to angle of attack parameters<a class="headerlink" href="#coefficient-of-drag-in-relation-to-angle-of-attack-parameters" title="Permalink to this headline">¶</a></h3>
+<p>The coefficient of drag is modeled as the sum of the parasitic and the induced drag:</p>
+<div class="highlight-c++"><div class="highlight"><pre><span class="kt">double</span> <span class="n">c_drag_a</span> <span class="o">=</span> <span class="n">c_drag_p</span> <span class="o">+</span> <span class="n">pow</span><span class="p">(</span><span class="n">c_lift_0</span><span class="o">+</span><span class="n">c_lift_a0</span><span class="o">*</span><span class="n">alpha</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">M_PI</span><span class="o">*</span><span class="n">oswald</span><span class="o">*</span><span class="n">AR</span><span class="p">);</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">c_drag_p</span></tt>: The parasitic drag coefficient</p>
+</div>
+<div class="section" id="other-parameters-related-to-the-coefficient-of-drag">
+<h3>Other parameters related to the coefficient of drag<a class="headerlink" href="#other-parameters-related-to-the-coefficient-of-drag" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">c_drag_q</span></tt>: Pitch-rate to drag coefficient</p>
+</div>
+<div class="section" id="other-parameters-of-the-standard-linear-model">
+<h3>Other parameters of the standard linear model<a class="headerlink" href="#other-parameters-of-the-standard-linear-model" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">c_l_0</span></tt>: Bias rolling moment coefficient</p>
+<p><tt class="docutils literal"><span class="pre">c_l_p</span></tt>: Rolling moment coefficient in relation to roll rate</p>
+<p><tt class="docutils literal"><span class="pre">c_l_deltaa</span></tt>: Rolling moment coefficient in relation to aileron deflection (must be positive)</p>
+<p><tt class="docutils literal"><span class="pre">c_l_deltar</span></tt>: Rolling moment coefficient in relation to rudder deflection</p>
+<p><tt class="docutils literal"><span class="pre">c_l_r</span></tt>: Rolling moment coefficient in relation to yaw rate</p>
+<p><tt class="docutils literal"><span class="pre">c_l_b</span></tt>: Rolling moment coefficient in relation to angle-of-sideslip</p>
+<p><tt class="docutils literal"><span class="pre">c_m_0</span></tt>: Bias pitching moment coefficient</p>
+<p><tt class="docutils literal"><span class="pre">c_m_a</span></tt>: Pitching moment coefficient in relation to angle-of-attack</p>
+<p><tt class="docutils literal"><span class="pre">c_m_q</span></tt>: Pitching moment coefficient in relation to pitch rate</p>
+<p><tt class="docutils literal"><span class="pre">c_m_deltae</span></tt>: Pitching moment coefficient in relation to elevator deflection (must be positive)</p>
+<p><tt class="docutils literal"><span class="pre">c_n_0</span></tt>: Bias pitching moment coefficient</p>
+<p><tt class="docutils literal"><span class="pre">c_n_b</span></tt>: Yawing moment coefficient in relation to angle-of-sideslip</p>
+<p><tt class="docutils literal"><span class="pre">c_n_p</span></tt>: Yawing moment coefficient in relation to roll-rate</p>
+<p><tt class="docutils literal"><span class="pre">c_n_r</span></tt>: Yawing moment coefficient in relation to yaw-rate</p>
+<p><tt class="docutils literal"><span class="pre">c_n_deltaa</span></tt>: Yawing moment coefficient in relation to aileron deflection</p>
+<p><tt class="docutils literal"><span class="pre">c_n_deltar</span></tt>: Yawing moment coefficient in relation to rudder deflection (must be positive)</p>
+<p><tt class="docutils literal"><span class="pre">c_y_0</span></tt>: Bias side force coefficient</p>
+<p><tt class="docutils literal"><span class="pre">c_y_b</span></tt>: Side force coefficient in relation to angle-of-attack</p>
+<p><tt class="docutils literal"><span class="pre">c_y_p</span></tt>: Side force coefficient in relation to roll-rate</p>
+<p><tt class="docutils literal"><span class="pre">c_y_r</span></tt>: Side force coefficient in relation to yaw-rate</p>
+<p><tt class="docutils literal"><span class="pre">c_y_deltaa</span></tt>: Side force coefficient in relation to aileron deflection</p>
+<p><tt class="docutils literal"><span class="pre">c_y_deltar</span></tt>: Side force coefficient in relation to rudder deflection</p>
+</div>
+</div>
+<div class="section" id="spline-aero-parameters">
+<h2>Spline aero parameters<a class="headerlink" href="#spline-aero-parameters" title="Permalink to this headline">¶</a></h2>
+<p>The following parameters are used to define polynomials or splines which describe the coefficient of lift and drag as a 1-D function of the angle-of-attack. Two parameter groups are required, <tt class="docutils literal"><span class="pre">cLiftPoly</span></tt> and <tt class="docutils literal"><span class="pre">cDragpoly</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">cLiftPoly</span></tt>: A 1-variable (1D) polynomial describing the coefficient of lift (non-dimensional), as a function of angle of attack (in radians). This is a parameter group and all the related polynomial parameters must be set as a parameter under this group. A spline polynomial spanning the whole [-pi, pi] interval is suggested.
+More information on the related parameters can be found in the [polynomial parameters page](polynomialParams.md).</p>
+<p><tt class="docutils literal"><span class="pre">cDragpoly</span></tt>: A 1-variable (1D) polynomial describing the coefficient of drag (non-dimensional), as a function of angle of attach (in radians). This is a parameter group and all the related polynomial parameters must be set as a parameter under this group. A spline polynomial spanning the whole [-pi, pi] interval is suggested.
+More information on the related parameters can be found in the [polynomial parameters page](polynomialParams.md).</p>
+</div>
+<div class="section" id="other-parameters">
+<h2>Other parameters<a class="headerlink" href="#other-parameters" title="Permalink to this headline">¶</a></h2>
+<p><tt class="docutils literal"><span class="pre">s</span></tt>: Wing surface area</p>
+<p><tt class="docutils literal"><span class="pre">b</span></tt>: Aircraft wingspan (from tip to tip)</p>
+<p><tt class="docutils literal"><span class="pre">c</span></tt>: Mean chord length of the aircraft</p>
+<p><tt class="docutils literal"><span class="pre">c_deltaa_max</span></tt>: Maximum aileron deflection (in radians)</p>
+<p><tt class="docutils literal"><span class="pre">c_deltae_max</span></tt>: Maximum elevator deflection (in radians)</p>
+<p><tt class="docutils literal"><span class="pre">c_deltar_max</span></tt>: Maximum rudder deflection (in radians)</p>
+<p><tt class="docutils literal"><span class="pre">chanAileron</span></tt>: The input channel which controls the ailerons. Set to -1 for no aileron effect.</p>
+<p><tt class="docutils literal"><span class="pre">chanElevator</span></tt>: The input channel which controls the elevator. Set to -1 for no elevator effect.</p>
+<p><tt class="docutils literal"><span class="pre">chanRudder</span></tt>: The input channel which controls the rudder. Set to -1 for no rudder effect.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../utilities/index.html" class="btn btn-neutral float-right" title="Utilities" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="aircraftBodyParams.html" class="btn btn-neutral" title="Rigid Body Parameters" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
+
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Aircraft%20Aerodynamic%20Parameters%20-%20&body=URL:%20../parameters/aircraftAeroParams%0ATitle:%20Aircraft%20Aerodynamic%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+
+    <p>
+
+    </p>
+  </div>
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

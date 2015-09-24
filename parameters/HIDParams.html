@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Elements of Theory &mdash; last_letter 0.5 documentation</title>
+  <title>Human Interface Device (HID) Parameters &mdash; last_letter 0.5 documentation</title>
   
 
   
@@ -31,8 +31,9 @@
 
   
     <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
-        <link rel="next" title="Frames of Reference and Conventions" href="referenceFrames.html"/>
-        <link rel="prev" title="Using last_letter as the Physics Simulator for ArduPlane SITL" href="../scenarios/ArduPlane_SITL.html"/> 
+        <link rel="up" title="last_letter parameters" href="index.html"/>
+        <link rel="next" title="Environment Parameters" href="environmentParams.html"/>
+        <link rel="prev" title="The URDF file" href="aircraftURDFParams.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -84,11 +85,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Elements of Theory</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Parameters</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">Human Interface Device (HID) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html">Environment Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="worldParams.html">World Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html">Ponynomial object parameters</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters/index.html">last_letter parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
 </ul>
@@ -121,7 +126,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Elements of Theory</li>
+          <li><a href="index.html">last_letter parameters</a> &raquo;</li>
+      
+    <li>Human Interface Device (HID) Parameters</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -133,14 +140,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="elements-of-theory">
-<h1>Elements of Theory<a class="headerlink" href="#elements-of-theory" title="Permalink to this headline">¶</a></h1>
-<p>In this section, you will find introductory material, explanations and details on topics related more on theory and background information, rather than software instructions and technical/coding issues.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
-</ul>
-</div>
+  <div class="section" id="human-interface-device-hid-parameters">
+<h1>Human Interface Device (HID) Parameters<a class="headerlink" href="#human-interface-device-hid-parameters" title="Permalink to this headline">¶</a></h1>
+<p>This file contains the mapping, scaling and inverting parameters needed to configure your input device. All the following parameters must be prefixed under the <tt class="docutils literal"><span class="pre">/HID/</span></tt> group.
+For more information on the input device configuraiton, please read the <a class="reference external" href="../getting_started/RCCal.html">corresponding guide</a>.</p>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a>axes``**(integer)**: The mapping between the input device axes and the PWM channels.</p>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a>buttons``**(integer)**: The mapping between the input device buttons and the PWM channels.</p>
+<p><tt class="docutils literal"><span class="pre">throws</span></tt>: The maximum value that the input device records at that channel. Is used for input scaling. If negative, the direction of control is inverted (similar to inverting a channel in a real-world transmitter).</p>
+<p><tt class="docutils literal"><span class="pre">mixerid</span></tt>: The input mixing scheme. Currently, there are 3 types of mixers implemented:
+- 0: No mixing - the aircraft model will receive the channels exactly as they are remapped and scaled by the calibration procedure.
+- 1: Airplane mixing - The throttle channel will be re-scaled from [-1 1] to [0 1] to be used by a motor and channel 0 will be also be mapped from [-1 1] to [0 1], in order to suitably control the simulation reset function.
+- 2: Quadrotor mixing - The first 4 channels are mixed with each other to produce meaningful motor signals for an X-frame quadrotor. A reset channel is also configured.
+- 3: Firefly Y6 mixing - Mixing suitable for a somewhat clunky control scheme of the Firefly Y6 hybrid vehicle.</p>
 </div>
 
 
@@ -150,10 +161,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="referenceFrames.html" class="btn btn-neutral float-right" title="Frames of Reference and Conventions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="environmentParams.html" class="btn btn-neutral float-right" title="Environment Parameters" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../scenarios/ArduPlane_SITL.html" class="btn btn-neutral" title="Using last_letter as the Physics Simulator for ArduPlane SITL" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="aircraftURDFParams.html" class="btn btn-neutral" title="The URDF file" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -163,7 +174,7 @@
   <div role="contentinfo">
     <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
 
-<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Elements%20of%20Theory%20-%20&body=URL:%20../theory_elements/index%0ATitle:%20Elements%20of%20Theory%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Human%20Interface%20Device%20%28HID%29%20Parameters%20-%20&body=URL:%20../parameters/HIDParams%0ATitle:%20Human%20Interface%20Device%20%28HID%29%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
 
     <p>
 

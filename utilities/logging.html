@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Elements of Theory &mdash; last_letter 0.5 documentation</title>
+  <title>Logging &mdash; last_letter 0.5 documentation</title>
   
 
   
@@ -31,8 +31,9 @@
 
   
     <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
-        <link rel="next" title="Frames of Reference and Conventions" href="referenceFrames.html"/>
-        <link rel="prev" title="Using last_letter as the Physics Simulator for ArduPlane SITL" href="../scenarios/ArduPlane_SITL.html"/> 
+        <link rel="up" title="Utilities" href="index.html"/>
+        <link rel="next" title="Contributors" href="../contributors.html"/>
+        <link rel="prev" title="Utilities" href="index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -84,12 +85,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Elements of Theory</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../parameters/index.html">Parameters</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Utilities</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Logging</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters/index.html">last_letter parameters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
 </ul>
 
@@ -121,7 +122,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Elements of Theory</li>
+          <li><a href="index.html">Utilities</a> &raquo;</li>
+      
+    <li>Logging</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -133,14 +136,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="elements-of-theory">
-<h1>Elements of Theory<a class="headerlink" href="#elements-of-theory" title="Permalink to this headline">¶</a></h1>
-<p>In this section, you will find introductory material, explanations and details on topics related more on theory and background information, rather than software instructions and technical/coding issues.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
-</ul>
+  <div class="section" id="logging">
+<h1>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h1>
+<p>last_letter uses the ROS <a class="reference external" href="http://wiki.ros.org/Bags">bag system</a> to record logs.</p>
+<p>The <tt class="docutils literal"><span class="pre">record</span></tt> executable of the <tt class="docutils literal"><span class="pre">rosbag</span></tt> package is called in the <tt class="docutils literal"><span class="pre">last_letter/launch/simulation.launch</span></tt> file with the argument</p>
+<div class="highlight-xml"><div class="highlight"><pre><span class="nt">&lt;node</span> <span class="na">if=</span><span class="s">&quot;$(arg log)&quot;</span> <span class="na">pkg=</span><span class="s">&quot;rosbag&quot;</span> <span class="na">name=</span><span class="s">&quot;recorder&quot;</span> <span class="na">type=</span><span class="s">&quot;record&quot;</span> <span class="na">args=</span><span class="s">&quot;-O UAV_recording.bag -a&quot;</span><span class="nt">/&gt;</span> <span class="c">&lt;!-- topic activity recorder node --&gt;</span>
+</pre></div>
 </div>
+<p>, provided that the <tt class="docutils literal"><span class="pre">log</span></tt> argument of the launch file is set to <tt class="docutils literal"><span class="pre">true</span></tt>.</p>
+<p>This command starts a <a class="reference external" href="http://wiki.ros.org/rosbag/Commandline#record">rosbag/record</a> executable with the name <tt class="docutils literal"><span class="pre">recorder</span></tt>, with the arguments <tt class="docutils literal"><span class="pre">-O</span> <span class="pre">UAV_recording.bag</span> <span class="pre">-a</span></tt>.
+The arguments tells the executable to write a <tt class="docutils literal"><span class="pre">.bag</span></tt> file wit the name <tt class="docutils literal"><span class="pre">UAV_recording.bag</span></tt> and puts in there <strong>all</strong> of the topics which appear in the simulation.</p>
+<p>The <tt class="docutils literal"><span class="pre">.bag</span></tt> file is stored in the <tt class="docutils literal"><span class="pre">~/.ros</span></tt> directory.</p>
+<p>You can extract the information of each topic in the <tt class="docutils literal"><span class="pre">.bag</span></tt> file separately, or replay them to playback the simulation. These functions are described in the ROS documentation pages of the <tt class="docutils literal"><span class="pre">.bag</span></tt> files.</p>
 </div>
 
 
@@ -150,10 +157,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="referenceFrames.html" class="btn btn-neutral float-right" title="Frames of Reference and Conventions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../contributors.html" class="btn btn-neutral float-right" title="Contributors" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../scenarios/ArduPlane_SITL.html" class="btn btn-neutral" title="Using last_letter as the Physics Simulator for ArduPlane SITL" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="Utilities" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -163,7 +170,7 @@
   <div role="contentinfo">
     <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
 
-<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Elements%20of%20Theory%20-%20&body=URL:%20../theory_elements/index%0ATitle:%20Elements%20of%20Theory%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Logging%20-%20&body=URL:%20../utilities/logging%0ATitle:%20Logging%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
 
     <p>
 

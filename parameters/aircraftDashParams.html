@@ -1,0 +1,253 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Dashboard Configuration Parameters &mdash; last_letter 0.5 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
+        <link rel="up" title="Aircraft Parameters" href="aircraftParams.html"/>
+        <link rel="next" title="The URDF file" href="aircraftURDFParams.html"/>
+        <link rel="prev" title="Ground Contact Point Parameters" href="aircraftGroundParams.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> last_letter
+        
+
+        
+        </a>
+
+        
+          
+          
+            <div class="version">
+              0.5
+            </div>
+          
+        
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Parameters</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="aircraftInitParams.html">Aircraft Initialization Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftBodyParams.html">Rigid Body Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftAeroParams.html">Aircraft Aerodynamic Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftPropParams.html">Aircraft Propulsion Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftGroundParams.html">Ground Contact Point Parameters</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="">Dashboard Configuration Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftURDFParams.html">The URDF file</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="HIDParams.html">Human Interface Device (HID) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html">Environment Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="worldParams.html">World Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html">Ponynomial object parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">last_letter</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">last_letter parameters</a> &raquo;</li>
+      
+          <li><a href="aircraftParams.html">Aircraft Parameters</a> &raquo;</li>
+      
+    <li>Dashboard Configuration Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dashboard-configuration-parameters">
+<h1>Dashboard Configuration Parameters<a class="headerlink" href="#dashboard-configuration-parameters" title="Permalink to this headline">¶</a></h1>
+<p>Along with the aircraft model characteristics, you can specify the appearance of the <tt class="docutils literal"><span class="pre">rqt</span></tt> dashboard window, an avionics panel which appears each time you launch last_letter.
+The panel is made up of multiple gauges (which are grouped in 3 columns) and each gauge has a similar description, which uses the following parameters:</p>
+<p><tt class="docutils literal"><span class="pre">topic</span></tt>: The ROS topic which this gauge should be bound to. This can be any topic under the current <tt class="docutils literal"><span class="pre">roscore</span></tt>. Optionally, this can be a topic under the <tt class="docutils literal"><span class="pre">uav_name/dashboard</span></tt> topic directory.
+Available topics under this directory are:
+<tt class="docutils literal"><span class="pre">euler.x</span></tt>: Roll angle (in degrees)
+<tt class="docutils literal"><span class="pre">euler.y</span></tt>: Pitch angle (in degrees)
+<tt class="docutils literal"><span class="pre">euler.z</span></tt>: Yaw angle (in degrees)
+<tt class="docutils literal"><span class="pre">airspeed</span></tt>: Airspeed (in m/s)
+<tt class="docutils literal"><span class="pre">alpha</span></tt>: Angle of attack (in degrees)
+<tt class="docutils literal"><span class="pre">beta</span></tt>: Angle of sideslip (in degrees)
+<tt class="docutils literal"><span class="pre">climbRate</span></tt>: Climb rate (in m/s)
+<tt class="docutils literal"><span class="pre">altitude</span></tt>: GPS altitude (in m)
+<tt class="docutils literal"><span class="pre">rotorspeed</span></tt>: Propeller_1 rotational speed (in RPM)</p>
+<p><tt class="docutils literal"><span class="pre">length</span></tt>: The length of the arc of the gauge (in degrees).</p>
+<p><tt class="docutils literal"><span class="pre">end_angle</span></tt>: The angle at which the gauge reaches its maximum value. 0 angle is at &#8220;3 o&#8217;clock&#8221; in a full circle and the positive direction is counter-clockwise.
+Example: If you want the gauge to cap directly at 12 o&#8217;clock you should specify <tt class="docutils literal"><span class="pre">end_angle:</span> <span class="pre">90</span></tt>.</p>
+<p><tt class="docutils literal"><span class="pre">min</span></tt>, <tt class="docutils literal"><span class="pre">max</span></tt>: The values of the gauge at its minimum and maximum point.</p>
+<p><tt class="docutils literal"><span class="pre">main_points</span></tt>: The number of tickmarks of the gauge.</p>
+<p><tt class="docutils literal"><span class="pre">warning</span></tt>: A list of pairs, which specify the interval at which the gauge flashes yellow, as a warning sign.
+Example: In order to make the gauge flash yellow between at [1000, 2000] and [6000, 7000] specify <tt class="docutils literal"><span class="pre">warning:</span> <span class="pre">[1000,</span> <span class="pre">2000,</span> <span class="pre">6000,</span> <span class="pre">7000]</span></tt>.
+Leave empty (<tt class="docutils literal"><span class="pre">[]</span></tt>) for no warning interval.</p>
+<p><tt class="docutils literal"><span class="pre">danger</span></tt>: Similar to <tt class="docutils literal"><span class="pre">warning</span></tt>, but the gauge flashes red when the needle is in the specified interval.</p>
+<p><tt class="docutils literal"><span class="pre">multiplier</span></tt> (string): Text item, to depict the multiplier which should be used with the gauge reading.</p>
+<p><tt class="docutils literal"><span class="pre">units</span></tt> (string): Text item, which indicated the unit of the gauge quantity.</p>
+<p><tt class="docutils literal"><span class="pre">description</span></tt> (string): Text item, which carries a description of the quantity depicted in the gauge.</p>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="aircraftURDFParams.html" class="btn btn-neutral float-right" title="The URDF file" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="aircraftGroundParams.html" class="btn btn-neutral" title="Ground Contact Point Parameters" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
+
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Dashboard%20Configuration%20Parameters%20-%20&body=URL:%20../parameters/aircraftDashParams%0ATitle:%20Dashboard%20Configuration%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+
+    <p>
+
+    </p>
+  </div>
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.5',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

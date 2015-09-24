@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Elements of Theory &mdash; last_letter 0.5 documentation</title>
+  <title>World Parameters &mdash; last_letter 0.5 documentation</title>
   
 
   
@@ -31,8 +31,9 @@
 
   
     <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
-        <link rel="next" title="Frames of Reference and Conventions" href="referenceFrames.html"/>
-        <link rel="prev" title="Using last_letter as the Physics Simulator for ArduPlane SITL" href="../scenarios/ArduPlane_SITL.html"/> 
+        <link rel="up" title="last_letter parameters" href="index.html"/>
+        <link rel="next" title="Ponynomial object parameters" href="polynomialParams.html"/>
+        <link rel="prev" title="Environment Parameters" href="environmentParams.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -84,11 +85,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Elements of Theory</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Parameters</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HIDParams.html">Human Interface Device (HID) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html">Environment Parameters</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="">World Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html">Ponynomial object parameters</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters/index.html">last_letter parameters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
 </ul>
@@ -121,7 +126,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Elements of Theory</li>
+          <li><a href="index.html">last_letter parameters</a> &raquo;</li>
+      
+    <li>World Parameters</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -133,14 +140,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="elements-of-theory">
-<h1>Elements of Theory<a class="headerlink" href="#elements-of-theory" title="Permalink to this headline">¶</a></h1>
-<p>In this section, you will find introductory material, explanations and details on topics related more on theory and background information, rather than software instructions and technical/coding issues.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
-</ul>
+  <div class="section" id="world-parameters">
+<h1>World Parameters<a class="headerlink" href="#world-parameters" title="Permalink to this headline">¶</a></h1>
+<p>This file contains global parameters which control how the simulation behaves.</p>
+<p><tt class="docutils literal"><span class="pre">simRate</span></tt>: The simulation frame-rate (in Hz). This is the frame-rate which the simulator will try to achieve and which the user experiences. In other words, this is how fast the computer will try to perform the set of calculations corresponding to one simulation step.
+.. note-block:</p>
+<div class="highlight-python"><div class="highlight"><pre>Depending on the initialization options, this parameter may not be used.
+</pre></div>
 </div>
+<p><tt class="docutils literal"><span class="pre">deltaT</span></tt>: The simulation time-step (in seconds). This is the increment of time which will be used for propagating the differential equations of the physics model. In other words, this is how much time will advance between each simulation step/frame <strong>in the simulated world</strong>.</p>
+<p><tt class="docutils literal"><span class="pre">timeControls</span></tt>: Index which selects the simulation frame-rate. Is used by the simulation clock node (<tt class="docutils literal"><span class="pre">last_letter/src/clock.cpp</span></tt>)</p>
+<ul class="simple">
+<li>0: The default value. The simulation calculates a new iteration at the rate defined by <tt class="docutils literal"><span class="pre">simRate</span></tt>.</li>
+<li>1: The simulation calculates a new iteration each time the <tt class="docutils literal"><span class="pre">ctrlPWM</span></tt> topic is updated. This allows for controllers which cannot work in real-time and need a lot of time to calculate the control input. It is also used to interface with <tt class="docutils literal"><span class="pre">ardupilot</span></tt> SITL.</li>
+<li>2: Free spinning clock, the simulation will update as fast as it can.</li>
+</ul>
+<p><tt class="docutils literal"><span class="pre">integratorType</span></tt>: Index which selects the type of integrator used for kinematics calculations. Right now only the <em>forward Euler</em> integrator is supported, with a value of 0.</p>
 </div>
 
 
@@ -150,10 +165,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="referenceFrames.html" class="btn btn-neutral float-right" title="Frames of Reference and Conventions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="polynomialParams.html" class="btn btn-neutral float-right" title="Ponynomial object parameters" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../scenarios/ArduPlane_SITL.html" class="btn btn-neutral" title="Using last_letter as the Physics Simulator for ArduPlane SITL" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="environmentParams.html" class="btn btn-neutral" title="Environment Parameters" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -163,7 +178,7 @@
   <div role="contentinfo">
     <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
 
-<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Elements%20of%20Theory%20-%20&body=URL:%20../theory_elements/index%0ATitle:%20Elements%20of%20Theory%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=World%20Parameters%20-%20&body=URL:%20../parameters/worldParams%0ATitle:%20World%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
 
     <p>
 

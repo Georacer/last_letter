@@ -45,7 +45,6 @@ Screenshots
 	launching/index
 	scenarios/index
 	theory_elements/index
-	parameters/index
+	Parameters <parameters/index>
 	utilities/index
-	tutorials/index
 	contributors

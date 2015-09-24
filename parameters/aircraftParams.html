@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Elements of Theory &mdash; last_letter 0.5 documentation</title>
+  <title>Aircraft Parameters &mdash; last_letter 0.5 documentation</title>
   
 
   
@@ -31,8 +31,9 @@
 
   
     <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
-        <link rel="next" title="Frames of Reference and Conventions" href="referenceFrames.html"/>
-        <link rel="prev" title="Using last_letter as the Physics Simulator for ArduPlane SITL" href="../scenarios/ArduPlane_SITL.html"/> 
+        <link rel="up" title="last_letter parameters" href="index.html"/>
+        <link rel="next" title="Aircraft Initialization Parameters" href="aircraftInitParams.html"/>
+        <link rel="prev" title="last_letter parameters" href="index.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -84,11 +85,24 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Elements of Theory</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Parameters</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="">Aircraft Parameters</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="aircraftInitParams.html">Aircraft Initialization Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftBodyParams.html">Rigid Body Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftAeroParams.html">Aircraft Aerodynamic Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftPropParams.html">Aircraft Propulsion Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftGroundParams.html">Ground Contact Point Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftDashParams.html">Dashboard Configuration Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftURDFParams.html">The URDF file</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters/index.html">last_letter parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HIDParams.html">Human Interface Device (HID) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html">Environment Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="worldParams.html">World Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html">Ponynomial object parameters</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
 </ul>
@@ -121,7 +135,9 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Elements of Theory</li>
+          <li><a href="index.html">last_letter parameters</a> &raquo;</li>
+      
+    <li>Aircraft Parameters</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -133,12 +149,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="elements-of-theory">
-<h1>Elements of Theory<a class="headerlink" href="#elements-of-theory" title="Permalink to this headline">¶</a></h1>
-<p>In this section, you will find introductory material, explanations and details on topics related more on theory and background information, rather than software instructions and technical/coding issues.</p>
+  <div class="section" id="aircraft-parameters">
+<h1>Aircraft Parameters<a class="headerlink" href="#aircraft-parameters" title="Permalink to this headline">¶</a></h1>
+<p>These parameter files contribute to the configuration and behaviour of the aircraft and can be found in the <tt class="docutils literal"><span class="pre">last_letter/data/parameters/&lt;aircraft_name&gt;/</span></tt> folder. The parameters are broken down into the following subcategories:</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aircraftInitParams.html">Aircraft Initialization Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aircraftBodyParams.html">Rigid Body Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aircraftAeroParams.html">Aircraft Aerodynamic Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aircraftPropParams.html">Aircraft Propulsion Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aircraftGroundParams.html">Ground Contact Point Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aircraftDashParams.html">Dashboard Configuration Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="aircraftURDFParams.html">The URDF file</a></li>
 </ul>
 </div>
 </div>
@@ -150,10 +172,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="referenceFrames.html" class="btn btn-neutral float-right" title="Frames of Reference and Conventions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="aircraftInitParams.html" class="btn btn-neutral float-right" title="Aircraft Initialization Parameters" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../scenarios/ArduPlane_SITL.html" class="btn btn-neutral" title="Using last_letter as the Physics Simulator for ArduPlane SITL" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral" title="last_letter parameters" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -163,7 +185,7 @@
   <div role="contentinfo">
     <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
 
-<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Elements%20of%20Theory%20-%20&body=URL:%20../theory_elements/index%0ATitle:%20Elements%20of%20Theory%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Aircraft%20Parameters%20-%20&body=URL:%20../parameters/aircraftParams%0ATitle:%20Aircraft%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
 
     <p>
 

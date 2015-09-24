@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Elements of Theory &mdash; last_letter 0.5 documentation</title>
+  <title>Aircraft Initialization Parameters &mdash; last_letter 0.5 documentation</title>
   
 
   
@@ -31,8 +31,9 @@
 
   
     <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
-        <link rel="next" title="Frames of Reference and Conventions" href="referenceFrames.html"/>
-        <link rel="prev" title="Using last_letter as the Physics Simulator for ArduPlane SITL" href="../scenarios/ArduPlane_SITL.html"/> 
+        <link rel="up" title="Aircraft Parameters" href="aircraftParams.html"/>
+        <link rel="next" title="Rigid Body Parameters" href="aircraftBodyParams.html"/>
+        <link rel="prev" title="Aircraft Parameters" href="aircraftParams.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -84,11 +85,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Elements of Theory</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Parameters</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="">Aircraft Initialization Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftBodyParams.html">Rigid Body Parameters</a></li>
+<li class="toctree-l3"><a class="reference internal" href="aircraftAeroParams.html">Aircraft Aerodynamic Parameters</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../parameters/index.html">last_letter parameters</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
 </ul>
@@ -121,7 +127,11 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Elements of Theory</li>
+          <li><a href="index.html">last_letter parameters</a> &raquo;</li>
+      
+          <li><a href="aircraftParams.html">Aircraft Parameters</a> &raquo;</li>
+      
+    <li>Aircraft Initialization Parameters</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -133,14 +143,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="elements-of-theory">
-<h1>Elements of Theory<a class="headerlink" href="#elements-of-theory" title="Permalink to this headline">¶</a></h1>
-<p>In this section, you will find introductory material, explanations and details on topics related more on theory and background information, rather than software instructions and technical/coding issues.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="referenceFrames.html">Frames of Reference and Conventions</a></li>
-</ul>
-</div>
+  <div class="section" id="aircraft-initialization-parameters">
+<h1>Aircraft Initialization Parameters<a class="headerlink" href="#aircraft-initialization-parameters" title="Permalink to this headline">¶</a></h1>
+<p>These are found in the file <tt class="docutils literal"><span class="pre">init.yaml</span></tt> and describe basic initialization quantities of the aircraft.</p>
+<p><tt class="docutils literal"><span class="pre">coordinates</span></tt>: The initial coordinates of the aircraft in the WGS84 frame, in latitude, longitude and altitude (in degrees and meters respectively)</p>
+<p><tt class="docutils literal"><span class="pre">position</span></tt>: The initial position of the aircraft in the <strong>NED</strong> frame (in meters)</p>
+<p><tt class="docutils literal"><span class="pre">orientation</span></tt>: The initial orientation of the aircraft in quaternion form; angle is the last argument</p>
+<p><tt class="docutils literal"><span class="pre">velLin</span></tt>: The initial linear velocity of the aircraft, in body axes (in meters/second)</p>
+<p><tt class="docutils literal"><span class="pre">velAng</span></tt>: The initial angular velocity of the aircraft, in body axes (in radians/second)</p>
+<p><tt class="docutils literal"><span class="pre">aileron</span></tt>: The initial aileron deflection, normalized in -1/1</p>
+<p><tt class="docutils literal"><span class="pre">elevator</span></tt>: The initial elevator deflection, normalized in -1/1</p>
+<p><tt class="docutils literal"><span class="pre">throttle</span></tt>: The initial throttle setting, normalized in 0/1</p>
+<p><tt class="docutils literal"><span class="pre">rudder</span></tt>: The initial rudder aileron deflection, normalized in -1/1</p>
+<p><tt class="docutils literal"><span class="pre">chanReset</span></tt>: The channel which will cause the simulation to reset, should its value exceed 1600. If set to -1 reset will be inactive.</p>
 </div>
 
 
@@ -150,10 +165,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="referenceFrames.html" class="btn btn-neutral float-right" title="Frames of Reference and Conventions" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="aircraftBodyParams.html" class="btn btn-neutral float-right" title="Rigid Body Parameters" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../scenarios/ArduPlane_SITL.html" class="btn btn-neutral" title="Using last_letter as the Physics Simulator for ArduPlane SITL" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="aircraftParams.html" class="btn btn-neutral" title="Aircraft Parameters" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -163,7 +178,7 @@
   <div role="contentinfo">
     <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
 
-<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Elements%20of%20Theory%20-%20&body=URL:%20../theory_elements/index%0ATitle:%20Elements%20of%20Theory%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Aircraft%20Initialization%20Parameters%20-%20&body=URL:%20../parameters/aircraftInitParams%0ATitle:%20Aircraft%20Initialization%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
 
     <p>
 

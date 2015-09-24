@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Parameters &mdash; last_letter 0.5 documentation</title>
+  <title>last_letter parameters &mdash; last_letter 0.5 documentation</title>
   
 
   
@@ -31,8 +31,8 @@
 
   
     <link rel="top" title="last_letter 0.5 documentation" href="../index.html"/>
-        <link rel="next" title="Utilities" href="../utilities/index.html"/>
-        <link rel="prev" title="Elements of Theory" href="../theory_elements/index.html"/> 
+        <link rel="next" title="Aircraft Parameters" href="aircraftParams.html"/>
+        <link rel="prev" title="Frames of Reference and Conventions" href="../theory_elements/referenceFrames.html"/> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -83,10 +83,17 @@
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../getting_started/index.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../launching/index.html">Launching</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../scenarios/index.html">Scenarios</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../theory_elements/index.html">Elements of Theory</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="">Parameters</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="HIDParams.html">Human Interface Device (HID) Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html">Environment Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="worldParams.html">World Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html">Ponynomial object parameters</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../utilities/index.html">Utilities</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../contributors.html">Contributors</a></li>
 </ul>
 
@@ -118,7 +125,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-    <li>Parameters</li>
+    <li>last_letter parameters</li>
       <li class="wy-breadcrumbs-aside">
         
           
@@ -130,8 +137,42 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="parameters">
-<h1>Parameters<a class="headerlink" href="#parameters" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="last-letter-parameters">
+<h1>last_letter parameters<a class="headerlink" href="#last-letter-parameters" title="Permalink to this headline">¶</a></h1>
+<p>Most of <cite>last_letter</cite>&#8216;s libraries and executables are initialized (or operate based) upon several parameters. These parameters are loaded onto the <em>parameter server</em> on simulation startup by the launch file. The order in which the parameters are declared in the corresponding <cite>*.yaml</cite> file is not important, but declaring the same parameter twice in separate locations/files will overwrite the previous value.</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">ll numerical values of the parameters within lists (in [] brackets) must be forced to a float format by a trailling <tt class="docutils literal"><span class="pre">.0</span></tt> if needed, unless otherwise stated</p>
+</div>
+<p>The main categories of parameters are the following:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="aircraftParams.html">Aircraft Parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="aircraftInitParams.html">Aircraft Initialization Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aircraftBodyParams.html">Rigid Body Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aircraftAeroParams.html">Aircraft Aerodynamic Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aircraftPropParams.html">Aircraft Propulsion Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aircraftGroundParams.html">Ground Contact Point Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aircraftDashParams.html">Dashboard Configuration Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="aircraftURDFParams.html">The URDF file</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="HIDParams.html">Human Interface Device (HID) Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="environmentParams.html">Environment Parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html#barometric-parameters">Barometric parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html#static-wind-parameters">Static Wind parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="environmentParams.html#wind-gusts-parameters">Wind gusts parameters</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="worldParams.html">World Parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polynomialParams.html">Ponynomial object parameters</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html#d-polynomial-parameters">1D polynomial parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html#id1">2D polynomial parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomialParams.html#cubic-spline">Cubic spline</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 
 
@@ -141,10 +182,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../utilities/index.html" class="btn btn-neutral float-right" title="Utilities" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="aircraftParams.html" class="btn btn-neutral float-right" title="Aircraft Parameters" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../theory_elements/index.html" class="btn btn-neutral" title="Elements of Theory" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../theory_elements/referenceFrames.html" class="btn btn-neutral" title="Frames of Reference and Conventions" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -154,7 +195,7 @@
   <div role="contentinfo">
     <p>Except where otherwise noted, this documentation is licensed under <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC Attribution-Share Alike 3.0 Unported</a>.</p>
 
-<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=Parameters%20-%20&body=URL:%20../parameters/index%0ATitle:%20Parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
+<div style="float:right;"><a href="https://github.com/Georacer/last_letter/issues/new?title=last_letter%20parameters%20-%20&body=URL:%20../parameters/index%0ATitle:%20last_letter%20parameters%0A%0APlease%20update%20this%20description%20and%20the%20issue%20title">Page bug</a></div>
 
     <p>
 
