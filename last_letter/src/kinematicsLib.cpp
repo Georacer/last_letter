@@ -73,18 +73,25 @@ void Kinematics::calcDerivatives()
 	// create transformation matrix from state orientation quaternion
 	quat2rotmtx (parentObj->states.pose.orientation, Reb);
 
-	// create position derivatives from earth velocity
-	posDot = Reb*parentObj->states.velocity.linear;
-	if (isnan(posDot)) {ROS_FATAL("NaN member in position derivative vector"); ros::shutdown();}
+	// Read wind speed in body axes from environment object
+	tf::Vector3 wind(parentObj->environment.wind.x, parentObj->environment.wind.y, parentObj->environment.wind.z);
 
 	// create body velocity derivatives from acceleration, angular rotation and body velocity
 	linearAcc = (1.0/mass)*forceInput;
 	if (isnan(linearAcc)) {ROS_FATAL("NaN member in linear acceleration vector"); ros::shutdown();}
 	geometry_msgs::Vector3 corriolisAcc;
-	vector3_cross(-parentObj->states.velocity.angular, parentObj->states.velocity.linear, &corriolisAcc);
+	tempVect = parentObj->states.velocity.linear;
+	tempVect.x = tempVect.x + wind.getX();
+	tempVect.y = tempVect.y + wind.getY();
+	tempVect.z = tempVect.z + wind.getZ();
+	vector3_cross(-parentObj->states.velocity.angular, tempVect, &corriolisAcc); // Adding wind according to Allerton, Principles of Flight Simulation p.145
 	if (isnan(corriolisAcc)) {ROS_FATAL("NaN member in corriolis acceleration vector"); ros::shutdown();}
 	speedDot = linearAcc + corriolisAcc;
 	if (isnan(speedDot)) {ROS_FATAL("NaN member in velocity derivative vector"); ros::shutdown();}
+
+	// create position derivatives from earth velocity
+	posDot = Reb*parentObj->states.velocity.linear;
+	if (isnan(posDot)) {ROS_FATAL("NaN member in position derivative vector"); ros::shutdown();}
 
 	// create angular derivatives quaternion from angular rates
 	quatDot.w = 1.0;
