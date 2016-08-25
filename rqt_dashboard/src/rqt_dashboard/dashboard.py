@@ -9,13 +9,13 @@ from operator import add, sub
 
 from qt_gui.plugin import Plugin
 from python_qt_binding import loadUi
-from python_qt_binding.QtGui import QWidget
-from PyQt4 import QtGui, QtCore
+from python_qt_binding.QtWidgets import QWidget
+from PyQt5 import QtGui, QtWidgets, QtCore
 from rqt_plot.rosplot import ROSData, RosPlotException
 from std_msgs.msg import Float32
 from last_letter_msgs.msg import RefCommands
 
-class DashboardGrid(QtGui.QWidget):
+class DashboardGrid(QtWidgets.QWidget):
 	def __init__(self):
 		super(DashboardGrid, self).__init__()
 		self.setFixedSize(900, 900)
@@ -27,7 +27,7 @@ class DashboardGrid(QtGui.QWidget):
 		filename =  rospack.get_path('last_letter') + '/data/parameters/aircraft' + rospy.get_namespace() + 'dashboard.yaml'
 		data = yaml.load(open(filename).read())
 		gauges = []
-		self.line = QtGui.QHBoxLayout()
+		self.line = QtWidgets.QHBoxLayout()
 
 		self.commands = RefCommands()
 		initPos = rospy.get_param('init/position',[0])
@@ -51,7 +51,7 @@ class DashboardGrid(QtGui.QWidget):
 		grouped_gauges = list(izip_longest(*(iter(gauges),)*3))
 
 		for i in xrange(len(grouped_gauges)):
-			setattr(self, 'column{}'.format(i), QtGui.QVBoxLayout())
+			setattr(self, 'column{}'.format(i), QtWidgets.QVBoxLayout())
 			curr_column = getattr(self, 'column{}'.format(i))
 			for g in grouped_gauges[i]:
 				if g is not None:
@@ -81,7 +81,7 @@ class DashboardGrid(QtGui.QWidget):
 		self.pubTimer.start(1000)
 
 #By Fadi
-class GaugeSimple(QtGui.QWidget):
+class GaugeSimple(QtWidgets.QWidget):
 	''' Gauge pointer movement:
 	minimum->maximum values: clockwise rotation
 	maximum value > minimum-value
@@ -292,7 +292,7 @@ class GaugeSimple(QtGui.QWidget):
 		return self.angle_from_zero(self.center, self.marker_point, 90)
 
 	def draw_marker(self, x=0, y=0, size=10):
-		poly = QtGui.QPolygonF()
+		poly = QtWidgets.QPolygonF()
 		poly.append(QtCore.QPointF(x-size, y))
 		poly.append(QtCore.QPointF(x+size, y))
 		poly.append(QtCore.QPointF(x+size, y-size))
@@ -416,7 +416,7 @@ class GaugeSimple(QtGui.QWidget):
 		if getattr(self, 'marker_value', None):
 			painter.drawText(QtCore.QPointF(self.center.x()-center_text(str(self.marker_value)), self.center.y()-20), str(self.marker_value))
 
-		QtGui.QWidget.paintEvent(self, event)
+		QtWidgets.QWidget.paintEvent(self, event)
 
 class Dashboard(Plugin):
 
