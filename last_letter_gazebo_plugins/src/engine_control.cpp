@@ -5,7 +5,6 @@
 #include <stdio.h>
 
 #include "gazebo_msgs/ModelState.h"
-#include "std_msgs/Float32.h"
 #include "geometry_msgs/Wrench.h"
 #include <gazebo/common/Plugin.hh>
 #include <ros/ros.h>

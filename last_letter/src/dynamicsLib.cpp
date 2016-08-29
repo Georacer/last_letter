@@ -123,14 +123,14 @@
 		// std::cout << "accumulator: " << torqueProp.x << " " << torqueProp.y << " " << torqueProp.z << std::endl;
 		// std::cout << std::endl;
 
-		// // Call aerodynamics routines
-		// forceAero = aerodynamics->getForce();
-		// if (isnan(forceAero)) {ROS_FATAL("dynamicsLib.cpp: NaN member in aerodynamics force vector"); ros::shutdown();}
-		// // std::cout << "aerodynamics: " << forceAero.x << " " << forceAero.y << " " << forceAero.z << std::endl;
-
-		// torqueAero = aerodynamics->getTorque();
-		// if (isnan(torqueAero)) {ROS_FATAL("dynamicsLib.cpp: NaN member in aerodynamics torque vector"); ros::shutdown();}
-
+		geometry_msgs::Wrench GazeboWrenchAero;
+		GazeboWrenchAero.force.x = forceAero.x;
+		GazeboWrenchAero.force.y = -forceAero.y;
+		GazeboWrenchAero.force.z = -forceAero.z;
+		GazeboWrenchAero.torque.x = torqueAero.x;
+		GazeboWrenchAero.torque.y = -torqueAero.y;
+		GazeboWrenchAero.torque.z = -torqueAero.z;
+		parentObj->pubAero.publish(GazeboWrenchAero);
 
 		// Call ground reactions routines - MUST BE CALLED LAST!!!
 		forceGround = groundReaction->getForce();

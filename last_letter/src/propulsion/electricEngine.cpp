@@ -107,9 +107,6 @@ void ElectricEng::updateRadPS()
 	wrenchProp.torque.y = omega/100.0;
 	parentObj->pubMotor.publish(wrenchProp); // Send calculated propeller angular velocity to Gazebo plugin
 
-	ROS_INFO("w: %g, \t Pe: %g, \t Pp: %g, \t Fp: %g",omega, engPower, propPower ,wrenchProp.force.x);
-
-
 	parentObj->states.rotorspeed[0]=std::fabs(omega); // Write engine speed to states message
 
 	message.header.stamp = ros::Time::now();

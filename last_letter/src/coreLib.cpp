@@ -129,7 +129,7 @@ void ModelPlane::step(void)
 	states.header.stamp = tprev;
 
 	//publish results
-	// pubState.publish(states);
+	pubState.publish(states);
 	// pubForce.publish(kinematics.forceInput);
 	// pubTorque.publish(kinematics.torqueInput);
 	// pubLinAcc.publish(kinematics.linearAcc);
@@ -161,6 +161,22 @@ void ModelPlane::getEnvironment(last_letter_msgs::Environment envUpdate)
 void ModelPlane::getModelState(gazebo_msgs::ModelState state)
 {
 	GazeboState = state;
+
+	states.pose.position.x = GazeboState.pose.position.x;
+	states.pose.position.y = -GazeboState.pose.position.y;
+	states.pose.position.z = -GazeboState.pose.position.z;
+	// REVIEW the orientation rotation
+	states.pose.orientation.x = GazeboState.pose.orientation.w;
+	states.pose.orientation.y = -GazeboState.pose.orientation.y;
+	states.pose.orientation.z = GazeboState.pose.orientation.z;
+	states.pose.orientation.w = -GazeboState.pose.orientation.x;
+	states.velocity.linear.x = GazeboState.twist.linear.x;
+	states.velocity.linear.y = -GazeboState.twist.linear.y;
+	states.velocity.linear.z = -GazeboState.twist.linear.z;
+	states.velocity.angular.x = GazeboState.twist.angular.x;
+	states.velocity.angular.y = -GazeboState.twist.angular.y;
+	states.velocity.angular.z = -GazeboState.twist.angular.z;
+
 }
 
 ///////////////////////////
@@ -199,10 +215,10 @@ Airdata::~Airdata()
 //Caclulate airspeed and aerodynamics angles
 void Airdata::calcAirData()
 {
-	// Calculate relative airspeed
+	// Calculate relative airspeed, Gazebo works with ENU frame, not NED (NEEDS FIXING)
 	u_r = parentObj->GazeboState.twist.linear.x - parentObj->environment.wind.x;
-	v_r = parentObj->GazeboState.twist.linear.y - parentObj->environment.wind.y;
-	w_r = parentObj->GazeboState.twist.linear.z - parentObj->environment.wind.z;
+	v_r = -parentObj->GazeboState.twist.linear.y - parentObj->environment.wind.y;
+	w_r = -parentObj->GazeboState.twist.linear.z - parentObj->environment.wind.z;
 
 	airspeed = sqrt(pow(u_r,2)+pow(v_r,2)+pow(w_r,2));
 	alpha = atan2(w_r,u_r);
