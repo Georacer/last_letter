@@ -14,7 +14,11 @@ find_package(catkin REQUIRED COMPONENTS
 	uav_utils
 	mathutils
 	tf
+	gazebo_ros
 )
+
+# Depend on system install of Gazebo
+find_package(gazebo REQUIRED)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -28,6 +32,7 @@ add_service_files(DIRECTORY srv FILES
 ## catkin specific configuration ##
 ###################################
 catkin_package(
+	DEPENDS gazebo_ros
 	INCLUDE_DIRS include
 	LIBRARIES modelPlaneLib
 )
@@ -44,6 +49,7 @@ include_directories(
 	src/groundReactions
 	src/propulsion
 	${catkin_INCLUDE_DIRS}
+	${GAZEBO_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library
@@ -62,6 +68,7 @@ add_executable(simClock src/clock.cpp)
 add_executable(ctrlInjector src/ctrlInjector.cpp)
 # add_executable(cameraController src/cameraController.cpp)
 add_executable(argumentHandler src/argumentHandler.cpp)
+add_executable(gazebo_state_test src/gazebo_state_test.cpp)
 
 ## Add cmake target dependencies of the executable/library
 add_dependencies(uav_publisher last_letter_msgs_gencpp ${catkin_EXPORTED_TARGETS})
@@ -76,6 +83,7 @@ add_dependencies(simClock last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messa
 add_dependencies(ctrlInjector last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 # add_dependencies(cameraController last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(argumentHandler last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(gazebo_state_test last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_publisher ${catkin_LIBRARIES})
@@ -91,6 +99,7 @@ target_link_libraries(simClock ${catkin_LIBRARIES})
 target_link_libraries(ctrlInjector ${catkin_LIBRARIES})
 # target_link_libraries(cameraController ${catkin_LIBRARIES})
 target_link_libraries(argumentHandler ${catkin_LIBRARIES})
+target_link_libraries(gazebo_state_test ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find last_letter
