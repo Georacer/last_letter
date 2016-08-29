@@ -32,10 +32,13 @@ class ModelPlane
 	///////////
 	//Variables
 	last_letter_msgs::SimStates states; // main simulation states
+	gazebo_msgs::ModelState GazeboState; // Gazebo state
 	last_letter_msgs::SimPWM input; // PWM input to the model
 	last_letter_msgs::Environment environment; // environmental component local to the UAV
 	ros::Subscriber subInp, subEnv; // ROS subscribers
+	ros::Subscriber subGazeboState, subProp; // Subscribers to the Gazebo plugins
 	ros::Publisher pubState, pubForce, pubTorque, pubLinAcc; // ROS publishers
+	ros::Publisher pubMotor, pubAero; // Publishers for Gazebo plugins
 	ros::Time tprev; // previous ROS time holder
 	double dt; // simulation timestep in s
 	int initTime; // first simulation loop flag
@@ -71,4 +74,8 @@ class ModelPlane
 
 	// Read environmental values callback
 	void getEnvironment(last_letter_msgs::Environment environment);
+
+	void getModelState(gazebo_msgs::ModelState state);
+
+	void getPropState(gazebo_msgs::ModelState state);
 };

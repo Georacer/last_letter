@@ -17,10 +17,17 @@ kinematics(this), dynamics(this), airdata(this)
 	//Subscribe and advertize
 	subInp = n.subscribe("ctrlPWM",1,&ModelPlane::getInput, this); //model control input subscriber
 	subEnv = n.subscribe("environment",1,&ModelPlane::getEnvironment, this); //dynamic environment effects subscriber
+
+	subGazeboState = n.subscribe("modelState",1,&ModelPlane::getModelState, this); //Update model state from Gazebo simulation
+	subProp = n.subscribe("propState",1,&ModelPlane::getPropState,this); //Update propeller state from Gazebo simulation
+
 	pubState = n.advertise<last_letter_msgs::SimStates>("states",1000); //model states publisher
 	pubForce = n.advertise<geometry_msgs::Vector3>("forceInput",1000); // forces publisher
 	pubTorque = n.advertise<geometry_msgs::Vector3>("torqueInput",1000); // torques publisher
 	pubLinAcc = n.advertise<geometry_msgs::Vector3>("linearAcc",1000); // Body frame linear acceleration - no corriolis effect
+
+	pubMotor = n.advertise<geometry_msgs::Wrench>("wrenchMotor",100); // Gazebo velocity for motor
+	pubAero = n.advertise<geometry_msgs::Wrench>("wrenchAero",100); // Gazebo wrench for aerodynamics
 }
 
 //Initialize states
@@ -110,23 +117,22 @@ void ModelPlane::init()
 void ModelPlane::step(void)
 {
 	// Perform step actions serially
-
 	airdata.calcAirData();
 
 	dynamics.calcWrench();
-	kinematics.forceInput = dynamics.getForce();
-	kinematics.torqueInput = dynamics.getTorque();
-	kinematics.calcDerivatives();
-	kinematics.integrator->propagation();
+	// kinematics.forceInput = dynamics.getForce();
+	// kinematics.torqueInput = dynamics.getTorque();
+	// kinematics.calcDerivatives();
+	// kinematics.integrator->propagation();
 
 	tprev = ros::Time::now();
 	states.header.stamp = tprev;
 
 	//publish results
-	pubState.publish(states);
-	pubForce.publish(kinematics.forceInput);
-	pubTorque.publish(kinematics.torqueInput);
-	pubLinAcc.publish(kinematics.linearAcc);
+	// pubState.publish(states);
+	// pubForce.publish(kinematics.forceInput);
+	// pubTorque.publish(kinematics.torqueInput);
+	// pubLinAcc.publish(kinematics.linearAcc);
 }
 
 /////////////////////////////////////////////////
@@ -148,6 +154,20 @@ void ModelPlane::getInput(last_letter_msgs::SimPWM inputMsg)
 void ModelPlane::getEnvironment(last_letter_msgs::Environment envUpdate)
 {
 	environment = envUpdate;
+}
+
+///////////////////////////
+// Store Gazebo model state
+void ModelPlane::getModelState(gazebo_msgs::ModelState state)
+{
+	GazeboState = state;
+}
+
+///////////////////////////
+// Store Gazebo propeller omega
+void ModelPlane::getPropState(gazebo_msgs::ModelState state)
+{
+	// Use this to get motor relative u-speed
 }
 
 //////////////////
@@ -180,9 +200,9 @@ Airdata::~Airdata()
 void Airdata::calcAirData()
 {
 	// Calculate relative airspeed
-	u_r = parentObj->states.velocity.linear.x - parentObj->environment.wind.x;
-	v_r = parentObj->states.velocity.linear.y - parentObj->environment.wind.y;
-	w_r = parentObj->states.velocity.linear.z - parentObj->environment.wind.z;
+	u_r = parentObj->GazeboState.twist.linear.x - parentObj->environment.wind.x;
+	v_r = parentObj->GazeboState.twist.linear.y - parentObj->environment.wind.y;
+	w_r = parentObj->GazeboState.twist.linear.z - parentObj->environment.wind.z;
 
 	airspeed = sqrt(pow(u_r,2)+pow(v_r,2)+pow(w_r,2));
 	alpha = atan2(w_r,u_r);

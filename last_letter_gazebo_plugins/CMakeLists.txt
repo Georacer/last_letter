@@ -126,6 +126,8 @@ include_directories(
 ## Declare a C++ library
 add_library(model_state_publisher src/model_state_publisher.cpp)
 target_link_libraries(model_state_publisher ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_library(engine_control src/engine_control.cpp)
+target_link_libraries(engine_control ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 # add_library(last_letter_gazebo_plugins
 #   src/${PROJECT_NAME}/last_letter_gazebo_plugins.cpp

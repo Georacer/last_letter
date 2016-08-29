@@ -31,7 +31,7 @@ namespace gazebo
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
           boost::bind(&modelStateBroadcaster::OnUpdate, this, _1));
 
-      this->rosPub = this->rosHandle.advertise<gazebo_msgs::ModelState>("modelState",100); //model states publisher
+      this->rosPub = this->rosHandle.advertise<gazebo_msgs::ModelState>("/" + this->model->GetName() + "/modelState",100); //model states publisher
 
       ROS_INFO("modelStateBroadcaster plugin initialized");
     }
@@ -39,10 +39,11 @@ namespace gazebo
     // Called by the world update start event
     public: void OnUpdate(const common::UpdateInfo & /*_info*/)
     {
-      // Apply a small linear velocity to the model.
+      // Read the model state
       this->modelPose = this->model->GetWorldPose();
-      this->modelVelLin = this->model->GetWorldLinearVel();
-      this->modelVelAng = this->model->GetWorldAngularVel();
+        // Velocities required in the body frame
+      this->modelVelLin = this->model->GetRelativeLinearVel();
+      this->modelVelAng = this->model->GetRelativeAngularVel();
 
       this->modelState.model_name = this->model->GetName();
       this->modelState.pose.position.x = this->modelPose.pos.x;

@@ -62,6 +62,7 @@ ElectricEng::~ElectricEng()
 // Update motor rotational speed and calculate thrust
 void ElectricEng::updateRadPS()
 {
+
 	rho = parentObj->environment.density;
 
 	double Ei = std::fabs(omega)/2/M_PI/Kv;
@@ -70,6 +71,9 @@ void ElectricEng::updateRadPS()
 	// Im = std::max(Im,0.0); // Current cannot return to the ESC
 	// Im = std::max(Im,-1.0); // Allow limited current back to the ESC
 	double engPower = Ei*(Im - I0);
+
+	// // Temporary measure
+	// if (engPower<0) engPower=0;
 
 	double advRatio = normalWind / (std::fabs(omega)/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	// advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
@@ -86,7 +90,7 @@ void ElectricEng::updateRadPS()
 
 	// Constrain propeller force to [0,+5] times the aircraft weight
 	wrenchProp.force.x = std::max(std::min(wrenchProp.force.x, 5.0*parentObj->kinematics.mass*9.81), 0.0*parentObj->kinematics.mass*9.81);
-	wrenchProp.torque.x = propPower / omega;
+	wrenchProp.torque.x = engPower / omega; // I think engPower is the right choice, not propPower
 
 	if (inputMotor < 0.01) {
 		wrenchProp.force.x = 0;
@@ -99,6 +103,12 @@ void ElectricEng::updateRadPS()
 	double omegaDot = 1/engInertia*deltaT;
 	omega += rotationDir * omegaDot * parentObj->dt;
 	omega = rotationDir * std::max(std::min(std::fabs(omega), omegaMax), omegaMin); // Constrain omega to working range
+
+	wrenchProp.torque.y = omega/100.0;
+	parentObj->pubMotor.publish(wrenchProp); // Send calculated propeller angular velocity to Gazebo plugin
+
+	ROS_INFO("w: %g, \t Pe: %g, \t Pp: %g, \t Fp: %g",omega, engPower, propPower ,wrenchProp.force.x);
+
 
 	parentObj->states.rotorspeed[0]=std::fabs(omega); // Write engine speed to states message
 

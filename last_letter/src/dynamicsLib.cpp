@@ -61,12 +61,14 @@
 	{
 		geometry_msgs::Vector3 tempVect;
 
-		// Call gravity calculation routines
-		forceGrav = gravity->getForce();
-		if (isnan(forceGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity force vector"); ros::shutdown();}
+		// Unneded, Gazebo takes care of them
+		//
+		// // Call gravity calculation routines
+		// forceGrav = gravity->getForce();
+		// if (isnan(forceGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity force vector"); ros::shutdown();}
 
-		torqueGrav = gravity->getTorque();
-		if (isnan(torqueGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity torque vector"); ros::shutdown();}
+		// torqueGrav = gravity->getTorque();
+		// if (isnan(torqueGrav)) {ROS_FATAL("dynamicsLib.cpp: NaN member in gravity torque vector"); ros::shutdown();}
 
 
 		// Call  motors routines

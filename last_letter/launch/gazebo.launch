@@ -1,0 +1,41 @@
+<launch>
+    <!-- Available arguments -->
+    <arg name="manualMode" default="true"/>
+    <arg name="autoMode" default="false"/>
+    <arg name="ArduPlane" default="false"/>
+    <arg name="uav_name" default="skywalker_2013"/>
+    <arg name="log" default="false"/>
+    <!-- <arg name="groundCam" default="false"/> -->
+
+    <!-- External optional arguments -->
+    <arg name="home" default="nan"/>
+    <arg name="simRate" default="nan"/>
+    <arg name="deltaT" default="nan"/>
+
+    <!-- Enable simulation clock -->
+    <param name="use_sim_time" type="bool" value="true" />
+
+    <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="world_name" value="$(find last_letter)/worlds/ll_empty.world"/>
+      <!-- more default parameters can be changed here -->
+    </include>
+    <!-- Spawn a robot into Gazebo -->
+    <node name="spawn_sdf" pkg="gazebo_ros" type="spawn_model" args="-file /home/george/model_editor_models/Skywalker_2013_mk2/model.sdf -sdf -z 1 -model skywalker_2013" />
+
+
+    <node name="gazebo_state_test" pkg="last_letter" type="gazebo_state_test"/>
+    <!-- Launch the simulator /-->
+    <include file="$(find last_letter)/launch/simulation_gazebo.launch" >
+        <arg name="manualMode" value="$(arg manualMode)"/>
+        <arg name="autoMode" value="$(arg autoMode)"/>
+        <arg name="uav_name" value="$(arg uav_name)"/>
+        <arg name="log" value="$(arg log)"/>
+        <arg name="home" value="$(arg home)"/>
+        <arg name="simRate" value="$(arg simRate)"/>
+        <arg name="deltaT" value="$(arg deltaT)"/>
+        <arg name="ArduPlane" value="$(arg ArduPlane)"/>
+    </include>
+
+
+</launch>

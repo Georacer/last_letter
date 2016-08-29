@@ -15,6 +15,9 @@
 #include "mathutils/mathutils.hpp"
 #include "uav_utils/uav_utils.hpp"
 
+//Include Gazebo messages
+#include "gazebo_msgs/ModelState.h"
+
 //Include custom messages
 #include "last_letter_msgs/SimStates.h"
 #include "last_letter_msgs/SimPWM.h"

@@ -3,6 +3,9 @@
 ///////////////////////////////////////////
 
 #include <tf/transform_broadcaster.h>
+
+#include "gazebo_msgs/ModelState.h"
+
 #include <last_letter_msgs/ElectricEng.h>
 
 ////////////////////////////////////////////

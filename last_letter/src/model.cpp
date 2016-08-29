@@ -27,9 +27,9 @@ int main(int argc, char **argv)
 	uav = new ModelPlane(n); //Create a ModelPlane passing the nodehandle for subscriptions & publicatons
 
 	int statusClock=0, statusEnv=0, statusArg=0;
-	while (statusClock!=1) {
-		ros::param::get("nodeStatus/clock", statusClock);
-	}
+	// while (statusClock!=1) {
+	// 	ros::param::get("nodeStatus/clock", statusClock);
+	// }
 	while (statusEnv!=1) {
 		ros::param::get("nodeStatus/environment", statusEnv);
 	}

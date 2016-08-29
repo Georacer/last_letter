@@ -1,6 +1,7 @@
 ///////////////////////////
 // Electric hobby engine //
 ///////////////////////////
+
 class ElectricEng : public Propulsion
 {
 public:
