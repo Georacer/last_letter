@@ -56,6 +56,21 @@
 			<node pkg="tf" type="static_transform_publisher" name="body2Cockpit" args="0.0 0.0 0.0 0.0 0.0 3.14 base_link plane_camera 10" />
 		</group>
 
+		<!-- Input nodes -->
+		<group if="$(arg manualMode)">
+			<group unless="$(arg ArduPlane)">
+	<!--		<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
+				<rosparam command="load" file="$(find last_letter)data/parameters/HID.yaml" />
+				<node pkg="joy" type="joy_node" name="joystick" output="screen" >
+					<param name="dev" value="/dev/input/js0" />
+					<param name="deadzone" value="0.01" />
+				</node>
+				<node pkg="last_letter" name="joy2chan" type="joy2chan" output="screen" >
+					<remap from="rawPWM" to="ctrlPWM"/>
+				</node>
+			</group>
+		</group>
+
 	</group>
 
 </launch>

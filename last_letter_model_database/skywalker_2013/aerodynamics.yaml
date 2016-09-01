@@ -1,0 +1,57 @@
+#airfoil Aerodynamic Parameters
+
+airfoil/nWings: 1
+
+airfoil1/CGOffset: [-0.02, 0.00, -0.05] # vector from CG to CoL
+airfoil1/mountOrientation: [0.0, 0.0, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
+
+airfoil1/chanGimbal: -1
+airfoil1/gimbalAxis: 0
+airfoil1/gimbalAngle_max: 0.0
+
+airfoil1/aerodynamicsType: 1
+airfoil1/s: 0.45
+airfoil1/b: 1.88
+airfoil1/c: 0.24
+
+airfoil1/c_lift_0: 0.56
+airfoil1/c_lift_deltae: 0.0
+airfoil1/c_lift_a: 6.9
+airfoil1/c_lift_q: 0
+airfoil1/mcoeff: 50
+airfoil1/oswald: 0.9
+airfoil1/alpha_stall: 0.4712
+airfoil1/c_drag_q: 0
+airfoil1/c_drag_deltae: 0.0
+airfoil1/c_drag_p: 0.1
+airfoil1/c_y_0: 0
+airfoil1/c_y_b: -0.98
+airfoil1/c_y_p: 0
+airfoil1/c_y_r: 0
+airfoil1/c_y_deltaa: 0
+airfoil1/c_y_deltar: -0.2 #opposite sign than c_n_deltar
+
+airfoil1/c_l_0: 0
+airfoil1/c_l_p: -1.0
+airfoil1/c_l_b: -0.12
+airfoil1/c_l_r: 0.14
+airfoil1/c_l_deltaa: 0.25
+airfoil1/c_l_deltar: -0.037
+airfoil1/c_m_0: 0.045
+airfoil1/c_m_a: -0.7
+airfoil1/c_m_q: -20
+airfoil1/c_m_deltae: 1.0
+airfoil1/c_n_0: 0
+airfoil1/c_n_b: 0.25
+airfoil1/c_n_p: 0.022
+airfoil1/c_n_r: -1
+airfoil1/c_n_deltaa: 0.00
+airfoil1/c_n_deltar: 0.1 #opposite sign than c_y_deltar
+
+airfoil1/deltaa_max: 0.3491
+airfoil1/deltae_max: 0.3491
+airfoil1/deltar_max: 0.3491
+
+airfoil1/chanAileron: 0
+airfoil1/chanElevator: 1
+airfoil1/chanRudder: 3

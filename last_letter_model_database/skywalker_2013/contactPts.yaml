@@ -1,0 +1,16 @@
+#Contact points array
+#Ground reaction model types: 0 no ground reactions, 1 PanosGroundReaction, 2 PointFriction
+#Material types: 0 foam, 1 metal, 2 rubber wheel, 3 composites
+airframe/groundReactionType: 1
+airframe/contactPtsNo: 7
+airframe/contactPoint1: [0.162, -0.2324, 0.2214, 2.0, 500.0, 25.0]
+airframe/contactPoint2: [0.162, 0.2324, 0.2214, 2.0, 500.0, 25.0]
+airframe/contactPoint3: [-0.8639, 0.0, 0.0522, 2.0, 500.0, 25.0]
+airframe/contactPoint4: [-0.0832, 0.9671, -0.1283, 0.0, 500.0, 25.0]
+airframe/contactPoint5: [-0.0832, -0.9671, -0.1683, 0.0, 500.0, 25.0]
+airframe/contactPoint6: [0.3785, 0.0, 0.017, 0.0, 500.0, 25.0]
+airframe/contactPoint7: [-0.9328, 0.0, -0.2196, 0.0, 500.0, 25.0]
+
+airframe/chanSteer: 4
+airframe/steerAngle_max: 0.79
+airframe/chanBrake: 5

@@ -58,8 +58,11 @@ namespace gazebo
 
       tempVect = InertialQuat*this->modelPose.pos; // Rotate position vector to NED frame
       this->modelState.pose.position.x = tempVect.x;
+      if (!std::isfinite(tempVect.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in north"); return;}
       this->modelState.pose.position.y = tempVect.y;
+      if (!std::isfinite(tempVect.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in east"); return;}
       this->modelState.pose.position.z = tempVect.z;
+      if (!std::isfinite(tempVect.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in down"); return;}
 
       tempQuat = InertialQuat*this->modelPose.rot; // Rotate orientation quaternion to NED frame
       if (tempQuat.w<0)
@@ -75,12 +78,18 @@ namespace gazebo
       this->modelState.pose.orientation.w = tempQuat.w;
 
       this->modelState.twist.linear.x = this->modelVelLin.x;
+      if (!std::isfinite(this->modelVelLin.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in u"); return;}
       this->modelState.twist.linear.y = this->modelVelLin.y;
+      if (!std::isfinite(this->modelVelLin.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in v"); return;}
       this->modelState.twist.linear.z = this->modelVelLin.z;
+      if (!std::isfinite(this->modelVelLin.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in w"); return;}
 
       this->modelState.twist.angular.x = this->modelVelAng.x;
+      if (!std::isfinite(this->modelVelAng.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in p"); return;}
       this->modelState.twist.angular.y = this->modelVelAng.y;
+      if (!std::isfinite(this->modelVelAng.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in q"); return;}
       this->modelState.twist.angular.z = this->modelVelAng.z;
+      if (!std::isfinite(this->modelVelAng.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in r"); return;}
 
       this->modelState.reference_frame = "world";
 
