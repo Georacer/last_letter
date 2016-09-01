@@ -158,45 +158,9 @@ void ModelPlane::getEnvironment(last_letter_msgs::Environment envUpdate)
 
 ///////////////////////////
 // Store Gazebo model state
-void ModelPlane::getModelState(gazebo_msgs::ModelState state)
+void ModelPlane::getModelState(last_letter_msgs::SimStates gazeboState)
 {
-	GazeboState = state;
-
-	// On Earth frame
-	states.pose.position.x = GazeboState.pose.position.x;
-	states.pose.position.y = GazeboState.pose.position.y;
-	states.pose.position.z = GazeboState.pose.position.z;
-
-	// On Earth frame
-	states.pose.orientation.x = GazeboState.pose.orientation.x;
-	states.pose.orientation.y = GazeboState.pose.orientation.y;
-	states.pose.orientation.z = GazeboState.pose.orientation.z;
-	states.pose.orientation.w = GazeboState.pose.orientation.w;
-
-	// On body frame
-	states.velocity.linear.x = GazeboState.twist.linear.x;
-	states.velocity.linear.y = GazeboState.twist.linear.y;
-	states.velocity.linear.z = GazeboState.twist.linear.z;
-	if (!std::isfinite(states.velocity.linear.x)) {ROS_FATAL("coreLib.cpp/getModelState: NaN value in u"); ros::shutdown();}
-	if (std::fabs(states.velocity.linear.x)>1e+160) {ROS_FATAL("coreLib.cpp/getModelState: u over 1e+160"); ros::shutdown();}
-	if (!std::isfinite(states.velocity.linear.y)) {ROS_FATAL("coreLib.cpp/getModelState: NaN value in v"); ros::shutdown();}
-	if (std::fabs(states.velocity.linear.y)>1e+160) {ROS_FATAL("coreLib.cpp/getModelState: u over 1e+160"); ros::shutdown();}
-	if (!std::isfinite(states.velocity.linear.z)) {ROS_FATAL("coreLib.cpp/getModelState: NaN value in w"); ros::shutdown();}
-	if (std::fabs(states.velocity.linear.z)>1e+160) {ROS_FATAL("coreLib.cpp/getModelState: u over 1e+160"); ros::shutdown();}
-
-	// On body frame
-	states.velocity.angular.x = GazeboState.twist.angular.x;
-	states.velocity.angular.y = GazeboState.twist.angular.y;
-	states.velocity.angular.z = GazeboState.twist.angular.z;
-	if (!std::isfinite(states.velocity.angular.x)) {ROS_FATAL("coreLib.cpp/getModelState: NaN value in p"); ros::shutdown();}
-	if (std::fabs(states.velocity.angular.x)>1e+160) {ROS_FATAL("coreLib.cpp/getModelState: p over 1e+160"); ros::shutdown();}
-	if (!std::isfinite(states.velocity.angular.y)) {ROS_FATAL("coreLib.cpp/getModelState: NaN value in q"); ros::shutdown();}
-	if (std::fabs(states.velocity.angular.y)>1e+160) {ROS_FATAL("coreLib.cpp/getModelState: q over 1e+160"); ros::shutdown();}
-	if (!std::isfinite(states.velocity.angular.z)) {ROS_FATAL("coreLib.cpp/getModelState: NaN value in r"); ros::shutdown();}
-	if (std::fabs(states.velocity.angular.z)>1e+160) {ROS_FATAL("coreLib.cpp/getModelState: r over 1e+160"); ros::shutdown();}
-
-	ROS_DEBUG_STREAM("coreLib.cpp/getModelState: p:" << states.velocity.angular.x << "\t q: " << states.velocity.angular.y << "\t r: " << states.velocity.angular.z);
-
+	states = gazeboState;
 }
 
 ///////////////////////////
@@ -236,18 +200,18 @@ Airdata::~Airdata()
 void Airdata::calcAirData()
 {
 	// Calculate relative airspeed, Gazebo works with ENU frame, not NED (NEEDS FIXING)
-	u_r = parentObj->GazeboState.twist.linear.x - parentObj->environment.wind.x;
-	v_r = parentObj->GazeboState.twist.linear.y - parentObj->environment.wind.y;
-	w_r = parentObj->GazeboState.twist.linear.z - parentObj->environment.wind.z;
+	u_r = parentObj->states.velocity.linear.x - parentObj->environment.wind.x;
+	v_r = parentObj->states.velocity.linear.y - parentObj->environment.wind.y;
+	w_r = parentObj->states.velocity.linear.z - parentObj->environment.wind.z;
 
-	ROS_DEBUG_STREAM("coreLib.cpp/calcAidData: u_r: " << u_r << "\t v_r: " << v_r << "\t w_r: " << w_r);
+	// ROS_DEBUG_STREAM("coreLib.cpp/calcAidData: u_r: " << u_r << "\t v_r: " << v_r << "\t w_r: " << w_r);
 
 	if (!std::isfinite(u_r)) {ROS_FATAL("coreLib.cpp/calcAirData: NaN value in u_r"); ros::shutdown();}
-	if (std::fabs(u_r)>1e+160) {ROS_FATAL("coreLib.cpp/calcAirData: u_r over 1e+160"); ros::shutdown();}
+	// if (std::fabs(u_r)>1e+160) {ROS_FATAL("coreLib.cpp/calcAirData: u_r over 1e+160"); ros::shutdown();}
 	if (!std::isfinite(v_r)) {ROS_FATAL("coreLib.cpp/calcAirData: NaN value in v_r"); ros::shutdown();}
-	if (std::fabs(v_r)>1e+160) {ROS_FATAL("coreLib.cpp/calcAirData: v_r over 1e+160"); ros::shutdown();}
+	// if (std::fabs(v_r)>1e+160) {ROS_FATAL("coreLib.cpp/calcAirData: v_r over 1e+160"); ros::shutdown();}
 	if (!std::isfinite(w_r)) {ROS_FATAL("coreLib.cpp/calcAirData: NaN value in w_r"); ros::shutdown();}
-	if (std::fabs(w_r)>1e+160) {ROS_FATAL("coreLib.cpp/calcAirData: w_r over 1e+160"); ros::shutdown();}
+	// if (std::fabs(w_r)>1e+160) {ROS_FATAL("coreLib.cpp/calcAirData: w_r over 1e+160"); ros::shutdown();}
 
 	airspeed = sqrt(pow(u_r,2)+pow(v_r,2)+pow(w_r,2));
 	alpha = atan2(w_r,u_r);
@@ -266,7 +230,7 @@ void Airdata::calcAirData()
 		// beta = asin(v_r/airspeed);
 	}
 
-	ROS_DEBUG_STREAM("coreLib.cpp/calcAidData: airspeed: " << airspeed << " alpha: " << alpha << " beta: " << beta);
+	// ROS_DEBUG_STREAM("coreLib.cpp/calcAidData: airspeed: " << airspeed << " alpha: " << alpha << " beta: " << beta);
 
 }
 

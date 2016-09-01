@@ -7,6 +7,7 @@ project(last_letter_gazebo_plugins)
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
   roscpp
+  last_letter_msgs
 )
 
 ## System dependencies are found with CMake's conventions

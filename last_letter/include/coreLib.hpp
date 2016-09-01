@@ -75,7 +75,7 @@ class ModelPlane
 	// Read environmental values callback
 	void getEnvironment(last_letter_msgs::Environment environment);
 
-	void getModelState(gazebo_msgs::ModelState state);
+	void getModelState(last_letter_msgs::SimStates gazeboState);
 
 	void getPropState(gazebo_msgs::ModelState state);
 };

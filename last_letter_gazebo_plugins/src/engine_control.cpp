@@ -18,6 +18,7 @@ namespace gazebo
     {
       // Store the pointer to the model
       this->model = _parent;
+      this->world = this->model->GetWorld();
       // Store the pointer to the motor shaft
       this->jointAxis = this->model->GetJoint("propeller_shaft");
       // Store teh point to the propeller link
@@ -45,7 +46,6 @@ namespace gazebo
     // Called by the world update start event
     public: void OnUpdate(const common::UpdateInfo & /*_info*/)
     {
-
       // Read the linkProp state
       this->modelPose = this->linkProp->GetWorldPose();
         // Velocities required in the body frame
@@ -73,6 +73,12 @@ namespace gazebo
 
     public: void getWrenchMotor(const geometry_msgs::Wrench& wrench)
     {
+      if (this->world->GetSimTime().sec<1)
+      {
+        // ROS_INFO("Letting simulation settle");
+        return;
+      }
+
       // ROS_INFO("Received motor force (XYZ): %g\t%g\t%g",wrench.force.x, wrench.force.y, wrench.force.z);
       // ROS_INFO("Received motor torque (XYZ): %g\t%g\t%g",wrench.torque.x, wrench.torque.y, wrench.torque.z);
 
@@ -96,6 +102,7 @@ namespace gazebo
     // Pointer to the model
     private:
       physics::ModelPtr model;
+      physics::WorldPtr world;
       math::Pose relPose;
 
     // Pointer to motor joint

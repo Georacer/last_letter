@@ -2,9 +2,11 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 #include <gazebo/common/common.hh>
+#include <ignition/math/Vector3.hh>
 #include <stdio.h>
 
 #include "gazebo_msgs/ModelState.h"
+#include "last_letter_msgs/SimStates.h"
 #include <gazebo/common/Plugin.hh>
 #include <ros/ros.h>
 
@@ -18,7 +20,10 @@ namespace gazebo
     {
       // Store the pointer to the model
       this->model = _parent;
+      this->world = this->model->GetWorld();
       this->INS = this->model->GetLink("INS");
+
+      this->WGS84 = this->world->GetSphericalCoordinates();
 
       if (!ros::isInitialized())
       {
@@ -31,7 +36,7 @@ namespace gazebo
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
           boost::bind(&modelStateBroadcaster::OnUpdate, this, _1));
 
-      this->rosPub = this->rosHandle.advertise<gazebo_msgs::ModelState>("/" + this->model->GetName() + "/modelState",1); //model states publisher
+      this->rosPub = this->rosHandle.advertise<last_letter_msgs::SimStates>("/" + this->model->GetName() + "/modelState",1); //model states publisher
 
       ROS_INFO("modelStateBroadcaster plugin initialized");
     }
@@ -54,15 +59,26 @@ namespace gazebo
       this->modelVelLin = BodyQuat*this->model->GetRelativeLinearVel();
       this->modelVelAng = BodyQuat*this->model->GetRelativeAngularVel();
 
-      this->modelState.model_name = this->model->GetName();
+      this->modelState.header.frame_id = this->model->GetName();
+
+      this->modelState.header.stamp = ros::Time::now();
 
       tempVect = InertialQuat*this->modelPose.pos; // Rotate position vector to NED frame
+      if (!std::isfinite(this->modelPose.pos.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in Gazebo east"); this->model->Reset(); return;}
+      if (!std::isfinite(this->modelPose.pos.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in Gazebo north"); this->model->Reset(); return;}
+      if (!std::isfinite(this->modelPose.pos.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in Gazeo up"); this->model->Reset(); return;}
       this->modelState.pose.position.x = tempVect.x;
-      if (!std::isfinite(tempVect.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in north"); return;}
+      if (!std::isfinite(tempVect.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in NED north"); this->model->Reset(); return;}
       this->modelState.pose.position.y = tempVect.y;
-      if (!std::isfinite(tempVect.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in east"); return;}
+      if (!std::isfinite(tempVect.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in NED east"); this->model->Reset(); return;}
       this->modelState.pose.position.z = tempVect.z;
-      if (!std::isfinite(tempVect.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in down"); return;}
+      if (!std::isfinite(tempVect.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in NED down"); this->model->Reset(); return;}
+
+      // ROS_INFO("Gazebo quaternion (w/x/y/z): %g\t%g\t%g\t%g", this->modelPose.rot.w, this->modelPose.rot.x, this->modelPose.rot.y, this->modelPose.rot.z);
+      if (!std::isfinite(this->modelPose.rot.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in Gazebo body rot.x"); this->model->Reset(); return;}
+      if (!std::isfinite(this->modelPose.rot.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in Gazebo body rot.y"); this->model->Reset(); return;}
+      if (!std::isfinite(this->modelPose.rot.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in Gazebo body rot.z"); this->model->Reset(); return;}
+      if (!std::isfinite(this->modelPose.rot.w)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in Gazebo body rot.w"); this->model->Reset(); return;}
 
       tempQuat = InertialQuat*this->modelPose.rot; // Rotate orientation quaternion to NED frame
       if (tempQuat.w<0)
@@ -76,30 +92,48 @@ namespace gazebo
       this->modelState.pose.orientation.y = tempQuat.y;
       this->modelState.pose.orientation.z = tempQuat.z;
       this->modelState.pose.orientation.w = tempQuat.w;
+      // ROS_INFO("aerospace quaternion (w/x/y/z): %g\t%g\t%g\t%g", tempQuat.w, tempQuat.x, tempQuat.y, tempQuat.z);
+      if (!std::isfinite(tempQuat.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in aerospace body rot.x"); this->model->Reset(); return;}
+      if (!std::isfinite(tempQuat.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in aerospace body rot.y"); this->model->Reset(); return;}
+      if (!std::isfinite(tempQuat.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in aerospace body rot.z"); this->model->Reset(); return;}
+      if (!std::isfinite(tempQuat.w)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in aerospace body rot.w"); this->model->Reset(); return;}
 
-      this->modelState.twist.linear.x = this->modelVelLin.x;
-      if (!std::isfinite(this->modelVelLin.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in u"); return;}
-      this->modelState.twist.linear.y = this->modelVelLin.y;
-      if (!std::isfinite(this->modelVelLin.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in v"); return;}
-      this->modelState.twist.linear.z = this->modelVelLin.z;
-      if (!std::isfinite(this->modelVelLin.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in w"); return;}
+      this->modelState.velocity.linear.x = this->modelVelLin.x;
+      if (!std::isfinite(this->modelVelLin.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in u"); this->model->Reset(); return;}
+      this->modelState.velocity.linear.y = this->modelVelLin.y;
+      if (!std::isfinite(this->modelVelLin.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in v"); this->model->Reset(); return;}
+      this->modelState.velocity.linear.z = this->modelVelLin.z;
+      if (!std::isfinite(this->modelVelLin.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in w"); this->model->Reset(); return;}
 
-      this->modelState.twist.angular.x = this->modelVelAng.x;
-      if (!std::isfinite(this->modelVelAng.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in p"); return;}
-      this->modelState.twist.angular.y = this->modelVelAng.y;
-      if (!std::isfinite(this->modelVelAng.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in q"); return;}
-      this->modelState.twist.angular.z = this->modelVelAng.z;
-      if (!std::isfinite(this->modelVelAng.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in r"); return;}
+      this->modelState.velocity.angular.x = this->modelVelAng.x;
+      if (!std::isfinite(this->modelVelAng.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in p"); this->model->Reset(); return;}
+      this->modelState.velocity.angular.y = this->modelVelAng.y;
+      if (!std::isfinite(this->modelVelAng.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in q"); this->model->Reset(); return;}
+      this->modelState.velocity.angular.z = this->modelVelAng.z;
+      if (!std::isfinite(this->modelVelAng.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in r"); this->model->Reset(); return;}
 
-      this->modelState.reference_frame = "world";
+      // Get WGS84 coordinates
+      math::Vector3 coords = this->WGS84->SphericalFromLocal(ignition::math::Vector3d(this->modelPose.pos.x, this->modelPose.pos.y, this->modelPose.pos.z));
+      this->modelState.geoid.latitude = coords.x;
+      this->modelState.geoid.longitude = coords.y;
+      this->modelState.geoid.altitude = coords.z;
+      if (!std::isfinite(coords.x)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in lat"); this->model->Reset(); return;}
+      if (!std::isfinite(coords.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in lon"); this->model->Reset(); return;}
+      if (!std::isfinite(coords.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in alt"); this->model->Reset(); return;}
+
+      // ROS_INFO("WGS84 coordinates (lat/lon/alt): %g\t%g\t%g", coords.x, coords.y, coords.z);
 
       this->rosPub.publish(this->modelState);
     }
 
+    // Pointer to the world
+    private: physics::WorldPtr world;
     // Pointer to the model
     private: physics::ModelPtr model;
     // Pointer to the model INS link, which is in the NED frame
     private: physics::LinkPtr INS;
+
+    private: gazebo::common::SphericalCoordinatesPtr WGS84;
 
     // Pointer to the update event connection
     private: event::ConnectionPtr updateConnection;
@@ -108,7 +142,7 @@ namespace gazebo
     private:
       ros::NodeHandle rosHandle;
       ros::Publisher rosPub;
-      gazebo_msgs::ModelState modelState;
+      last_letter_msgs::SimStates modelState;
       math::Pose modelPose;
       math::Vector3 modelVelLin, modelVelAng;
   };

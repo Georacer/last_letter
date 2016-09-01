@@ -18,6 +18,7 @@ namespace gazebo
     {
       // Store the pointer to the model
       this->model = _parent;
+      this->world = this->model->GetWorld();
       // Store the pointer to the fuselage link
       this->linkINS = this->model->GetLink("INS");
       this->linkFuse = this->model->GetLink("fuselage");
@@ -48,6 +49,12 @@ namespace gazebo
     public: void getWrenchAero(const geometry_msgs::Wrench& wrench)
     {
 
+      if (this->world->GetSimTime().sec<1)
+      {
+        // ROS_INFO("Letting simulation settle");
+        return;
+      }
+
       math::Quaternion BodyQuat(0,1,0,0); // Rotation quaternion from gazebo body frame to aerospace body frame
       math::Vector3 CoL(-0.02, 0.00, 0.05); // CoL location
 
@@ -66,6 +73,7 @@ namespace gazebo
 
     // Pointer to the model
     private: physics::ModelPtr model;
+      physics::WorldPtr world;
 
     // Pointer to INS link
     physics::LinkPtr linkINS, linkFuse;
