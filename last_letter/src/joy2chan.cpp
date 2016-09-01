@@ -1,18 +1,66 @@
-#include <joy2chan.hpp>
+#include <ros/ros.h>
+#include <sensor_msgs/Joy.h>
+#include <cstdlib>
+#include <ros/console.h>
 
-ros::Publisher pub;
+#include <last_letter_msgs/SimPWM.h>
 
-int axisIndex[11];
-int buttonIndex[11];
-double throwIndex[11];
-int mixerid;
+class JoyConverter{
+public:
+	ros::Subscriber sub;
+	ros::Publisher pub;
 
-void joy2chan(sensor_msgs::Joy joyMsg)
+	int axisIndex[11];
+	int buttonIndex[11];
+	double throwIndex[11];
+	int mixerid;
+
+	JoyConverter(ros::NodeHandle n);
+	~JoyConverter();
+	void joy2chan(sensor_msgs::Joy joyMsg);
+	last_letter_msgs::SimPWM mixer(double * input, int mixerid);
+};
+
+JoyConverter::JoyConverter(ros::NodeHandle n)
 {
+
+	sub = n.subscribe("joy",1,&JoyConverter::joy2chan,this);
+	pub = n.advertise<last_letter_msgs::SimPWM>("rawPWM",1);	// Read the controller configuration parameters from the HID.yaml file
+
+	XmlRpc::XmlRpcValue listInt, listDouble;
+	int i;
+	if(!ros::param::getCached("/HID/throws", listDouble)) {ROS_FATAL("Invalid parameters for -/HID/throws- in param server!"); ros::shutdown();}
+	for (i = 0; i < listDouble.size(); ++i) {
+		ROS_ASSERT(listDouble[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
+		throwIndex[i]=listDouble[i];
+	}
+	ROS_INFO("Reading input axes");
+	if(!ros::param::getCached("/HID/axes", listInt)) {ROS_FATAL("Invalid parameters for -/HID/axes- in param server!"); ros::shutdown();}
+	for (i = 0; i < listInt.size(); ++i) {
+		ROS_ASSERT(listInt[i].getType() == XmlRpc::XmlRpcValue::TypeInt);
+		axisIndex[i]=listInt[i];
+	}
+	ROS_INFO("Reading input buttons configuration");
+	if(!ros::param::getCached("/HID/buttons", listInt)) {ROS_FATAL("Invalid parameters for -/HID/buttons- in param server!"); ros::shutdown();}
+	for (i = 0; i < listInt.size(); ++i) {
+		ROS_ASSERT(listInt[i].getType() == XmlRpc::XmlRpcValue::TypeInt);
+		buttonIndex[i]=listInt[i];
+	}
+	// Read the mixer type
+	if(!ros::param::getCached("/HID/mixerid", mixerid)) {ROS_INFO("No mixing function selected"); mixerid=0;}
+}
+
+JoyConverter::~JoyConverter()
+{
+}
+
+void JoyConverter::joy2chan(sensor_msgs::Joy joyMsg)
+{
+	ROS_DEBUG("joy2chan: Processing new joy msg");
 	last_letter_msgs::SimPWM channels;
 	double input[11];
 	int i;
-	for (i = 0; i <= 11; i++) {
+	for (i = 0; i < 11; i++) {
 		if (axisIndex[i] != -1) { // if an axis is assigned in this channel
 			input[i] = 1.0/throwIndex[i]*joyMsg.axes[axisIndex[i]];
 		}
@@ -24,6 +72,7 @@ void joy2chan(sensor_msgs::Joy joyMsg)
 		}
 	}
 
+	ROS_DEBUG("joy2chan: Calling mixing function");
 	channels = mixer(input, mixerid);
 	for (i=0;i<11;i++) // Cap channel limits
 	{
@@ -32,11 +81,13 @@ void joy2chan(sensor_msgs::Joy joyMsg)
 	}
 
 	channels.header.stamp = ros::Time::now();
+	ROS_DEBUG("joy2chan: Publishing channels");
 	pub.publish(channels);
+	ROS_DEBUG("joy2chan: Callback ended");
 }
 
 // Mixer function
-last_letter_msgs::SimPWM mixer(double * input, int mixerid)
+last_letter_msgs::SimPWM JoyConverter::mixer(double * input, int mixerid)
 {
 	last_letter_msgs::SimPWM channels;
 	int i;
@@ -98,32 +149,13 @@ int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "joystick_node");
 	ros::NodeHandle n;
-	ros::Subscriber sub = n.subscribe("joy",1,joy2chan);
-	pub = n.advertise<last_letter_msgs::SimPWM>("rawPWM",1);
 
-	// Read the controller configuration parameters from the HID.yaml file
-	XmlRpc::XmlRpcValue listInt, listDouble;
-	int i;
-	if(!ros::param::getCached("/HID/throws", listDouble)) {ROS_FATAL("Invalid parameters for -/HID/throws- in param server!"); ros::shutdown();}
-	for (i = 0; i < listDouble.size(); ++i) {
-		ROS_ASSERT(listDouble[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
-		throwIndex[i]=listDouble[i];
-	}
-	std::cout << "Reading input axes" << std::endl;
-	if(!ros::param::getCached("/HID/axes", listInt)) {ROS_FATAL("Invalid parameters for -/HID/axes- in param server!"); ros::shutdown();}
-	for (i = 0; i < listInt.size(); ++i) {
-		ROS_ASSERT(listInt[i].getType() == XmlRpc::XmlRpcValue::TypeInt);
-		axisIndex[i]=listInt[i];
-	}
-	ROS_INFO("Reading input buttons configuration");
-	if(!ros::param::getCached("/HID/buttons", listInt)) {ROS_FATAL("Invalid parameters for -/HID/buttons- in param server!"); ros::shutdown();}
-	for (i = 0; i < listInt.size(); ++i) {
-		ROS_ASSERT(listInt[i].getType() == XmlRpc::XmlRpcValue::TypeInt);
-		buttonIndex[i]=listInt[i];
-	}
-	// Read the mixer type
-	if(!ros::param::getCached("/HID/mixerid", mixerid)) {ROS_INFO("No mixing function selected"); mixerid=0;}
+	JoyConverter converter(n);
 
+	// Setting debug level of the node
+	// if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+ //   		ros::console::notifyLoggerLevelsChanged();
+	// }
 
 	// Enter spin
 	while (ros::ok())

@@ -19,6 +19,7 @@ namespace gazebo
       // Store the pointer to the model
       this->model = _parent;
       // Store the pointer to the fuselage link
+      this->linkINS = this->model->GetLink("INS");
       this->linkFuse = this->model->GetLink("fuselage");
 
       if (!ros::isInitialized())
@@ -46,15 +47,28 @@ namespace gazebo
 
     public: void getWrenchAero(const geometry_msgs::Wrench& wrench)
     {
-      this->linkFuse->AddRelativeForce(math::Vector3(wrench.force.x, wrench.force.y, wrench.force.z));
-      this->linkFuse->AddRelativeTorque(math::Vector3(wrench.torque.x, wrench.torque.y, wrench.torque.z));
+
+      math::Quaternion BodyQuat(0,1,0,0); // Rotation quaternion from gazebo body frame to aerospace body frame
+      math::Vector3 CoL(-0.02, 0.00, 0.05); // CoL location
+
+      math::Vector3 inpForce(wrench.force.x, wrench.force.y, wrench.force.z); // in aerodpace body frame
+      math::Vector3 inpTorque(wrench.torque.x, wrench.torque.y, wrench.torque.z); // in aerospace body frame
+
+      math::Vector3 newForce = BodyQuat.GetInverse()*inpForce; // in gazebo frame
+      math::Vector3 newTorque = BodyQuat.GetInverse()*inpTorque + CoL.Cross(newForce);// in gazebo frame
+
+      // ROS_INFO("aerodynamics.cpp plugin: applying new force (xyz): %g\t%g\t%g",newForce.x, newForce.y, newForce.z);
+      this->linkFuse->AddRelativeForce(newForce);
+
+      // ROS_INFO("aerodynamics.cpp plugin: applying new torque (xyz): %g\t%g\t%g",newTorque.x, newTorque.y, newTorque.z);
+      this->linkFuse->AddRelativeTorque(newTorque);
     }
 
     // Pointer to the model
     private: physics::ModelPtr model;
 
-    // Pointer to propeller link
-    physics::LinkPtr linkFuse;
+    // Pointer to INS link
+    physics::LinkPtr linkINS, linkFuse;
 
     // Pointer to the update event connection
     private: event::ConnectionPtr updateConnection;

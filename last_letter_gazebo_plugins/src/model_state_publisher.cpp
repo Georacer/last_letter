@@ -18,6 +18,7 @@ namespace gazebo
     {
       // Store the pointer to the model
       this->model = _parent;
+      this->INS = this->model->GetLink("INS");
 
       if (!ros::isInitialized())
       {
@@ -25,13 +26,12 @@ namespace gazebo
           << "Load the Gazebo system plugin 'libgazebo_ros_api_plugin.so' in the gazebo_ros package)");
         return;
       }
-
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
           boost::bind(&modelStateBroadcaster::OnUpdate, this, _1));
 
-      this->rosPub = this->rosHandle.advertise<gazebo_msgs::ModelState>("/" + this->model->GetName() + "/modelState",100); //model states publisher
+      this->rosPub = this->rosHandle.advertise<gazebo_msgs::ModelState>("/" + this->model->GetName() + "/modelState",1); //model states publisher
 
       ROS_INFO("modelStateBroadcaster plugin initialized");
     }
@@ -39,26 +39,49 @@ namespace gazebo
     // Called by the world update start event
     public: void OnUpdate(const common::UpdateInfo & /*_info*/)
     {
+
+      math::Vector3 tempVect;
+      math::Quaternion tempQuat;
+      math::Quaternion InertialQuat(0,0.7071,0.7071,0); // Rotation quaterion from NED to ENU
+      math::Quaternion BodyQuat(0,1,0,0); // Rotation quaternion from default body to aerospace body frame
+
       // Read the model state
       this->modelPose = this->model->GetWorldPose();
-        // Velocities required in the body frame
-      this->modelVelLin = this->model->GetRelativeLinearVel();
-      this->modelVelAng = this->model->GetRelativeAngularVel();
+      // Convert rotation
+      this->modelPose.rot = this->modelPose.rot*BodyQuat;
+
+        // Velocities required in the aerospace body frame
+      this->modelVelLin = BodyQuat*this->model->GetRelativeLinearVel();
+      this->modelVelAng = BodyQuat*this->model->GetRelativeAngularVel();
 
       this->modelState.model_name = this->model->GetName();
-      this->modelState.pose.position.x = this->modelPose.pos.x;
-      this->modelState.pose.position.y = this->modelPose.pos.y;
-      this->modelState.pose.position.z = this->modelPose.pos.z;
-      this->modelState.pose.orientation.x = this->modelPose.rot.x;
-      this->modelState.pose.orientation.y = this->modelPose.rot.y;
-      this->modelState.pose.orientation.z = this->modelPose.rot.z;
-      this->modelState.pose.orientation.w = this->modelPose.rot.w;
+
+      tempVect = InertialQuat*this->modelPose.pos; // Rotate position vector to NED frame
+      this->modelState.pose.position.x = tempVect.x;
+      this->modelState.pose.position.y = tempVect.y;
+      this->modelState.pose.position.z = tempVect.z;
+
+      tempQuat = InertialQuat*this->modelPose.rot; // Rotate orientation quaternion to NED frame
+      if (tempQuat.w<0)
+      {
+        tempQuat.w = -tempQuat.w;
+        tempQuat.x = -tempQuat.x;
+        tempQuat.y = -tempQuat.y;
+        tempQuat.z = -tempQuat.z;
+      }
+      this->modelState.pose.orientation.x = tempQuat.x;
+      this->modelState.pose.orientation.y = tempQuat.y;
+      this->modelState.pose.orientation.z = tempQuat.z;
+      this->modelState.pose.orientation.w = tempQuat.w;
+
       this->modelState.twist.linear.x = this->modelVelLin.x;
       this->modelState.twist.linear.y = this->modelVelLin.y;
       this->modelState.twist.linear.z = this->modelVelLin.z;
+
       this->modelState.twist.angular.x = this->modelVelAng.x;
       this->modelState.twist.angular.y = this->modelVelAng.y;
       this->modelState.twist.angular.z = this->modelVelAng.z;
+
       this->modelState.reference_frame = "world";
 
       this->rosPub.publish(this->modelState);
@@ -66,6 +89,8 @@ namespace gazebo
 
     // Pointer to the model
     private: physics::ModelPtr model;
+    // Pointer to the model INS link, which is in the NED frame
+    private: physics::LinkPtr INS;
 
     // Pointer to the update event connection
     private: event::ConnectionPtr updateConnection;

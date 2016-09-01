@@ -117,12 +117,24 @@ void Aerodynamics::rotateFrame()
 	relativeWind.y = tempVect.getY();
 	relativeWind.z = tempVect.getZ();
 
-	// Calculate the new, relative air data
-	relativeWind = getAirData(relativeWind);
-	airspeed = relativeWind.x; // Redundant, but we leave this here for now
-	alpha = relativeWind.y;
-	beta = relativeWind.z;
-	// std::cout << "airspeed: " << airspeed << " alpha: " << alpha << " beta: " << beta << std::endl;
+	airspeed = sqrt(pow(relativeWind.x,2)+pow(relativeWind.y,2)+pow(relativeWind.z,2));
+	alpha = atan2(relativeWind.z,relativeWind.x);
+
+	if (relativeWind.x==0) {
+		if (relativeWind.y==0) {
+			beta=0;
+		}
+		else {
+			beta=asin(relativeWind.y/abs(relativeWind.y));
+		}
+
+	}
+	else {
+		beta = atan2(relativeWind.y,relativeWind.x);
+		// beta = asin(v_r/airspeed);
+	}
+
+	// ROS_DEBUG_STREAM("aerodynamicsLib.cpp/rotateFrame: airspeed: " << airspeed << " alpha: " << alpha << " beta: " << beta);
 
 	if (!std::isfinite(airspeed)) {ROS_FATAL("aerodynamicsLib.cpp/rotateWind: NaN value in airspeed"); ros::shutdown();}
 	if (std::fabs(airspeed)>1e+160) {ROS_FATAL("aerodynamicsLib.cpp/rotateWind: normalWind over 1e+160"); ros::shutdown();}
@@ -136,6 +148,8 @@ void Aerodynamics::rotateFrame()
 	q = relativeRates.y;
 	relativeRates.z = tempVect.getZ();
 	r = relativeRates.z;
+
+	// ROS_DEBUG_STREAM("aerodynamicsLib.cpp/rotateFrame: p:" << p << "\t q: " << q << "\t r: " << r);
 }
 
  // Convert the resulting force to the body axes
@@ -315,6 +329,7 @@ StdLinearAero::~StdLinearAero()
 // Force calculation function
 void StdLinearAero::getForce()
 {
+
 	// Read air density
 	rho = parentObj->environment.density;
 
@@ -333,6 +348,9 @@ void StdLinearAero::getForce()
 
 	//calculate aerodynamic force
 	double qbar = 1.0/2.0*rho*pow(airspeed,2)*s; //Calculate dynamic pressure
+
+
+	// ROS_DEBUG_STREAM("aerodynamicsLib.cpp/getForce: qbar: " << qbar << "\t c_lift_a: " << c_lift_a << "\t c_drag_a: " << c_drag_a);
 	double ax, ay, az;
 	if (airspeed==0)
 	{
@@ -352,6 +370,9 @@ void StdLinearAero::getForce()
 	wrenchAero.force.x = ax;
 	wrenchAero.force.y = ay;
 	wrenchAero.force.z = az;
+
+
+	// ROS_DEBUG_STREAM("aerodynamicsLib.cpp/getForce: forceAero.x:" << ax << "\tforceAero.y: " << ay << "\tforceAero.z: " << az);
 }
 
 // Torque calculation function
@@ -379,6 +400,9 @@ void StdLinearAero::getTorque()
 	wrenchAero.torque.x = la;
 	wrenchAero.torque.y = ma;
 	wrenchAero.torque.z = na;
+
+
+	// ROS_DEBUG_STREAM("aerodynamicsLib.cpp/getTorque: torqueAero.x:" << la << "\ttorqueAero.y: " << ma << "\ttorqueAero.z: " << na);
 
 	// Add torque to to force misalignment with CG
 	// r x F, where r is the distance from CoG to CoL

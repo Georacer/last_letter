@@ -23,6 +23,7 @@ namespace gazebo
       // Store teh point to the propeller link
       this->linkProp = this->model->GetLink("propeller");
       this->linkMot = this->model->GetLink("motor");
+      this->linkFuse = this->model->GetLink("fuselage");
 
       if (!ros::isInitialized())
       {
@@ -33,8 +34,7 @@ namespace gazebo
 
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
-      this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&engineControl::OnUpdate, this, _1));
+      this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&engineControl::OnUpdate, this, _1));
 
       this->rosPub = this->rosHandle.advertise<gazebo_msgs::ModelState>("/" + this->model->GetName() + "/propState",100); //model states publisher
       this->rosSubMotor = this->rosHandle.subscribe("/" + this->model->GetName() + "/wrenchMotor",1,&engineControl::getWrenchMotor, this); //get the applied wrench
@@ -73,18 +73,35 @@ namespace gazebo
 
     public: void getWrenchMotor(const geometry_msgs::Wrench& wrench)
     {
-      this->jointAxis->SetVelocity(0,wrench.torque.y); //Abuse of the wrench struct
-      this->linkProp->AddRelativeForce(math::Vector3(wrench.force.x, wrench.force.y, wrench.force.z));
-      // this->linkMot->AddRelativeTorque(math::Vector3(wrench.torque.y, 0, 0));
+      // ROS_INFO("Received motor force (XYZ): %g\t%g\t%g",wrench.force.x, wrench.force.y, wrench.force.z);
+      // ROS_INFO("Received motor torque (XYZ): %g\t%g\t%g",wrench.torque.x, wrench.torque.y, wrench.torque.z);
+
+      math::Quaternion BodyQuat(0,1,0,0); // Rotation quaternion from gazebo body frame to aerospace body frame
+      this->relPose = this->linkMot->GetRelativePose();
+
+      math::Vector3 inpForce(wrench.force.x, wrench.force.y, wrench.force.z); // in motor frame
+      math::Vector3 inpTorque(wrench.torque.x, wrench.torque.y, wrench.torque.z); // in motor frame
+
+      math::Vector3 newForce = this->relPose.rot.GetInverse()*inpForce; // in gazebo frame
+      math::Vector3 newTorque = this->relPose.rot.GetInverse()*newTorque + this->relPose.pos.Cross(newForce);// in gazebo frame
+
+      // ROS_INFO("Converted it to body force (XYZ): %g\t%g\t%g", newForce.x, newForce.y, newForce.z);
+      // ROS_INFO("Converted it to body torque (XYZ): %g\t%g\t%g", newTorque.x, newTorque.y, newTorque.z);
+      // this->jointAxis->SetVelocity(0,wrench.torque.y); //Abuse of the wrench struct
+
+      this->linkFuse->AddRelativeForce(newForce);
+      this->linkFuse->AddRelativeTorque(newTorque);
     }
 
     // Pointer to the model
-    private: physics::ModelPtr model;
+    private:
+      physics::ModelPtr model;
+      math::Pose relPose;
 
     // Pointer to motor joint
     physics::JointPtr jointAxis;
     // Pointer to propeller link
-    physics::LinkPtr linkProp, linkMot;
+    physics::LinkPtr linkProp, linkMot, linkFuse;
 
     // Pointer to the update event connection
     private: event::ConnectionPtr updateConnection;

@@ -21,8 +21,7 @@
       <!-- more default parameters can be changed here -->
     </include>
     <!-- Spawn a robot into Gazebo -->
-    <node name="spawn_sdf" pkg="gazebo_ros" type="spawn_model" args="-file /home/george/model_editor_models/Skywalker_2013_mk2/model.sdf -sdf -z 1 -model skywalker_2013" />
-
+    <node name="spawn_sdf" pkg="gazebo_ros" type="spawn_model" args="-file /home/george/model_editor_models/Skywalker_2013_mk3/model.sdf -sdf -z 1 -model skywalker_2013" />
 
     <node name="gazebo_state_test" pkg="last_letter" type="gazebo_state_test"/>
     <!-- Launch the simulator /-->

@@ -23,6 +23,12 @@ int main(int argc, char **argv)
 
 	ros::init(argc, argv, "simNode");
 	ros::NodeHandle n;
+
+	//Setting debug level of the node
+	if( ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug) ) {
+   		ros::console::notifyLoggerLevelsChanged();
+	}
+
 	ros::Subscriber sub = n.subscribe("/clock",1000, stepCallback);
 	uav = new ModelPlane(n); //Create a ModelPlane passing the nodehandle for subscriptions & publicatons
 
