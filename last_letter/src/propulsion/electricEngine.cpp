@@ -104,7 +104,6 @@ void ElectricEng::updateRadPS()
 	omega += rotationDir * omegaDot * parentObj->dt;
 	omega = rotationDir * std::max(std::min(std::fabs(omega), omegaMax), omegaMin); // Constrain omega to working range
 
-	wrenchProp.torque.y = omega/100.0;
 	parentObj->pubMotor.publish(wrenchProp); // Send calculated propeller angular velocity to Gazebo plugin
 
 	parentObj->states.rotorspeed[0]=std::fabs(omega); // Write engine speed to states message

@@ -107,7 +107,7 @@ void Propulsion::rotateWind()
 
 	normalWind = relativeWind.x;
 	if (!std::isfinite(normalWind)) {ROS_FATAL("propulsion.cpp: NaN value in normalWind"); ros::shutdown();}
-	if (std::fabs(normalWind)>1e+160) {ROS_FATAL("propulsion.cpp/rotateWind: normalWind over 1e+160"); ros::shutdown();}
+	// if (std::fabs(normalWind)>1e+160) {ROS_FATAL("propulsion.cpp/rotateWind: normalWind over 1e+160"); ros::shutdown();}
 }
 
 void Propulsion::rotateProp() // Update propeller angle

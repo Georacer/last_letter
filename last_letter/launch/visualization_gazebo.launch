@@ -1,0 +1,16 @@
+<!-- Launch file for the visualization modules /-->
+
+<launch>
+	<arg name="clockSim" value="false"/>	<!-- Choose Reatime/Simulated clock /-->
+	<arg name="uav_name" />
+	<!-- <arg name="groundCam" /> -->
+
+	<!-- apply realtime/simulated clock option -->
+	<param if="$(arg clockSim)" name="use_sim_time" type="bool" value="true" />
+
+	<node pkg="rqt_dashboard" type="dash_backend" name="dash_backend" ns="$(arg uav_name)" output="screen" />
+
+	<node pkg="rqt_gui" type="rqt_gui" name="Dashboard" ns="$(arg uav_name)" args="--perspective-file $(find rqt_dashboard)/UAV_dashboard.perspective" output="screen" />
+
+</launch>
+

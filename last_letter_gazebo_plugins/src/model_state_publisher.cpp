@@ -21,9 +21,11 @@ namespace gazebo
       // Store the pointer to the model
       this->model = _parent;
       this->world = this->model->GetWorld();
-      this->INS = this->model->GetLink("INS");
 
       this->WGS84 = this->world->GetSphericalCoordinates();
+
+      this->last_time = this->world->GetSimTime();
+      this->last_velLin = this->model->GetWorldLinearVel();
 
       if (!ros::isInitialized())
       {
@@ -123,6 +125,32 @@ namespace gazebo
 
       // ROS_INFO("WGS84 coordinates (lat/lon/alt): %g\t%g\t%g", coords.x, coords.y, coords.z);
 
+      // Fill the acceleration field with the virtual accelerometer readings
+      //
+      // tempVect = this->model->GetWorldLinearAccel(); // Read inertial acceleration in inertial frame
+      // ignition::math::Vector3d gravity(this->world->Gravity()); // Read gravity acceleration in inertial frame
+      // tempVect = tempVect - math::Vector3(gravity.X(), gravity.Y(), gravity.Z()); // Subtract gravity
+      // tempVect = this->modelPose.rot*tempVect; // Rotate acceleration to body frame
+      // this->modelState.acceleration.linear.x = tempVect.x;
+      // this->modelState.acceleration.linear.y = tempVect.y;
+      // this->modelState.acceleration.linear.z = tempVect.z;
+
+      common::Time cur_time = this->world->GetSimTime();
+      double dt = this->last_time.Double() - cur_time.Double();
+      if (dt != 0)
+      {
+        tempVect = (this->last_velLin - this->model->GetWorldLinearVel())/dt;
+        ignition::math::Vector3d gravity(this->world->Gravity()); // Read gravity acceleration in inertial frame
+        tempVect = tempVect - math::Vector3(gravity.X(), gravity.Y(), gravity.Z()); // Subtract gravity
+        tempVect = this->modelPose.rot*tempVect; // Rotate acceleration to body frame
+        this->modelState.acceleration.linear.x = tempVect.x;
+        this->modelState.acceleration.linear.y = tempVect.y;
+        this->modelState.acceleration.linear.z = tempVect.z;
+
+        this->last_velLin = this->model->GetWorldLinearVel();
+        this->last_time = cur_time;
+      }
+
       this->rosPub.publish(this->modelState);
     }
 
@@ -130,8 +158,6 @@ namespace gazebo
     private: physics::WorldPtr world;
     // Pointer to the model
     private: physics::ModelPtr model;
-    // Pointer to the model INS link, which is in the NED frame
-    private: physics::LinkPtr INS;
 
     private: gazebo::common::SphericalCoordinatesPtr WGS84;
 
@@ -144,7 +170,8 @@ namespace gazebo
       ros::Publisher rosPub;
       last_letter_msgs::SimStates modelState;
       math::Pose modelPose;
-      math::Vector3 modelVelLin, modelVelAng;
+      math::Vector3 modelVelLin, modelVelAng, last_velLin;
+      common::Time last_time;
   };
 
   // Register this plugin with the simulator

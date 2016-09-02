@@ -35,6 +35,12 @@
         <arg name="ArduPlane" value="$(arg ArduPlane)"/>
     </include>
 
+    <!-- ArduPlane SITL connection -->
+    <group if="$(arg ArduPlane)" ns="$(arg uav_name)">
+        <node pkg="last_letter" type="fdmUDPSend.py" name="fdmUDPSend"  output="screen"/>
+        <node pkg="last_letter" type="ctrlInjector" name="injector" output="screen"/>
+    </group>
+
     <!-- Launch the visualizers /-->
     <include file="$(find last_letter)/launch/visualization_gazebo.launch" >
         <arg name="uav_name" value="$(arg uav_name)" />
