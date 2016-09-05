@@ -20,7 +20,6 @@ namespace gazebo
       this->model = _parent;
       this->world = this->model->GetWorld();
       // Store the pointer to the fuselage link
-      this->linkINS = this->model->GetLink("INS");
       this->linkFuse = this->model->GetLink("fuselage");
 
       if (!ros::isInitialized())
@@ -75,8 +74,8 @@ namespace gazebo
     private: physics::ModelPtr model;
       physics::WorldPtr world;
 
-    // Pointer to INS link
-    physics::LinkPtr linkINS, linkFuse;
+    // Pointer to fuselage link
+    physics::LinkPtr linkFuse;
 
     // Pointer to the update event connection
     private: event::ConnectionPtr updateConnection;

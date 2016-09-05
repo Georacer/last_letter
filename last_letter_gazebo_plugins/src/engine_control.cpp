@@ -37,7 +37,6 @@ namespace gazebo
       // simulation iteration.
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(boost::bind(&engineControl::OnUpdate, this, _1));
 
-      this->rosPub = this->rosHandle.advertise<gazebo_msgs::ModelState>("/" + this->model->GetName() + "/propState",100); //model states publisher
       this->rosSubMotor = this->rosHandle.subscribe("/" + this->model->GetName() + "/wrenchMotor",1,&engineControl::getWrenchMotor, this); //get the applied wrench
 
       ROS_INFO("engineControl plugin initialized");
@@ -46,29 +45,6 @@ namespace gazebo
     // Called by the world update start event
     public: void OnUpdate(const common::UpdateInfo & /*_info*/)
     {
-      // Read the linkProp state
-      this->modelPose = this->linkProp->GetWorldPose();
-        // Velocities required in the body frame
-      this->modelVelLin = this->linkProp->GetRelativeLinearVel();
-      this->modelVelAng = this->linkProp->GetRelativeAngularVel();
-
-      this->propState.model_name = this->linkProp->GetName();
-      this->propState.pose.position.x = this->modelPose.pos.x;
-      this->propState.pose.position.y = this->modelPose.pos.y;
-      this->propState.pose.position.z = this->modelPose.pos.z;
-      this->propState.pose.orientation.x = this->modelPose.rot.x;
-      this->propState.pose.orientation.y = this->modelPose.rot.y;
-      this->propState.pose.orientation.z = this->modelPose.rot.z;
-      this->propState.pose.orientation.w = this->modelPose.rot.w;
-      this->propState.twist.linear.x = this->modelVelLin.x;
-      this->propState.twist.linear.y = this->modelVelLin.y;
-      this->propState.twist.linear.z = this->modelVelLin.z;
-      this->propState.twist.angular.x = this->modelVelAng.x;
-      this->propState.twist.angular.y = this->modelVelAng.y;
-      this->propState.twist.angular.z = this->modelVelAng.z;
-      this->propState.reference_frame = "propeller";
-
-      this->rosPub.publish(this->propState);
     }
 
     public: void getWrenchMotor(const geometry_msgs::Wrench& wrench)
@@ -116,7 +92,6 @@ namespace gazebo
     // ROS related variables
     private:
       ros::NodeHandle rosHandle;
-      ros::Publisher rosPub;
       ros::Subscriber rosSubMotor;
       gazebo_msgs::ModelState propState;
       math::Pose modelPose;

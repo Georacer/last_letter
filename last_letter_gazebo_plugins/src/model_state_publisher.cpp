@@ -26,6 +26,7 @@ namespace gazebo
 
       this->last_time = this->world->GetSimTime();
       this->last_velLin = this->model->GetWorldLinearVel();
+      this->last_pose = this->model->GetWorldPose();
 
       if (!ros::isInitialized())
       {
@@ -125,31 +126,58 @@ namespace gazebo
 
       // ROS_INFO("WGS84 coordinates (lat/lon/alt): %g\t%g\t%g", coords.x, coords.y, coords.z);
 
-      // Fill the acceleration field with the virtual accelerometer readings
-      //
+      // // Fill the acceleration field with the virtual accelerometer readings
       // tempVect = this->model->GetWorldLinearAccel(); // Read inertial acceleration in inertial frame
-      // ignition::math::Vector3d gravity(this->world->Gravity()); // Read gravity acceleration in inertial frame
-      // tempVect = tempVect - math::Vector3(gravity.X(), gravity.Y(), gravity.Z()); // Subtract gravity
-      // tempVect = this->modelPose.rot*tempVect; // Rotate acceleration to body frame
-      // this->modelState.acceleration.linear.x = tempVect.x;
-      // this->modelState.acceleration.linear.y = tempVect.y;
-      // this->modelState.acceleration.linear.z = tempVect.z;
 
       common::Time cur_time = this->world->GetSimTime();
       double dt = this->last_time.Double() - cur_time.Double();
       if (dt != 0)
       {
+        // Get acceleration from velocity
         tempVect = (this->last_velLin - this->model->GetWorldLinearVel())/dt;
-        ignition::math::Vector3d gravity(this->world->Gravity()); // Read gravity acceleration in inertial frame
-        tempVect = tempVect - math::Vector3(gravity.X(), gravity.Y(), gravity.Z()); // Subtract gravity
-        tempVect = this->modelPose.rot*tempVect; // Rotate acceleration to body frame
-        this->modelState.acceleration.linear.x = tempVect.x;
-        this->modelState.acceleration.linear.y = tempVect.y;
-        this->modelState.acceleration.linear.z = tempVect.z;
-
         this->last_velLin = this->model->GetWorldLinearVel();
+
+        //// Get acceleration from position
+        // this->curr_velLin = (this->modelPose.pos - this->last_pose.pos)/dt; // Differentiate pos to get vel
+        // tempVect = (this->curr_velLin - this->last_velLin)/dt; // Differentiate vel to get acc
+        // this->last_pose = this->modelPose;
+        // this->last_velLin = this->curr_velLin;
+
         this->last_time = cur_time;
       }
+
+      ignition::math::Vector3d gravity(this->world->Gravity()); // Read gravity acceleration in inertial frame
+      tempVect = tempVect - math::Vector3(gravity.X(), gravity.Y(), gravity.Z()); // Subtract gravity
+      tempVect = this->modelPose.rot*tempVect; // Rotate acceleration to body frame
+      this->modelState.acceleration.linear.x = tempVect.x;
+      this->modelState.acceleration.linear.y = tempVect.y;
+      this->modelState.acceleration.linear.z = tempVect.z;
+
+        // Apply (to Z-axis) Butterworth low-pass filter  /w cutoff freq=100Hz @ Sampling 400Hz
+        double inputX = tempVect.x;
+        double inputY = tempVect.y;
+        double inputZ = tempVect.z;
+        tempVect.z = -a[1]*accZfHist[0]-a[2]*accZfHist[1]-a[3]*accZfHist[2]+b[0]*inputZ+b[1]*accZHist[0]+b[2]*accZHist[1]+b[3]*accZHist[2];
+        accZHist[2]=accZHist[1];
+        accZHist[1]=accZHist[0];
+        accZHist[0]=inputZ;
+        accZfHist[2]=accZfHist[1];
+        accZfHist[1]=accZfHist[0];
+        accZfHist[0]=tempVect.z;
+
+        //// Apply averaging filter, size 10
+        // for (int i = 10; i>0; i--)
+        // {
+        //   accZHist[i] = accZHist[i-1];
+
+        // }
+        // accZHist[0] = inputZ;
+        // sum = 0;
+        // for (int i = 0; i<10; i++)
+        // {
+        //   sum+=accZHist[i];
+        // }
+        // tempVect.z = sum;
 
       this->rosPub.publish(this->modelState);
     }
@@ -170,8 +198,21 @@ namespace gazebo
       ros::Publisher rosPub;
       last_letter_msgs::SimStates modelState;
       math::Pose modelPose;
-      math::Vector3 modelVelLin, modelVelAng, last_velLin;
+      math::Vector3 modelVelLin, modelVelAng;
+      math::Vector3 curr_velLin, last_velLin;
+      math::Pose last_pose;
       common::Time last_time;
+
+    private:
+      double b [4] = {0.0376e-4, 0.1127, 0.1227, 0.0376};
+      double a [4] = {1.000, -2.9372, 2.8763, -9.9391};
+      double sum = 0;
+      double accXHist[10] ={0};
+      double accYHist[10] ={0};
+      double accZHist[10] ={0};
+      double accXfHist[10] ={0};
+      double accYfHist[10] ={0};
+      double accZfHist[10] ={0};
   };
 
   // Register this plugin with the simulator
