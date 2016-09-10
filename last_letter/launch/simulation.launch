@@ -74,6 +74,10 @@
 			<rosparam command="load" file="$(find last_letter)data/parameters/controllers/controller_HCUAV.yaml" />
 			<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
 		</group>
+		<!-- <group if="$(arg autoMode)">
+			<rosparam command="load" file="$(find last_letter)data/parameters/controllers/controller_ll.yaml" />
+			<node pkg="last_letter" name="Autopilot" type="autopilot_ll" output="screen"/>
+		</group> -->
 
 		<!-- Input nodes -->
 		<group if="$(arg manualMode)">

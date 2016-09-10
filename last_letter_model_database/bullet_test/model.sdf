@@ -1,0 +1,62 @@
+<?xml version='1.0'?>
+<sdf version='1.4'>
+  <model name='bullet_test'>
+    <link name='fuselage'>
+      <pose frame=''>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>3</mass>
+        <inertia>
+          <ixx>0.8244</ixx>
+          <ixy>0</ixy>
+          <ixz>0.1204</ixz>
+          <iyy>1.135</iyy>
+          <iyz>0</iyz>
+          <izz>1.759</izz>
+        </inertia>
+        <pose frame=''>0 0 0 0 -0 0</pose>
+      </inertial>
+      <self_collide>0</self_collide>
+      <kinematic>0</kinematic>
+      <visual name='visual'>
+        <pose frame=''>0 0 0 -3.14149 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 1</size>
+          </box>
+        </geometry>
+        <material>
+          <lighting>1</lighting>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Grey</name>
+          </script>
+          <ambient>0.3 0.3 0.3 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+          <specular>0.01 0.01 0.01 1</specular>
+          <emissive>0 0 0 1</emissive>
+          <shader type='vertex'>
+            <normal_map>__default__</normal_map>
+          </shader>
+        </material>
+        <cast_shadows>1</cast_shadows>
+        <transparency>0</transparency>
+      </visual>
+      <collision name='fuselage'>
+        <laser_retro>0</laser_retro>
+        <max_contacts>10</max_contacts>
+        <pose frame=''>0 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 1</size>
+          </box>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Plugin Insertion -->
+    <plugin name="bullet_test" filename="libbullet_test.so"/>
+
+    <static>0</static>
+    <allow_auto_disable>1</allow_auto_disable>
+  </model>
+</sdf>

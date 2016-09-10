@@ -65,7 +65,7 @@ namespace gazebo
       math::Vector3 inpTorque(wrench.torque.x, wrench.torque.y, wrench.torque.z); // in motor frame
 
       math::Vector3 newForce = this->relPose.rot.GetInverse()*inpForce; // in gazebo frame
-      math::Vector3 newTorque = this->relPose.rot.GetInverse()*newTorque + this->relPose.pos.Cross(newForce);// in gazebo frame
+      math::Vector3 newTorque = this->relPose.rot.GetInverse()*inpTorque + this->relPose.pos.Cross(newForce);// in gazebo frame
 
       // ROS_INFO("Converted it to body force (XYZ): %g\t%g\t%g", newForce.x, newForce.y, newForce.z);
       // ROS_INFO("Converted it to body torque (XYZ): %g\t%g\t%g", newTorque.x, newTorque.y, newTorque.z);

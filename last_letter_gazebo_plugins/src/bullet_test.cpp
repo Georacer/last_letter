@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "gazebo_msgs/ModelState.h"
+#include "geometry_msgs/Wrench.h"
 #include "last_letter_msgs/SimStates.h"
 #include <gazebo/common/Plugin.hh>
 #include <ros/ros.h>
@@ -14,19 +15,16 @@
 
 namespace gazebo
 {
-  class modelStateBroadcaster : public ModelPlugin
+  class bullet_test : public ModelPlugin
   {
     public: void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     {
       // Store the pointer to the model
       this->model = _parent;
       this->world = this->model->GetWorld();
+      this->linkFuse = this->model->GetLink("fuselage");
 
       this->WGS84 = this->world->GetSphericalCoordinates();
-
-      this->last_time = this->world->GetSimTime();
-      this->last_velLin = this->model->GetWorldLinearVel();
-      this->last_pose = this->model->GetWorldPose();
 
       if (!ros::isInitialized())
       {
@@ -37,11 +35,12 @@ namespace gazebo
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&modelStateBroadcaster::OnUpdate, this, _1));
+          boost::bind(&bullet_test::OnUpdate, this, _1));
 
       this->rosPub = this->rosHandle.advertise<last_letter_msgs::SimStates>("/" + this->model->GetName() + "/modelState",1); //model states publisher
+      this->rosSub = this->rosHandle.subscribe("/" + this->model->GetName() + "/wrenchMotor",1,&bullet_test::getWrenchMotor, this); //get the applied wrench
 
-      ROS_INFO("modelStateBroadcaster plugin initialized");
+      ROS_INFO("bullet_test plugin initialized");
     }
 
     // Called by the world update start event
@@ -137,12 +136,6 @@ namespace gazebo
         tempVect = (this->last_velLin - this->model->GetWorldLinearVel())/dt;
         this->last_velLin = this->model->GetWorldLinearVel();
 
-        //// Get acceleration from position
-        // this->curr_velLin = (this->modelPose.pos - this->last_pose.pos)/dt; // Differentiate pos to get vel
-        // tempVect = (this->curr_velLin - this->last_velLin)/dt; // Differentiate vel to get acc
-        // this->last_pose = this->modelPose;
-        // this->last_velLin = this->curr_velLin;
-
         this->last_time = cur_time;
       }
 
@@ -153,39 +146,47 @@ namespace gazebo
       this->modelState.acceleration.linear.y = tempVect.y;
       this->modelState.acceleration.linear.z = tempVect.z;
 
-        // // Apply (to Z-axis) Butterworth low-pass filter  /w cutoff freq=100Hz @ Sampling 400Hz
-        // double inputX = tempVect.x;
-        // double inputY = tempVect.y;
-        // double inputZ = tempVect.z;
-        // tempVect.z = -a[1]*accZfHist[0]-a[2]*accZfHist[1]-a[3]*accZfHist[2]+b[0]*inputZ+b[1]*accZHist[0]+b[2]*accZHist[1]+b[3]*accZHist[2];
-        // accZHist[2]=accZHist[1];
-        // accZHist[1]=accZHist[0];
-        // accZHist[0]=inputZ;
-        // accZfHist[2]=accZfHist[1];
-        // accZfHist[1]=accZfHist[0];
-        // accZfHist[0]=tempVect.z;
-
-        //// Apply averaging filter, size 10
-        // for (int i = 10; i>0; i--)
-        // {
-        //   accZHist[i] = accZHist[i-1];
-
-        // }
-        // accZHist[0] = inputZ;
-        // sum = 0;
-        // for (int i = 0; i<10; i++)
-        // {
-        //   sum+=accZHist[i];
-        // }
-        // tempVect.z = sum;
 
       this->rosPub.publish(this->modelState);
+    }
+
+    public: void getWrenchMotor(const geometry_msgs::Wrench& wrench)
+    {
+      if (this->world->GetSimTime().sec<1)
+      {
+        // ROS_INFO("Letting simulation settle");
+        return;
+      }
+
+      ROS_INFO("Received motor force (XYZ): %g\t%g\t%g",wrench.force.x, wrench.force.y, wrench.force.z);
+      // ROS_INFO("Received motor torque (XYZ): %g\t%g\t%g",wrench.torque.x, wrench.torque.y, wrench.torque.z);
+
+      math::Quaternion BodyQuat(0,1,0,0); // Rotation quaternion from gazebo body frame to aerospace body frame
+      // this->relPose = this->linkMot->GetRelativePose();
+
+      math::Vector3 inpForce(wrench.force.x, wrench.force.y, wrench.force.z); // in motor frame
+      math::Vector3 inpTorque(wrench.torque.x, wrench.torque.y, wrench.torque.z); // in motor frame
+
+      // math::Vector3 newForce = this->relPose.rot.GetInverse()*inpForce; // in gazebo frame
+      // math::Vector3 newTorque = this->relPose.rot.GetInverse()*newTorque + this->relPose.pos.Cross(newForce);// in gazebo frame
+
+      // ROS_INFO("Converted it to body force (XYZ): %g\t%g\t%g", newForce.x, newForce.y, newForce.z);
+      // ROS_INFO("Converted it to body torque (XYZ): %g\t%g\t%g", newTorque.x, newTorque.y, newTorque.z);
+      // this->jointAxis->SetVelocity(0,wrench.torque.y); //Abuse of the wrench struct
+
+      // this->linkFuse->AddRelativeForce(math::Vector3(0,0,wrench.force.x));
+      // this->linkFuse->SetForce(math::Vector3(0,0,wrench.force.x));
+      this->linkFuse->AddForce(math::Vector3(0,0,wrench.force.x));
+      // this->linkFuse->AddRelativeTorque(newTorque);
     }
 
     // Pointer to the world
     private: physics::WorldPtr world;
     // Pointer to the model
     private: physics::ModelPtr model;
+
+    // Pointer to fuselage link
+    physics::LinkPtr linkFuse;
 
     private: gazebo::common::SphericalCoordinatesPtr WGS84;
 
@@ -196,25 +197,15 @@ namespace gazebo
     private:
       ros::NodeHandle rosHandle;
       ros::Publisher rosPub;
+      ros::Subscriber rosSub;
       last_letter_msgs::SimStates modelState;
       math::Pose modelPose;
       math::Vector3 modelVelLin, modelVelAng;
-      math::Vector3 curr_velLin, last_velLin;
-      math::Pose last_pose;
+      math::Vector3 last_velLin;
       common::Time last_time;
 
-    private:
-      double b [4] = {0.0376e-4, 0.1127, 0.1227, 0.0376};
-      double a [4] = {1.000, -2.9372, 2.8763, -9.9391};
-      double sum = 0;
-      double accXHist[10] ={0};
-      double accYHist[10] ={0};
-      double accZHist[10] ={0};
-      double accXfHist[10] ={0};
-      double accYfHist[10] ={0};
-      double accZfHist[10] ={0};
   };
 
   // Register this plugin with the simulator
-  GZ_REGISTER_MODEL_PLUGIN(modelStateBroadcaster)
+  GZ_REGISTER_MODEL_PLUGIN(bullet_test)
 }

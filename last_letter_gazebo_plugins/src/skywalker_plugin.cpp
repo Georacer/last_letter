@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "gazebo_msgs/ModelState.h"
+#include "geometry_msgs/Wrench.h"
 #include "last_letter_msgs/SimStates.h"
 #include <gazebo/common/Plugin.hh>
 #include <ros/ros.h>
@@ -14,7 +15,7 @@
 
 namespace gazebo
 {
-  class modelStateBroadcaster : public ModelPlugin
+  class skywalker_plugin : public ModelPlugin
   {
     public: void Load(physics::ModelPtr _parent, sdf::ElementPtr _sdf)
     {
@@ -22,11 +23,12 @@ namespace gazebo
       this->model = _parent;
       this->world = this->model->GetWorld();
 
+      this->linkMot = this->model->GetLink("motor");
+      this->linkFuse = this->model->GetLink("fuselage");
+
       this->WGS84 = this->world->GetSphericalCoordinates();
 
       this->last_time = this->world->GetSimTime();
-      this->last_velLin = this->model->GetWorldLinearVel();
-      this->last_pose = this->model->GetWorldPose();
 
       if (!ros::isInitialized())
       {
@@ -37,11 +39,13 @@ namespace gazebo
       // Listen to the update event. This event is broadcast every
       // simulation iteration.
       this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-          boost::bind(&modelStateBroadcaster::OnUpdate, this, _1));
+          boost::bind(&skywalker_plugin::OnUpdate, this, _1));
 
       this->rosPub = this->rosHandle.advertise<last_letter_msgs::SimStates>("/" + this->model->GetName() + "/modelState",1); //model states publisher
+      this->rosSubMotor = this->rosHandle.subscribe("/" + this->model->GetName() + "/wrenchMotor",1,&skywalker_plugin::getWrenchMotor, this); //get the applied wrench
+      this->rosSubAero = this->rosHandle.subscribe("/" + this->model->GetName() + "/wrenchAero",1,&skywalker_plugin::getWrenchAero, this); //get the applied wrench
 
-      ROS_INFO("modelStateBroadcaster plugin initialized");
+      ROS_INFO("skywalker_plugin plugin initialized");
     }
 
     // Called by the world update start event
@@ -55,6 +59,7 @@ namespace gazebo
 
       // Read the model state
       this->modelPose = this->model->GetWorldPose();
+      this->gazeboPose = this->modelPose;
       // Convert rotation
       this->modelPose.rot = this->modelPose.rot*BodyQuat;
 
@@ -124,6 +129,12 @@ namespace gazebo
       if (!std::isfinite(coords.y)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in lon"); this->model->Reset(); return;}
       if (!std::isfinite(coords.z)) {ROS_ERROR("model_state_publisher.cpp plugin: NaN value in alt"); this->model->Reset(); return;}
 
+
+      math::Vector3 NEDVelocity = this->modelPose.rot.GetInverse()*this->modelVelLin;
+      this->modelState.geoid.velocity.x = NEDVelocity.x;
+      this->modelState.geoid.velocity.y = NEDVelocity.y;
+      this->modelState.geoid.velocity.z = NEDVelocity.z;
+
       // ROS_INFO("WGS84 coordinates (lat/lon/alt): %g\t%g\t%g", coords.x, coords.y, coords.z);
 
       // // Fill the acceleration field with the virtual accelerometer readings
@@ -137,12 +148,6 @@ namespace gazebo
         tempVect = (this->last_velLin - this->model->GetWorldLinearVel())/dt;
         this->last_velLin = this->model->GetWorldLinearVel();
 
-        //// Get acceleration from position
-        // this->curr_velLin = (this->modelPose.pos - this->last_pose.pos)/dt; // Differentiate pos to get vel
-        // tempVect = (this->curr_velLin - this->last_velLin)/dt; // Differentiate vel to get acc
-        // this->last_pose = this->modelPose;
-        // this->last_velLin = this->curr_velLin;
-
         this->last_time = cur_time;
       }
 
@@ -153,39 +158,69 @@ namespace gazebo
       this->modelState.acceleration.linear.y = tempVect.y;
       this->modelState.acceleration.linear.z = tempVect.z;
 
-        // // Apply (to Z-axis) Butterworth low-pass filter  /w cutoff freq=100Hz @ Sampling 400Hz
-        // double inputX = tempVect.x;
-        // double inputY = tempVect.y;
-        // double inputZ = tempVect.z;
-        // tempVect.z = -a[1]*accZfHist[0]-a[2]*accZfHist[1]-a[3]*accZfHist[2]+b[0]*inputZ+b[1]*accZHist[0]+b[2]*accZHist[1]+b[3]*accZHist[2];
-        // accZHist[2]=accZHist[1];
-        // accZHist[1]=accZHist[0];
-        // accZHist[0]=inputZ;
-        // accZfHist[2]=accZfHist[1];
-        // accZfHist[1]=accZfHist[0];
-        // accZfHist[0]=tempVect.z;
-
-        //// Apply averaging filter, size 10
-        // for (int i = 10; i>0; i--)
-        // {
-        //   accZHist[i] = accZHist[i-1];
-
-        // }
-        // accZHist[0] = inputZ;
-        // sum = 0;
-        // for (int i = 0; i<10; i++)
-        // {
-        //   sum+=accZHist[i];
-        // }
-        // tempVect.z = sum;
-
       this->rosPub.publish(this->modelState);
+
+
+      // Apply wrenches
+      if (this->world->GetSimTime().sec<1)
+      {
+        // ROS_INFO("Letting simulation settle");
+        return;
+      }
+      // Consruct forces in gazebo body frame
+      this->forceTotal = this->forceMotor + this->forceAero;
+      this->torqueTotal = this->torqueMotor + this->torqueAero;
+
+      // Rotate to world frame
+      this->forceTotal = this->gazeboPose.rot*this->forceTotal; // Why this doesn't work with .GetInverse()?
+      this->torqueTotal = this->gazeboPose.rot*this->torqueTotal; // Why this doesn't work with .GetInverse()?
+
+      // Apply total wrench
+      // ROS_INFO("skywalker_plugin.cpp plugin: applying new force (xyz): %g\t%g\t%g",this->forceTotal.x, this->forceTotal.y, this->forceTotal.z);
+      this->linkFuse->SetForce(this->forceTotal);
+      this->linkFuse->SetTorque(this->torqueTotal);
+    }
+
+    public: void getWrenchMotor(const geometry_msgs::Wrench& wrench)
+    {
+      // ROS_INFO("Received motor force (XYZ): %g\t%g\t%g",wrench.force.x, wrench.force.y, wrench.force.z);
+      // ROS_INFO("Received motor torque (XYZ): %g\t%g\t%g",wrench.torque.x, wrench.torque.y, wrench.torque.z);
+
+      math::Quaternion BodyQuat(0,1,0,0); // Rotation quaternion from gazebo body frame to aerospace body frame
+      this->relPose = this->linkMot->GetRelativePose();
+
+      math::Vector3 inpForce(-wrench.force.x, -wrench.force.y, wrench.force.z); // in motor frame
+      math::Vector3 inpTorque(-wrench.torque.x, -wrench.torque.y, wrench.torque.z); // in motor frame
+
+      this->forceMotor = this->relPose.rot.GetInverse()*inpForce; // in gazebo frame
+      this->torqueMotor = this->relPose.rot.GetInverse()*inpTorque + this->relPose.pos.Cross(this->forceMotor);// in gazebo frame
+
+      // ROS_INFO("Converted it to body force (XYZ): %g\t%g\t%g", newForce.x, newForce.y, newForce.z);
+      // ROS_INFO("Converted it to body torque (XYZ): %g\t%g\t%g", newTorque.x, newTorque.y, newTorque.z);
+    }
+
+    public: void getWrenchAero(const geometry_msgs::Wrench& wrench)
+    {
+      math::Quaternion BodyQuat(0,1,0,0); // Rotation quaternion from gazebo body frame to aerospace body frame
+      math::Vector3 CoL(-0.02, 0.00, 0.05); // CoL location
+
+      math::Vector3 inpForce(wrench.force.x, wrench.force.y, wrench.force.z); // in aerodpace body frame
+      math::Vector3 inpTorque(wrench.torque.x, wrench.torque.y, wrench.torque.z); // in aerospace body frame
+
+      this->forceAero = BodyQuat.GetInverse()*inpForce; // in gazebo frame
+      this->torqueAero = BodyQuat.GetInverse()*inpTorque + CoL.Cross(this->forceAero);// in gazebo frame
+
+      // ROS_INFO("skywalker_plugin.cpp plugin: applying new body force (xyz): %g\t%g\t%g",this->forceAero.x, this->forceAero.y, this->forceAero.z);
+      // ROS_INFO("aerodynamics.cpp plugin: applying new torque (xyz): %g\t%g\t%g",newTorque.x, newTorque.y, newTorque.z);
     }
 
     // Pointer to the world
     private: physics::WorldPtr world;
     // Pointer to the model
     private: physics::ModelPtr model;
+
+    // Link pointers
+    physics::LinkPtr linkMot, linkFuse;
 
     private: gazebo::common::SphericalCoordinatesPtr WGS84;
 
@@ -196,25 +231,18 @@ namespace gazebo
     private:
       ros::NodeHandle rosHandle;
       ros::Publisher rosPub;
+      ros::Subscriber rosSubMotor, rosSubAero;
       last_letter_msgs::SimStates modelState;
-      math::Pose modelPose;
+      math::Pose modelPose, relPose, gazeboPose;
+      geometry_msgs::Wrench totalWrench, wrenchMotor, wrenchAero;
+
+      math::Vector3 forceMotor, torqueMotor, forceAero, torqueAero, forceTotal, torqueTotal;
       math::Vector3 modelVelLin, modelVelAng;
       math::Vector3 curr_velLin, last_velLin;
-      math::Pose last_pose;
       common::Time last_time;
 
-    private:
-      double b [4] = {0.0376e-4, 0.1127, 0.1227, 0.0376};
-      double a [4] = {1.000, -2.9372, 2.8763, -9.9391};
-      double sum = 0;
-      double accXHist[10] ={0};
-      double accYHist[10] ={0};
-      double accZHist[10] ={0};
-      double accXfHist[10] ={0};
-      double accYfHist[10] ={0};
-      double accZfHist[10] ={0};
   };
 
   // Register this plugin with the simulator
-  GZ_REGISTER_MODEL_PLUGIN(modelStateBroadcaster)
+  GZ_REGISTER_MODEL_PLUGIN(skywalker_plugin)
 }

@@ -17,10 +17,14 @@
 
     <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-      <arg name="world_name" value="$(find last_letter)/worlds/empty.world"/>
+        <arg name="physics" value="bullet"/>
+        <arg name="verbose" value="true"/>
+        <arg name="world_name" value="$(find last_letter)/worlds/empty.world"/>
     </include>
     <!-- Spawn a robot into Gazebo -->
-    <node name="spawn_sdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find last_letter_model_database)/skywalker_2013/model.sdf -sdf -z 1 -model skywalker_2013" />
+    <node name="spawn_sdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find last_letter_model_database)/skywalker_2013/model.sdf -sdf -z 0.5 -model $(arg uav_name)" />
+    <!-- <node name="spawn_sdf" pkg="gazebo_ros" type="spawn_model" args="-file $(find last_letter_model_database)/bullet_test/model.sdf -sdf -z 1.5 -model $(arg uav_name)" /> -->
+    <!-- <node name="spawn_sdf" pkg="gazebo_ros" type="spawn_model" args="-database coke_can -gazebo -model coke_can -y 1" /> -->
 
     <node name="gazebo_state_test" pkg="last_letter" type="gazebo_state_test"/>
     <!-- Launch the simulator /-->
