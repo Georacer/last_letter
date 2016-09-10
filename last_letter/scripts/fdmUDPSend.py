@@ -72,29 +72,28 @@ def state_callback(state):
                            state.pose.orientation.y,
                            state.pose.orientation.z,
                            state.pose.orientation.w)
+    # fdm.dcm.from_euler(roll, pitch, yaw)
+
+    (roll,pitch,yaw) = fdm.dcm.to_euler()
     # (yaw, pitch, roll) = tf.transformations.euler_from_quaternion([state.pose.orientation.x,
                                                                        # state.pose.orientation.y,
                                                                        # state.pose.orientation.z,
                                                                        # state.pose.orientation.w],'rzyx')
-    (roll,pitch,yaw) = fdm.dcm.to_euler()
     fdm.attitude = Vector3(roll, pitch, yaw)
     fdm.gyro = Vector3(state.velocity.angular.x, state.velocity.angular.y, state.velocity.angular.z)
-    # fdm.dcm.from_euler(roll, pitch, yaw)
-    fdm.accel = Vector3(state.acceleration.linear.x, state.acceleration.linear.y, state.acceleration.linear.z);
 
-# # Passes new bootstrapped accelerometer data to the fdmState structure every new update
-# def accel_callback(accel):
-#     global fdm
-#     accel = Vector3(accel.x, accel.y, accel.z) # Read LinearAcc in aerospace body axes
-#     accel = fdm.dcm * accel # Convert it to NED axes
-#     accel.z -= 9.80665 # Subtract gravity
-#     accel = fdm.dcm.transposed() * accel # Bring it back to aerospace body axes
-#     fdm.accel = accel
+    fdm.accel = Vector3(state.acceleration.linear.x, state.acceleration.linear.y, state.acceleration.linear.z); # Bootstrapped acceleration provided by last_letter
+    # accel = Vector3(state.acceleration.linear.x, state.acceleration.linear.y, state.acceleration.linear.z) # Read LinearAcc in aerospace body axes
+    # accel = fdm.dcm * accel # Convert it to NED axes
+    # accel.z -= 9.80665 # Subtract gravity
+    # accel = fdm.dcm.transposed() * accel # Bring it back to aerospace body axes
+    # fdm.accel = accel
 
 # Passes new wind and airspeed data to the fdmState structure every new update
 def env_callback(environment):
     global fdm
     wind = Vector3(environment.wind.x, environment.wind.y, environment.wind.z)
+    # This is wrong because velocity is in the Earth frame, while wind is in the body frame
     fdm.airspeed = (fdm.velocity - wind).length()
 
 # Passes new timestamp data to the fdmState structure every new update
@@ -139,6 +138,7 @@ def send_output(sock, fdm):
                       fdm.attitude.z,
                       fdm.airspeed)
     sock.send(buf)
+    print("Sent airspeed: %s" % fdm.airspeed)
 
 ###############
 ## Main Program
