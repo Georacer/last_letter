@@ -131,6 +131,10 @@ add_library(engine_control src/engine_control.cpp)
 target_link_libraries(engine_control ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 add_library(aerodynamics src/aerodynamics.cpp)
 target_link_libraries(aerodynamics ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_library(bullet_test src/bullet_test.cpp)
+target_link_libraries(bullet_test ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
+add_library(skywalker_plugin src/skywalker_plugin.cpp)
+target_link_libraries(skywalker_plugin ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES})
 
 # add_library(last_letter_gazebo_plugins
 #   src/${PROJECT_NAME}/last_letter_gazebo_plugins.cpp
