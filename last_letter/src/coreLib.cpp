@@ -160,7 +160,12 @@ void ModelPlane::getEnvironment(last_letter_msgs::Environment envUpdate)
 // Store Gazebo model state
 void ModelPlane::getModelState(last_letter_msgs::SimStates gazeboState)
 {
-	states = gazeboState;
+//	states = gazeboState;
+  states.header = gazeboState.header;
+  states.geoid = gazeboState.geoid;
+  states.pose = gazeboState.pose;
+  states.velocity = gazeboState.velocity;
+  states.acceleration = gazeboState.acceleration;
 }
 
 ///////////////////////////
