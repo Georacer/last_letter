@@ -138,7 +138,7 @@ def send_output(sock, fdm):
                       fdm.attitude.z,
                       fdm.airspeed)
     sock.send(buf)
-    print("Sent airspeed: %s" % fdm.airspeed)
+#    print("Sent airspeed: %s" % fdm.airspeed)
 
 ###############
 ## Main Program
