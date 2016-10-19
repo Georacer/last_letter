@@ -52,10 +52,10 @@
 		states = *InpStates;
 		calcTemp(); //Run 1st
 		calcGrav();
-		calcWind();
-		calcDens();
 		calcPres();
-		calcGrav();
+		calcDens();
+		calcWind();
+		// calcGrav();
 		environment.header.stamp = ros::Time::now();
 		env_pub.publish(environment);
 	}
@@ -135,10 +135,11 @@
 	//Calculate air density
 	void environmentModel::calcDens()
 	{
-		double Hb = 0, Tb = T0, Pb = P0, L = L0;
-		double alt2pressRatio = (Pb / P0) * pow(1 - (L / Tb) * (states.geoid.altitude/1000.0 - Hb), ((1000.0 * grav0) / (Rd * L))); //Corrected to 1 - (L/...)
-		double alt2tempRatio =  environment.temperature / T0;
-		double density = Rho0 * alt2pressRatio  / alt2tempRatio;
+		// double Hb = 0, Tb = T0, Pb = P0, L = L0;
+		// double alt2pressRatio = (Pb / P0) * pow(1 - (L / Tb) * (states.geoid.altitude/1000.0 - Hb), ((1000.0 * grav0) / (Rd * L))); //Corrected to 1 - (L/...)
+		// double alt2tempRatio =  environment.temperature / T0;
+		// double density = Rho0 * alt2pressRatio  / alt2tempRatio;
+		double density = 100*environment.pressure/(Rd*environment.temperature);
 		environment.density = density;
 	}
 
@@ -148,7 +149,7 @@
 	{
 		double pressure;
 		double Hb = 0, Tb = T0, Pb = P0, L = L0;
-		pressure = Pb * pow(1 - (L / Tb) * (states.geoid.altitude/1000.0 - Hb), ((1000.0 * grav0) / (Rd * L))); //Corrected to 1 - (L/...)
+		pressure = Pb * pow((Tb/environment.temperature), ((1000.0 * grav0) / (Rd * L)) ); //Corrected to 1 - (L/...)
 		environment.pressure = pressure;
 	}
 
@@ -156,7 +157,7 @@
 	//Calculate temperature
 	void environmentModel::calcTemp()
 	{
-		environment.temperature = T0 + states.geoid.altitude/1000.0 * L0;
+		environment.temperature = T0 + states.geoid.altitude/1000.0 * L0; // Checked
 	}
 
 	///////////////////
