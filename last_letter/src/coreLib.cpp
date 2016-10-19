@@ -28,6 +28,8 @@ kinematics(this), dynamics(this), airdata(this)
 
 	pubMotor = n.advertise<geometry_msgs::Wrench>("wrenchMotor",1); // Gazebo velocity for motor
 	pubAero = n.advertise<geometry_msgs::Wrench>("wrenchAero",1); // Gazebo wrench for aerodynamics
+
+  ros::ServiceClient stepper = n.ServiceClient<('gazebo_step',gazebo_step,True);
 }
 
 //Initialize states
@@ -117,6 +119,7 @@ void ModelPlane::init()
 void ModelPlane::step(void)
 {
 	// Perform step actions serially
+
 	airdata.calcAirData();
 
 	dynamics.calcWrench();
@@ -124,6 +127,18 @@ void ModelPlane::step(void)
 	// kinematics.torqueInput = dynamics.getTorque();
 	// kinematics.calcDerivatives();
 	// kinematics.integrator->propagation();
+
+  gazebo_step srv;
+  srv.request.steps = 1;
+  stepper.call(srv);
+  if (srv.response.response)
+  {
+    //    Nothing to do here
+  }
+  else
+  {
+    ROS_DEBUG("Gazebo step service failed");
+  }
 
 	tprev = ros::Time::now();
 	states.header.stamp = tprev;
