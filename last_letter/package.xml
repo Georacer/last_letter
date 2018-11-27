@@ -34,5 +34,6 @@
   <run_depend>joy</run_depend>
   <run_depend>last_letter_msgs</run_depend>
   <run_depend>tf</run_depend>
+  <run_depend>message_runtime</run_depend>
 
 </package>

@@ -24,6 +24,15 @@ find_package(catkin REQUIRED COMPONENTS
 add_service_files(DIRECTORY srv FILES
 )
 
+#########################
+## reconfigure ##
+#########################
+#add dynamic reconfigure api
+find_package(catkin REQUIRED dynamic_reconfigure)
+generate_dynamic_reconfigure_options(
+  cfg/controller.cfg
+)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -31,6 +40,8 @@ catkin_package(
 	INCLUDE_DIRS include
 	LIBRARIES modelPlaneLib
 )
+
+
 
 ###########
 ## Build ##
@@ -62,6 +73,7 @@ add_executable(simClock src/clock.cpp)
 add_executable(ctrlInjector src/ctrlInjector.cpp)
 # add_executable(cameraController src/cameraController.cpp)
 add_executable(argumentHandler src/argumentHandler.cpp)
+add_executable(omega_d_node src/omega_d_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 add_dependencies(uav_publisher last_letter_msgs_gencpp ${catkin_EXPORTED_TARGETS})
@@ -76,6 +88,7 @@ add_dependencies(simClock last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messa
 add_dependencies(ctrlInjector last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 # add_dependencies(cameraController last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(argumentHandler last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(omega_d_node last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_publisher ${catkin_LIBRARIES})
@@ -91,6 +104,7 @@ target_link_libraries(simClock ${catkin_LIBRARIES})
 target_link_libraries(ctrlInjector ${catkin_LIBRARIES})
 # target_link_libraries(cameraController ${catkin_LIBRARIES})
 target_link_libraries(argumentHandler ${catkin_LIBRARIES})
+target_link_libraries(omega_d_node ${catkin_LIBRARIES})
 
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find last_letter
