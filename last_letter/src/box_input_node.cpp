@@ -1,22 +1,25 @@
-#include "ros/ros.h"
+#include <ros/ros.h>
 #include <std_msgs/Float64.h>
 #include <dynamic_reconfigure/server.h>
 #include <last_letter/ControlConfig.h>
 
 std_msgs::Float64 omega_d;
+std_msgs::Float64 motor_angle;
 
 void GainsCallback(last_letter::ControlConfig &config, uint32_t level)
 {
 	omega_d.data=config.omega_d;
+	motor_angle.data=config.motor_angle;
 }
 
 int main(int argc, char **argv)
 {
-	ros::init(argc, argv, "omega_d_node");
+	ros::init(argc, argv, "box_input_node");
 
 	ros::NodeHandle n;
 
-	ros::Publisher chatter_pub = n.advertise<std_msgs::Float64>("/last_letter/omega_d", 1);
+	ros::Publisher chatter_pub1 = n.advertise<std_msgs::Float64>("/last_letter/omega_d", 1);
+	ros::Publisher chatter_pub2 = n.advertise<std_msgs::Float64>("/last_letter/motor_angle", 1);
 
 	ros::Rate loop_rate(1000);
 
@@ -29,7 +32,8 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 
-		chatter_pub.publish(omega_d);
+		chatter_pub1.publish(omega_d);
+		chatter_pub2.publish(motor_angle);
 
 		ros::spinOnce();
 

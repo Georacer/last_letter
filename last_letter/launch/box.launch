@@ -1,0 +1,43 @@
+<launch>
+  
+	<!--node name="box_node" pkg="motor_multi_plugin" type="box_node" /-->
+	<!--node name="joint_node" pkg="motor_multi_plugin" type="joint_node" /-->
+	<!--node name="prop_node" pkg="motor_multi_plugin" type="prop_node" /-->
+	<node name="box_input_node" pkg="last_letter" type="box_input_node"/>
+	
+	<node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure" /> 
+	
+	
+	
+<arg name="model" default="$(find last_letter)/urdf/box.urdf.xacro"/>
+  <arg name="gui" default="true" />
+  
+  
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+  <arg name="world_name" value="$(find last_letter)/worlds/myworld.world"/>
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+    <arg name="headless" value="$(arg headless)"/>
+  </include>
+  
+  
+  <param name="robot_description" command="$(find xacro)/xacro '$(arg model)'"/>
+  <param name="use_gui" value="$(arg gui)"/>
+  
+   <!-- push robot_description to factory and spawn robot in gazebo -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-z 1.0 -unpause -urdf -model box_ -param robot_description" respawn="false" output="screen" />
+    
+      
+</launch>
+  
+  
