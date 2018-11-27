@@ -12,7 +12,7 @@ void joy2chan(sensor_msgs::Joy joyMsg)
 	last_letter_msgs::SimPWM channels;
 	double input[11];
 	int i;
-	for (i = 0; i <= 11; i++) {
+	for (i = 0; i < 11; i++) {
 		if (axisIndex[i] != -1) { // if an axis is assigned in this channel
 			input[i] = 1.0/throwIndex[i]*joyMsg.axes[axisIndex[i]];
 		}
@@ -104,12 +104,13 @@ int main(int argc, char **argv)
 	// Read the controller configuration parameters from the HID.yaml file
 	XmlRpc::XmlRpcValue listInt, listDouble;
 	int i;
+	ROS_INFO("Reading throws directions");
 	if(!ros::param::getCached("/HID/throws", listDouble)) {ROS_FATAL("Invalid parameters for -/HID/throws- in param server!"); ros::shutdown();}
 	for (i = 0; i < listDouble.size(); ++i) {
 		ROS_ASSERT(listDouble[i].getType() == XmlRpc::XmlRpcValue::TypeDouble);
 		throwIndex[i]=listDouble[i];
 	}
-	std::cout << "Reading input axes" << std::endl;
+	ROS_INFO("Reading input axes");
 	if(!ros::param::getCached("/HID/axes", listInt)) {ROS_FATAL("Invalid parameters for -/HID/axes- in param server!"); ros::shutdown();}
 	for (i = 0; i < listInt.size(); ++i) {
 		ROS_ASSERT(listInt[i].getType() == XmlRpc::XmlRpcValue::TypeInt);
