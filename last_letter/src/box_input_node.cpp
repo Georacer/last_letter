@@ -2,14 +2,16 @@
 #include <std_msgs/Float64.h>
 #include <dynamic_reconfigure/server.h>
 #include <last_letter/ControlConfig.h>
+#include <geometry_msgs/Vector3.h>
 
 std_msgs::Float64 omega_d;
-std_msgs::Float64 motor_angle;
+geometry_msgs::Vector3 motor_angle;
 
 void GainsCallback(last_letter::ControlConfig &config, uint32_t level)
 {
 	omega_d.data=config.omega_d;
-	motor_angle.data=config.motor_angle;
+	motor_angle.x=config.motor_angle_x;
+	motor_angle.y=config.motor_angle_y;
 }
 
 int main(int argc, char **argv)
@@ -19,7 +21,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 
 	ros::Publisher chatter_pub1 = n.advertise<std_msgs::Float64>("/last_letter/omega_d", 1);
-	ros::Publisher chatter_pub2 = n.advertise<std_msgs::Float64>("/last_letter/motor_angle", 1);
+	ros::Publisher chatter_pub2 = n.advertise<geometry_msgs::Vector3>("/last_letter/motor_angle", 1);
 
 	ros::Rate loop_rate(1000);
 

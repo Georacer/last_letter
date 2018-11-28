@@ -62,9 +62,13 @@ link_directories(${GAZEBO_LIBRARY_DIRS})
 
 ## Declare a cpp library
 add_library(modelPlaneLib src/modelPlaneLib.cpp)
+<<<<<<< Updated upstream
+=======
 add_library(box_joint_lib src/box_joint_plugin.cpp)
 add_library(thruster_driver src/box_thruster_driver_plugin.cpp)
 add_library(prop_forcer src/box_prop_plugin.cpp)
+add_library(body_drags src/box_body_drags_plugin.cpp)
+>>>>>>> Stashed changes
 
 ## Add cmake target dependencies of the executable/library
 add_executable(uav_publisher src/state_publisher.cpp)
@@ -78,7 +82,12 @@ add_executable(autopilot_HCUAV src/controller_HCUAV.cpp)
 add_executable(simClock src/clock.cpp)
 add_executable(ctrlInjector src/ctrlInjector.cpp)
 add_executable(argumentHandler src/argumentHandler.cpp)
+<<<<<<< Updated upstream
+=======
 add_executable(box_input_node src/box_input_node.cpp)
+add_executable(box_body_drags_node src/box_body_drags_node.cpp)
+
+>>>>>>> Stashed changes
 
 ## Add cmake target dependencies of the executable/library
 add_dependencies(uav_publisher last_letter_msgs_gencpp ${catkin_EXPORTED_TARGETS})
@@ -92,7 +101,11 @@ add_dependencies(autopilot_HCUAV last_letter_msgs_gencpp ${PROJECT_NAME}_generat
 add_dependencies(simClock last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(ctrlInjector last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
 add_dependencies(argumentHandler last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+<<<<<<< Updated upstream
+=======
 add_dependencies(box_input_node last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp ${PROJECT_NAME}_gencfg)
+add_dependencies(box_body_drags_node last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+>>>>>>> Stashed changes
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_publisher ${catkin_LIBRARIES})
@@ -107,10 +120,15 @@ target_link_libraries(modelPlaneLib mathutils uav_utils ${catkin_LIBRARIES})
 target_link_libraries(simClock ${catkin_LIBRARIES})
 target_link_libraries(ctrlInjector ${catkin_LIBRARIES})
 target_link_libraries(argumentHandler ${catkin_LIBRARIES})
+<<<<<<< Updated upstream
+=======
 target_link_libraries(box_input_node ${catkin_LIBRARIES})
 target_link_libraries(box_joint_lib ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 target_link_libraries(thruster_driver ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
 target_link_libraries(prop_forcer ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
+target_link_libraries(box_body_drags_node ${catkin_LIBRARIES})
+target_link_libraries(body_drags ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${roscpp_LIBRARIES})
+>>>>>>> Stashed changes
 
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find last_letter

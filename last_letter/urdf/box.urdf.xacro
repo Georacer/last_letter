@@ -42,22 +42,53 @@
 	    <inertial>
 	    <origin xyz="0 0 ${width/2}" />
 		    <origin xyz="0 0 0"/>
-		    <mass value="1.0"/>
-		    <inertia ixx="0.16666" ixy="0" ixz="0" iyz="0" iyy="0.16666" izz="0.16666" />
+		    <mass value="0.01"/>
+		    <inertia ixx="0.00166" ixy="0" ixz="0" iyz="0" iyy="0.00166" izz="0.00166" />
+		</inertial>		
+ </link>
+ 
+ <link name="joint_helper">
+	    <visual>
+	    <origin xyz="0 0 0.05" />
+	      <geometry>
+	        <box size="0.05 0.05 0.05"/>
+	      </geometry>
+	    </visual>
+	    
+	    <collision>
+	    <origin xyz="0 0 0.05}" />
+	      <geometry>
+	        <box size="0.05 0.05 0.05"/>
+	      </geometry>
+	    </collision>
+	    
+	    <inertial>
+	    <origin xyz="0 0 0.05" />
+		    <origin xyz="0 0 0"/>
+		    <mass value="0.1"/>
+		    <inertia ixx="0.000416" ixy="0" ixz="0" iyz="0" iyy="0.000416" izz="0.000416" />
 		</inertial>
 		
  </link>
 	  
- <joint name="flap_joint" type="revolute">
+ <joint name="flap_joint_x" type="revolute">
 	    	<origin xyz="0 0 ${2*width}" rpy="0 0 0"/>
 	    	<limit effort="1000.0" lower="-1.57" upper="1.57" velocity="0.5"/>
 	    	<dynamics friction="100"/>
           <axis xyz="1 0 0"/>
 			<parent link="base_link" />
+			<child link="joint_helper" />
+</joint>
+
+ <joint name="flap_joint_y" type="revolute">
+	    	<origin xyz="0 0 0.1" rpy="0 0 0"/>
+	    	<limit effort="1000.0" lower="-1.57" upper="1.57" velocity="0.5"/>
+	    	<dynamics friction="100"/>
+          <axis xyz="0 1 0"/>
+			<parent link="joint_helper" />
 			<child link="base" />
 </joint>
-	  
-	  
+
  <link name="arm">
 	  	<visual>
 	  		<origin xyz="0 0 ${width/10}" />
@@ -121,6 +152,7 @@
    		<plugin name="joint_plugin" filename="libbox_joint_lib.so"/>
    		<plugin name="box_thruster_driver_plugin" filename="libthruster_driver.so"/>
    		<plugin name="box_prop_plugin" filename="libprop_forcer.so"/>
+   		<plugin name="box_body_drags_plugin" filename="libbody_drags.so"/>
    		 		
    	</gazebo>
 
