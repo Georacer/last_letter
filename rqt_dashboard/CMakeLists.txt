@@ -46,7 +46,7 @@ include_directories(
 add_executable(dash_backend src/backend.cpp)
 
 ## Add cmake target dependencies of the executable/library
-add_dependencies(dash_backend last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(dash_backend  ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(dash_backend ${catkin_LIBRARIES})

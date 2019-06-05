@@ -42,7 +42,7 @@ include_directories(include
 add_library(uav_utils src/uav_utils.cpp)
 
 ## Add cmake target dependencies of the executable/library
-add_dependencies(uav_utils last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+# add_dependencies(uav_utils  )
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(uav_utils ${LAPACK_LIBRARIES} ${catkin_LIBRARIES})

@@ -15,6 +15,7 @@ catkin_python_setup()
 
 catkin_package(
    INCLUDE_DIRS include
+   LIBRARIES mathutils
 )
 
 ###########

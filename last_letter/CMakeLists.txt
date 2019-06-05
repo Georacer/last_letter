@@ -29,7 +29,7 @@ add_service_files(DIRECTORY srv FILES
 ###################################
 catkin_package(
 	INCLUDE_DIRS include
-	LIBRARIES modelPlaneLib
+	LIBRARIES modelPlaneLib 
 )
 
 ###########
@@ -64,33 +64,33 @@ add_executable(ctrlInjector src/ctrlInjector.cpp)
 add_executable(argumentHandler src/argumentHandler.cpp)
 
 ## Add cmake target dependencies of the executable/library
-add_dependencies(uav_publisher last_letter_msgs_gencpp ${catkin_EXPORTED_TARGETS})
-add_dependencies(quat2euler last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(model last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(joy2chan last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(environment last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(virtualJoy ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(autopilot_ll last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(autopilot_HCUAV last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(simClock last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(ctrlInjector last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-# add_dependencies(cameraController last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
-add_dependencies(argumentHandler last_letter_msgs_gencpp ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(uav_publisher ${catkin_EXPORTED_TARGETS})
+add_dependencies(quat2euler ${catkin_EXPORTED_TARGETS} )
+add_dependencies(model ${catkin_EXPORTED_TARGETS} )
+add_dependencies(joy2chan ${catkin_EXPORTED_TARGETS} )
+add_dependencies(environment ${catkin_EXPORTED_TARGETS} )
+# add_dependencies(virtualJoy )
+add_dependencies(autopilot_ll ${catkin_EXPORTED_TARGETS} )
+add_dependencies(autopilot_HCUAV ${catkin_EXPORTED_TARGETS} )
+add_dependencies(simClock ${catkin_EXPORTED_TARGETS} )
+add_dependencies(ctrlInjector ${catkin_EXPORTED_TARGETS} )
+# add_dependencies(cameraController ${catkin_EXPORTED_TARGETS} )
+add_dependencies(argumentHandler ${catkin_EXPORTED_TARGETS} )
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(uav_publisher ${catkin_LIBRARIES})
-target_link_libraries(quat2euler mathutils ${catkin_LIBRARIES})
-target_link_libraries(model mathutils uav_utils modelPlaneLib ${catkin_LIBRARIES})
-target_link_libraries(joy2chan ${catkin_LIBRARIES})
-target_link_libraries(environment mathutils uav_utils ${catkin_LIBRARIES})
-target_link_libraries(virtualJoy mathutils uav_utils ${catkin_LIBRARIES})
-target_link_libraries(autopilot_ll mathutils uav_utils ${catkin_LIBRARIES})
-target_link_libraries(autopilot_HCUAV mathutils uav_utils ${catkin_LIBRARIES})
-target_link_libraries(modelPlaneLib mathutils uav_utils ${catkin_LIBRARIES})
-target_link_libraries(simClock ${catkin_LIBRARIES})
-target_link_libraries(ctrlInjector ${catkin_LIBRARIES})
+target_link_libraries(uav_publisher ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(quat2euler ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(model modelPlaneLib ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(joy2chan ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(environment ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(virtualJoy ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(autopilot_ll ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(autopilot_HCUAV ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(modelPlaneLib ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(simClock ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
+target_link_libraries(ctrlInjector ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
 # target_link_libraries(cameraController ${catkin_LIBRARIES})
-target_link_libraries(argumentHandler ${catkin_LIBRARIES})
+target_link_libraries(argumentHandler ${catkin_LIBRARIES} ${catkin_INCLUDE_DIRS})
 
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find last_letter
