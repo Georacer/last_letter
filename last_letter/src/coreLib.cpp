@@ -180,25 +180,14 @@ Airdata::~Airdata()
 void Airdata::calcAirData()
 {
 	// Calculate relative airspeed
-	u_r = parentObj->states.velocity.linear.x - parentObj->environment.wind.x;
-	v_r = parentObj->states.velocity.linear.y - parentObj->environment.wind.y;
-	w_r = parentObj->states.velocity.linear.z - parentObj->environment.wind.z;
-
-	airspeed = sqrt(pow(u_r,2)+pow(v_r,2)+pow(w_r,2));
-	alpha = atan2(w_r,u_r);
-
-	if (u_r==0) {
-		if (v_r==0) {
-			beta=0;
-		}
-		else {
-			beta=asin(v_r/abs(v_r));
-		}
-
-	}
-	else {
-		beta = atan2(v_r,u_r);
-	}
+	geometry_msgs::Vector3 rel_velocity = parentObj->states.velocity.linear - parentObj->environment.wind;
+	u_r = rel_velocity.x;
+	v_r = rel_velocity.y;
+	w_r = rel_velocity.z;
+	geometry_msgs::Vector3 airdata = getAirData(rel_velocity);
+	airspeed = airdata.x;
+	alpha = airdata.y;
+	beta = airdata.z;
 }
 
 //////////////////////////

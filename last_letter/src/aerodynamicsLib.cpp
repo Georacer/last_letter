@@ -118,11 +118,11 @@ void Aerodynamics::rotateFrame()
 	relativeWind.z = tempVect.getZ();
 
 	// Calculate the new, relative air data
-	relativeWind = getAirData(relativeWind);
-	airspeed = relativeWind.x; // Redundant, but we leave this here for now
-	alpha = relativeWind.y;
-	beta = relativeWind.z;
-	// std::cout << "airspeed: " << airspeed << " alpha: " << alpha << " beta: " << beta << std::endl;
+	geometry_msgs::Vector3 airdata = getAirData(relativeWind);
+	airspeed = airdata.x; // Redundant, but we leave this here for now
+	alpha = airdata.y;
+	beta = airdata.z;
+	// std::cout << "airspeed: " << airspeed << " alpha: " << alpha << " beta: " << beta << std::endl; // Check
 
 	if (!std::isfinite(airspeed)) {ROS_FATAL("aerodynamicsLib.cpp/rotateWind: NaN value in airspeed"); ros::shutdown();}
 	if (std::fabs(airspeed)>1e+160) {ROS_FATAL("aerodynamicsLib.cpp/rotateWind: normalWind over 1e+160"); ros::shutdown();}
@@ -149,6 +149,7 @@ void Aerodynamics::rotateForce()
 	wrenchAero.force.x = tempVect.getX();
 	wrenchAero.force.y = tempVect.getY();
 	wrenchAero.force.z = tempVect.getZ();
+	// std::cout << "Aerodynamic force: " << wrenchAero.force.x << ", " << wrenchAero.force.y << ", " << wrenchAero.force.z << std::endl;
 
 
 }
