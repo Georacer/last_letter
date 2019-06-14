@@ -195,6 +195,54 @@
 	}
 
 
+/////////////////////////////
+// WGS84 utility functions //
+/////////////////////////////
+
+double WGS84_RN(double lat)
+{
+	double sfi =sin(lat*M_PI/180);
+	return last_letter_msgs::Geoid::WGS84_Ra/sqrt(1-last_letter_msgs::Geoid::WGS84_e2*sfi*sfi);
+}
+
+double WGS84_RM(double lat)
+{
+	double sfi =sin(lat*M_PI/180);
+	return last_letter_msgs::Geoid::WGS84_Ra*(1-last_letter_msgs::Geoid::WGS84_e2)/pow(1-last_letter_msgs::Geoid::WGS84_e2*sfi*sfi,1.5);
+}
+
+//////////////////////////////
+// PPM and PWM functionalities
+
+double PwmToHalfRange(uint16_t pwmValue)
+// Convert a 1000-2000 us value to 0-1 range
+{
+    return (float)(pwmValue - 1000) / 1000;
+}
+
+double PwmToFullValue(uint16_t pwmValue)
+// Convert a 1000-2000 us value to -1-1 range
+{
+    return (pwmValue - 1500) / 500;
+}
+
+uint16_t HalfRangeToPwm(double signal)
+// Convert a 0-1 range to 1000-2000 us range
+{
+    return (uint16_t)(signal * 1000 + 1000);
+}
+
+uint16_t FullRangeToPwm(double signal)
+// Convert a -1-1 range to 1000-2000 us range
+{
+    return (uint16_t)(signal * 500 + 1500);
+}
+
+
+//////////////////////////
+// Miscellaneous Utilities
+//////////////////////////
+
 /////////////////////////////////////////
 //Aerodynamc angles/ airspeed calculation
 geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds)
@@ -227,19 +275,72 @@ geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds)
 	return result;
 }
 
-
-/////////////////////////////
-// WGS84 utility functions //
-/////////////////////////////
-
-double WGS84_RN(double lat)
+/**
+ * @brief Randomize the UAV parameters
+ * Reads a list of parameters for randomization from the parameter server
+ * 
+ */
+void randomizeUavParameters(ros::NodeHandle n)
 {
-	double sfi =sin(lat*M_PI/180);
-	return last_letter_msgs::Geoid::WGS84_Ra/sqrt(1-last_letter_msgs::Geoid::WGS84_e2*sfi*sfi);
+	// Read which parameters should be randomized
+	XmlRpc::XmlRpcValue parameterList;
+	int i;
+	char paramMsg[50];
+	double std_dev;
+	sprintf(paramMsg, "paramRandomizer/std_dev");
+	if (!n.getParam(paramMsg, std_dev))
+	{
+		ROS_INFO("paramRandomizer/std_dev parameter not found. Setting to 0");
+		std_dev = 0;
+	}
+	else
+	{
+		ROS_INFO("Requested UAV parameter randomization by %f", std_dev);
+	}
+	if (std_dev)
+	{
+		ROS_INFO("Randomizing parameter std_dev by %f", std_dev);
+		sprintf(paramMsg, "paramRandomizer/param_names");
+		if(!n.getParam(paramMsg, parameterList))
+		{
+			ROS_WARN("Could not find a list of parameters to randomize in the param server!");
+		}
+		else
+		{
+			for (i = 0; i < parameterList.size(); ++i)
+			{
+				ROS_ASSERT(parameterList[i].getType() == XmlRpc::XmlRpcValue::TypeString);
+				randomizeParameter(n, static_cast<std::string>(parameterList[i]), std_dev);
+			}
+		}
+	}
+	else
+	{
+		ROS_INFO("Aircraft parameter randomization not requested");
+	}
 }
 
-double WGS84_RM(double lat)
+/**
+ * @brief Randomize a double parameter by a given standard deviation
+ * 
+ * @param paramName The parameter name
+ * @param std_dev The variance to alter the parameter by
+ */
+void randomizeParameter(ros::NodeHandle n, std::string paramName, double std_dev)
 {
-	double sfi =sin(lat*M_PI/180);
-	return last_letter_msgs::Geoid::WGS84_Ra*(1-last_letter_msgs::Geoid::WGS84_e2)/pow(1-last_letter_msgs::Geoid::WGS84_e2*sfi*sfi,1.5);
+	double param, randomizedParam;
+	if (!n.getParam(paramName, param))
+	{
+		ROS_ERROR("Unable to retrieve parameter %s", paramName.c_str());
+	}
+	else
+	{
+		std::default_random_engine generator;
+		std::normal_distribution<double> distribution(0.0, std_dev);
+
+		randomizedParam = param*(1 + distribution(generator));
+		ROS_INFO("Randomizing parameter %s", paramName.c_str());
+		n.setParam(paramName, randomizedParam);
+	}
+
 }

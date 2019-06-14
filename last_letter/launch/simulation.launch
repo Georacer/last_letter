@@ -4,7 +4,7 @@
 
 	<arg name="manualMode"/>	<!-- Connect model input with joystick -->
 	<arg name="autoMode"/>	<!-- Connect model input with a controller node -->
-	<arg name="uav_name"/>	<!-- uav_name paremter which selects aircraft data file -->
+	<arg name="uav_name"/>	<!-- uav_name parameter which selects aircraft data file -->
 	<arg name="log"/>	<!-- Enable recorder node for logging -->
 	<arg name="ArduPlane"/> <!-- Let APM:SITL produce the control input -->
 

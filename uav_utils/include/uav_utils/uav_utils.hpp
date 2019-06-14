@@ -1,11 +1,17 @@
+#include <ros/ros.h>
 #include <geometry_msgs/Quaternion.h>
 #include <geometry_msgs/Vector3.h>
 #include <cstdio>
 #include <cmath>
+#include <random>
 
 #include "geometry_msgs/Vector3.h"
 
 #include "last_letter_msgs/Geoid.h"
+
+//////////////
+// COntrollers
+//////////////
 
 class PID
 {
@@ -56,8 +62,6 @@ public:
 	void init(void);
 };
 
-geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);
-
 /////////////////////////////
 // WGS84 utility functions //
 /////////////////////////////
@@ -75,3 +79,29 @@ double WGS84_RN(double lat);
  * @return     RM - radius corresponding to curvature in meters
  */
 double WGS84_RM(double lat);
+
+
+//////////////////////////////
+// PPM and PWM functionalities
+//////////////////////////////
+
+double PwmToHalfRange(uint16_t pwmValue);
+// Convert a 1000-2000 us value to 0-1 range
+
+double PwmToFullValue(uint16_t pwmValue);
+// Convert a 1000-2000 us value to -1-1 range
+
+uint16_t HalfRangeToPwm(double signal);
+// Convert a 0-1 range to 1000-2000 us range
+
+uint16_t FullRangeToPwm(double signal);
+// Convert a -1-1 range to 1000-2000 us range
+
+
+//////////////////////////
+// Miscellaneous Utilities
+//////////////////////////
+
+geometry_msgs::Vector3 getAirData (geometry_msgs::Vector3 speeds);
+void randomizeUavParameters(ros::NodeHandle n);
+void randomizeParameter(ros::NodeHandle n, std::string paramName, double variance);
