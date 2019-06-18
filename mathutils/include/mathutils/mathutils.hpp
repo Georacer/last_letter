@@ -36,6 +36,10 @@ void multi_mtx_mtx_3X3 (double *a, double *b, double *res);
 void multi_mtx_mtx_3Xn(double *a, double *b, double *res,int n);
 void multi_mtxT_mtx_3X3 (double *a, double *b, double *res);
 void multi_mtxT_mtx_3Xn(double *a, double *b, double *res,int n);
+int is_pos_def(double * R); // Check if 3x3 matrix is positive definite
+
+template<typename T>
+const T& constrain(const T& x, const T& a, const T& b);
 
 
 //////////////////////////
@@ -148,9 +152,3 @@ bool isnan_mtx(double * R, int n);
 bool myisfinite(const geometry_msgs::Vector3 vec);
 bool myisfinite(const geometry_msgs::Quaternion q);
 bool myisfinite_mtx(double * R, int n);
-
-//////////////////////////////////////////////
-// Check if 3x3 matrix is positive definite //
-//////////////////////////////////////////////
-
-int is_pos_def(double * R);

@@ -207,6 +207,27 @@ void multi_mtxT_mtx_3Xn(double *a, double *b, double *res,int n)
   }
 }
 
+template<typename T>
+const T& constrain(const T& x, const T& a, const T& b)
+{
+  if (x < a)
+  {
+    return a;
+  }
+  else if (x > b)
+  {
+    return b;
+  }
+  else
+  {
+    return x;
+  }
+}
+// Explicit instantiations to allow using the library without need of its headers
+template const int& constrain<int>(const int& x, const int& a, const int& b);
+template const float& constrain<float>(const float& x, const float& a, const float& b);
+template const double& constrain<double>(const double& x, const double& a, const double& b);
+
 double vector3_norm(geometry_msgs::Vector3 a)
 {
   return sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
