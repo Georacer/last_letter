@@ -4,7 +4,7 @@
 #include <last_letter_msgs/SimStates.h>
 
 ros::Publisher pub;
-ros::Subscriber sub;
+ros::Subscriber subCtrl, subRawCtrl, subState;
 
 ros::Time simTime(0.0);
 ros::WallTime realTimePrev = ros::WallTime::now(), realTimeNow;
@@ -12,16 +12,58 @@ ros::Duration dt;
 ros::WallDuration wallCounter;
 rosgraph_msgs::Clock simClock;
 unsigned long frameCounter = 0;
+int timeControls;
+int chanPause; // The number of the channel where the pauseSim command is sent
+bool pauseSim = false;  // The pauseSimd state
+bool pauseButtonPressed = false;
 
 ////////////////////////////////////
 // Control input trigger callback //
 ////////////////////////////////////
 void controlsCallback(const last_letter_msgs::SimPWM pwm)
 {
-	simTime = simTime + dt;
-	simClock.clock = simTime;
-	pub.publish(simClock);
-	frameCounter++;
+	// Publish simulated time
+	if (!pauseSim && (timeControls==1))
+	{
+		simTime = simTime + dt;
+		simClock.clock = simTime;
+		pub.publish(simClock);
+		frameCounter++;
+	}
+}
+
+///////////////////////
+// Raw control callback
+///////////////////////
+void rawControlsCallback(const last_letter_msgs::SimPWM pwm)
+{
+	// Register the pauseSim command
+	if (pwm.value[chanPause]>1800)
+	{
+		if (!pauseButtonPressed)
+		{
+			pauseButtonPressed = true;
+			pauseSim = !pauseSim;
+
+			if (pauseSim)
+			{
+				ROS_INFO("Paused simulation");
+			}
+			else
+			{
+				ROS_INFO("Unpausing simulation");
+				simTime = simTime + dt;
+				simClock.clock = simTime;
+				pub.publish(simClock);
+				frameCounter++;
+			}
+		}
+
+	}
+	else
+	{
+		pauseButtonPressed = false;
+	}
 }
 
 ///////////////////////////////////////
@@ -29,10 +71,13 @@ void controlsCallback(const last_letter_msgs::SimPWM pwm)
 ///////////////////////////////////////
 void stateCallback(const last_letter_msgs::SimStates state)
 {
-	simTime = simTime + dt;
-	simClock.clock = simTime;
-	pub.publish(simClock);
-	frameCounter++;
+	if (!pauseSim && (timeControls==0 || timeControls==2))
+	{
+		simTime = simTime + dt;
+		simClock.clock = simTime;
+		pub.publish(simClock);
+		frameCounter++;
+	}
 }
 
 ///////////////
@@ -44,7 +89,9 @@ int main(int argc, char **argv)
 	ros::init(argc, argv, "simClockNode");
 	ros::NodeHandle n;
 	pub = n.advertise<rosgraph_msgs::Clock>("/clock",1000);
-	sub = n.subscribe("ctrlPWM", 100, controlsCallback);
+	subCtrl = n.subscribe("ctrlPWM", 100, controlsCallback);
+	subRawCtrl = n.subscribe("rawPWM", 100, rawControlsCallback);
+	subState = n.subscribe("states", 100, stateCallback);
 
 	int statusModel=0;
 	ros::param::set("nodeStatus/clock", 1);
@@ -59,8 +106,9 @@ int main(int argc, char **argv)
 	ros::param::get("/world/simRate",simRate); //frame rate in Hz
 	double deltaT;
 	ros::param::get("/world/deltaT",deltaT); //simulation time step in seconds
-	int timeControls;
 	ros::param::get("/world/timeControls",timeControls); //frame rate in Hz
+	ros::param::get("init/chanPause", chanPause); // Read the channel number where the pauseSim command is given
+	ROS_INFO("Reading pause from %d channel", chanPause);
 
 	ros::WallRate spinner(simRate);
 	dt = ros::Duration(deltaT);
@@ -70,7 +118,6 @@ int main(int argc, char **argv)
 	if (timeControls==0) // Default real-time simulation
 	{
 		ROS_INFO("Using default real-time simulation clock");
-		sub = n.subscribe("states", 100, stateCallback);
 		ros::WallDuration(1).sleep(); //wait for other nodes to get raised
 		simClock.clock = simTime;
 		pub.publish(simClock);
@@ -91,7 +138,6 @@ int main(int argc, char **argv)
 	else if (timeControls==1) // Simulation waits for controls message
 	{
 		ROS_INFO("Using controls-triggered simulation clock");
-		sub = n.subscribe("ctrlPWM", 100, controlsCallback);
 		simClock.clock = simTime;
 		pub.publish(simClock);
 		while (ros::ok())
@@ -110,7 +156,6 @@ int main(int argc, char **argv)
 	else if (timeControls==2) // Simulation runs as fast as possible
 	{
 		ROS_INFO("Using free-spinning simulation clock");
-		sub = n.subscribe("states", 100, stateCallback);
 		// ros::WallDuration(3).sleep(); //wait for other nodes to get raised
 		simClock.clock = simTime;
 		pub.publish(simClock);
