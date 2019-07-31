@@ -14,7 +14,7 @@ catkin_python_setup()
 ###################################
 
 catkin_package(
-   INCLUDE_DIRS include
+   INCLUDE_DIRS include include/mathutils
    LIBRARIES mathutils
 )
 
@@ -23,7 +23,7 @@ catkin_package(
 ###########
 
 ## Specify additional locations of header files
-include_directories(include
+include_directories(include include/mathutils
   ${catkin_INCLUDE_DIRS}
   ${LAPACK_INCLUDE_DIRS}
 )
@@ -43,7 +43,6 @@ execute_process(COMMAND rosdoc_lite -o ${MATHUTILS_DIR}/doc/doxygen_rosdoc_lite 
 ## Install ##
 #############
 
-install(PROGRAMS
-bin/mathutils
+install(TARGETS ${PROJECT_NAME}
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

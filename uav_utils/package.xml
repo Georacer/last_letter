@@ -4,7 +4,7 @@
   <version>0.1.0</version>
   <description>Small-scale UAV utilities toolbox</description>
 
-  <maintainer email="gzogops@mail.ntua.gr">George Zogopoulos-Papaliakos</maintainer>
+  <maintainer email="gzogop@mail.ntua.gr">George Zogopoulos-Papaliakos</maintainer>
 
   <license>GPLv3</license>
 
@@ -19,6 +19,7 @@
   <build_depend>roscpp</build_depend>
   <build_depend>tf</build_depend>
   <build_depend>rospy</build_depend>
+  <build_depend>mathutils</build_depend>
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>std_srvs</build_depend>
@@ -27,6 +28,7 @@
   <run_depend>geometry_msgs</run_depend>
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
+  <run_depend>mathutils</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>std_srvs</run_depend>

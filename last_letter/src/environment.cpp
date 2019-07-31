@@ -64,7 +64,7 @@
 	//Calculate wind element in body axes
 	void environmentModel::calcWind()
 	{
-		double Reb[9];
+		double Rbe[9];
 		geometry_msgs::Vector3 airspeed;
 		double Va, input, temp[2];
 
@@ -73,11 +73,13 @@
 		// 	dt = 2/simRate;
 		// } //Compensate for possible transient frame drops
 
-		//calculate bias wind
-		quat2rotmtx(states.pose.orientation, Reb);
+		//calculate bias wind in Earth frame (0-direction is North)
+		quat2rotmtx(states.pose.orientation, Rbe);
+		// Wind comes FROM its designated direction
 		wind.x = -cos(windDir)*kwind*pow(abs(states.geoid.altitude)+0.001,surfSmooth);
 		wind.y = -sin(windDir)*kwind*pow(abs(states.geoid.altitude)+0.001,surfSmooth); //abs is used to avoid exp(x,0) which may return nan
 		wind.z = 0;
+		// std::cout << "wind: " << wind.x << ", " << wind.y << ", " << wind.z << std::endl; // Check
 
 		if (isnan(wind.x) || isnan(wind.y) || isnan(wind.z))
 		{
@@ -87,7 +89,8 @@
 		}
 
 		//calculate turbulent wind
-		airspeed = Reb*states.velocity.linear;
+		airspeed = Rbe*states.velocity.linear;
+		// std::cout << airspeed.x << ", " << airspeed.y << ", " << airspeed.z << std::endl; // Check
 		airspeed = airspeed - wind;
 		Va = sqrt(pow(airspeed.x,2)+pow(airspeed.y,2)+pow(airspeed.z,2));
 
@@ -117,7 +120,8 @@
 			ros::shutdown();
 		}
 
-		environment.wind = Reb/wind; //Rotate bias wind in body axes
+		environment.wind = Rbe/wind; //Rotate bias wind in body axes
+		// std::cout << "wind: " << environment.wind.x << ", " << environment.wind.y << ", " << environment.wind.z << std::endl; // Check
 
 		environment.wind.x +=windDistU; //Add turbulence
 		environment.wind.y +=windDistV[0];

@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 	geometry_msgs
 	roscpp
 	rospy
+	mathutils
 	sensor_msgs
 	std_msgs
 	nav_msgs
@@ -56,7 +57,6 @@ execute_process(COMMAND rosdoc_lite -o ${UAV_UTILS_DIR}/doc/doxygen_rosdoc_lite 
 ## Install ##
 #############
 
-install(PROGRAMS
-   bin/uav_utils
+install(TARGETS ${PROJECT_NAME}
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

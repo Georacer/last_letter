@@ -40,6 +40,10 @@ int is_pos_def(double * R); // Check if 3x3 matrix is positive definite
 
 template<typename T>
 const T& constrain(const T& x, const T& a, const T& b);
+template<typename T>
+T map(const T&x, const T& in_min, const T& in_max, const T& out_min, const T& out_max);
+template<typename T>
+T map_centered(const T&x, const T& in_min, const T& in_max, const T& out_min, const T& out_max);
 
 
 //////////////////////////

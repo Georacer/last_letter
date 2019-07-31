@@ -151,7 +151,6 @@ void Aerodynamics::rotateForce()
 	wrenchAero.force.z = tempVect.getZ();
 	// std::cout << "Aerodynamic force: " << wrenchAero.force.x << ", " << wrenchAero.force.y << ", " << wrenchAero.force.z << std::endl;
 
-
 }
 
 // Convert the resulting torque to the body axes

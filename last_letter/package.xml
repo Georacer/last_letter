@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>last_letter</name>
   <version>0.5.0</version>
   <description>The last_letter package</description>
@@ -26,13 +26,17 @@
   <build_depend>rosdoc_lite</build_depend>
   <build_depend>tf</build_depend>
 
-  <run_depend>roscpp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>std_msgs</run_depend>
-  <run_depend>uav_utils</run_depend>
-  <run_depend>mathutils</run_depend>
-  <run_depend>joy</run_depend>
-  <run_depend>last_letter_msgs</run_depend>
-  <run_depend>tf</run_depend>
+  <build_export_depend>last_letter_msgs</build_export_depend>
+  <build_export_depend>uav_utils</build_export_depend>
+  <build_export_depend>mathutils</build_export_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>uav_utils</exec_depend>
+  <exec_depend>mathutils</exec_depend>
+  <exec_depend>joy</exec_depend>
+  <exec_depend>last_letter_msgs</exec_depend>
+  <exec_depend>tf</exec_depend>
 
 </package>

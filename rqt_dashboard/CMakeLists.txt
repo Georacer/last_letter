@@ -60,7 +60,8 @@ execute_process(COMMAND rosdoc_lite -o ${RQT_DASHBOARD_DIR}/doc/doxygen_rosdoc_l
 ## Install ##
 #############
 
- install(PROGRAMS
-   scripts/rqt_dashboard
-   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+# Convert to proper python script installation command
+#  install(PROGRAMS
+#    scripts/rqt_dashboard
+#    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#  )
