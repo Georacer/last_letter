@@ -228,6 +228,45 @@ template const int& constrain<int>(const int& x, const int& a, const int& b);
 template const float& constrain<float>(const float& x, const float& a, const float& b);
 template const double& constrain<double>(const double& x, const double& a, const double& b);
 
+/**
+ * @brief Rescale a number x from the range (in_min, in_max) to the range (out_min, out_max)
+ * 
+ * @tparam T 
+ */
+template<typename T>
+T map(const T& x, const T& in_min, const T& in_max, const T& out_min, const T& out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+// Explicit instantiations to allow using the library without need of its headers
+template int map<int>(const int& x, const int& in_min, const int& in_max, const int& out_min, const int& out_max);
+template float map<float>(const float& x, const float& in_min, const float& in_max, const float& out_min, const float& out_max);
+template double map<double>(const double& x, const double& in_min, const double& in_max, const double& out_min, const double& out_max);
+
+/**
+ * @brief Rescale a number x from the range (in_min, in_max) to the range (out_min, out_max), but always preserve zero
+ * This function differs form the simple map by splitting the input/output range around zero and applying the simple
+ * map to each interval independently
+ * 
+ * @tparam T 
+ */
+template<typename T>
+T map_centered(const T& x, const T& in_min, const T& in_max, const T& out_min, const T& out_max)
+{
+  T zero{0};
+  if (x<0)
+  {
+    return map(x, in_min, zero, out_min, zero);
+  }
+  else
+  {
+    return map(x, zero, in_max, zero, out_max);
+  }
+}
+// Explicit instantiations to allow using the library without need of its headers
+template float map_centered<float>(const float& x, const float& in_min, const float& in_max, const float& out_min, const float& out_max);
+template double map_centered<double>(const double& x, const double& in_min, const double& in_max, const double& out_min, const double& out_max);
+
 double vector3_norm(geometry_msgs::Vector3 a)
 {
   return sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
