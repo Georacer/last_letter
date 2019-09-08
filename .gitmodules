@@ -1,0 +1,3 @@
+[submodule "last_letter/last_letter_lib"]
+	path = last_letter/last_letter_lib
+	url = git@github.com:Georacer/last_letter_lib.git
