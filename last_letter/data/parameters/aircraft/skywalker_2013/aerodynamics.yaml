@@ -51,6 +51,9 @@ airfoil1/c_n_deltar: 0.1 #opposite sign than c_y_deltar
 airfoil1/deltaa_max: 0.3491
 airfoil1/deltae_max: 0.3491
 airfoil1/deltar_max: 0.3491
+airfoil1/deltaa_max_nominal: 0.3491
+airfoil1/deltae_max_nominal: 0.3491
+airfoil1/deltar_max_nominal: 0.3491
 
 airfoil1/chanAileron: 0
 airfoil1/chanElevator: 1
