@@ -12,7 +12,10 @@ find_package(catkin REQUIRED COMPONENTS
 	geometry_msgs
 	std_msgs
 	last_letter_msgs
+	last_letter_lib
 )
+
+find_package(Eigen3 REQUIRED)
 
 catkin_python_setup()
 
@@ -40,16 +43,18 @@ generate_messages(
 ## Specify additional locations of header files
 include_directories(
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIRS}
+  ${last_letter_lib_INCLUDE_DIRS}
 )
 
 ## Declare a cpp executable
 add_executable(dash_backend src/backend.cpp)
 
 ## Add cmake target dependencies of the executable/library
-add_dependencies(dash_backend  ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(dash_backend ${last_letter_lib_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(dash_backend ${catkin_LIBRARIES})
+target_link_libraries(dash_backend ${last_letter_lib_LIBRARIES} ${catkin_LIBRARIES})
 
 ## Generate package documentation with rosdoc_lite
 execute_process(COMMAND rospack find rqt_dashboard
