@@ -1,6 +1,10 @@
+#include <ros/ros.h>
 #include "model.hpp"
 
-ModelPlane * uav;
+#include "prog_utils.hpp"
+#include "uav_utils.hpp"
+
+#include <rosgraph_msgs/Clock.h>
 
 //////////////////////////////
 // Simulation step callback //
@@ -8,11 +12,6 @@ ModelPlane * uav;
 void stepCallback(const rosgraph_msgs::Clock time)
 {
 	uav->step();
-	if (isnan(uav->states.velocity.linear))
-	{
-		ROS_FATAL("State NAN detected on main!");
-		ros::shutdown();
-	}
 }
 
 ///////////////
@@ -25,18 +24,17 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 	ros::Subscriber sub = n.subscribe("/clock",1000, stepCallback);
 
-	// Randomize parameters if needed
-	randomizeUavParameters(n);
+	ROS_INFO("Generating UavModelWrapper");
+	uav = new UavModelWrapper(n); //Create a UavStruct by passing the configurations bundle struct
 
-	uav = new ModelPlane(n); //Create a ModelPlane passing the nodehandle for subscriptions & publicatons
-
-	int statusClock=0, statusEnv=0, statusArg=0;
+	int statusClock=0, statusArg=0;
 	while (statusClock!=1) {
 		ros::param::get("nodeStatus/clock", statusClock);
 	}
-	while (statusEnv!=1) {
-		ros::param::get("nodeStatus/environment", statusEnv);
-	}
+	// Deprecated as environment is embedded in UAV model
+	// while (statusEnv!=1) {
+	// 	ros::param::get("nodeStatus/environment", statusEnv);
+	// }
 	while (statusArg!=1) {
 		ros::param::get("nodeStatus/argumentHandler", statusArg);
 	}
@@ -47,7 +45,7 @@ int main(int argc, char **argv)
 
 	ROS_INFO("simNode up");
 
-	uav->init();
+	// uav->init();
 
 	while (ros::ok())
 	{

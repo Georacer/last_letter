@@ -17,21 +17,6 @@ int chanPause; // The number of the channel where the pauseSim command is sent
 bool pauseSim = false;  // The pauseSimd state
 bool pauseButtonPressed = false;
 
-////////////////////////////////////
-// Control input trigger callback //
-////////////////////////////////////
-void controlsCallback(const last_letter_msgs::SimPWM pwm)
-{
-	// Publish simulated time
-	if (!pauseSim && (timeControls==1))
-	{
-		simTime = simTime + dt;
-		simClock.clock = simTime;
-		pub.publish(simClock);
-		frameCounter++;
-	}
-}
-
 ///////////////////////
 // Raw control callback
 ///////////////////////
@@ -64,6 +49,26 @@ void rawControlsCallback(const last_letter_msgs::SimPWM pwm)
 	{
 		pauseButtonPressed = false;
 	}
+}
+
+////////////////////////////////////
+// Control input trigger callback //
+////////////////////////////////////
+void controlsCallback(const last_letter_msgs::SimPWM pwm)
+// Callback for the ctrlPWM topic
+{
+	// Publish simulated time
+	if (!pauseSim && (timeControls==1))
+	{
+		simTime = simTime + dt;
+		simClock.clock = simTime;
+		pub.publish(simClock);
+		frameCounter++;
+	}
+
+	// Also forward the raw controls to the ctrlPWM callback. 
+	// This is to capture the pause button when rawPWM topic is remapped to ctrlPWM as well
+	rawControlsCallback(pwm);
 }
 
 ///////////////////////////////////////
@@ -107,7 +112,7 @@ int main(int argc, char **argv)
 	double deltaT;
 	ros::param::get("/world/deltaT",deltaT); //simulation time step in seconds
 	ros::param::get("/world/timeControls",timeControls); //frame rate in Hz
-	ros::param::get("init/chanPause", chanPause); // Read the channel number where the pauseSim command is given
+	n.getParam("chanPause", chanPause); // Read the channel number where the pauseSim command is given
 	ROS_INFO("Reading pause from %d channel", chanPause);
 
 	ros::WallRate spinner(simRate);
