@@ -59,3 +59,5 @@ qtcreator-*
 /uav_utils/doc/doxygen_rosdoc_lite
 /mathutils/doc/doxygen_rosdoc_lite
 /rqt_dashboard/doc/doxygen_rosdoc_lite
+
+last_letter_lib/
