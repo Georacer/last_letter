@@ -16,9 +16,9 @@
 	<!-- Initialization of parameters -->
 	<group>
 		<!-- Load environmental parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/environment.yaml" />
+		<!-- <rosparam command="load" file="$(find last_letter)data/parameters/environment.yaml" /> -->
 		<!-- Load global parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/world.yaml" />
+		<rosparam command="load" ns="/world/" file="$(env HOME)/last_letter_models/world.yaml" />
 	</group>
 
 	<!-- Initialization of services -->
@@ -29,15 +29,16 @@
 	<group ns="$(arg uav_name)">
 
 		<!-- Initialization of the parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/init.yaml" /> <!-- load state initialization parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/rigidBody.yaml" /> <!-- load rigid body parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/aerodynamics.yaml" /> <!-- load aerodynamic parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/propulsion.yaml" /> <!-- load propulsion parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/aircraft/$(arg uav_name)/contactPts.yaml" /> <!-- load contact points parameters -->
-		<rosparam command="load" file="$(find last_letter)data/parameters/Sensors_parameters.yaml" />
+		<rosparam command="load" file="$(env HOME)/last_letter_models/aircraft/$(arg uav_name)/init.yaml" /> <!--load state initialization parameters -->
+		<!-- <rosparam command="load" file="$(env HOME)/last_letter_models/aircraft/$(arg uav_name)/inertial.yaml" /> load rigid body parameters -->
+		<!-- <rosparam command="load" file="$(env HOME)/last_letter_models/aircraft/$(arg uav_name)/aerodynamics.yaml" /> load aerodynamic parameters -->
+		<!-- <rosparam command="load" file="$(env HOME)/last_letter_models/aircraft/$(arg uav_name)/propulsion.yaml" /> load propulsion parameters -->
+		<!-- <rosparam command="load" file="$(env HOME)/last_letter_models/aircraft/$(arg uav_name)/ground.yaml" /> load contact points parameters -->
+		<rosparam command="load" file="$(env HOME)/last_letter_models/Sensors_parameters.yaml" />
 
 		<!-- Raising core nodes -->
 		<group>
+			<param name="uav_name" value="$(arg uav_name)" />
 			<node pkg="last_letter" name="argumentHandler" type="argumentHandler" output="screen"> <!-- Node which handles last-minute changes in the parameter server. Always last after any parameter loads -->
 				<rosparam param="home" subst_value="true">$(arg home)</rosparam>
 				<param name="simRate" value="$(arg simRate)"/>
@@ -46,9 +47,10 @@
 			</node>
 			<node if="$(arg log)" pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag -a"/> <!-- topic activity recorder node -->
 			<node pkg="last_letter" name="clock" type="simClock" output="screen"/>
-			<node pkg="last_letter" name="plane_model" type="model" output="screen" required="true"/>
-			<node pkg="last_letter" name="environment_model" type="environment" output="screen"/>
-			<node pkg="last_letter" name="euler_translator" type="quat2euler" output="screen"/>
+			<!-- <node pkg="last_letter" name="plane_model" type="model" output="screen" required="true"/> -->
+			<node pkg="last_letter" name="plane_model" type="model" output="screen" required="true" launch-prefix="gdb -ex run --args"/>
+			<!-- <node pkg="last_letter" name="environment_model" type="environment" output="screen"/> -->
+			<!-- <node pkg="last_letter" name="euler_translator" type="quat2euler" output="screen"/> -->
 		</group>
 
 		<!-- Transformations broadcasters -->
@@ -56,7 +58,7 @@
 			<!-- transform body NED to body NWU -->
 			<node pkg="tf" type="static_transform_publisher" name="body2Cockpit" args="0.0 0.0 0.0 0.0 0.0 3.14 base_link plane_camera 10" />
 			<!-- publish body NWU frame for rviz-->
-			<node pkg="last_letter" type="uav_publisher" name="broadcaster" />
+			<!-- <node pkg="last_letter" type="uav_publisher" name="broadcaster" /> -->
 		</group>
 
 		<!-- Raising sensor nodes -->
@@ -79,7 +81,7 @@
 		<group if="$(arg manualMode)">
 			<group unless="$(arg ArduPlane)">
 	<!--		<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
-				<rosparam command="load" file="$(find last_letter)data/parameters/HID.yaml" />
+				<rosparam command="load" file="$(env HOME)/last_letter_models/HID.yaml" />
 				<node pkg="joy" type="joy_node" name="joystick" output="screen" >
 					<param name="dev" value="/dev/input/js0" />
 					<param name="deadzone" value="0.01" />

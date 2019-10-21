@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>rqt_dashboard</name>
-  <version>0.0.0</version>
+  <version>0.1.0</version>
   <description>Virtual dashboard package for the last_letter simulator</description>
 
   <maintainer email="gzogop@mail.ntua.gr">George Zogopoulos Papaliakos</maintainer>
@@ -21,13 +21,17 @@
   <build_depend>rqt_gui</build_depend>
   <build_depend>rqt_gui_py</build_depend>
   <build_depend>last_letter_msgs</build_depend>
+  <build_depend>last_letter_lib</build_depend>
 
-  <run_depend>roscpp</run_depend>
-  <run_depend>rospy</run_depend>
-  <run_depend>rqt_gui</run_depend>
-  <run_depend>rqt_gui_py</run_depend>
-  <run_depend>message_runtime</run_depend>
-  <run_depend>last_letter_msgs</run_depend>
+  <build_export_depend>last_letter_lib</build_export_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>rqt_gui</exec_depend>
+  <exec_depend>rqt_gui_py</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>last_letter_msgs</exec_depend>
+  <exec_depend>last_letter_lib</exec_depend>
 
   <export>
     <rqt_gui plugin="${prefix}/plugin.xml"/>

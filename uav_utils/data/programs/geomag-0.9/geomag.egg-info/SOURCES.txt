@@ -1,8 +1,0 @@
-README.txt
-setup.py
-geomag/__init__.py
-geomag/geomag.py
-geomag.egg-info/PKG-INFO
-geomag.egg-info/SOURCES.txt
-geomag.egg-info/dependency_links.txt
-geomag.egg-info/top_level.txt
