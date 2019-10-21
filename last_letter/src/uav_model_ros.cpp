@@ -29,13 +29,29 @@ UavModelWrapper::UavModelWrapper (ros::NodeHandle n)
 
 	if(!ros::param::getCached("/world/deltaT", dt)) {ROS_FATAL("Invalid parameters for -deltaT- in param server!"); ros::shutdown();}
 	tprev = ros::Time::now();
-	states.header.stamp = tprev;
+
+    // Initialize static message data
+    states.header.frame_id = "body_frame";
+    states_dot.header.frame_id = "body_frame";
+    environment.header.frame_id = "body_frame";
+    wrenchInput.header.frame_id = "body_frame";
+    linearAcc.header.frame_id = "body_frame";
+
+    // Initialize with NaN all non-applicable UAV state derivatives
+    states_dot.rotorspeed[0] = NAN;
+    states_dot.acceleration.linear.x = NAN;
+    states_dot.acceleration.linear.y = NAN;
+    states_dot.acceleration.linear.z = NAN;
+    states_dot.acceleration.angular.x = NAN;
+    states_dot.acceleration.angular.y = NAN;
+    states_dot.acceleration.angular.z = NAN;
+
 	//Subscribe and advertize
 	subInp = n.subscribe("ctrlPWM",1,&UavModelWrapper::getInput, this); //model control input subscriber
 	pubState = n.advertise<last_letter_msgs::SimStates>("states",1000); //model states publisher
+	pubStateDot = n.advertise<last_letter_msgs::SimStates>("statesDot",1000); //model states publisher
 	pubEnv = n.advertise<last_letter_msgs::Environment>("environment",1000); //model states publisher
-	pubForce = n.advertise<geometry_msgs::Vector3Stamped>("forceInput",1000); // forces publisher
-	pubTorque = n.advertise<geometry_msgs::Vector3Stamped>("torqueInput",1000); // torques publisher
+    pubWrench = n.advertise<last_letter_msgs::SimWrenches>("wrenches", 1000); // model force/torque inputs publisher 
 	pubLinAcc = n.advertise<geometry_msgs::Vector3Stamped>("linearAcc",1000); // Body frame linear acceleration - no corriolis effect
 }
 
@@ -65,25 +81,35 @@ void UavModelWrapper::step(void)
     // Access simulation state and other variables
     convertStates(uavModel->state, states);
     states.header.stamp = tprev;
-    states.header.frame_id = "bodyFrame";
+
+    // Access simulation state derivatives
+    convertStatesDerivatives(uavModel->kinematics.stateDot, states_dot);
+    states_dot.header.stamp = tprev;
+
+    // Access environment
     convertEnvironment(uavModel->environmentModel.environment, environment);
     environment.header.stamp = tprev;
-    environment.header.frame_id = "bodyFrame";
-    convertRosVector3(uavModel->dynamics.getForce(), forceInput.vector);
-    forceInput.header.stamp = tprev;
-    forceInput.header.frame_id = "bodyFrame";
-    convertRosVector3(uavModel->dynamics.getTorque(), torqueInput.vector);
-    torqueInput.header.stamp = tprev;
-    torqueInput.header.frame_id = "bodyFrame";
+
+    // Access wrenches
+    convertRosVector3(uavModel->dynamics.forceAero, wrenchInput.aerodynamic.force);
+    convertRosVector3(uavModel->dynamics.forceProp, wrenchInput.propulsion.force);
+    convertRosVector3(uavModel->dynamics.forceGrav, wrenchInput.gravity.force);
+    convertRosVector3(uavModel->dynamics.forceGround, wrenchInput.ground.force);
+    convertRosVector3(uavModel->dynamics.torqueAero, wrenchInput.aerodynamic.torque);
+    convertRosVector3(uavModel->dynamics.torqueProp, wrenchInput.propulsion.torque);
+    convertRosVector3(uavModel->dynamics.torqueGrav, wrenchInput.gravity.torque);
+    convertRosVector3(uavModel->dynamics.torqueGround, wrenchInput.ground.torque);
+    wrenchInput.header.stamp = tprev;
+
+    // Publish linear acceleration
     convertRosVector3(uavModel->dynamics.getForce()/uavModel->kinematics.inertial.mass, linearAcc.vector);
     linearAcc.header.stamp = tprev;
-    linearAcc.header.frame_id = "bodyFrame";
 
 	//publish results
 	pubState.publish(states);
+	pubStateDot.publish(states_dot);
     pubEnv.publish(environment);
-	pubForce.publish(forceInput);
-	pubTorque.publish(torqueInput);
+	pubWrench.publish(wrenchInput);
 	pubLinAcc.publish(linearAcc);
 
     // publish transforms
@@ -172,7 +198,7 @@ void convertStates(const SimState_t simState, last_letter_msgs::SimStates &wrapp
     wrapperState.acceleration.linear.z = simState.acceleration.linear.z();
     for (int i=0; i<4; i++)
     {
-        // TODO: This crashese the simulation, debug it
+        // TODO: This crashes the simulation, debug it
         // wrapperState.rotorspeed[i] = simState.rotorspeed[i];
     }
     wrapperState.geoid.latitude = simState.geoid.latitude;
@@ -183,9 +209,32 @@ void convertStates(const SimState_t simState, last_letter_msgs::SimStates &wrapp
     wrapperState.geoid.velocity.z = simState.geoid.velocity.z();
 }
 
+void convertStatesDerivatives(const Derivatives_t simDerivatives, last_letter_msgs::SimStates &wrapperStateDot)
+{
+    wrapperStateDot.pose.position.x = simDerivatives.posDot.x();
+    wrapperStateDot.pose.position.y = simDerivatives.posDot.y();
+    wrapperStateDot.pose.position.z = simDerivatives.posDot.z();
+    wrapperStateDot.pose.orientation.x = simDerivatives.quatDot.x();
+    wrapperStateDot.pose.orientation.y = simDerivatives.quatDot.y();
+    wrapperStateDot.pose.orientation.z = simDerivatives.quatDot.z();
+    wrapperStateDot.pose.orientation.w = simDerivatives.quatDot.w();
+    wrapperStateDot.velocity.linear.x = simDerivatives.speedDot.x();
+    wrapperStateDot.velocity.linear.y = simDerivatives.speedDot.y();
+    wrapperStateDot.velocity.linear.z = simDerivatives.speedDot.z();
+    wrapperStateDot.velocity.angular.x = simDerivatives.rateDot.x();
+    wrapperStateDot.velocity.angular.y = simDerivatives.rateDot.y();
+    wrapperStateDot.velocity.angular.z = simDerivatives.rateDot.z();
+    wrapperStateDot.geoid.latitude = simDerivatives.coordDot.x();
+    wrapperStateDot.geoid.longitude = simDerivatives.coordDot.y();
+    wrapperStateDot.geoid.altitude = simDerivatives.coordDot.z();
+    wrapperStateDot.geoid.velocity.x = simDerivatives.posDot.x();
+    wrapperStateDot.geoid.velocity.y = simDerivatives.posDot.y();
+    wrapperStateDot.geoid.velocity.z = -simDerivatives.posDot.z();
+}
+
 void convertEnvironment(const Environment_t simEnv, last_letter_msgs::Environment &wrapperEnv)
 {
-    wrapperEnv.wind.x = simEnv.wind.x();
+    wrapperEnv.wind.x = simEnv.wind.x(); // Note: Wind is expressed in body frame
     wrapperEnv.wind.y = simEnv.wind.y();
     wrapperEnv.wind.z = simEnv.wind.z();
     wrapperEnv.density = simEnv.density;
@@ -218,4 +267,3 @@ void convertTfQuaternion(const Eigen::Quaterniond quatEigen, tf::Quaternion &qua
 {
     quatTf = tf::Quaternion(quatEigen.x(), quatEigen.y(), quatEigen.z(), quatEigen.w());
 }
-

@@ -22,6 +22,7 @@ add_message_files(
 	SimPWM.msg
 	SimServos.msg
 	SimStates.msg
+	SimWrenches.msg
 	Geoid.msg
 	ElectricEng.msg
 	Environment.msg

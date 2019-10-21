@@ -8,6 +8,7 @@
 #include <geometry_msgs/QuaternionStamped.h>
 
 #include <last_letter_msgs/SimStates.h>
+#include <last_letter_msgs/SimWrenches.h>
 #include <last_letter_msgs/SimPWM.h>
 #include <last_letter_msgs/Environment.h>
 
@@ -20,12 +21,13 @@ class UavModelWrapper
 	///////////
 	//Variables
     UavModel * uavModel;
-	last_letter_msgs::SimStates states; // main simulation states
+	last_letter_msgs::SimStates states, states_dot; // main simulation states and their time derivatives
 	last_letter_msgs::SimPWM input; // PWM input to the model
 	last_letter_msgs::Environment environment; // environmental component local to the UAV
-    geometry_msgs::Vector3Stamped forceInput, torqueInput, linearAcc;
+	last_letter_msgs::SimWrenches wrenchInput;
+    geometry_msgs::Vector3Stamped linearAcc;
 	ros::Subscriber subInp; // ROS subscribers
-	ros::Publisher pubState, pubEnv, pubForce, pubTorque, pubLinAcc; // ROS publishers
+	ros::Publisher pubState, pubStateDot, pubEnv, pubWrench, pubLinAcc; // ROS publishers
 	ros::Time tprev; // previous ROS time holder
 	double dt; // simulation timestep in s
 	int initTime; // first simulation loop flag
@@ -62,6 +64,7 @@ class UavModelWrapper
 };
 
 void convertStates(const SimState_t, last_letter_msgs::SimStates &);
+void convertStatesDerivatives(const Derivatives_t, last_letter_msgs::SimStates &);
 void convertEnvironment(const Environment_t, last_letter_msgs::Environment &);
 void convertTfVector3(const Eigen::Vector3d, tf::Vector3 &);
 void convertTfQuaternion(const Eigen::Quaterniond, tf::Quaternion &);
