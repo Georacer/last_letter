@@ -67,9 +67,6 @@ int main(int argc, char **argv)
 	// ros::Subscriber subEuler = n.subscribe("euler", 1, euler_callback);
 	ros::Subscriber subEnv = n.subscribe("environment", 1, env_callback);
 	ros::Publisher pub = n.advertise<rqt_dashboard::Dashboard>("dashboard", 1);
-	// Initialize rotorspeed array
-	states.rotorspeed.clear();
-	states.rotorspeed.push_back((double) 0);
 	ROS_INFO("dashboard backend ready");
 
 	while (ros::ok())
