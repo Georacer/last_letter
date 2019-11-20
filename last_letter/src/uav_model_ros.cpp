@@ -141,7 +141,7 @@ void UavModelWrapper::broadcastTransforms()
         convertTfQuaternion(rotationEigen, rotationTf);
         transform.setOrigin(translationTf);
         transform.setRotation(rotationTf);
-        frameName = "propeller"+i;
+        frameName = "propeller_"+std::to_string(i);
         broadcaster.sendTransform(tf::StampedTransform(transform, states.header.stamp, "base_link", frameName));
     }
 
@@ -153,7 +153,7 @@ void UavModelWrapper::broadcastTransforms()
         convertTfQuaternion(rotationEigen, rotationTf);
         transform.setOrigin(translationTf);
         transform.setRotation(rotationTf);
-        frameName = "airfoil_"+i;
+        frameName = "airfoil_"+std::to_string(i);
         broadcaster.sendTransform(tf::StampedTransform(transform, states.header.stamp, "base_link", frameName));
     }
 }
