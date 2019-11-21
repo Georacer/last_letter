@@ -26,6 +26,7 @@ add_message_files(
 	Geoid.msg
 	ElectricEng.msg
 	Environment.msg
+	Parameter.msg
 	SimSensor.msg
 	SimSensor3.msg
 	SimBarometer.msg

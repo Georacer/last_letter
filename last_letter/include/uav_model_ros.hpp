@@ -11,6 +11,7 @@
 #include <last_letter_msgs/SimWrenches.h>
 #include <last_letter_msgs/SimPWM.h>
 #include <last_letter_msgs/Environment.h>
+#include <last_letter_msgs/Parameter.h>
 
 #include "uav_model.hpp"
 
@@ -26,7 +27,7 @@ class UavModelWrapper
 	last_letter_msgs::Environment environment; // environmental component local to the UAV
 	last_letter_msgs::SimWrenches wrenchInput;
     geometry_msgs::Vector3Stamped linearAcc;
-	ros::Subscriber subInp; // ROS subscribers
+	ros::Subscriber subInp, subParam; // ROS subscribers
 	ros::Publisher pubState, pubStateDot, pubEnv, pubWrench, pubLinAcc; // ROS publishers
 	ros::Time tprev; // previous ROS time holder
 	double dt; // simulation timestep in s
@@ -34,6 +35,7 @@ class UavModelWrapper
 	int chanReset;
     bool tfBroadcastEnable = true;
     tf::TransformBroadcaster broadcaster;
+	bool _new_parameters = false; // Whether new parameters have been received
 
 	///////////
 	//Methods
@@ -53,6 +55,9 @@ class UavModelWrapper
 	 * @param inputMsg Direct servo control commands
 	 */
 	void getInput(last_letter_msgs::SimPWM inputMsg);
+
+	// Parameter callback
+	void getParameters(last_letter_msgs::Parameter paramMsg);
 
 	// Perform simulation step
 	void step(void);

@@ -48,6 +48,7 @@ UavModelWrapper::UavModelWrapper (ros::NodeHandle n)
 
 	//Subscribe and advertize
 	subInp = n.subscribe("ctrlPWM",1,&UavModelWrapper::getInput, this); //model control input subscriber
+	subParam = n.subscribe("parameter_changes",1000,&UavModelWrapper::getParameters, this); //model parameters editor subscriber
 	pubState = n.advertise<last_letter_msgs::SimStates>("states",1000); //model states publisher
 	pubStateDot = n.advertise<last_letter_msgs::SimStates>("statesDot",1000); //model states publisher
 	pubEnv = n.advertise<last_letter_msgs::Environment>("environment",1000); //model states publisher
@@ -65,6 +66,11 @@ void UavModelWrapper::init()
 //make one step of the plane simulation
 void UavModelWrapper::step(void)
 {
+    if (_new_parameters)
+    {
+        uavModel->update_model();
+        _new_parameters = false;
+    }
 	// perform step actions serially
     uavModel->step();
 
@@ -169,6 +175,17 @@ void UavModelWrapper::getInput(last_letter_msgs::SimPWM inputMsg)
         modelInput.value[i] = inputMsg.value[i];
     }
     uavModel->setInputPwm(modelInput);
+}
+
+///////////////////////////////////////
+// Read model parameters and apply them
+void UavModelWrapper::getParameters(last_letter_msgs::Parameter paramMsg)
+{
+    ParamType_t msg_type = static_cast<ParamType_t>(paramMsg.type);
+    if (uavModel->set_parameter(msg_type, paramMsg.name, paramMsg.value))
+    {
+        _new_parameters = true;
+    }
 }
 
 //////////////////
