@@ -198,8 +198,7 @@ void convertStates(const SimState_t simState, last_letter_msgs::SimStates &wrapp
     wrapperState.acceleration.linear.z = simState.acceleration.linear.z();
     for (int i=0; i<4; i++)
     {
-        // TODO: This crashes the simulation, debug it
-        // wrapperState.rotorspeed[i] = simState.rotorspeed[i];
+        wrapperState.rotorspeed[i] = simState.rotorspeed[i];
     }
     wrapperState.geoid.latitude = simState.geoid.latitude;
     wrapperState.geoid.longitude = simState.geoid.longitude;
