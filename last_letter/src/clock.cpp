@@ -17,30 +17,44 @@ int chanPause; // The number of the channel where the pauseSim command is sent
 bool pauseSim = false;  // The pauseSimd state
 bool pauseButtonPressed = false;
 
-///////////////////////
-// Raw control callback
-///////////////////////
-void rawControlsCallback(const last_letter_msgs::SimPWM pwm)
+/**
+ * @brief Pause command logic
+ * 
+ * @param pause_pwm Value of the pause channel
+ */
+void pauseLogic(const uint16_t pause_pwm)
 {
-	// Register the pauseSim command
-	if (pwm.value[chanPause]>1800)
+
+	if (pause_pwm>1800)
 	{
 		if (!pauseButtonPressed)
 		{
 			pauseButtonPressed = true;
-			pauseSim = !pauseSim;
 
-			if (pauseSim)
+			if (timeControls == 1) // Working on control-based step-rate
 			{
-				ROS_INFO("Paused simulation");
+				pauseSim = !pauseSim;
+
+				if (pauseSim)
+				{
+					ROS_INFO("Paused simulation");
+				}
+				else
+				{
+					ROS_INFO("Unpausing simulation");
+					simTime = simTime + dt;
+					simClock.clock = simTime;
+					pub.publish(simClock);
+					frameCounter++;
+				}
 			}
-			else
+			else if (timeControls == 3) // Working by manual stepping
 			{
-				ROS_INFO("Unpausing simulation");
-				simTime = simTime + dt;
-				simClock.clock = simTime;
-				pub.publish(simClock);
-				frameCounter++;
+					ROS_INFO("Stepping simulation");
+					simTime = simTime + dt;
+					simClock.clock = simTime;
+					pub.publish(simClock);
+					frameCounter++;
 			}
 		}
 
@@ -49,6 +63,16 @@ void rawControlsCallback(const last_letter_msgs::SimPWM pwm)
 	{
 		pauseButtonPressed = false;
 	}
+}
+
+///////////////////////
+// Raw control callback
+///////////////////////
+void rawControlsCallback(const last_letter_msgs::SimPWM pwm)
+{
+	// Register the pauseSim command
+	uint16_t pause_pwm = pwm.value[chanPause];
+	pauseLogic(pause_pwm);
 }
 
 ////////////////////////////////////
@@ -162,6 +186,23 @@ int main(int argc, char **argv)
 	{
 		ROS_INFO("Using free-spinning simulation clock");
 		// ros::WallDuration(3).sleep(); //wait for other nodes to get raised
+		simClock.clock = simTime;
+		pub.publish(simClock);
+		while (ros::ok())
+		{
+			realTimeNow = ros::WallTime::now();
+			wallCounter = realTimeNow - realTimePrev;
+			if (wallCounter.toSec() > 5) {
+				ROS_INFO("Simulation rate: %lu Hz", frameCounter/5);
+				realTimePrev = realTimeNow;
+				frameCounter=0;
+			}
+			ros::spinOnce();
+		}
+	}
+	else if (timeControls==3) // Simulation is manually triggered by the pause button
+	{
+		ROS_INFO("Manual simulation clock (pause button)");
 		simClock.clock = simTime;
 		pub.publish(simClock);
 		while (ros::ok())

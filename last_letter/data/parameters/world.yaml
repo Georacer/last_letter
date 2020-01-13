@@ -10,6 +10,7 @@
 # 0 : default real-time simulation clock
 # 1 : controls-triggered simulation clock
 # 2 : free-spinning simulation clock
+# 3 : manually triggered steps
 /world/timeControls: 0
 
 /world/integratorType: 0

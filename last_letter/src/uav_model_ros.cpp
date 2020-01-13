@@ -22,7 +22,7 @@ UavModelWrapper::UavModelWrapper (ros::NodeHandle n)
 	// This will likely bloat the library size, but it's not too big of a deal.
     ROS_INFO("Loading uav configuration for %s", uavName.c_str());
 	ConfigsStruct_t configStruct = loadModelConfig(uavName);
-	// Parameter randomization it done internally in loadModelConfig
+	// Parameter randomization is done internally in loadModelConfig
 
     ROS_INFO("Creating new UavModel");
 	uavModel = new UavModel(configStruct); //Create a UavStruct by passing the configurations bundle struct
