@@ -31,7 +31,15 @@ void pauseLogic(const uint16_t pause_pwm)
 		{
 			pauseButtonPressed = true;
 
-			if (timeControls == 1) // Working on control-based step-rate
+			if (timeControls == 3) // Working by manual stepping
+			{
+					ROS_INFO("Stepping simulation");
+					simTime = simTime + dt;
+					simClock.clock = simTime;
+					pub.publish(simClock);
+					frameCounter++;
+			}
+			else // Working on rest of stepping methods
 			{
 				pauseSim = !pauseSim;
 
@@ -47,14 +55,6 @@ void pauseLogic(const uint16_t pause_pwm)
 					pub.publish(simClock);
 					frameCounter++;
 				}
-			}
-			else if (timeControls == 3) // Working by manual stepping
-			{
-					ROS_INFO("Stepping simulation");
-					simTime = simTime + dt;
-					simClock.clock = simTime;
-					pub.publish(simClock);
-					frameCounter++;
 			}
 		}
 
