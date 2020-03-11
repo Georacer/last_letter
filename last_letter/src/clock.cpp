@@ -206,116 +206,61 @@ int main(int argc, char **argv)
 	ros::param::get("/world/simRate",simRate); //frame rate in Hz
 	double deltaT;
 	ros::param::get("/world/deltaT",deltaT); //simulation time step in seconds
+	dt = ros::Duration(deltaT);
 	ros::param::get("/world/timeControls",timeControls); //frame rate in Hz
 	n.getParam("chanPause", chanPause); // Read the channel number where the pauseSim command is given
 	ROS_INFO("Reading pause from %d channel", chanPause);
 
-	ros::WallRate sim_spinner(simRate);
-	ros::WallRate max_spinner(max_clock_rate);
-	dt = ros::Duration(deltaT);
-
+	ros::WallRate spinner(1); // Provisionally allocate the spinner
 
 	ROS_INFO("simClockNode up");
+	double spin_rate;
+	std::string ctrls_msg;
+	switch (timeControls)
+	{
+		case 0:
+			spin_rate = simRate;
+			ctrls_msg = "Using default real-time simulation clock";
+			break;
+		case 1:
+			spin_rate = simRate;
+			ctrls_msg = "Using controls-triggered simulation clock";
+			break;
+		case 2:
+			spin_rate = max_clock_rate;
+			ctrls_msg = "Using free-spinning simulation clock";
+			break;
+		case 3:
+			spin_rate = max_clock_rate;
+			ctrls_msg = "Manual simulation clock (pause button)";
+			break;
+		default:
+			ROS_ERROR("Invalid timeControls value!");
+			ros::shutdown();
+			return 0;
+	}
+	spinner = ros::WallRate(spin_rate);
 
-	if (timeControls==0) // Default real-time simulation
+	ROS_INFO("%s", ctrls_msg.c_str());
+	simClock.clock = simTime;
+	pub.publish(simClock);
+	while (ros::ok())
 	{
-		ROS_INFO("Using default real-time simulation clock");
-		// ros::WallDuration(1).sleep(); //wait for other nodes to get raised
-		simClock.clock = simTime;
-		pub.publish(simClock);
-		while (ros::ok())
+		ros::spinOnce();
+		spinner.sleep(); // Sleep to control simulation rate
+		// Check if the simulation has been dead for a long time
+		if (rate_monitor.get_time_since_last_frame() > dead_time)
 		{
-			ros::spinOnce();
-			sim_spinner.sleep(); // Sleep to control simulation rate
-			// Check if the simulation has been dead for a long time
-			if (rate_monitor.get_time_since_last_frame() > dead_time)
-			{
-				ROS_WARN("Queing a step after dead-time ellapsed");
-				step_required = true;
-			}
-			// Check if a step was required but was not serviced (due to paused simulation)
-			if (step_required && !pauseSim)
-			{
-				step_simulation();
-				step_required = false;
-			}
+			ROS_WARN("Queing a step after dead-time ellapsed");
+			step_required = true;
 		}
-	}
-	else if (timeControls==1) // Simulation waits for controls message
-	{
-		ROS_INFO("Using controls-triggered simulation clock");
-		simClock.clock = simTime;
-		pub.publish(simClock);
-		while (ros::ok())
+		// Check if a step was required but was not serviced (due to paused simulation)
+		if (step_required && !pauseSim)
 		{
-			ros::spinOnce();
-			sim_spinner.sleep(); // Sleep to contorl simulation rate
-			// Check if the simulation has been dead for a long time
-			if (rate_monitor.get_time_since_last_frame() > dead_time)
-			{
-				ROS_WARN("Queing a step after dead-time ellapsed");
-				step_required = true;
-			}
-			// Check if a step was required but was not serviced (due to paused simulation)
-			if (step_required && !pauseSim)
-			{
-				step_simulation();
-				step_required = false;
-			}
+			step_simulation();
+			step_required = false;
 		}
-	}
-	else if (timeControls==2) // Simulation runs as fast as possible
-	{
-		ROS_INFO("Using free-spinning simulation clock");
-		// ros::WallDuration(3).sleep(); //wait for other nodes to get raised
-		simClock.clock = simTime;
-		pub.publish(simClock);
-		while (ros::ok())
-		{
-			ros::spinOnce();
-			// Check if the simulation has been dead for a long time
-			if (rate_monitor.get_time_since_last_frame() > dead_time)
-			{
-				ROS_WARN("Queing a step after dead-time ellapsed");
-				step_required = true;
-			}
-			// Check if a step was required but was not serviced (due to paused simulation)
-			if (step_required && !pauseSim)
-			{
-				step_simulation();
-				step_required = false;
-			}
-		}
-	}
-	else if (timeControls==3) // Simulation is manually triggered by the pause button
-	{
-		ROS_INFO("Manual simulation clock (pause button)");
-		simClock.clock = simTime;
-		pub.publish(simClock);
-		while (ros::ok())
-		{
-			ros::spinOnce();
-			max_spinner.sleep(); // Take a breather
-			// Check if the simulation has been dead for a long time
-			if (rate_monitor.get_time_since_last_frame() > dead_time)
-			{
-				ROS_WARN("Queing a step after dead-time ellapsed");
-				step_required = true;
-			}
-			// Check if a step was required but was not serviced (due to paused simulation)
-			if (step_required && !pauseSim)
-			{
-				ROS_INFO("Stepping simulation");
-				step_simulation();
-				step_required = false;
-			}
-		}
-	}
-	else {
-		ROS_ERROR("Invalid timeControls value!");
-		ros::shutdown();
 	}
 
 	return 0;
-
 }
