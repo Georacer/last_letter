@@ -7,15 +7,79 @@ ros::Publisher pub;
 ros::Subscriber subCtrl, subRawCtrl, subState;
 
 ros::Time simTime(0.0);
-ros::WallTime realTimePrev = ros::WallTime::now(), realTimeNow;
 ros::Duration dt;
-ros::WallDuration wallCounter;
+double max_clock_rate{1000};
+double dead_time{1}; // Time in lack of step after which simulation loop is declared broken
 rosgraph_msgs::Clock simClock;
-unsigned long frameCounter = 0;
 int timeControls;
 int chanPause; // The number of the channel where the pauseSim command is sent
 bool pauseSim = false;  // The pauseSimd state
 bool pauseButtonPressed = false;
+bool step_required = false;
+
+
+/**
+ * @brief Class to monitor and publish simulation rate
+ * 
+ */
+class RateMonitor {
+
+	public:
+	ros::WallTime realTimeNow;
+	ros::WallTime realTimePrev;
+	ros::WallTime prevFrameTime;
+	ros::WallDuration wallCounter;
+	double pub_interval{5};
+	unsigned long frameCounter = 0;
+
+	RateMonitor()
+	{
+
+	};
+
+	void initialize_ros()
+	{
+		realTimePrev = ros::WallTime::now();
+		prevFrameTime = ros::WallTime::now();
+	};
+
+	void add_frames(int count=1)
+	{
+		frameCounter += count;
+		prevFrameTime = ros::WallTime::now();
+		publish_simrate();
+	};
+
+	double get_time_since_last_frame()
+	{
+		wallCounter = ros::WallTime::now() - prevFrameTime;
+		return wallCounter.toSec();
+	};
+
+	void publish_simrate()
+	{
+		realTimeNow = ros::WallTime::now();
+		wallCounter = realTimeNow - realTimePrev;
+		if (wallCounter.toSec() > pub_interval) {
+			ROS_INFO("Simulation rate: %d Hz", int(frameCounter/pub_interval));
+			realTimePrev = realTimeNow;
+			frameCounter=0;
+		}
+	};
+};
+
+// Create rate_monitor as a global object
+RateMonitor rate_monitor;
+
+
+void step_simulation()
+{
+	simTime = simTime + dt;
+	simClock.clock = simTime;
+	pub.publish(simClock);
+	rate_monitor.add_frames();
+};
+
 
 /**
  * @brief Pause command logic
@@ -26,18 +90,17 @@ void pauseLogic(const uint16_t pause_pwm)
 {
 
 	if (pause_pwm>1800)
+	// Pause button is pressed
 	{
 		if (!pauseButtonPressed)
+		// It has not been registered
 		{
-			pauseButtonPressed = true;
+			pauseButtonPressed = true; // Acknowledge button press
 
-			if (timeControls == 3) // Working by manual stepping
+			if (timeControls == 3) 
+			// Working by manual stepping, trigger simulation step
 			{
-					ROS_INFO("Stepping simulation");
-					simTime = simTime + dt;
-					simClock.clock = simTime;
-					pub.publish(simClock);
-					frameCounter++;
+				step_required = true;
 			}
 			else // Working on rest of stepping methods
 			{
@@ -50,20 +113,17 @@ void pauseLogic(const uint16_t pause_pwm)
 				else
 				{
 					ROS_INFO("Unpausing simulation");
-					simTime = simTime + dt;
-					simClock.clock = simTime;
-					pub.publish(simClock);
-					frameCounter++;
+					step_simulation();
 				}
 			}
 		}
-
 	}
 	else
 	{
-		pauseButtonPressed = false;
+		pauseButtonPressed = false; // Acknowlege button release
 	}
 }
+
 
 ///////////////////////
 // Raw control callback
@@ -75,39 +135,50 @@ void rawControlsCallback(const last_letter_msgs::SimPWM pwm)
 	pauseLogic(pause_pwm);
 }
 
+
 ////////////////////////////////////
 // Control input trigger callback //
 ////////////////////////////////////
 void controlsCallback(const last_letter_msgs::SimPWM pwm)
 // Callback for the ctrlPWM topic
 {
-	// Publish simulated time
-	if (!pauseSim && (timeControls==1))
+	if (timeControls==1)
+	// If simulation is set to run on controls callback
 	{
-		simTime = simTime + dt;
-		simClock.clock = simTime;
-		pub.publish(simClock);
-		frameCounter++;
+		step_required = true;
+		if (!pauseSim)
+		{
+			step_simulation();
+			step_required = false;
+		}
 	}
-
 	// Also forward the raw controls to the ctrlPWM callback. 
 	// This is to capture the pause button when rawPWM topic is remapped to ctrlPWM as well
 	rawControlsCallback(pwm);
 }
+
 
 ///////////////////////////////////////
 // Simulation state trigger callback //
 ///////////////////////////////////////
 void stateCallback(const last_letter_msgs::SimStates state)
 {
-	if (!pauseSim && (timeControls==0 || timeControls==2))
+	if (timeControls==0 || timeControls==2)
+	// If simulation is set to run on fixed or free clock, push another clock tick as soon as the previous state has
+	// been calculated and published
 	{
-		simTime = simTime + dt;
-		simClock.clock = simTime;
-		pub.publish(simClock);
-		frameCounter++;
+		step_required = true;
+		// Mark that a simulation step is required. If it is missed because of pause, step_simulation shall be called
+		// externally
+		if (!pauseSim)
+		// If simulation is not paused
+		{
+			step_simulation();
+			step_required = false;
+		}
 	}
 }
+
 
 ///////////////
 //Main function
@@ -121,16 +192,16 @@ int main(int argc, char **argv)
 	subCtrl = n.subscribe("ctrlPWM", 100, controlsCallback);
 	subRawCtrl = n.subscribe("rawPWM", 100, rawControlsCallback);
 	subState = n.subscribe("states", 100, stateCallback);
+	rate_monitor.initialize_ros();
 
+	// Synchronize clock and model
 	int statusModel=0;
 	ros::param::set("nodeStatus/clock", 1);
 	while (statusModel!=1) {
 		ros::param::get("nodeStatus/model",statusModel);
 	}
 
-	// ros::WallDuration(5).sleep(); //wait for other nodes to get raised
-
-
+	// Read parameters regarding simulation behaviour
 	double simRate;
 	ros::param::get("/world/simRate",simRate); //frame rate in Hz
 	double deltaT;
@@ -139,29 +210,35 @@ int main(int argc, char **argv)
 	n.getParam("chanPause", chanPause); // Read the channel number where the pauseSim command is given
 	ROS_INFO("Reading pause from %d channel", chanPause);
 
-	ros::WallRate spinner(simRate);
+	ros::WallRate sim_spinner(simRate);
+	ros::WallRate max_spinner(max_clock_rate);
 	dt = ros::Duration(deltaT);
+
 
 	ROS_INFO("simClockNode up");
 
 	if (timeControls==0) // Default real-time simulation
 	{
 		ROS_INFO("Using default real-time simulation clock");
-		ros::WallDuration(1).sleep(); //wait for other nodes to get raised
+		// ros::WallDuration(1).sleep(); //wait for other nodes to get raised
 		simClock.clock = simTime;
 		pub.publish(simClock);
 		while (ros::ok())
 		{
-			realTimeNow = ros::WallTime::now();
-			wallCounter = realTimeNow - realTimePrev;
-			if (wallCounter.toSec() > 5) {
-				ROS_INFO("Simulation rate: %lu Hz", frameCounter/5);
-				realTimePrev = realTimeNow;
-				frameCounter=0;
-			}
 			ros::spinOnce();
-			spinner.sleep();
-
+			sim_spinner.sleep(); // Sleep to control simulation rate
+			// Check if the simulation has been dead for a long time
+			if (rate_monitor.get_time_since_last_frame() > dead_time)
+			{
+				ROS_WARN("Queing a step after dead-time ellapsed");
+				step_required = true;
+			}
+			// Check if a step was required but was not serviced (due to paused simulation)
+			if (step_required && !pauseSim)
+			{
+				step_simulation();
+				step_required = false;
+			}
 		}
 	}
 	else if (timeControls==1) // Simulation waits for controls message
@@ -171,15 +248,20 @@ int main(int argc, char **argv)
 		pub.publish(simClock);
 		while (ros::ok())
 		{
-			realTimeNow = ros::WallTime::now();
-			wallCounter = realTimeNow - realTimePrev;
-			if (wallCounter.toSec() > 5) {
-				ROS_INFO("Simulation rate: %lu Hz", frameCounter/5);
-				realTimePrev = realTimeNow;
-				frameCounter=0;
-			}
 			ros::spinOnce();
-
+			sim_spinner.sleep(); // Sleep to contorl simulation rate
+			// Check if the simulation has been dead for a long time
+			if (rate_monitor.get_time_since_last_frame() > dead_time)
+			{
+				ROS_WARN("Queing a step after dead-time ellapsed");
+				step_required = true;
+			}
+			// Check if a step was required but was not serviced (due to paused simulation)
+			if (step_required && !pauseSim)
+			{
+				step_simulation();
+				step_required = false;
+			}
 		}
 	}
 	else if (timeControls==2) // Simulation runs as fast as possible
@@ -190,14 +272,19 @@ int main(int argc, char **argv)
 		pub.publish(simClock);
 		while (ros::ok())
 		{
-			realTimeNow = ros::WallTime::now();
-			wallCounter = realTimeNow - realTimePrev;
-			if (wallCounter.toSec() > 5) {
-				ROS_INFO("Simulation rate: %lu Hz", frameCounter/5);
-				realTimePrev = realTimeNow;
-				frameCounter=0;
-			}
 			ros::spinOnce();
+			// Check if the simulation has been dead for a long time
+			if (rate_monitor.get_time_since_last_frame() > dead_time)
+			{
+				ROS_WARN("Queing a step after dead-time ellapsed");
+				step_required = true;
+			}
+			// Check if a step was required but was not serviced (due to paused simulation)
+			if (step_required && !pauseSim)
+			{
+				step_simulation();
+				step_required = false;
+			}
 		}
 	}
 	else if (timeControls==3) // Simulation is manually triggered by the pause button
@@ -207,14 +294,21 @@ int main(int argc, char **argv)
 		pub.publish(simClock);
 		while (ros::ok())
 		{
-			realTimeNow = ros::WallTime::now();
-			wallCounter = realTimeNow - realTimePrev;
-			if (wallCounter.toSec() > 5) {
-				ROS_INFO("Simulation rate: %lu Hz", frameCounter/5);
-				realTimePrev = realTimeNow;
-				frameCounter=0;
-			}
 			ros::spinOnce();
+			max_spinner.sleep(); // Take a breather
+			// Check if the simulation has been dead for a long time
+			if (rate_monitor.get_time_since_last_frame() > dead_time)
+			{
+				ROS_WARN("Queing a step after dead-time ellapsed");
+				step_required = true;
+			}
+			// Check if a step was required but was not serviced (due to paused simulation)
+			if (step_required && !pauseSim)
+			{
+				ROS_INFO("Stepping simulation");
+				step_simulation();
+				step_required = false;
+			}
 		}
 	}
 	else {
