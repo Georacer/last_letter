@@ -20,13 +20,19 @@
 
 	<!-- Launch the simulator /-->
 	<include file="$(find last_letter)/launch/simulation.launch" >
-		<arg name="manualMode" value="$(arg manualMode)"/>
-		<arg name="autoMode" value="$(arg autoMode)"/>
 		<arg name="uav_name" value="$(arg uav_name)"/>
 		<arg name="log" value="$(arg log)"/>
 		<arg name="home" value="$(arg home)"/>
 		<arg name="simRate" value="$(arg simRate)"/>
 		<arg name="deltaT" value="$(arg deltaT)"/>
+		<arg name="ArduPlane" value="$(arg ArduPlane)"/>
+	</include>
+
+	<!-- Launch the input and control nodes -->
+	<include file="$(find last_letter)/launch/controls.launch" >
+		<arg name="manualMode" value="$(arg manualMode)"/>
+		<arg name="autoMode" value="$(arg autoMode)"/>
+		<arg name="uav_name" value="$(arg uav_name)"/>
 		<arg name="ArduPlane" value="$(arg ArduPlane)"/>
 	</include>
 

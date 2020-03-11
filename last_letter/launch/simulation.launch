@@ -2,16 +2,14 @@
 
 <launch>
 
-	<arg name="manualMode"/>	<!-- Connect model input with joystick -->
-	<arg name="autoMode"/>	<!-- Connect model input with a controller node -->
 	<arg name="uav_name"/>	<!-- uav_name parameter which selects aircraft data file -->
-	<arg name="log"/>	<!-- Enable recorder node for logging -->
-	<arg name="ArduPlane"/> <!-- Let APM:SITL produce the control input -->
+	<arg name="log" default="false"/>	<!-- Enable recorder node for logging -->
+	<arg name="ArduPlane" default="false"/> <!-- Let APM:SITL produce the control input -->
 
 	<!-- External optional arguments -->
-	<arg name="home"/>
-	<arg name="simRate"/>
-	<arg name="deltaT"/>
+	<arg name="home" default="nan"/>
+	<arg name="simRate" default="nan"/>
+	<arg name="deltaT" default="nan"/>
 
 	<!-- Initialization of parameters -->
 	<group>
@@ -47,8 +45,8 @@
 			</node>
 			<node if="$(arg log)" pkg="rosbag" name="recorder" type="record" args="-O UAV_recording.bag -a"/> <!-- topic activity recorder node -->
 			<node pkg="last_letter" name="clock" type="simClock" output="screen"/>
-			<!-- <node pkg="last_letter" name="plane_model" type="model" output="screen" required="true"/> -->
-			<node pkg="last_letter" name="plane_model" type="model" output="screen" required="true" launch-prefix="gdb -ex run --args"/>
+			<node pkg="last_letter" name="plane_model" type="model" output="screen" required="true"/>
+			<!-- <node pkg="last_letter" name="plane_model" type="model" output="screen" required="true" launch-prefix="gdb -ex run -args"/> -->
 			<!-- <node pkg="last_letter" name="environment_model" type="environment" output="screen"/> -->
 			<!-- <node pkg="last_letter" name="euler_translator" type="quat2euler" output="screen"/> -->
 		</group>
@@ -69,27 +67,6 @@
 <!--			<node pkg="last_letter" name="Gyroscope" type="gyroscope.py" output="screen"/>-->
 <!--			<node pkg="last_letter" name="GPS" type="GPS.py" output="screen"/>-->
 <!--			<node pkg="last_letter" name="Magnetometer" type="magnetometer.py" output="screen"/>-->
-		</group>
-
-		<!-- Raising controller nodes -->
-		<group if="$(arg autoMode)">
-			<rosparam command="load" file="$(find last_letter)data/parameters/controllers/controller_HCUAV.yaml" />
-			<node pkg="last_letter" name="Autopilot" type="autopilot_HCUAV" output="screen"/>
-		</group>
-
-		<!-- Input nodes -->
-		<group if="$(arg manualMode)">
-			<group unless="$(arg ArduPlane)">
-	<!--		<node pkg="last_letter" name="virtualJoy" type="virtualJoy" output="screen" />-->
-				<rosparam command="load" file="$(env HOME)/last_letter_models/HID.yaml" />
-				<node pkg="joy" type="joy_node" name="joystick" output="screen" >
-					<param name="dev" value="/dev/input/js0" />
-					<param name="deadzone" value="0.01" />
-				</node>
-				<node pkg="last_letter" name="joy2chan" type="joy2chan" output="screen" >
-					<remap from="rawPWM" to="ctrlPWM"/>
-				</node>
-			</group>
 		</group>
 
 	</group>
