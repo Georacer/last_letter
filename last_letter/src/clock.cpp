@@ -113,7 +113,7 @@ void pauseLogic(const uint16_t pause_pwm)
 				else
 				{
 					ROS_INFO("Unpausing simulation");
-					step_simulation();
+					// step_simulation();
 				}
 			}
 		}
@@ -143,14 +143,9 @@ void controlsCallback(const last_letter_msgs::SimPWM pwm)
 // Callback for the ctrlPWM topic
 {
 	if (timeControls==1)
-	// If simulation is set to run on controls callback
+	// If simulation is set to run on controls callback, request another step
 	{
 		step_required = true;
-		if (!pauseSim)
-		{
-			step_simulation();
-			step_required = false;
-		}
 	}
 	// Also forward the raw controls to the ctrlPWM callback. 
 	// This is to capture the pause button when rawPWM topic is remapped to ctrlPWM as well
@@ -164,18 +159,10 @@ void controlsCallback(const last_letter_msgs::SimPWM pwm)
 void stateCallback(const last_letter_msgs::SimStates state)
 {
 	if (timeControls==0 || timeControls==2)
-	// If simulation is set to run on fixed or free clock, push another clock tick as soon as the previous state has
+	// If simulation is set to run on fixed or free clock, request another step as soon as the previous state has
 	// been calculated and published
 	{
 		step_required = true;
-		// Mark that a simulation step is required. If it is missed because of pause, step_simulation shall be called
-		// externally
-		if (!pauseSim)
-		// If simulation is not paused
-		{
-			step_simulation();
-			step_required = false;
-		}
 	}
 }
 
@@ -211,6 +198,9 @@ int main(int argc, char **argv)
 	n.getParam("chanPause", chanPause); // Read the channel number where the pauseSim command is given
 	ROS_INFO("Reading pause from %d channel", chanPause);
 
+	int ctrl_channel_rate = simRate; // Expected publish rate on the controls channel
+	int frame_multiplier = simRate/ctrl_channel_rate; // How many times the simulation must step before a new control input needs to be generated
+
 	ros::WallRate spinner(1); // Provisionally allocate the spinner
 
 	ROS_INFO("simClockNode up");
@@ -244,6 +234,8 @@ int main(int argc, char **argv)
 	ROS_INFO("%s", ctrls_msg.c_str());
 	simClock.clock = simTime;
 	pub.publish(simClock);
+
+	int temp_ctrl_counter = frame_multiplier; // Initialize the frame multiplier. Will only be needed if timeControls == 1
 	while (ros::ok())
 	{
 		ros::spinOnce();
@@ -258,7 +250,20 @@ int main(int argc, char **argv)
 		if (step_required && !pauseSim)
 		{
 			step_simulation();
-			step_required = false;
+			// If the clock is tied to the control channel
+			if (timeControls==1)
+			{
+				temp_ctrl_counter -= 1;
+				if (temp_ctrl_counter == 0)
+				{
+					step_required = false;
+					temp_ctrl_counter = frame_multiplier;
+				}
+			}
+			else
+			{
+				step_required = false;
+			}
 		}
 	}
 
