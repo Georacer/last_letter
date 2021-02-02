@@ -1,0 +1,125 @@
+# Yaw gauge
+Gauge1:
+    topic: dashboard/euler/z
+    length: 360.0
+    end_angle: -90.0
+    min: -180.0
+    max: 180.0
+    main_points : 8
+    warning: []
+    danger: []
+    multiplier: ''
+    units: degrees
+    description: Yaw
+
+# Roll gauge
+Gauge2:
+    topic: dashboard/euler/x
+    length: 360.0
+    end_angle: -90.0
+    min: -180.0
+    max: 180.0
+    main_points : 24
+    warning : [-45, -30, 30, 45]
+    danger : [-180, -45, 45, 180]
+    multiplier: ''
+    units: degrees
+    description: Roll
+
+# Pitch gauge
+Gauge3:
+    topic: dashboard/euler/y
+    length: 180.0
+    end_angle: 90.0
+    min: -90.0
+    max: 90.0
+    main_points : 13
+    warning : [-15, -5, 5, 15]
+    danger : [-90, -15, 15, 90]
+    multiplier: ''
+    units: degrees
+    description: Pitch
+
+# Airspeed gauge
+Gauge4:
+    topic: dashboard/airspeed
+    length: 300.0
+    end_angle: -60.0
+    min : 0.0
+    max : 25.0
+    main_points : 6
+    warning : [7, 10, 20, 22]
+    danger : [0, 7, 22, 25]
+    multiplier: ''
+    units: m/s
+    description: Airspeed
+
+# Climb rate gauge
+Gauge5:
+    topic: dashboard/climbRate
+    length: 180.0
+    end_angle: 90.0
+    min : -10.0
+    max : 10.0
+    main_points : 7
+    warning : [-6, -4, 2, 3]
+    danger : [-10, -6, 3, 10]
+    multiplier: ''
+    units: m/s
+    description: Climb Rate
+
+# Altitude gauge
+Gauge6:
+    topic: dashboard/altitude
+    length: 360.0
+    end_angle: -90.0
+    min : 0.0
+    max : 500.0
+    main_points : 10
+    warning : [50, 100]
+    danger : [0, 50]
+    multiplier: ''
+    units: m
+    description: Geometric Altitude
+
+# Alpha gauge
+Gauge7:
+    topic: dashboard/alpha
+    length: 180.0
+    end_angle: 90.0
+    min : -90.0
+    max : 90.0
+    main_points : 13
+    warning : [-7, -5, 12, 17]
+    danger : [-90, -7, 17, 90]
+    multiplier: ''
+    units: degrees
+    description: Angle of Attack
+
+# Beta gauge
+Gauge8:
+    topic: dashboard/beta
+    length: 180.0
+    end_angle: 0.0
+    min : -90.0
+    max : 90.0
+    main_points : 13
+    warning : [-10, -5, 5, 10]
+    danger : [-90, -10, 10, 90]
+    multiplier: ''
+    units: degrees
+    description: Angle of Sideslip
+
+# Rotorspeed gauge
+Gauge9:
+    topic: dashboard/rotorspeed
+    length: 300.0
+    end_angle: -60.0
+    min : 0.0
+    max : 9600.0
+    main_points : 9
+    warning : [7000, 8000]
+    danger : [8000, 9600]
+    multiplier: ''
+    units: RPM
+    description: Engine Speed
