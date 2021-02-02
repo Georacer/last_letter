@@ -6,7 +6,7 @@
 	<arg name="manualMode" default="true"/>
 	<arg name="autoMode" default="false"/>
 	<arg name="ArduPlane" default="false"/>
-	<arg name="uav_name" default="skywalker_2013"/>
+	<arg name="uav_name" default="skywalker_2013_mod"/>
 	<arg name="log" default="false"/>
 	<!-- <arg name="groundCam" default="false"/> -->
 
