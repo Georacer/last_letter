@@ -1,39 +1,37 @@
 <?xml version="1.0"?>
-<package format="2">
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
   <name>last_letter</name>
-  <version>0.9.0</version>
-  <description>The last_letter package</description>
+  <version>3.0.0</version>
+  <description>The last_letter UAV simulation suite</description>
+  <maintainer email="tailwhipx4@gmail.com">George</maintainer>
+  <license>TODO: License declaration</license>
 
-  <maintainer email="gzogop@mail.ntua.gr">George Zogopoulos-Papaliakos</maintainer>
+  <depend>message_filters</depend>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>gazebo_msgs</depend>
+  <depend>gazebo_ros</depend>
+  <depend>mavlink</depend>
+  <depend>last_letter_msgs</depend>
+  <depend>gazebo11</depend>
+  <depend>joy</depend>
 
-  <license>GPLv3</license>
+  <depend>libblas-dev</depend>
+  <depend>liblapack-dev</depend>
+  <depend>libfcl-dev</depend>
 
-  <url type="repository">https://github.com/Georacer/last_letter</url>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rclcpp</buildtool_depend>
+  <buildtool_depend>gazebo_msgs</buildtool_depend>
+  <build_depend>eigen</build_depend>
 
-  <author email="gzogop@mail.ntua.gr">George Zogopoulos-Papaliakos</author>
-  <author email="marantos@mail.ntua.gr">Panos Marantos</author>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
-
-  <build_depend>roscpp</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>message_generation</build_depend>
-  <build_depend>joy</build_depend>
-  <build_depend>last_letter_msgs</build_depend>
-  <build_depend>rosdoc_lite</build_depend>
-  <build_depend>tf</build_depend>
-  <build_depend>last_letter_lib</build_depend>
-
-  <build_export_depend>last_letter_msgs</build_export_depend>
-  <build_export_depend>last_letter_lib</build_export_depend>
-
-  <exec_depend>roscpp</exec_depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>joy</exec_depend>
-  <exec_depend>last_letter_msgs</exec_depend>
-  <exec_depend>tf</exec_depend>
-  <exec_depend>last_letter_lib</exec_depend>
-
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 </package>

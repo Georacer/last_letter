@@ -1,0 +1,16 @@
+image: ros:foxy-ros-base
+
+pipelines:
+    pull-requests:
+        '**': # Run this by default
+            - step:
+                name: Build and test the code
+                script:
+                    - mkdir -p ~/ros_ws/src/last_letter
+                    - cp -r . ~/ros_ws/src/last_letter
+                    - cd ~/ros_ws/src/last_letter
+                    - apt-get update && apt-get install -y ssh-client
+                    - git submodule update --init --recursive
+                    - ./tools/install_dependencies.sh
+                    - ./tools/build_project.sh
+                    - ./tools/install_project.sh

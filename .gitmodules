@@ -1,0 +1,4 @@
+[submodule "last_letter/external/last_letter_lib"]
+    path = last_letter/external/last_letter_lib
+    url = https://github.com/Georacer/last_letter_lib.git
+    branch = develop

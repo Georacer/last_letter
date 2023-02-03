@@ -1,6 +1,6 @@
 # Generic parameter message
 # Mainly used for emitting model parameter changes
-Header header
+std_msgs/Header header
 int8 type # The parameter type (aero, env, prop, etc)
 # typedef enum {
 #     PARAM_TYPE_WORLD = 0,

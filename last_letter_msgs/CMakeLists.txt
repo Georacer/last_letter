@@ -1,63 +1,45 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5)
 project(last_letter_msgs)
 
-## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS
-	roscpp
-	rospy
-	std_msgs
-	nav_msgs
-	geometry_msgs
-	message_generation
+# Default to C99
+if(NOT CMAKE_C_STANDARD)
+  set(CMAKE_C_STANDARD 99)
+endif()
+
+# Default to C++14
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
+# Generate message and service descriptions
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Vector4.msg"
+  "msg/CommandPayload.msg"
+  "msg/SimCommands.msg"
+  "msg/Parameter.msg"
+  "msg/SimPWM.msg"
+  "msg/LinkStates.msg"
+  "msg/Airdata.msg"
+  "msg/Barometer.msg"
+  "msg/Gnss.msg"
+  "msg/Imu.msg"
+  "msg/MavlinkHilStateQuaternion.msg"
+  DEPENDENCIES
+  std_msgs
+  sensor_msgs
+  geometry_msgs
 )
 
-################################################
-## Declare ROS messages, services and actions ##
-################################################
-
-## Generate messages in the 'msg' folder
-add_message_files(
-	FILES
-	Accelerations.msg
-	SimPWM.msg
-	SimServos.msg
-	SimStates.msg
-	SimWrenches.msg
-	Geoid.msg
-	ElectricEng.msg
-	Environment.msg
-	Parameter.msg
-	SimSensor.msg
-	SimSensor3.msg
-	SimBarometer.msg
-	SimGPS.msg
-	SimSat.msg
-	SimSats.msg
-	DOP.msg
-	RefCommands.msg
-)
-
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-	DEPENDENCIES
-	std_msgs
-	nav_msgs
-	geometry_msgs
-)
-
-###################################
-## catkin specific configuration ##
-###################################
-
-catkin_package(
-   CATKIN_DEPENDS message_runtime
-)
-
-###########
-## Build ##
-###########
-
-## Generate package documentation with rosdoc_lite
-execute_process(COMMAND rospack find last_letter_msgs
-	OUTPUT_VARIABLE LAST_LETTER_MSGS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND rosdoc_lite -o ${LAST_LETTER_MSGS_DIR}/doc/doxygen_rosdoc_lite ${LAST_LETTER_MSGS_DIR})
+ament_package()
