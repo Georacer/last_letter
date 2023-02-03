@@ -3,6 +3,8 @@ import os
 import launch
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -11,6 +13,11 @@ os.environ["GAZEBO_PLUGIN_PATH"] = os.path.expanduser("~/.gazebo/plugins")
 
 
 def generate_launch_description():
+
+    uav_name_arg = DeclareLaunchArgument(name='uav_name', default_value='skywalker_2013', description='The UAV model name.')
+    uav_name_value = LaunchConfiguration('uav_name')
+    world_file_path_arg = DeclareLaunchArgument(name='world_file_path', default_value='~/.gazebo/worlds/ll_world.world', description='The world file to load.')
+    world_file_path_value = LaunchConfiguration('world_file_path')
 
     # Create a log_level argument for the launcher, trickling down to all nodes
     logger = launch.substitutions.LaunchConfiguration("log_level")
@@ -27,7 +34,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "world": "~/.gazebo/worlds/ll_world.world",
+            "world": world_file_path_value,
             "verbose": "true",
             "lockstep": "true",
             "server_required": "true",
@@ -46,7 +53,7 @@ def generate_launch_description():
             )
         ),
         launch_arguments={
-            "world": "~/.gazebo/worlds/ll_world.world",
+            "world": world_file_path_value,
             "verbose": "true",
             "lockstep": "true",
             # "server_required": "true",
@@ -61,7 +68,7 @@ def generate_launch_description():
         namespace="",
         executable="uav_model_ros",
         name="uav_model_ros",
-        parameters=[{"use_sim_time": True, "uav_name": "skywalker_2013"}],
+        parameters=[{"use_sim_time": True, "uav_name": uav_name_value}],
         arguments=["--ros-args", "--log-level", logger],
         output={"stdout": "screen"},
         # parameters=[{"uav_name": "skywalker"}],
@@ -109,6 +116,8 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            uav_name_arg,
+            world_file_path_arg,
             logging_config,
             last_letter_node,
             px4_interface_node,
