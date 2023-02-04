@@ -9,14 +9,18 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 
-os.environ["GAZEBO_PLUGIN_PATH"] = os.path.expanduser("~/.gazebo/plugins")
-
+MODELS_FOLDER = os.path.expanduser("~/last_letter_models/")
+os.environ["GAZEBO_PLUGIN_PATH"] += os.pathsep + os.path.expanduser("~/.gazebo/plugins")
+os.environ["GAZEBO_MODEL_PATH"] += os.pathsep + os.path.join(MODELS_FOLDER, 'models')
+os.environ["GAZEBO_RESOURCE_PATH"] += os.pathsep + os.path.join(MODELS_FOLDER, 'worlds')
 
 def generate_launch_description():
 
     uav_name_arg = DeclareLaunchArgument(name='uav_name', default_value='skywalker_2013', description='The UAV model name.')
     uav_name_value = LaunchConfiguration('uav_name')
-    world_file_path_arg = DeclareLaunchArgument(name='world_file_path', default_value='~/.gazebo/worlds/ll_world.world', description='The world file to load.')
+    world_file_path_arg = DeclareLaunchArgument(name='world_file_path',
+                                                default_value=[uav_name_value, '.world'],
+                                                description='The world file to load.')
     world_file_path_value = LaunchConfiguration('world_file_path')
 
     # Create a log_level argument for the launcher, trickling down to all nodes
