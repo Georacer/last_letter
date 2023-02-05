@@ -14,13 +14,7 @@ COPY tools/entrypoint.sh /ros_entrypoint.sh
 RUN chmod +x /ros_entrypoint.sh
 COPY tools/environment.sh /environment.sh
 
-# RUN echo "" >> ~/.bashrc
-# RUN echo "export GAZEBO_MODEL_PATH=/usr/share/gazebo-11/models:$HOME/.gazebo/models:" >> ~/.bashrc
-# RUN echo "export GAZEBO_RESOURCE_PATH=:/usr/share/gazebo-11:/usr/share/gazebo_models:" >> ~/.bashrc
-# RUN echo "export GAZEBO_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/gazebo-11/plugins" >> ~/.bashrc
-# RUN echo "source /ros_ws/install/setup.bash" >> ~/.bashrc
 RUN cat /environment.sh >> ~/.bashrc
-# Perhaps source: "source <install_path>/share/gazebo/setup.sh"
 
 # Remove the apt cache to reduce image size.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
