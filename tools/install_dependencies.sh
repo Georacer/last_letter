@@ -21,8 +21,9 @@ add-apt-repository ppa:berndporr/dsp -y
 ## Install packages
 apt-get update && apt-get install -y\
     iir1-dev \
-    python3-pip
+    python3-pip \
+    vim
 
 # Install pip packages
-pip3 install -r src/last_letter/last_letter/external/last_letter_lib/tools/requirements.txt
+pip install /ros_ws/src/last_letter/last_letter/external/last_letter_lib/
 pip3 install -r src/last_letter/tools/requirements.txt
