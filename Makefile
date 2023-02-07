@@ -3,7 +3,7 @@ USE_DOCKER ?= true
 USE_SUDO ?= false
 HEADLESS ?= false
 UAV_NAME ?= skywalker_2013
-CUSTOM_UAV_PATH ?= ''
+CUSTOM_MODELS_FOLDER ?= ''
 
 .DEFAULT_GOAL = run
 
@@ -12,13 +12,14 @@ help:
 	@echo '*** last_letter simulator ***'
 	@echo 'Usage: make [TARGET] [ARGUMENTS]'
 	@echo 'TARGETS:'
-	@echo '	help		Display help message.'
-	@echo '	run		Run the simulation.'
+	@echo '	help			Display help message.'
+	@echo '	run			Run the simulation.'
 	@echo 'ARGUMENTS:'
-	@echo '	USE_DOCKER	Run the simulation in a Docker container [true].'
-	@echo '	USE_SUDO	Invoke docker with sudo [false].'
-	@echo '	HEADLESS	Do not launch graphics [false].'
-	@echo '	UAV_NAME	Select the UAV model to launch [skywalker_2013].'
+	@echo '	USE_DOCKER		Run the simulation in a Docker container [true].'
+	@echo '	USE_SUDO		Invoke docker with sudo [false].'
+	@echo '	HEADLESS		Do not launch graphics [false].'
+	@echo '	UAV_NAME		Select the UAV model to launch [skywalker_2013].'
+	@echo '	CUSTOM_MODELS_FOLDER	Select the UAV model to launch [skywalker_2013].'
 
 # Activate the xhost environment to share it with a Docker container.
 define xhost_activate
@@ -31,8 +32,8 @@ endef
 ROS_ARGS = \
 	uav_name:=$(UAV_NAME)
 
-ifneq ($(CUSTOM_UAV_PATH), '')
-	mount_custom_uav:=--volume=$(CUSTOM_UAV_PATH):/root/last_letter_models/models/$(UAV_NAME)
+ifneq ($(CUSTOM_MODELS_FOLDER), '')
+	mount_custom_uav:=--volume=$(CUSTOM_MODELS_FOLDER)/$(UAV_NAME):/root/last_letter_models/models/$(UAV_NAME)
 endif
 
 ifeq ($(USE_SUDO), true)
