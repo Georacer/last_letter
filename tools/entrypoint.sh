@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex # setup environment
+set -e
 
 source /environment.sh
 

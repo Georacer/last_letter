@@ -13,7 +13,8 @@ Create a `ros_ws/src` folder.
 
 Launch the launch file manually by
 `. ros_ws/install/setup.bash`
-`ros2 launch last_letter default.launch.py uav_name:=<uav_name> world_file_path:=<world_path>`
+`cd src/last_letter`
+`make run USE_DOCKER=false`
 
 ## On Docker
 
@@ -24,10 +25,9 @@ It takes approximately 10 minutes.
 
 ### Run on Docker
 
-`xhost +` (or `xhost +local:docker`?)
-`sudo docker run -it --rm --volume=/tmp/.X11-unix/:/tmp/.X11-unix/ --device=/dev/dri:/dev/dri -e DISPLAY -p 14570:14570 -p 4560:4560 last_letter`
+`cd src/last_letter`
+`make run`
 
-If you want non-default arguments, call instead:
-`sudo docker run -it --rm --volume=/tmp/.X11-unix/:/tmp/.X11-unix/ --device=/dev/dri:/dev/dri -e DISPLAY -p 14570:14570 -p 4560:4560 last_letter ros2 launch last_letter default.launch.py uav_name:=<uav_name> world_file_path:=<world_path>`
+## Available commands
 
-### Run custom models
+`make run help`
