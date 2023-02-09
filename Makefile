@@ -51,7 +51,7 @@ endif
 ifeq ($(USE_DOCKER), true)
 	DOCKER_CMD = $(DOCKER_SUDO) docker run --rm \
 		$(DOCKER_DETACHED) \
-		--name pxavy_last_letter \
+		--name $(CONTAINER_NAME) \
 		--volume=/tmp/.X11-unix/:/tmp/.X11-unix/ \
 		$(mount_custom_uav) \
 		--device=/dev/dri:/dev/dri \
