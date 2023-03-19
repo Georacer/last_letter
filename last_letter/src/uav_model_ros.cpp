@@ -13,28 +13,28 @@
 using namespace std::chrono_literals;
 
 ///////////////////
-//Class Constructor
+// Class Constructor
 UavModelNode::UavModelNode() : Node("uav_model_node")
 {
     // Get the UAV name from the parameter server and build the relevant UAV configuration struct
     this->declare_parameter<std::string>("uav_name", "uav_name");
     this->get_parameter("uav_name", uavName);
     RCLCPP_INFO(this->get_logger(), "Loading uav configuration for %s", uavName.c_str());
-    lll::programming_utils::ConfigsStruct_t configStruct = lll::programming_utils::loadModelConfig(uavName);
+    lll::programming_utils::ParameterManager configStruct = lll::programming_utils::loadModelConfig(uavName);
     // Parameter randomization is done internally in loadModelConfig
 
     RCLCPP_INFO(this->get_logger(), "Creating new UavModel");
-    uavModel = new lll::UavModel(configStruct); //Create a UavStruct by passing the configurations bundle struct
+    uavModel = new lll::UavModel(configStruct); // Create a UavStruct by passing the configurations bundle struct
 
     tprev = this->now();
 
-    //Subscribe and advertize
+    // Subscribe and advertize
     subState = this->create_subscription<last_letter_msgs::msg::LinkStates>(
         "/ll_link_states", 10, std::bind(&UavModelNode::getState_cb, this, std::placeholders::_1));
     subInp = this->create_subscription<last_letter_msgs::msg::SimPWM>(
         "/ctrlPWM",
         1,
-        std::bind(&UavModelNode::getInput, this, std::placeholders::_1)); //model control input subscriber
+        std::bind(&UavModelNode::getInput, this, std::placeholders::_1)); // model control input subscriber
     subParam = this->create_subscription<last_letter_msgs::msg::Parameter>(
         "parameter_changes",
         1000,
@@ -52,14 +52,14 @@ UavModelNode::UavModelNode() : Node("uav_model_node")
     filt_az_.setup(f_sample_, f_cut_);
 
     // Initialize sensor publishers
-	airdata_pub_ = create_publisher<last_letter_msgs::msg::Airdata>("/airdata", 10);
-	baro_pub_ = create_publisher<last_letter_msgs::msg::Barometer>("/barometer", 10);
-	imu_pub_ = create_publisher<last_letter_msgs::msg::Imu>("/imu", 10);
-	gnss_pub_ = create_publisher<last_letter_msgs::msg::Gnss>("/gnss", 10);
-	groundtruth_pub_ = create_publisher<last_letter_msgs::msg::MavlinkHilStateQuaternion>("/groundtruth", 10);
+    airdata_pub_ = create_publisher<last_letter_msgs::msg::Airdata>("/airdata", 10);
+    baro_pub_ = create_publisher<last_letter_msgs::msg::Barometer>("/barometer", 10);
+    imu_pub_ = create_publisher<last_letter_msgs::msg::Imu>("/imu", 10);
+    gnss_pub_ = create_publisher<last_letter_msgs::msg::Gnss>("/gnss", 10);
+    groundtruth_pub_ = create_publisher<last_letter_msgs::msg::MavlinkHilStateQuaternion>("/groundtruth", 10);
 }
 
-//Initialize states
+// Initialize states
 void UavModelNode::init()
 {
     uavModel->init();
@@ -73,7 +73,7 @@ void UavModelNode::timerCallback()
 }
 
 ///////////////////////////////////////
-//make one step of the plane simulation
+// make one step of the plane simulation
 void UavModelNode::step()
 {
     if (_new_parameters)
@@ -230,32 +230,32 @@ void UavModelNode::publishSensors()
     {
         switch (sensor_ptr->type)
         {
-            case last_letter_lib::sensor_t::IMU:
-                imu_pub_->publish(buildImuMsg(sensor_ptr.get()));
-                break;
-            case last_letter_lib::sensor_t::BAROMETER:
-                baro_pub_->publish(buildBaroMsg(sensor_ptr.get()));
-                break;
-            case last_letter_lib::sensor_t::AIRDATA:
-                airdata_pub_->publish(buildAirdataMsg(sensor_ptr.get()));
-                break;
-            case last_letter_lib::sensor_t::GPS:
-                gnss_pub_->publish(buildGnssMsg(sensor_ptr.get()));
-                break;
-            case last_letter_lib::sensor_t::MAVLINK_HIL_STATE_QUATERNION:
-                groundtruth_pub_->publish(buildGroundtruthMsg(sensor_ptr.get()));
-                break;
-            default:
-                RCLCPP_ERROR(get_logger(), "Unknown sensor type %d", sensor_ptr->type);
-                std::cout << "Unknown sensor type: " << int(sensor_ptr->type) << std::endl;
-                break;
+        case last_letter_lib::sensor_t::IMU:
+            imu_pub_->publish(buildImuMsg(sensor_ptr.get()));
+            break;
+        case last_letter_lib::sensor_t::BAROMETER:
+            baro_pub_->publish(buildBaroMsg(sensor_ptr.get()));
+            break;
+        case last_letter_lib::sensor_t::AIRDATA:
+            airdata_pub_->publish(buildAirdataMsg(sensor_ptr.get()));
+            break;
+        case last_letter_lib::sensor_t::GPS:
+            gnss_pub_->publish(buildGnssMsg(sensor_ptr.get()));
+            break;
+        case last_letter_lib::sensor_t::MAVLINK_HIL_STATE_QUATERNION:
+            groundtruth_pub_->publish(buildGroundtruthMsg(sensor_ptr.get()));
+            break;
+        default:
+            RCLCPP_ERROR(get_logger(), "Unknown sensor type %d", sensor_ptr->type);
+            std::cout << "Unknown sensor type: " << int(sensor_ptr->type) << std::endl;
+            break;
         }
     }
 }
 
-last_letter_msgs::msg::Airdata UavModelNode::buildAirdataMsg(last_letter_lib::Sensor * base_sensor)
+last_letter_msgs::msg::Airdata UavModelNode::buildAirdataMsg(last_letter_lib::Sensor *base_sensor)
 {
-    auto * sensor_ptr = static_cast<last_letter_lib::AirdataSensor*>(base_sensor);
+    auto *sensor_ptr = static_cast<last_letter_lib::AirdataSensor *>(base_sensor);
     last_letter_msgs::msg::Airdata msg;
     msg.header.stamp = now();
     msg.differential_pressure = sensor_ptr->differential_pressure;
@@ -266,9 +266,9 @@ last_letter_msgs::msg::Airdata UavModelNode::buildAirdataMsg(last_letter_lib::Se
     return msg;
 }
 
-last_letter_msgs::msg::Barometer UavModelNode::buildBaroMsg(last_letter_lib::Sensor * base_sensor)
+last_letter_msgs::msg::Barometer UavModelNode::buildBaroMsg(last_letter_lib::Sensor *base_sensor)
 {
-    auto sensor_ptr = static_cast<last_letter_lib::Barometer*>(base_sensor);
+    auto sensor_ptr = static_cast<last_letter_lib::Barometer *>(base_sensor);
     last_letter_msgs::msg::Barometer msg;
     msg.header.stamp = now();
     msg.temperature = sensor_ptr->temperature_reading;
@@ -277,9 +277,9 @@ last_letter_msgs::msg::Barometer UavModelNode::buildBaroMsg(last_letter_lib::Sen
     return msg;
 }
 
-last_letter_msgs::msg::Imu UavModelNode::buildImuMsg(last_letter_lib::Sensor * base_sensor)
+last_letter_msgs::msg::Imu UavModelNode::buildImuMsg(last_letter_lib::Sensor *base_sensor)
 {
-    auto sensor_ptr = static_cast<last_letter_lib::Imu*>(base_sensor);
+    auto sensor_ptr = static_cast<last_letter_lib::Imu *>(base_sensor);
     last_letter_msgs::msg::Imu msg;
     msg.header.stamp = now();
     msg.accelerometer.x = sensor_ptr->accelerometer_reading.x();
@@ -294,9 +294,9 @@ last_letter_msgs::msg::Imu UavModelNode::buildImuMsg(last_letter_lib::Sensor * b
     return msg;
 }
 
-last_letter_msgs::msg::Gnss UavModelNode::buildGnssMsg(last_letter_lib::Sensor * base_sensor)
+last_letter_msgs::msg::Gnss UavModelNode::buildGnssMsg(last_letter_lib::Sensor *base_sensor)
 {
-    auto sensor_ptr = static_cast<last_letter_lib::Gnss*>(base_sensor);
+    auto sensor_ptr = static_cast<last_letter_lib::Gnss *>(base_sensor);
     last_letter_msgs::msg::Gnss msg;
     msg.header.stamp = now();
     msg.status.status = sensor_ptr->fix_type;
@@ -315,30 +315,30 @@ last_letter_msgs::msg::Gnss UavModelNode::buildGnssMsg(last_letter_lib::Sensor *
     return msg;
 }
 
-last_letter_msgs::msg::MavlinkHilStateQuaternion UavModelNode::buildGroundtruthMsg(last_letter_lib::Sensor * base_sensor)
+last_letter_msgs::msg::MavlinkHilStateQuaternion UavModelNode::buildGroundtruthMsg(last_letter_lib::Sensor *base_sensor)
 {
-    auto sensor_ptr = static_cast<last_letter_lib::MavlinkHilStateQuaternion*>(base_sensor);
+    auto sensor_ptr = static_cast<last_letter_lib::MavlinkHilStateQuaternion *>(base_sensor);
     last_letter_msgs::msg::MavlinkHilStateQuaternion msg;
     msg.header.stamp = now();
     Quaterniond orientation = sensor_ptr->attitude.conjugate();
-	msg.quaternion.x = orientation.x();
-	msg.quaternion.y = orientation.y();
-	msg.quaternion.z = orientation.z();
-	msg.quaternion.w = orientation.w();
-	msg.acceleration.x = sensor_ptr->acceleration_linear.x();
-	msg.acceleration.y = sensor_ptr->acceleration_linear.y();
-	msg.acceleration.z = sensor_ptr->acceleration_linear.z();
-	msg.velocity_angular.x = sensor_ptr->velocity_angular.x();
-	msg.velocity_angular.y = sensor_ptr->velocity_angular.y();
-	msg.velocity_angular.z = sensor_ptr->velocity_angular.z();
-	msg.latitude = sensor_ptr->latitude;
-	msg.longitude = sensor_ptr->longitude;
-	msg.altitude = sensor_ptr->altitude;
-	msg.gnss_velocity.x = sensor_ptr->velocity_ned.x();
-	msg.gnss_velocity.y = sensor_ptr->velocity_ned.y();
-	msg.gnss_velocity.z = sensor_ptr->velocity_ned.z();
-	msg.airspeed_indicated = sensor_ptr->airspeed_indicated;
-	msg.airspeed_true = sensor_ptr->airspeed_true;
+    msg.quaternion.x = orientation.x();
+    msg.quaternion.y = orientation.y();
+    msg.quaternion.z = orientation.z();
+    msg.quaternion.w = orientation.w();
+    msg.acceleration.x = sensor_ptr->acceleration_linear.x();
+    msg.acceleration.y = sensor_ptr->acceleration_linear.y();
+    msg.acceleration.z = sensor_ptr->acceleration_linear.z();
+    msg.velocity_angular.x = sensor_ptr->velocity_angular.x();
+    msg.velocity_angular.y = sensor_ptr->velocity_angular.y();
+    msg.velocity_angular.z = sensor_ptr->velocity_angular.z();
+    msg.latitude = sensor_ptr->latitude;
+    msg.longitude = sensor_ptr->longitude;
+    msg.altitude = sensor_ptr->altitude;
+    msg.gnss_velocity.x = sensor_ptr->velocity_ned.x();
+    msg.gnss_velocity.y = sensor_ptr->velocity_ned.y();
+    msg.gnss_velocity.z = sensor_ptr->velocity_ned.z();
+    msg.airspeed_indicated = sensor_ptr->airspeed_indicated;
+    msg.airspeed_true = sensor_ptr->airspeed_true;
     return msg;
 }
 
@@ -354,7 +354,7 @@ void UavModelNode::getParameters(const last_letter_msgs::msg::Parameter::SharedP
 }
 
 //////////////////
-//Class destructor
+// Class destructor
 UavModelNode::~UavModelNode()
 {
     delete uavModel;

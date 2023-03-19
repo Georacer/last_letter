@@ -72,7 +72,7 @@ endif
 	@$(DOCKER_CMD) ros2 launch last_letter default.launch.py $(ROS_ARGS)
 
 # Stop a detached docker container.
-.PHONE: stop
+.PHONY: stop
 stop:
 	$(DOCKER_SUDO) docker stop $(CONTAINER_NAME)
 	

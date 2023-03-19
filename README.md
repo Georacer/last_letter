@@ -30,4 +30,4 @@ It takes approximately 10 minutes.
 
 ## Available commands
 
-`make run help`
+`make help`
