@@ -389,10 +389,10 @@ void Px4Interface::convert_controls_from_px4_to_ll(const std::vector<double> inp
     ctrl_output_.value[6] = inputs[2] * 1000 + 1000;
     ctrl_output_.value[7] = inputs[3] * 1000 + 1000;
     // Airplane part
-    ctrl_output_.value[0] = inputs[6] * 500 + 1500;
-    ctrl_output_.value[1] = inputs[7] * 500 + 1500;
-    ctrl_output_.value[2] = inputs[4] * 1000 + 1000;
-    ctrl_output_.value[3] = 1500; // VTOL has no rudder
+    ctrl_output_.value[0] = inputs[5] * 500 + 1500;  // Aileron
+    ctrl_output_.value[1] = inputs[6] * 500 + 1500;  // Elevator
+    ctrl_output_.value[2] = inputs[4] * 1000 + 1000; // Throttle
+    ctrl_output_.value[3] = inputs[7] * 500 + 1500;  // Rudder
     // ctrl_output_.header.stamp = rclcpp::Time(0, 0) + px4_time_;
     ctrl_output_.header.stamp = px4_time_;
 }
