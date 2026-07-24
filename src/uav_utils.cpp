@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <stdexcept>
+
 #include "last_letter_lib/uav_utils.hpp"
 #include "last_letter_lib/math_utils.hpp"
 
@@ -70,7 +73,7 @@ SimState_t::SimState_t(const VectorXd v)
     {
         int num_rotors = v.size() - 13;
         rotorspeed = std::vector<double>(num_rotors);
-        for (int idx; idx < num_rotors; idx++)
+        for (int idx=0; idx < num_rotors; idx++)
         {
             rotorspeed[idx] = v(13 + idx);
         }
@@ -98,54 +101,13 @@ SimState_t SimState_t::strip_thrusters()
     return res;
 }
 
-Input::Input(double delta_a, double delta_e, double delta_r, std::vector<double> delta_t) : value(12, 0)
+Input::Input(const std::vector<double> &v) : value(num_input_channels, 0)
 {
-    set_da(delta_a);
-    set_de(delta_e);
-    set_dr(delta_r);
-    set_dt(delta_t);
-}
-void Input::set_dt(const std::vector<double> v)
-{
-    num_thrusters = v.size();
-    if (num_thrusters > 0)
+    if (v.size() > num_input_channels)
     {
-        value.at(2) = v.at(0);
-        if (num_thrusters > 1)
-        {
-            for (int idx = 1; idx < num_thrusters; idx++)
-            {
-                value.at(idx + 3) = v.at(idx);
-            }
-        }
+        throw std::invalid_argument("Input vector longer than num_input_channels.");
     }
-}
-std::vector<double> Input::get_dt()
-{
-    if (num_thrusters == 0)
-    {
-        return std::vector<double>();
-    }
-    else
-    {
-        std::vector<double> v(num_thrusters, 0);
-        v.at(0) = value.at(2);
-        if (num_thrusters > 1)
-        {
-            for (int idx = 1; idx < num_thrusters; idx++)
-            {
-                v.at(idx) = value.at(idx + 3);
-            }
-        }
-        return v;
-    }
-}
-std::vector<double> Input::to_python_array()
-{
-    std::vector<double> v = {get_da(), get_de(), get_dr()};
-    auto thrusters = get_dt();
-    v.insert(v.end(), thrusters.begin(), thrusters.end());
-    return v;
+    std::copy(v.begin(), v.end(), value.begin());
 }
 
 //////////////////////////

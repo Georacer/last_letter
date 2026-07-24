@@ -202,29 +202,23 @@ public:
 
 typedef std::unordered_map<std::string, SimState_t> LinkStateMap_t;
 
+// Number of control channels carried by an Input / InputPwm_t.
+constexpr size_t num_input_channels{16};
+
 class Input
 {
 public:
-    Input() : value(12, 0) {}
-    Input(double delta_a, double delta_e, double delta_r, std::vector<double> delta_t);
+    Input() : value(num_input_channels, 0) {}
+    // Build from a channel vector. Shorter inputs are zero-padded to num_input_channels.
+    Input(const std::vector<double> &v);
     std::vector<double> value; // -1 - 1 (or 0 - 1) ranged
-    double get_da() { return value.at(0); }
-    void set_da(const double v) { value.at(0) = v; }
-    double get_de() { return value.at(1); }
-    void set_de(const double v) { value.at(1) = v; }
-    double get_dr() { return value.at(3); }
-    void set_dr(const double v) { value.at(3) = v; }
-    std::vector<double> get_dt();
-    void set_dt(const std::vector<double> v);
-    std::vector<double> to_python_array();
-    int num_thrusters{0};
-
-private:
+    std::vector<double> to_array() const { return value; }
+    static Input from_array(const std::vector<double> &v) { return Input(v); }
 };
 
 struct InputPwm_t
 {
-    InputPwm_t() : value(12, 1000) {}
+    InputPwm_t() : value(num_input_channels, 1000) {}
     std::vector<uint16_t> value; // PWM microseconds, 1000-2000 typical range
 };
 

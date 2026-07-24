@@ -333,7 +333,7 @@ class TestThruster:
         thruster = build_thruster_simple
 
         delta_t = 0.5
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         thruster.update_local_state(build_uav_state, build_environment_data)
         thruster.calc_model()
@@ -382,7 +382,7 @@ class TestThruster:
         thruster.update_parameters()
 
         delta_t = 0.5
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         thruster.update_local_state(build_uav_state, build_environment_data)
         thruster.calc_model()
@@ -407,7 +407,7 @@ class TestThruster:
         state.velocity_linear = np.array([0, 0, 0])
 
         delta_t = 0.5
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         thruster.update_local_state(build_uav_state, build_environment_data)
         thruster.calc_model()
@@ -427,7 +427,7 @@ class TestThruster:
         state.velocity_linear = np.array([pitch_speed, 0, 0])
 
         delta_t = 0.5
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         thruster.update_local_state(build_uav_state, build_environment_data)
         thruster.calc_model()
@@ -458,7 +458,7 @@ class TestThruster:
         state.velocity_linear = np.array([0, 0, 0])
 
         delta_t = 0.5
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         thruster.update_local_state(build_uav_state, build_environment_data)
         for _ in range(100):  # TODO: Once you bind DynamicSystem, check t=1 to stop.
@@ -482,7 +482,7 @@ class TestThruster:
         """
         thruster = build_thruster_electric_2
         delta_t = 0.5
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         state = build_uav_state
         state.velocity_linear = np.array([0, 0, 0])
@@ -527,7 +527,7 @@ class TestThruster:
         state.velocity_linear = np.array([0, 0, 0])
 
         delta_t = 0
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         thruster.update_local_state(build_uav_state, build_environment_data)
         thruster.calc_model()
@@ -549,7 +549,7 @@ class TestThruster:
 
         omega_ref = 700
         delta_t = omega_ref / thruster.get_param_double("omega_max")
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         thruster.update_local_state(build_uav_state, build_environment_data)
         thruster.calc_model()
@@ -568,7 +568,7 @@ class TestThruster:
 
         omega_ref = 700
         delta_t = omega_ref / thruster.get_param_double("omega_max")
-        inputs = Inputs.from_array([0, 0, 0, delta_t])
+        inputs = Inputs.from_array([0, 0, delta_t, 0])
         thruster.set_input(inputs)
         thruster.update_local_state(build_uav_state, build_environment_data)
         thruster.calc_model()

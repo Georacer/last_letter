@@ -29,60 +29,6 @@ from ..cpp_last_letter_lib.cpp_uav_utils import Inputs
 from ..cpp_last_letter_lib.cpp_uav_utils import UavState
 
 
-# class Inputs:
-#     delta_a: float = 0  # In normalized (-1, 1) range
-#     delta_e: float = 0  # In normalized (-1, 1) range
-#     delta_r: float = 0  # In normalized (-1, 1) range
-#     delta_t: List = (
-#         None  # Fill in with input appropriate for each thruster in the aircraft
-#     )
-
-#     def __init__(self, delta_a=0, delta_e=0, delta_r=0, delta_t=[]):
-#         self.delta_a = delta_a
-#         self.delta_e = delta_e
-#         self.delta_r = delta_r
-#         if not isinstance(delta_t, list):
-#             raise TypeError("delta_t must be a list")
-#         self.delta_t = delta_t
-
-#     def __repr__(self):
-#         s = """
-#         {}:
-#         delta_a={}
-#         delta_e={}
-#         delta_r={}
-#         delta_t={}
-#         """.format(
-#             self.__class__.__name__,
-#             self.delta_a,
-#             self.delta_e,
-#             self.delta_r,
-#             self.delta_t,
-#         )
-#         return s
-
-#     def to_array(self):
-#         return np.concatenate(
-#             ([self.delta_a], [self.delta_e], [self.delta_r], self.delta_t)
-#         )
-
-#     @classmethod
-#     def from_array(cls, arr):
-#         """
-#         Crate an Inputs object from a numpy array.
-
-#         See to_array() for the expected order of inputs.
-#         """
-#         new_input = cls(
-#             arr[0],
-#             arr[1],
-#             arr[2],
-#             arr[3:],
-#         )
-
-#         return new_input
-
-
 # class UavState:
 #     position: Vector3 = None  # NED position
 #     attitude: UnitQuaternion = None  # Attitude quaternion (from body to inertial)

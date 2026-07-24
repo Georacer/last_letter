@@ -44,8 +44,7 @@ TEST(TestUavModel, TestRoll)
     aircraft.state = state;
     auto z_init = state.pose.position.z();
 
-    auto u = Input();
-    u.set_da(0.5);
+    auto u = Input({0.5});
     aircraft.setInput(u);
     double t = 0;
     double t_end = 1;

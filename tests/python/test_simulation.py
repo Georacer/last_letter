@@ -255,7 +255,7 @@ class TestAircraft:
     def test_freefall(self, build_desc_aircraft):
         ac = sim.Aircraft("test_aircraft")
         ac.initialize(build_desc_aircraft)
-        u = Inputs(0, 0, 0, [0])
+        u = Inputs()
         ac.set_input(u)
         t, t_end = 0, 1
         while t < t_end:
@@ -273,7 +273,7 @@ class TestAircraft:
         ac.set_param("init/orientation", np.array([q0.x, q0.y, q0.z, q0.w]))
         ac.update_parameters()
         ac.init()
-        u = Inputs(0, 0, 0, [0])
+        u = Inputs()
         ac.set_input(u)
         t, t_end = 0, 5
         while t < t_end:
@@ -310,7 +310,7 @@ class TestAircraft:
         ac.set_param("init/orientation", np.array([q0.x, q0.y, q0.z, q0.w]))
         ac.update_parameters()
         ac.init()
-        u = Inputs(0.5, 0, 0, [0])
+        u = Inputs([0.5, 0, 0, 0])
         ac.set_input(u)
         t, t_end = 0, 1
         while t < t_end:
@@ -346,7 +346,7 @@ class TestAircraft:
         ac.set_param("init/orientation", np.array([q0.x, q0.y, q0.z, q0.w]))
         ac.update_parameters()
         ac.init()
-        u = Inputs(0, 0.5, 0, [0])
+        u = Inputs([0, 0.5, 0, 0])
         ac.set_input(u)
         t, t_end = 0, 1
         while t < t_end:
@@ -378,7 +378,7 @@ class TestAircraft:
         ac.initialize(build_desc_aircraft)
         ac.set_param("env/rho", 0)  # Nullify aerodynamic effects.
         ac.update_parameters()
-        u = Inputs(0, 0, 0, [1])
+        u = Inputs([0, 0, 1, 0])
         ac.set_input(u)
         ac.step()
 
@@ -400,7 +400,7 @@ class TestAircraft:
         ac.set_param("init/orientation", np.array([q0.x, q0.y, q0.z, q0.w]))
         ac.update_parameters()
         ac.init()
-        u = Inputs(0, 0, 0, [0])
+        u = Inputs()
         ac.set_input(u)
         # Let aircraft glide
         t, t_end = 0, 3
@@ -409,7 +409,7 @@ class TestAircraft:
             t += DELTAT
         state_1 = UavState.from_uavstate(ac.state)
         # Then apply full throttle
-        u = Inputs(0, 0, 0, [1])
+        u = Inputs([0, 0, 1, 0])
         ac.set_input(u)
         t_end += 3
         while t < t_end:

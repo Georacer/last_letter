@@ -117,7 +117,7 @@ void UavModel::update_parameters()
     double_vect = get_param<vector<double>>("init/coordinates");
     initCoordinates_ = Vector3d(double_vect[0], double_vect[1], double_vect[2] - initPosition_.z()); // Read ground geoid altitude and raise the WGS coordinate by the NED altitude
     initChanReset_ = get_param<int>("init/chanReset");
-    initCtrlInput_.value = get_param<vector<double>>("init/ctrlInput");
+    initCtrlInput_ = Input(get_param<vector<double>>("init/ctrlInput"));
 
     // Propagate the update_parameters downwards.
 }

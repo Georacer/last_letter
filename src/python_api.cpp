@@ -82,7 +82,6 @@ Inertial inertial_simple(const double mass, const double j_xx, const double j_yy
     std::vector<double> v = {j_xx, j_yy, j_zz};
     return Inertial(mass, v);
 }
-Input input_from_array(const std::vector<double> v) { return Input(v.at(0), v.at(1), v.at(2), std::vector<double>(v.begin() + 3, v.end())); }
 
 PYBIND11_MODULE(cpp_last_letter_lib, m)
 {
@@ -259,16 +258,15 @@ PYBIND11_MODULE(cpp_last_letter_lib, m)
              { return SimState_t(self); });
     py::class_<Input>(m_uav_utils, "Inputs")
         .def(py::init())
-        .def(py::init<double, double, double, std::vector<double>>(), py::arg("delta_a"), py::arg("delta_e"), py::arg("delta_r"), py::arg("delta_t"))
-        .def_property("delta_a", &Input::get_da, &Input::set_da)
-        .def_property("delta_e", &Input::get_de, &Input::set_de)
-        .def_property("delta_r", &Input::get_dr, &Input::set_dr)
-        .def_property("delta_t", &Input::get_dt, &Input::set_dt)
-        .def_property_readonly("num_thrusters", [](Input &i)
-                               { return i.num_thrusters; })
-        .def("to_array", [](Input &t)
-             { return t.to_python_array(); })
-        .def_static("from_array", input_from_array);
+        .def(py::init<const std::vector<double> &>(), py::arg("values"))
+        .def("__len__", [](const Input &i)
+             { return i.value.size(); })
+        .def("__getitem__", [](const Input &i, size_t n)
+             { return i.value.at(n); })
+        .def("__setitem__", [](Input &i, size_t n, double v)
+             { i.value.at(n) = v; })
+        .def("to_array", &Input::to_array)
+        .def_static("from_array", &Input::from_array, py::arg("values"));
 
     auto m_programming_utils = m.def_submodule("cpp_programming_utils", "last_letter_lib programming_utils submodule");
     py::class_<Parametrized, PyParametrized>(m_programming_utils, "Parametrized")

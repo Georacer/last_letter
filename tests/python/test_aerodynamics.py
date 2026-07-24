@@ -98,7 +98,7 @@ def build_uav_inputs():
     """
     Build test UAV Inputs
     """
-    return Inputs(0, 0, 0, [0])
+    return Inputs()
 
 
 @pytest.fixture

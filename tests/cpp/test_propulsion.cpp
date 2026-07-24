@@ -24,9 +24,7 @@ TEST(TestPropulsion, TestThrusterSimple)
     auto pm = ParameterManager("pm");
     pm.set("chanMotor", 2, false);
     thruster.initialize(pm);
-    auto input = Input();
-    std::vector<double> throttle = {1};
-    input.set_dt(throttle);
+    auto input = Input({0, 0, 1, 0});
 
     SimState_t states;
     Environment_t environment;
@@ -44,9 +42,7 @@ TEST(TestPropulsion, TestOmegaControlledEngine)
     auto pm = ParameterManager("pm");
     pm.set("chanMotor", 2, false);
     thruster.initialize(pm);
-    auto input = Input();
-    std::vector<double> throttle = {1};
-    input.set_dt(throttle);
+    auto input = Input({0, 0, 1, 0});
 
     SimState_t states;
     Environment_t environment;
@@ -64,9 +60,7 @@ TEST(TestPropulsion, TestElectricEngine2)
     auto pm = ParameterManager("pm");
     pm.set("chanMotor", 2, false);
     thruster.initialize(pm);
-    auto input = Input();
-    std::vector<double> throttle = {1};
-    input.set_dt(throttle);
+    auto input = Input({0, 0, 1, 0});
 
     SimState_t states;
     Environment_t environment;

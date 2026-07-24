@@ -32,37 +32,30 @@ from last_letter_lib.utils.uav import UavState
 class TestInputs:
     def test_constructor(self):
         inputs = Inputs()
-        tests = []
-        tests.append(inputs.delta_a == 0)
-        tests.append(inputs.delta_e == 0)
-        tests.append(inputs.delta_r == 0)
-        tests.append(inputs.delta_t == [])
-        assert np.all(tests)
+        assert len(inputs) == 16
+        assert np.allclose(inputs.to_array(), np.zeros(16))
 
-    # TODO: Restore support for __repr__ in pybind11
-    # def test_repr(self):
-    #     inputs = Inputs()
-    #     out_str = """
-    #     Inputs:
-    #     delta_a=0
-    #     delta_e=0
-    #     delta_r=0
-    #     delta_t=[]
-    #     """
-    #     assert inputs.__repr__() == out_str
+    def test_constructor_from_list(self):
+        inputs = Inputs([1, 2, 3, 4, 5])
+        assert np.allclose(inputs.to_array(), np.array([1, 2, 3, 4, 5] + [0] * 11))
+
+    def test_constructor_too_long(self):
+        with pytest.raises(ValueError):
+            Inputs([0] * 17)
 
     def test_to_array(self):
-        inputs = Inputs(1, 2, 3, [4, 5])
-        assert np.allclose(inputs.to_array(), np.array([1, 2, 3, 4, 5]))
+        inputs = Inputs([1, 2, 3, 4, 5])
+        assert np.allclose(
+            inputs.to_array(), Inputs.from_array([1, 2, 3, 4, 5]).to_array()
+        )
 
-    def test_from_array(self):
-        inputs = Inputs.from_array([1, 2, 3, 4, 5])
-        tests = []
-        tests.append(inputs.delta_a == 1)
-        tests.append(inputs.delta_e == 2)
-        tests.append(inputs.delta_r == 3)
-        tests.append(inputs.delta_t == [4, 5])
-        assert np.all(tests)
+    def test_getitem_setitem(self):
+        inputs = Inputs()
+        inputs[2] = 0.5
+        assert inputs[2] == 0.5
+        assert inputs.to_array()[2] == 0.5
+        with pytest.raises(IndexError):
+            inputs[16]
 
 
 class TestUavState:
