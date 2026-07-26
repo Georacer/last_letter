@@ -1,5 +1,18 @@
-cmake_minimum_required(VERSION 3.15)
+# 3.28 is required for the EXCLUDE_FROM_ALL keyword of FetchContent_Declare,
+# which keeps the install rules of the fetched dependencies out of this project.
+# Note this is newer than the cmake shipped by Ubuntu 22.04 (3.22).
+cmake_minimum_required(VERSION 3.28)
 project(last_letter_lib VERSION 2.1.0 LANGUAGES CXX)
+
+# Default to a user-writable prefix instead of /usr/local, which needs root.
+# Only applies when the caller did not pass -DCMAKE_INSTALL_PREFIX; in
+# particular scikit-build-core sets it to the wheel staging directory, and that
+# choice is preserved.
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local"
+      CACHE PATH "Installation prefix." FORCE)
+endif()
+message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Generate compile_commands.json
 
@@ -51,6 +64,12 @@ endif()
 # before the first FetchContent so every dependency is compiled with -fPIC.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# Every FetchContent_Declare below passes EXCLUDE_FROM_ALL. Those projects carry
+# their own install() rules targeting <prefix>/include and <prefix>/lib, which
+# `cmake --install` would otherwise execute, scattering third-party headers into
+# our prefix. EXCLUDE_FROM_ALL makes CMake ignore a subdirectory's install rules.
+# The targets themselves are still built, because last_letter_lib links them.
+
 # Import yaml-cpp
 include(FetchContent)
 
@@ -58,6 +77,7 @@ FetchContent_Declare(
   yaml_cpp
   GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
   GIT_TAG        yaml-cpp-0.9.0
+  EXCLUDE_FROM_ALL
 )
 
 # Set options before the library is added
@@ -76,6 +96,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/PickNikRobotics/data_tamer.git
   GIT_TAG        1.0.3
   SOURCE_SUBDIR  data_tamer_cpp
+  EXCLUDE_FROM_ALL
 )
 set(DATA_TAMER_BUILD_ROS OFF CACHE BOOL "" FORCE)
 set(DATA_TAMER_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -152,8 +173,7 @@ endif()
 # the DESTINATION is an absolute path mirroring it, not CMAKE_INSTALL_PREFIX.
 # These are install rules: they run at `cmake --install` time, NOT at configure,
 # so plain `cmake`/`cmake --build` no longer writes to $HOME.
-install(DIRECTORY models DESTINATION $ENV{HOME}/last_letter_models)
-install(FILES last_letter_models/HID.yaml DESTINATION $ENV{HOME}/last_letter_models)
+install(DIRECTORY last_letter_models DESTINATION $ENV{HOME})
 
 # Export the header files for use by consumers of the library
 # ament_export_include_directories(include)  # Unnecessary according to https://index.ros.org/doc/ros2/Tutorials/Ament-CMake-Documentation/#building-a-library
@@ -180,6 +200,7 @@ if(LAST_LETTER_BUILD_TESTS)
   FetchContent_Declare(
     googletest
     URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
+    EXCLUDE_FROM_ALL
   )
 
   FetchContent_MakeAvailable(googletest)

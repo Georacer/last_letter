@@ -23,6 +23,9 @@ dependencies = [
 minimum-version = "build-system.requires"
 build-dir = "build/{wheel_tag}"
 wheel.packages = ["src/last_letter_lib"]
+# Keep in sync with cmake_minimum_required in CMakeLists.txt, so the wheel build
+# fetches a suitable cmake when the system one is older.
+cmake.version = ">=3.28"
 
 # The package build must produce the pybind11 extension; the CMake option that
 # gates it defaults OFF (so a bare `cmake` build is C++-only), so turn it on here.
