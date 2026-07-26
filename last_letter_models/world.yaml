@@ -14,3 +14,5 @@ deltaT: 0.0025
 timeControls: 0
 
 integratorType: 0
+
+kinematics_engine: 1

@@ -17,6 +17,7 @@ YAML::Node load_config_simple()
 ParameterManager load_config_aircraft(std::string uav_name, bool randomize)
 {
     string paramDir = "tests/cpp/test_parameters/";
+    string aircraftDir = "aircraft/";
     string prop_filename = "propulsion.yaml";
     string aero_filename = "aerodynamics.yaml";
     string ground_filename = "ground.yaml";
@@ -27,10 +28,10 @@ ParameterManager load_config_aircraft(std::string uav_name, bool randomize)
 
     string fullWorldFilename = paramDir + world_filename;
     string fullEnvironmentFilename = paramDir + environment_filename;
-    string fullPropFilename = paramDir + uav_name + "/" + prop_filename;
-    string fullAeroFilename = paramDir + uav_name + "/" + aero_filename;
-    string fullGroundFilename = paramDir + uav_name + "/" + ground_filename;
-    string fullInitFilename = paramDir + uav_name + "/" + init_filename;
+    string fullPropFilename = paramDir + aircraftDir + uav_name + "/" + prop_filename;
+    string fullAeroFilename = paramDir + aircraftDir +uav_name + "/" + aero_filename;
+    string fullGroundFilename = paramDir + aircraftDir +uav_name + "/" + ground_filename;
+    string fullInitFilename = paramDir + aircraftDir +uav_name + "/" + init_filename;
 
     ParameterManager configs("aircraft");
     ParameterManager world("world", YAML::LoadFile(fullWorldFilename));

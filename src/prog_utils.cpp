@@ -271,7 +271,7 @@ namespace last_letter_lib
         ParameterManager loadModelConfig(string modelName)
         {
             string modelFolderName = "last_letter_models/";
-            string aircraftDir = "";
+            string aircraftDir = "aircraft/";
             string modelPath = getHomeFolder() + "/" + modelFolderName;
 
             ParameterManager configs("aircraft");
