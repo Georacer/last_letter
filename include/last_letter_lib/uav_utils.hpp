@@ -203,7 +203,7 @@ public:
 typedef std::unordered_map<std::string, SimState_t> LinkStateMap_t;
 
 // Number of control channels carried by an Input / InputPwm_t.
-constexpr size_t num_input_channels{16};
+constexpr size_t num_input_channels{32};
 
 class Input
 {
