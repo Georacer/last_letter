@@ -1,0 +1,26 @@
+# Airframe Propulsion Parameters
+# Motor types: 0 No motor, 1 Beard Engine, 2 Piston engine, 3 Electric Engine
+# Polynomial types: 0 1D, 1 2D, 2 cubic spline
+
+nMotors: 1
+
+motor1:
+  name: thruster_0
+  chanMotor: 2
+
+  #   CGOffset: [-0.25, 0.0, -0.13] # location offset of the motor mount relative to CG
+  CGOffset: [-0.25, 0.0, 0.0] # location offset of the motor mount relative to CG
+  mountOrientation: [0.0, 0.0, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
+  inertial:
+    mass: 0.1
+  chanGimbal: -1
+  gimbalAngle_max: 0.0
+
+  rotationDir: 1.0
+
+  motorType: 1
+  s_prop: 1
+  c_prop: 0.33
+  k_motor: 30
+  k_t_p: 1e-6
+  k_omega: 800
