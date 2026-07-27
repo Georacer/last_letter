@@ -268,11 +268,18 @@ namespace last_letter_lib
         //     }
         // }
 
-        ParameterManager loadModelConfig(string modelName)
+        ParameterManager loadModelConfig(string modelName, string modelsRoot)
         {
             string modelFolderName = "last_letter_models/";
             string aircraftDir = "aircraft/";
-            string modelPath = getHomeFolder() + "/" + modelFolderName;
+            // An empty root keeps the historical default, $HOME/last_letter_models.
+            string modelPath = modelsRoot.empty()
+                                   ? getHomeFolder() + "/" + modelFolderName
+                                   : modelsRoot;
+            if (modelPath.back() != '/')
+            {
+                modelPath += '/';
+            }
 
             ParameterManager configs("aircraft");
 

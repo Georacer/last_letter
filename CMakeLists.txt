@@ -150,6 +150,27 @@ target_link_libraries(last_letter_lib
   data_tamer
 )
 
+# ArduPilot SITL bridge. Launched by ArduPilot's SITL::last_letter backend, it
+# drives a UavModel over the ArduPilot JSON backend protocol (UDP). Needs no
+# dependency beyond POSIX sockets, so it is built by default.
+option(LAST_LETTER_BUILD_ARDUPILOT "Build the ArduPilot SITL JSON bridge (last_letter_ardupilot)" ON)
+if(LAST_LETTER_BUILD_ARDUPILOT)
+  add_executable(last_letter_ardupilot
+    src/ardupilot/udp_socket.cpp
+    src/ardupilot/json_connector.cpp
+    src/ardupilot/main.cpp
+  )
+  target_link_libraries(last_letter_ardupilot last_letter_lib)
+  # liblast_letter_lib.so installs to <prefix>/last_letter_lib (see the install
+  # rules at the bottom of this file), not <prefix>/lib, so the binary in
+  # <prefix>/bin needs to be pointed at it explicitly.
+  set_target_properties(last_letter_ardupilot PROPERTIES
+    INSTALL_RPATH "$ORIGIN/../${PROJECT_NAME}"
+    BUILD_RPATH "$ORIGIN"
+  )
+  install(TARGETS last_letter_ardupilot RUNTIME DESTINATION bin)
+endif()
+
 # add_library(lib_trimmer src/trimmer.cpp)
 # target_link_libraries(lib_trimmer
 # ${NLOPT_LIBRARIES}

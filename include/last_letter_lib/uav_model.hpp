@@ -64,6 +64,11 @@ public:
     void init(); // Initialize UavModel object
     void step(); // Perform simulation step
 
+    // Change the integration timestep without re-running initialize(), which would
+    // rebuild every sub-model and reset the state. Updates world/deltaT and pushes
+    // the new value into each member that caches it.
+    void set_dt(double dt_new);
+
     // Data logging. Call enable_logging() before the first step() so channels
     // are created with the MCAP sink attached.
     void enable_logging(const std::string &path = ""); // Start recording (empty path => timestamped filename).

@@ -227,6 +227,33 @@ void UavModel::step()
 }
 
 /////////////////////////////////////////////////
+// Change the simulation timestep in-place.
+// initialize() cannot be used for this: it re-instantiates kinematics, dynamics and
+// the environment model and resets the state. dt is cached by several members at
+// their own update_parameters() time, so each copy has to be refreshed here.
+void UavModel::set_dt(double dt_new)
+{
+    if (!(dt_new > 0))
+    {
+        throw std::invalid_argument("uav_model.cpp: simulation timestep must be positive");
+    }
+
+    dt = dt_new;
+    set_param("world/deltaT", dt_new); // Keep the parameter tree in sync for later reads.
+
+    kinematics.dt = dt_new;
+    if (kinematics.integrator != nullptr)
+    {
+        kinematics.integrator->dt = dt_new;
+    }
+    for (auto &thruster : dynamics.thrusters)
+    {
+        thruster->dt = dt_new;
+    }
+    environmentModel.dt = dt_new;
+}
+
+/////////////////////////////////////////////////
 // Data logging
 void UavModel::enable_logging(const std::string &path)
 {

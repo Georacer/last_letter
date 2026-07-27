@@ -4,23 +4,28 @@
 
 nMotors: 1
 
-motor1/chanMotor: 2
+motor1:
+  name: thruster_0
+  chanMotor: 2
 
-# motor1/CGOffset: [-0.25, 0.0, -0.13] # location offset of the motor mount relative to CG
-motor1/CGOffset: [-0.25, 0.0, -0.13] # location offset of the motor mount relative to CG
-motor1/mountOrientation: [0.0, -0.08, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
-motor1/chanGimbal: -1
-motor1/gimbalAngle_max: 0.0
+  CGOffset: [-0.25, 0.0, -0.13] # location offset of the motor mount relative to CG
+  mountOrientation: [0.0, -0.08, 0.0] # Euler rotations from body axes to propeller normal plane. Gimbal rotation axis should be in z-axis.
+  inertial:
+    mass: 0.1
+  chanGimbal: -1
+  gimbalAngle_max: 0.0
 
-motor1/rotationDir: 1.0
+  rotationDir: 1.0
 
-motor1/motorType: 4
-motor1/omega_max: 1050
-motor1/j_max: 0.7630
-motor1/propDiam: 0.28
-motor1/thrust_poly/polyType: 0
-motor1/thrust_poly/polyNo: 2
-motor1/thrust_poly/coeffs: [0.1133, -0.0740, -0.1849]
-motor1/power_poly/polyType: 0
-motor1/power_poly/polyNo: 2
-motor1/power_poly/coeffs: [0.0440, 0.0059, -0.0732]
+  motorType: 4
+  omega_max: 1050
+  j_max: 0.7630
+  prop_diam: 0.28
+  thrust_poly:
+    polyType: 0
+    polyNo: 2
+    coeffs: [0.1133, -0.0740, -0.1849]
+  power_poly:
+    polyType: 0
+    polyNo: 2
+    coeffs: [0.0440, 0.0059, -0.0732]
