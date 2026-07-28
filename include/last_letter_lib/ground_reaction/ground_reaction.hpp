@@ -26,7 +26,10 @@ public:
 
     virtual void initialize_parameters() override;
     virtual void update_parameters() override;
-    double dt;
+    // GroundReaction is not a Component, so it carries its own copy of the
+    // Component::set_dt() contract; Dynamics::set_dt() drives both.
+    virtual void set_dt(double dt_p);
+    double dt{0.0025};
     Wrench_t wrenchGround;
     double inputSteer, inputBrake;
     double steerAngle_max;

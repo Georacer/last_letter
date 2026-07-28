@@ -37,7 +37,7 @@ class Thruster : public Component, public DynamicSystem
 public:
     ///////////
     // Variables
-    double dt;          // Simulation time step
+    // dt is inherited from Component.
     double inputMotor;  // control input (0-1)
     int chanMotor;
     double omega;       // motor angular speed in rad/s

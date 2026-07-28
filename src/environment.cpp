@@ -19,6 +19,12 @@ namespace last_letter_lib
 
 	ostringstream oss;
 
+	void EnvironmentModel::set_dt(double dt_p)
+	{
+		dt = dt_p;
+		set_param("world/deltaT", dt_p);
+	}
+
 	void EnvironmentModel::update_parameters()
 	{
 

@@ -24,6 +24,7 @@ void Dynamics::initialize(ParameterManager config)
     for (int i = 0; i < nWings; i++)
     {
         ParameterManager aeroConfig = p_aeroConfig.filter("airfoil" + std::to_string(i + 1) + "/");
+        aeroConfig.register_child_mngr(p_worldConfig); // Component reads world/deltaT.
         auto new_aero = aerodynamics::buildAerodynamics(aeroConfig);
         aerodynamics.push_back(new_aero.get());
         add_child(*new_aero);
@@ -44,6 +45,7 @@ void Dynamics::initialize(ParameterManager config)
     }
 
     // Create and initialize ground reactions object
+    p_groundConfig.register_child_mngr(p_worldConfig); // GroundReaction reads world/deltaT.
     ground_reaction = ground_reaction::buildGroundReaction(p_groundConfig);
     add_child(*ground_reaction);
 }
@@ -95,6 +97,20 @@ void Dynamics::setInputPwm(InputPwm_t input)
         airfoil->setInputPwm(input);
     }
     ground_reaction->setInputPwm(input);
+}
+
+// Trickle a new timestep down to everything that integrates: each Component
+// (airfoils and thrusters) and the ground reaction model, which is not one.
+// Dynamics keeps no dt of its own and declares no parameters, so there is
+// nothing to store here; each child keeps its own world/deltaT in sync.
+void Dynamics::set_dt(double dt_p)
+{
+    for (auto &component : components) {
+        component->set_dt(dt_p);
+    }
+    if (ground_reaction) {
+        ground_reaction->set_dt(dt_p);
+    }
 }
 
 void Dynamics::update_local_state(SimState_t states, Environment_t environment)

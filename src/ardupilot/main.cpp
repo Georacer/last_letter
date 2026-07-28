@@ -37,6 +37,7 @@
 
 using last_letter_lib::UavModel;
 using last_letter_lib::ardupilot::FrameKind;
+using last_letter_lib::ardupilot::is_driven;
 using last_letter_lib::ardupilot::JsonConnector;
 using last_letter_lib::ardupilot::ServoFrame;
 using last_letter_lib::ardupilot::StateFrame;
@@ -57,7 +58,7 @@ void handle_signal(int /*signum*/)
 void usage(const char *argv0)
 {
     printf("usage: %s [options]\n"
-           "  --model <name>       aircraft model to simulate (default: skywalker_2013)\n"
+           "  --model <name>       aircraft model to simulate (default: ardupilot_plane)\n"
            "  --port <n>           UDP port to listen on (default: 9002)\n"
            "  --address <ip>       address to bind to (default: 0.0.0.0)\n"
            "  --models-dir <path>  models root (default: $HOME/last_letter_models)\n"
@@ -68,7 +69,7 @@ void usage(const char *argv0)
 
 struct Options
 {
-    std::string model{"skywalker_2013"};
+    std::string model{"ardupilot_plane"};
     std::string address{"0.0.0.0"};
     std::string models_dir;
     std::string log_path;
@@ -236,7 +237,12 @@ int main(int argc, char **argv)
     double sim_time = 0;
     uint16_t last_frame_rate = 0;
     bool announced_peer = false;
+    bool servos_live = false;
     int exit_code = 0;
+
+    // Persists across frames so a channel ArduPilot stops driving keeps its last
+    // commanded value rather than snapping to an out-of-range default.
+    InputPwm_t input; // 32 channels, defaulted to 1000 us.
 
     try
     {
@@ -285,13 +291,35 @@ int main(int argc, char **argv)
                 last_frame_rate = frame.frame_rate;
             }
 
-            InputPwm_t input; // 32 channels, defaulted to 1000 us.
+            // ArduPilot holds every servo output at 0 for the first couple of
+            // seconds after boot, and leaves unassigned channels there for good.
+            // Those are not servo commands: the model would decode 0 us as -3 on
+            // a control surface (PwmToFullRange) and -1 on a throttle
+            // (PwmToHalfRange), i.e. triple full deflection and reverse thrust,
+            // which throws the aircraft off the runway before ArduPilot has taken
+            // control. Only ever hand over channels that are actually driven, and
+            // leave the model on its configured initial input until the first one
+            // shows up.
             const size_t channels = std::min(frame.num_channels, input.value.size());
+            bool frame_is_driven = false;
             for (size_t i = 0; i < channels; i++)
             {
-                input.value[i] = frame.pwm[i];
+                if (is_driven(frame.pwm[i]))
+                {
+                    input.value[i] = frame.pwm[i];
+                    frame_is_driven = true;
+                }
             }
-            uav.setInputPwm(input);
+            if (frame_is_driven)
+            {
+                if (!servos_live)
+                {
+                    printf("ArduPilot servo outputs are live\n");
+                    fflush(stdout);
+                    servos_live = true;
+                }
+                uav.setInputPwm(input);
+            }
 
             uav.step();
             sim_time += uav.dt;

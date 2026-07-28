@@ -16,7 +16,7 @@ GroundReaction::GroundReaction(string name): Parametrized(name)
 
 void GroundReaction::initialize_parameters()
 {
-    set_param<double>("deltaT", 0.0025, false);
+    set_param<double>("world/deltaT", 0.0025, false);
     set_param<int>("chanSteer", -1, false);
     set_param<int>("chanBrake", -1, false);
     set_param<double>("steerAngle_max", 0, false);
@@ -24,10 +24,16 @@ void GroundReaction::initialize_parameters()
 
 void GroundReaction::update_parameters()
 {
-    dt = get_param<double>("deltaT");
+    dt = get_param<double>("world/deltaT");
     chanSteer = get_param<int>("chanSteer");
     chanBrake = get_param<int>("chanBrake");
     steerAngle_max = get_param<double>("steerAngle_max");
+}
+
+void GroundReaction::set_dt(double dt_p)
+{
+    dt = dt_p;
+    set_param("world/deltaT", dt_p);
 }
 
 // Store the steering and brake control inputs

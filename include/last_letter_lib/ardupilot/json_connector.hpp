@@ -21,8 +21,7 @@
   ardupilot/libraries/SITL/examples/JSON/readme.md and
   ardupilot/libraries/SITL/SIM_JSON.cpp.
 
-  This class knows nothing about UavModel: it moves ServoFrame in and StateFrame
-  out, so it can be reused by any driver.
+  This class is a utility driver to exchange ServoFrame's and StateFrame's.
 */
 #pragma once
 
@@ -38,6 +37,19 @@ namespace ardupilot
 
 // Maximum servo channels ArduPilot can emit (with SERVO_32_ENABLE = 1).
 constexpr size_t max_servo_channels{32};
+
+// Plausible bounds for a servo command. The protocol documents PWM as "typically
+// in the 1000 to 2000 range"; the margin allows for extended endpoints. Anything
+// outside means the channel is not being driven at all - notably, ArduPilot emits
+// 0 on every channel for the first seconds after boot, and permanently on
+// channels with no output function assigned.
+constexpr uint16_t min_valid_pwm{800};
+constexpr uint16_t max_valid_pwm{2200};
+
+inline bool is_driven(uint16_t pwm)
+{
+    return pwm >= min_valid_pwm && pwm <= max_valid_pwm;
+}
 
 // How a freshly received packet relates to the previous one.
 enum class FrameKind

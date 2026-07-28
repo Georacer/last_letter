@@ -40,8 +40,13 @@ public:
         set_param("inertial/tensor/j_zz", 0.0, false);
         set_param("inertial/tensor/j_xz", 0.0, false);
         set_param("world/gravity/type", 0.0, false);
+        set_param("world/deltaT", 0.0025, false);
     }
     void update_parameters() override;
+    // Change the integration timestep. Virtual so components carrying their own
+    // sub-integrators can retune them too. Kept in sync with the world/deltaT
+    // parameter so a later update_parameters() does not undo it.
+    virtual void set_dt(double dt_p);
     // Update the local state given the aircraft state.
     // body_state is describing the body frame in the NED coordinate system.
     // environment is describing the wind in the NED coordinate system.
@@ -53,6 +58,7 @@ public:
     // and the CoM, (in other words, the center of gravityin body-frame coordinates) in order to compensate for it.
     Inertial rotate_inertia(const Eigen::Vector3d &r_com = Eigen::Vector3d::Zero()) const;
 
+    double dt{0.0025};      // Simulation timestep in s, mirrored from world/deltaT.
     WrenchSum_t wrench_sum; // The generated wrench in the local frame.
     Inertial inertial;
     SimState_t local_state; // W.r.t. Earth. This also contains rotor speeds, which is bloat, but we'll use it for now.

@@ -23,6 +23,18 @@ void Kinematics::initialize_parameters()
 void Kinematics::update_parameters()
 {
     dt = get_param<double>("world/deltaT");
+    if (integrator != nullptr) {
+        integrator->dt = dt;
+    }
+}
+
+void Kinematics::set_dt(double dt_p)
+{
+    dt = dt_p;
+    set_param("world/deltaT", dt_p);
+    if (integrator != nullptr) {
+        integrator->dt = dt_p;
+    }
 }
 
 void Kinematics::initialize(ParameterManager config)

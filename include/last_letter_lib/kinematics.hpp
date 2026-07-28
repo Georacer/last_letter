@@ -58,6 +58,9 @@ public:
     void initialize_parameters();
     void update_parameters();
 
+    // Change the integration timestep, retuning the integrator with it.
+    void set_dt(double dt_p);
+
     double dt;
     Derivatives_t stateDot;
     void calcDerivatives(SimState_t states, Inertial inertia, Wrench_t inpWrench);	  // Do not use this method (private)

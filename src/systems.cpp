@@ -22,10 +22,17 @@ void Component::update_parameters()
     inertial.tensor(1, 1) = get_param<double>("inertial/tensor/j_yy");
     inertial.tensor(2, 2) = get_param<double>("inertial/tensor/j_zz");
     inertial.tensor(0, 2) = inertial.tensor(2, 0) = -get_param<double>("inertial/tensor/j_xz");
+    dt = get_param<double>("world/deltaT");
 
     if (gravity == nullptr) {
         gravity = buildGravity(params_.filter("world/gravity/"));
     }
+}
+
+void Component::set_dt(double dt_p)
+{
+    dt = dt_p;
+    set_param("world/deltaT", dt_p);
 }
 
 void Component::update_local_state(const SimState_t body_state, const Environment_t environment)

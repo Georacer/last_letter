@@ -33,7 +33,6 @@ void Thruster::initialize_parameters()
 {
     Component::initialize_parameters();
 
-    set_param<double>("world/deltaT", 0.0025, false);
     set_param<double>("rotationDir",        1, false);
     set_param<int>("chanMotor", 0, false);
     set_param<int>("motorType", 0, false);
@@ -50,7 +49,6 @@ void Thruster::update_parameters()
 {
     Component::update_parameters();
 
-    dt = get_param<double>("world/deltaT");
     rotationDir = get_param<double>("rotationDir");
     chanMotor = get_param<int>("chanMotor");
     thrustMax = get_param<double>("thrustMax");

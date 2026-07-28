@@ -65,8 +65,8 @@ public:
     void step(); // Perform simulation step
 
     // Change the integration timestep without re-running initialize(), which would
-    // rebuild every sub-model and reset the state. Updates world/deltaT and pushes
-    // the new value into each member that caches it.
+    // rebuild every sub-model and reset the state. Forwards to kinematics,
+    // dynamics and the environment model, each of which retunes its own children.
     void set_dt(double dt_new);
 
     // Data logging. Call enable_logging() before the first step() so channels
