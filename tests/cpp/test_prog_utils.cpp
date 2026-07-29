@@ -77,8 +77,9 @@ TEST(ProgUtilsTest, GeneralTest)
     // ConfigsStruct_t newConfigStruct = load_config_aircraft("skywalker_2013", true);
     // EXPECT_NE(newConfigStruct.aero["airfoil1/c_l_pn"].as<double>(), -1);
 
-    // Test parameter loading from aircraft models folder in user home.
-    ParameterManager loadedConfig = loadModelConfig("skywalker_2013");
+    // Test parameter loading from an aircraft models folder. The repository test
+    // parameters are used rather than the default ($HOME/last_letter_models).
+    ParameterManager loadedConfig = loadModelConfig("skywalker_2013", "tests/cpp/test_parameters/");
 }
 
 class A
