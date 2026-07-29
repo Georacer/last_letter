@@ -10,6 +10,25 @@ CMake 3.28 or newer is required. This is newer than the 3.22 shipped by Ubuntu
 22.04; install a current one with `uv tool install cmake` or from the
 [Kitware APT repository](https://apt.kitware.com/).
 
+The following system packages are also expected. On Debian/Ubuntu:
+
+```bash
+sudo apt install build-essential git libeigen3-dev libboost-dev
+```
+
+- `build-essential` — a C++17 compiler.
+- `git` — the remaining dependencies (yaml-cpp, DataTamer and, for the tests,
+  GoogleTest) are cloned at configure time by CMake's `FetchContent`, so the
+  first configuration of a build directory needs network access.
+- `libeigen3-dev` — Eigen 3, the linear algebra library. Located with
+  `find_package(Eigen3)`.
+- `libboost-dev` — only the header-only parts of Boost are used (`boost/array.hpp`
+  and Boost.Odeint), so the compiled Boost libraries are not needed.
+
+Building the Python bindings additionally needs the Python development headers,
+`python3-dev`. `pybind11` itself is provided by the build environment and does
+not have to be installed system-wide.
+
 ### To build and install the C++ code
 
 ```bash
@@ -30,7 +49,7 @@ To build the ArduPilot bridge binary run
 cmake -S . -B build -DLAST_LETTER_BUILD_ARDUPILOT=ON && cmake --build build && cmake --install build
 ```
 
-The library will be installed in `$HOME/.local/bin`. Ensure it is on your path.
+The executable will be installed in `$HOME/.local/bin`. Ensure it is on your path.
 
 ### To build the Python code
 
@@ -61,7 +80,12 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DLAST_LETTER_BUILD_TESTS=ON && cma
 To compile everything, including the Python bindings, and run the GoogleTests for the C++ codebase:
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DLAST_LETTER_BUILD_TESTS=ON -DLAST_LETTER_BUILD_PYTHON=ON && cmake --build build && ./build/all_tests
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
+    -DLAST_LETTER_BUILD_TESTS=ON \
+    -DLAST_LETTER_BUILD_PYTHON=ON \
+    -DLAST_LETTER_BUILD_ARDUPILOT=ON \
+    && cmake --build build \
+    && ./build/all_tests
 ```
 
 ### Run the Python tests
