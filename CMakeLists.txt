@@ -150,10 +150,23 @@ target_link_libraries(last_letter_lib
   data_tamer
 )
 
+# When we are building the Python package the library needs to end up in the
+# Python package directory, next to cpp_last_letter_lib.so, whose path is
+# $ORIGIN.
+# Note: this also relocates the library for a plain `cmake --install`
+# that happens to have LAST_LETTER_BUILD_PYTHON on; enabling the option outside
+# the pyproject.toml-driven build is only meant to check that the bindings
+# still compile, so such an install is not expected.
+if(LAST_LETTER_BUILD_PYTHON)
+  set(LAST_LETTER_LIB_DESTINATION ${PROJECT_NAME})
+else()
+  set(LAST_LETTER_LIB_DESTINATION lib)
+endif()
+
 # ArduPilot SITL bridge. Launched by ArduPilot's SITL::last_letter backend, it
 # drives a UavModel over the ArduPilot JSON backend protocol (UDP). Needs no
 # dependency beyond POSIX sockets, so it is built by default.
-option(LAST_LETTER_BUILD_ARDUPILOT "Build the ArduPilot SITL JSON bridge (last_letter_ardupilot)" ON)
+option(LAST_LETTER_BUILD_ARDUPILOT "Build the ArduPilot SITL JSON bridge (last_letter_ardupilot)" OFF)
 if(LAST_LETTER_BUILD_ARDUPILOT)
   add_executable(last_letter_ardupilot
     src/ardupilot/udp_socket.cpp
@@ -161,11 +174,11 @@ if(LAST_LETTER_BUILD_ARDUPILOT)
     src/ardupilot/main.cpp
   )
   target_link_libraries(last_letter_ardupilot last_letter_lib)
-  # liblast_letter_lib.so installs to <prefix>/last_letter_lib (see the install
-  # rules at the bottom of this file), not <prefix>/lib, so the binary in
+  # liblast_letter_lib.so installs to <prefix>/${LAST_LETTER_LIB_DESTINATION}
+  # (see the install rules at the bottom of this file), so the binary in
   # <prefix>/bin needs to be pointed at it explicitly.
   set_target_properties(last_letter_ardupilot PROPERTIES
-    INSTALL_RPATH "$ORIGIN/../${PROJECT_NAME}"
+    INSTALL_RPATH "$ORIGIN/../${LAST_LETTER_LIB_DESTINATION}"
     BUILD_RPATH "$ORIGIN"
   )
   install(TARGETS last_letter_ardupilot RUNTIME DESTINATION bin)
@@ -175,6 +188,7 @@ endif()
 # target_link_libraries(lib_trimmer
 # ${NLOPT_LIBRARIES}
 # lib_uav_model)
+
 if(LAST_LETTER_BUILD_PYTHON)
   list(APPEND pybind11_sources
     src/python_api.cpp
@@ -185,7 +199,9 @@ if(LAST_LETTER_BUILD_PYTHON)
       BUILD_RPATH "$ORIGIN"
   )
   target_link_libraries(cpp_last_letter_lib PRIVATE last_letter_lib)
-  install(TARGETS cpp_last_letter_lib LIBRARY DESTINATION ${PROJECT_NAME})
+  # Same destination as liblast_letter_lib.so, so the $ORIGIN rpath above always
+  # resolves regardless of which install layout is in play.
+  install(TARGETS cpp_last_letter_lib LIBRARY DESTINATION ${LAST_LETTER_LIB_DESTINATION})
 endif()
 
 # Stage runtime aircraft-model data into the folder the library reads from at
@@ -280,7 +296,7 @@ list(APPEND exported_libs
 )
 install(
   TARGETS ${exported_libs}
-  LIBRARY DESTINATION ${PROJECT_NAME}
+  LIBRARY DESTINATION ${LAST_LETTER_LIB_DESTINATION}
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
