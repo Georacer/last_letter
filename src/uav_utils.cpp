@@ -12,7 +12,7 @@ using last_letter_lib::math_utils::rad_to_deg;
 namespace last_letter_lib {
 namespace uav_utils {
 
-Wrench_t WrenchSum_t::sum()
+Wrench_t WrenchSum_t::sum() const
 {
     auto result = Wrench_t();
     result.force = wrenchGrav.force + wrenchAero.force + wrenchProp.force + wrenchGround.force + wrenchExternal.force;

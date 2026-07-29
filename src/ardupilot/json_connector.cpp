@@ -1,31 +1,14 @@
-/*
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "last_letter_lib/ardupilot/json_connector.hpp"
 
+#include <cerrno>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
 
-namespace last_letter_lib
-{
-namespace ardupilot
-{
+namespace last_letter_lib {
+namespace ardupilot {
 
-namespace
-{
+namespace {
 
 // Protocol constants from ardupilot/libraries/SITL/SIM_JSON.h.
 constexpr uint16_t magic_16_channels{18458};
@@ -53,11 +36,29 @@ bool JsonConnector::open(const char *bind_address, uint16_t port)
 {
     if (!sock_.is_open())
     {
+        fprintf(stderr, "last_letter_ardupilot: could not create a UDP socket: %s\n",
+                strerror(errno));
         return false;
     }
-    sock_.set_blocking(false);
-    sock_.reuseaddress();
-    return sock_.bind(bind_address, port);
+    if (!sock_.set_blocking(false))
+    {
+        fprintf(stderr, "last_letter_ardupilot: could not make the socket non-blocking: %s\n",
+                strerror(errno));
+        return false;
+    }
+    if (!sock_.bind(bind_address, port))
+    {
+        fprintf(stderr, "last_letter_ardupilot: could not bind %s:%u: %s\n",
+                bind_address, unsigned(port), strerror(errno));
+        if (errno == EADDRINUSE)
+        {
+            fprintf(stderr, "  something else is already listening there; find it with:"
+                            " ss -lunp | grep %u\n",
+                    unsigned(port));
+        }
+        return false;
+    }
+    return true;
 }
 
 bool JsonConnector::receive_servos(ServoFrame &frame, uint32_t timeout_ms)
@@ -83,7 +84,7 @@ bool JsonConnector::receive_servos(ServoFrame &frame, uint32_t timeout_ms)
     }
     else
     {
-        fprintf(stderr, "last_letter_ardupilot: ignoring %zd-byte packet with magic %u\n",
+        fprintf(stderr, "last_letter_ardupilot: ignoring %zd-byte packet with unknown magic %u\n",
                 ret, unsigned(magic));
         return false;
     }
@@ -109,7 +110,7 @@ bool JsonConnector::receive_servos(ServoFrame &frame, uint32_t timeout_ms)
     else if (frame.frame_count == last_frame_count_)
     {
         // ArduPilot re-sends the same frame, without incrementing the counter,
-        // when it has been waiting on us for ~1.1 s (SIM_JSON.cpp:326).
+        // when it has been waiting on us (SIM_JSON.cpp:326).
         frame.kind = FrameKind::Duplicate;
     }
     else if (frame.frame_count != last_frame_count_ + 1)
@@ -136,7 +137,7 @@ bool JsonConnector::send_state(const StateFrame &s)
     }
 
     // ArduPilot parses this with a hand-rolled strstr scanner, not a JSON parser
-    // (SIM_JSON.cpp:177). Three properties of the text below are load-bearing:
+    // (SIM_JSON.cpp:177). Three properties of the text below are important:
     //  - the record is both preceded and terminated by '\n', which is how
     //    SIM_JSON::recv_fdm() delimits the newest complete frame;
     //  - there is no whitespace anywhere, because the scanner jumps a fixed

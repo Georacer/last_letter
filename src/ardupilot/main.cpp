@@ -1,18 +1,4 @@
 /*
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-/*
   last_letter_ardupilot: drives a last_letter UavModel from ArduPilot SITL over
   the JSON backend protocol.
 
@@ -23,7 +9,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <cerrno>
 #include <cmath>
 #include <csignal>
 #include <cstdio>
@@ -45,8 +30,7 @@ using last_letter_lib::programming_utils::loadModelConfig;
 using last_letter_lib::uav_utils::Airdata;
 using last_letter_lib::uav_utils::InputPwm_t;
 
-namespace
-{
+namespace {
 
 std::atomic<bool> g_stop{false};
 
@@ -62,7 +46,8 @@ void usage(const char *argv0)
            "  --port <n>           UDP port to listen on (default: 9002)\n"
            "  --address <ip>       address to bind to (default: 0.0.0.0)\n"
            "  --models-dir <path>  models root (default: $HOME/last_letter_models)\n"
-           "  --log <file.mcap>    record the run to an MCAP log\n"
+           "  --log [file.mcap]    record the run to an MCAP log; with no filename,\n"
+           "                       a timestamped one in the working directory\n"
            "  --help\n",
            argv0);
 }
@@ -72,7 +57,10 @@ struct Options
     std::string model{"ardupilot_plane"};
     std::string address{"0.0.0.0"};
     std::string models_dir;
+    // log_path stays empty for a bare --log, which is how UavModel::enable_logging()
+    // asks for a timestamped filename. want_log is what tells the two apart.
     std::string log_path;
+    bool want_log{false};
     uint16_t port{9002};
 };
 
@@ -87,12 +75,26 @@ bool parse_args(int argc, char **argv, Options &opts, bool &want_help)
             want_help = true;
             return true;
         }
-        if (i + 1 >= argc)
+        // The next element is this option's value unless there is none left or it
+        // is itself an option. No option here takes a negative value, so a leading
+        // '-' is unambiguous.
+        const bool has_value = (i + 1 < argc) && (argv[i + 1][0] != '-');
+        const std::string value{has_value ? argv[++i] : ""};
+
+        // Section for flags with optional arguments.
+        if (arg == "--log")
+        {
+            // The one option whose value is optional.
+            opts.want_log = true;
+            opts.log_path = value;
+            continue;
+        }
+        // Section for flags with mandatory arguments.
+        if (!has_value)
         {
             fprintf(stderr, "missing value for %s\n", arg.c_str());
             return false;
         }
-        const std::string value{argv[++i]};
         if (arg == "--model")
         {
             opts.model = value;
@@ -109,10 +111,6 @@ bool parse_args(int argc, char **argv, Options &opts, bool &want_help)
         {
             opts.models_dir = value;
         }
-        else if (arg == "--log")
-        {
-            opts.log_path = value;
-        }
         else
         {
             fprintf(stderr, "unknown option %s\n", arg.c_str());
@@ -127,13 +125,8 @@ bool parse_args(int argc, char **argv, Options &opts, bool &want_help)
 // Frame conventions (see ardupilot/libraries/SITL/examples/JSON/readme.md):
 //  - gyro and accel_body are body frame (FRD), everything else is NED;
 //  - accel_body is the specific force an accelerometer would measure, so the
-//    gravity contribution has to come out. state.acceleration.linear cannot be
-//    used directly: it is speedDot = F_total/m - w x v, which still includes
-//    gravity. Taking the wrench sum minus the gravity wrench and dividing by the
-//    mass gives the specific force straight away, and uses whichever gravity
-//    model the aircraft is configured with rather than a hardcoded 9.81.
-// Takes a mutable reference only because WrenchSum_t::sum() is not const.
-void fill_state(UavModel &uav, double timestamp, StateFrame &out)
+//    gravity contribution has to be removed.
+void fill_state(const UavModel &uav, double timestamp, StateFrame &out)
 {
     const auto &state = uav.state;
 
@@ -143,8 +136,7 @@ void fill_state(UavModel &uav, double timestamp, StateFrame &out)
     out.gyro[1] = state.velocity.angular.y();
     out.gyro[2] = state.velocity.angular.z();
 
-    auto &wrenches = uav.dynamics.wrench_sum;
-    // No `auto` here: an Eigen expression template would dangle past the temporary.
+    const auto &wrenches = uav.dynamics.wrench_sum;
     const Eigen::Vector3d specific_force =
         (wrenches.sum().force - wrenches.wrenchGrav.force) / uav.dynamics.inertial.mass;
     out.accel_body[0] = specific_force.x();
@@ -155,8 +147,6 @@ void fill_state(UavModel &uav, double timestamp, StateFrame &out)
     out.position[1] = state.pose.position.y();
     out.position[2] = state.pose.position.z();
 
-    // ArduPilot's q1..q4 are w, x, y, z of the body-to-earth rotation, which is
-    // exactly what pose.orientation holds.
     out.quaternion[0] = state.pose.orientation.w();
     out.quaternion[1] = state.pose.orientation.x();
     out.quaternion[2] = state.pose.orientation.y();
@@ -203,10 +193,6 @@ int main(int argc, char **argv)
     try
     {
         auto config = loadModelConfig(opts.model, opts.models_dir);
-        // Channel 9 is the model's simulation-reset channel by default. ArduPilot
-        // drives SERVO10 with whatever function it is assigned, and a value above
-        // 1600 us would silently re-initialise the aircraft mid-flight.
-        config.set("init/chanReset", -1, false);
         uav.initialize(config);
     }
     catch (const std::exception &e)
@@ -216,18 +202,25 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    if (!opts.log_path.empty())
+    if (opts.want_log)
     {
         // Must precede the first step() so the channels register with the sink.
         uav.enable_logging(opts.log_path);
-        printf("Recording to %s\n", opts.log_path.c_str());
+        if (opts.log_path.empty())
+        {
+            // logging::enable() names the file after the current date and time.
+            printf("Recording to a timestamped .mcap in the working directory\n");
+        }
+        else
+        {
+            printf("Recording to %s\n", opts.log_path.c_str());
+        }
     }
 
     JsonConnector connector;
     if (!connector.open(opts.address.c_str(), opts.port))
     {
-        fprintf(stderr, "last_letter_ardupilot: could not bind %s:%u: %s\n",
-                opts.address.c_str(), unsigned(opts.port), strerror(errno));
+        // open() reports which step failed and why; errno would be stale by now.
         return 1;
     }
     printf("Simulating '%s', listening for ArduPilot on %s:%u\n",
@@ -239,10 +232,6 @@ int main(int argc, char **argv)
     bool announced_peer = false;
     bool servos_live = false;
     int exit_code = 0;
-
-    // Persists across frames so a channel ArduPilot stops driving keeps its last
-    // commanded value rather than snapping to an out-of-range default.
-    InputPwm_t input; // 32 channels, defaulted to 1000 us.
 
     try
     {
@@ -282,9 +271,7 @@ int main(int argc, char **argv)
                         frame.frame_count);
             }
 
-            // ArduPilot asks for a step size through frame_rate (SIM_RATE_HZ).
-            // set_dt() retunes the integrator in place; initialize() would rebuild
-            // every sub-model and reset the state.
+            // Adapt to the timestep ArduPilot requests.
             if (frame.frame_rate != last_frame_rate && frame.frame_rate > 0)
             {
                 uav.set_dt(1.0 / double(frame.frame_rate));
@@ -293,13 +280,15 @@ int main(int argc, char **argv)
 
             // ArduPilot holds every servo output at 0 for the first couple of
             // seconds after boot, and leaves unassigned channels there for good.
-            // Those are not servo commands: the model would decode 0 us as -3 on
-            // a control surface (PwmToFullRange) and -1 on a throttle
-            // (PwmToHalfRange), i.e. triple full deflection and reverse thrust,
-            // which throws the aircraft off the runway before ArduPilot has taken
-            // control. Only ever hand over channels that are actually driven, and
+            // Those are not valid servo commands:
+            // Only ever process channels that are actually driven, and
             // leave the model on its configured initial input until the first one
             // shows up.
+            // Rebuilt from scratch every frame, so nothing ArduPilot commanded
+            // earlier can linger on a channel it has stopped driving. Channels it
+            // never drives keep InputPwm_t's 1000 us default.
+            InputPwm_t input; // 32 channels at 1000 us.
+
             const size_t channels = std::min(frame.num_channels, input.value.size());
             bool frame_is_driven = false;
             for (size_t i = 0; i < channels; i++)
@@ -336,9 +325,9 @@ int main(int argc, char **argv)
         exit_code = 1;
     }
 
-    if (!opts.log_path.empty())
+    if (opts.want_log)
     {
-        // Flushes and closes the MCAP; skipping it truncates the tail of the log.
+        // Flushes and closes the MCAP; skipping would truncate the tail of the log.
         uav.disable_logging();
     }
     printf("last_letter_ardupilot: stopped after %.3f s of simulated time\n", sim_time);

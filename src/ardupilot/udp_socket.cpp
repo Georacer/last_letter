@@ -1,18 +1,3 @@
-/*
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include "last_letter_lib/ardupilot/udp_socket.hpp"
 
 #include <cstring>
@@ -23,20 +8,14 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-namespace last_letter_lib
-{
-namespace ardupilot
-{
+namespace last_letter_lib {
+namespace ardupilot {
 
-namespace
-{
+namespace {
 
 void make_sockaddr(const char *address, uint16_t port, struct sockaddr_in &sockaddr)
 {
     memset(&sockaddr, 0, sizeof(sockaddr));
-#ifdef HAVE_SOCK_SIN_LEN
-    sockaddr.sin_len = sizeof(sockaddr);
-#endif
     sockaddr.sin_port = htons(port);
     sockaddr.sin_family = AF_INET;
     sockaddr.sin_addr.s_addr = inet_addr(address);
@@ -63,15 +42,9 @@ UdpSocket::~UdpSocket()
 
 bool UdpSocket::bind(const char *address, uint16_t port)
 {
-    struct sockaddr_in sockaddr;
+    sockaddr_in sockaddr;
     make_sockaddr(address, port, sockaddr);
     return ::bind(fd_, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) == 0;
-}
-
-bool UdpSocket::reuseaddress() const
-{
-    int one = 1;
-    return setsockopt(fd_, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)) != -1;
 }
 
 bool UdpSocket::set_blocking(bool blocking) const
@@ -112,7 +85,7 @@ ssize_t UdpSocket::recv(void *buf, size_t size, uint32_t timeout_ms)
     {
         return -1;
     }
-    struct sockaddr_in from;
+    sockaddr_in from;
     socklen_t len = sizeof(from);
     const ssize_t ret = ::recvfrom(fd_, buf, size, MSG_DONTWAIT, (struct sockaddr *)&from, &len);
     if (ret >= 0)
@@ -125,7 +98,7 @@ ssize_t UdpSocket::recv(void *buf, size_t size, uint32_t timeout_ms)
 
 ssize_t UdpSocket::sendto(const void *buf, size_t size, const char *address, uint16_t port)
 {
-    struct sockaddr_in sockaddr;
+    sockaddr_in sockaddr;
     make_sockaddr(address, port, sockaddr);
     return ::sendto(fd_, buf, size, 0, (struct sockaddr *)&sockaddr, sizeof(sockaddr));
 }

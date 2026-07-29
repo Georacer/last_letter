@@ -126,7 +126,7 @@ class WrenchSum_t
 {
 public:
     WrenchSum_t(): wrenchGrav(), wrenchAero(), wrenchProp(), wrenchGround(), wrenchExternal() {};
-    Wrench_t sum(); // Sum the wrench components.
+    Wrench_t sum() const; // Sum the wrench components.
     WrenchSum_t operator+(const WrenchSum_t w) const;
     WrenchSum_t &operator+=(const WrenchSum_t w);
 
@@ -362,6 +362,18 @@ std::pair<double, double> reproject(const double pos_north,
 //////////////////////////////
 // PPM and PWM functionalities
 //////////////////////////////
+
+// Plausible bounds for a servo command. 1000-2000 us is the nominal range; the
+// margin allows for extended endpoints. Values outside it are not commands at
+// all: an autopilot typically emits 0 us on a channel it is not driving, and
+// PwmToFullRange(0) is -3, i.e. triple full deflection.
+constexpr uint16_t min_valid_pwm{800};
+constexpr uint16_t max_valid_pwm{2200};
+
+inline bool IsValidPwm(uint16_t pwmValue)
+{
+    return pwmValue >= min_valid_pwm && pwmValue <= max_valid_pwm;
+}
 
 double PwmToHalfRange(uint16_t pwmValue);
 // Convert a 1000-2000 us value to 0-1 range

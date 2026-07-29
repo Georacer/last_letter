@@ -1,18 +1,4 @@
 /*
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-/*
   ArduPilot SITL "JSON" backend protocol, physics-engine side.
 
   ArduPilot sends a binary servo packet over UDP and blocks until the physics
@@ -30,10 +16,8 @@
 
 #include "last_letter_lib/ardupilot/udp_socket.hpp"
 
-namespace last_letter_lib
-{
-namespace ardupilot
-{
+namespace last_letter_lib {
+namespace ardupilot {
 
 // Maximum servo channels ArduPilot can emit (with SERVO_32_ENABLE = 1).
 constexpr size_t max_servo_channels{32};
@@ -114,7 +98,7 @@ private:
     bool have_frame_count_{false};
 
     // The serialised JSON of the most recent send_state(), kept for re-sends.
-    char buffer_[1024]{};
+    char buffer_[1024]{}; // 21 fields take roughly 500B.
     size_t buffer_len_{0};
 };
 

@@ -298,7 +298,17 @@ void UavModel::setInput(const Input p_input)
 // convert uS PWM values to control surface inputs
 void UavModel::setInputPwm(const InputPwm_t p_input)
 {
-    PwmInput.value = p_input.value;
+    // Take only the channels carrying a plausible servo command.
+    const size_t channels = std::min(p_input.value.size(), PwmInput.value.size());
+    for (size_t i = 0; i < channels; i++)
+    {
+        if (IsValidPwm(p_input.value[i]))
+        {
+            PwmInput.value[i] = p_input.value[i];
+        } else {
+            PwmInput.value[i] = 1000; // A naive fallback.
+        }
+    }
     dynamics.setInputPwm(PwmInput);
 
     if (chanReset > -1)
