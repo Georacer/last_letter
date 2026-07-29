@@ -245,10 +245,7 @@ private:
     // Variables
 };
 
-// Build the parameter tree of an aircraft model from a models directory laid out as
-//   <modelsRoot>/world.yaml
-//   <modelsRoot>/environment.yaml
-//   <modelsRoot>/aircraft/<modelName>/{propulsion,aerodynamics,ground,init}.yaml
+// Build the parameter tree of an aircraft model from a models directory.
 // An empty modelsRoot selects the default location, $HOME/last_letter_models.
 ParameterManager loadModelConfig(string modelName, string modelsRoot = "");
 

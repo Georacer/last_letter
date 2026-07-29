@@ -272,7 +272,7 @@ namespace last_letter_lib
         {
             string modelFolderName = "last_letter_models/";
             string aircraftDir = "aircraft/";
-            // An empty root keeps the historical default, $HOME/last_letter_models.
+            // An empty root assumes the default, $HOME/last_letter_models.
             string modelPath = modelsRoot.empty()
                                    ? getHomeFolder() + "/" + modelFolderName
                                    : modelsRoot;
@@ -327,7 +327,7 @@ namespace last_letter_lib
             // return randomizeConfigsStruct(configs, randomizerConfig);
         }
 
-        // Return home folder, without trailling slash
+        // Return home folder, without trailling slash.
         string getHomeFolder()
         {
             passwd *pw = getpwuid(getuid());

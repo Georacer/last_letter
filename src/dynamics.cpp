@@ -99,10 +99,7 @@ void Dynamics::setInputPwm(InputPwm_t input)
     ground_reaction->setInputPwm(input);
 }
 
-// Trickle a new timestep down to everything that integrates: each Component
-// (airfoils and thrusters) and the ground reaction model, which is not one.
-// Dynamics keeps no dt of its own and declares no parameters, so there is
-// nothing to store here; each child keeps its own world/deltaT in sync.
+// Update the timestep in all Components and other related members.
 void Dynamics::set_dt(double dt_p)
 {
     for (auto &component : components) {

@@ -64,9 +64,7 @@ public:
     void init(); // Initialize UavModel object
     void step(); // Perform simulation step
 
-    // Change the integration timestep without re-running initialize(), which would
-    // rebuild every sub-model and reset the state. Forwards to kinematics,
-    // dynamics and the environment model, each of which retunes its own children.
+    // Change the integration timestep without re-running initialize().
     void set_dt(double dt_new);
 
     // Data logging. Call enable_logging() before the first step() so channels

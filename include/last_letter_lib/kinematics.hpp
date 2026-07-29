@@ -58,7 +58,7 @@ public:
     void initialize_parameters();
     void update_parameters();
 
-    // Change the integration timestep, retuning the integrator with it.
+    // Change the integration timestep.
     void set_dt(double dt_p);
 
     double dt;

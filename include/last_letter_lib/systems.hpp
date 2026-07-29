@@ -43,9 +43,7 @@ public:
         set_param("world/deltaT", 0.0025, false);
     }
     void update_parameters() override;
-    // Change the integration timestep. Virtual so components carrying their own
-    // sub-integrators can retune them too. Kept in sync with the world/deltaT
-    // parameter so a later update_parameters() does not undo it.
+    // Change the internal timestep attribute.
     virtual void set_dt(double dt_p);
     // Update the local state given the aircraft state.
     // body_state is describing the body frame in the NED coordinate system.

@@ -17,21 +17,36 @@ cmake -S . -B build && cmake --build build && cmake --install build
 ```
 
 Installation defaults to the `$HOME/.local` prefix, so no `sudo` is needed.
+The library will be installed in `$HOME/.local/lib`.
 Override it with `-DCMAKE_INSTALL_PREFIX=<path>`. Note that the aircraft models
 are always installed to `$HOME/last_letter_models`, independently of the prefix,
 because that path is hardcoded in the library.
 
 A nix-shell pure configuration has been provided which can be optionally used.
 
+To build the ArduPilot bridge binary run
+
+```bash
+cmake -S . -B build -DLAST_LETTER_BUILD_ARDUPILOT=ON && cmake --build build && cmake --install build
+```
+
+The library will be installed in `$HOME/.local/bin`. Ensure it is on your path.
+
 ### To build the Python code
 
-To build the Python wheels do
+To build the Python wheels enter:
 
-- uv build
+```bash
+uv build
+```
 
-To build the code so that you can import the Python code in editable mode do
+The wheels will be placed under `dist`.
 
-- uv pip install --editable . [--force-reinstall]
+To build and install the Python package in your current Python environment enter:
+
+```bash
+uv pip install --editable <path_to_last_letter_lib> [--force-reinstall]
+```
 
 ## Testing instructions
 
@@ -43,10 +58,16 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DLAST_LETTER_BUILD_TESTS=ON && cma
 
 ### Build everything
 
+To compile everything, including the Python bindings, and run the GoogleTests for the C++ codebase:
+
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DLAST_LETTER_BUILD_TESTS=ON -DLAST_LETTER_BUILD_PYTHON=ON && cmake --build build && cmake --install build && ./build/all_tests
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DLAST_LETTER_BUILD_TESTS=ON -DLAST_LETTER_BUILD_PYTHON=ON && cmake --build build && ./build/all_tests
 ```
 
 ### Run the Python tests
 
-- uv run pytest tests/python
+First build and install the Python package (see above). Then enter:
+
+```bash
+uv run pytest tests/python
+```

@@ -42,7 +42,6 @@ namespace last_letter_lib
 	public:
 		Environment_t environment;
 		SimState_t states;
-		// Change the integration timestep (used by the Dryden turbulence filters).
 		void set_dt(double dt_p);
 
 		double dt, simRate;

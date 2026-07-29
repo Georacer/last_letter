@@ -227,11 +227,8 @@ void UavModel::step()
 }
 
 /////////////////////////////////////////////////
-// Change the simulation timestep in-place.
-// initialize() cannot be used for this: it re-instantiates kinematics, dynamics and
-// the environment model and resets the state. Each sub-model owns the job of
-// retuning itself and its own children, so this only sets our own copy and
-// forwards the call down the tree.
+// Change the simulation timestep without re-initializing the simulation.
+// Each sub-model is responsible for trickling down the change.
 void UavModel::set_dt(double dt_new)
 {
     if (!(dt_new > 0))
@@ -240,10 +237,10 @@ void UavModel::set_dt(double dt_new)
     }
 
     dt = dt_new;
-    set_param("world/deltaT", dt_new); // Keep the parameter tree in sync for later reads.
+    set_param("world/deltaT", dt_new);
 
-    kinematics.set_dt(dt_new);       // ... and, inside it, the integrator.
-    dynamics.set_dt(dt_new);         // ... and, inside it, every Component and the ground model.
+    kinematics.set_dt(dt_new);
+    dynamics.set_dt(dt_new);
     environmentModel.set_dt(dt_new);
 }
 
