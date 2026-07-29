@@ -11,5 +11,5 @@ velAng: [0.000, 0.000, 0.000] #body frame
 
 ctrlInput: [0.0, 0.0, 0.0, 0.0] # Starting control input, normalized range
 
-chanReset: 9
-chanPause: 8
+chanReset: -1
+chanPause: -1
