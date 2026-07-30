@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <chrono>
 #include <cmath>
 #include <csignal>
 #include <cstdio>
@@ -31,6 +32,9 @@ using last_letter_lib::uav_utils::Airdata;
 using last_letter_lib::uav_utils::InputPwm_t;
 
 namespace {
+
+// Wall-clock time between loop-rate reports.
+constexpr std::chrono::seconds rate_report_period{5};
 
 std::atomic<bool> g_stop{false};
 
@@ -92,7 +96,7 @@ bool parse_args(int argc, char **argv, Options &opts, bool &want_help)
         // Section for flags with mandatory arguments.
         if (!has_value)
         {
-            fprintf(stderr, "missing value for %s\n", arg.c_str());
+            fprintf(stderr, "last_letter_ardupilot: missing value for %s\n", arg.c_str());
             return false;
         }
         if (arg == "--model")
@@ -113,7 +117,7 @@ bool parse_args(int argc, char **argv, Options &opts, bool &want_help)
         }
         else
         {
-            fprintf(stderr, "unknown option %s\n", arg.c_str());
+            fprintf(stderr, "last_letter_ardupilot: unknown option %s\n", arg.c_str());
             return false;
         }
     }
@@ -213,7 +217,7 @@ int main(int argc, char **argv)
         }
         else
         {
-            printf("Recording to %s\n", opts.log_path.c_str());
+            printf("last_letter_ardupilot: Recording to %s\n", opts.log_path.c_str());
         }
     }
 
@@ -223,7 +227,7 @@ int main(int argc, char **argv)
         // open() reports which step failed and why; errno would be stale by now.
         return 1;
     }
-    printf("Simulating '%s', listening for ArduPilot on %s:%u\n",
+    printf("last_letter_ardupilot: Simulating '%s', listening for ArduPilot on %s:%u\n",
            opts.model.c_str(), opts.address.c_str(), unsigned(opts.port));
     fflush(stdout);
 
@@ -232,6 +236,15 @@ int main(int argc, char **argv)
     bool announced_peer = false;
     bool servos_live = false;
     int exit_code = 0;
+
+    // Loop-rate stats tracking. The window only opens once ArduPilot shows up, so the
+    // wait for it does not count against the first report.
+    using clock = std::chrono::steady_clock;
+    clock::time_point window_start;
+    clock::time_point frame_started;
+    clock::duration window_busy{0};
+    double window_sim = 0;
+    unsigned window_steps = 0;
 
     try
     {
@@ -242,12 +255,15 @@ int main(int argc, char **argv)
             {
                 continue; // Timed out waiting for ArduPilot; keep waiting.
             }
+            // Everything from here to send_state() is work ArduPilot is blocked on.
+            frame_started = clock::now();
 
             if (!announced_peer)
             {
-                printf("ArduPilot connected from %s\n", connector.peer().c_str());
+                printf("last_letter_ardupilot: ArduPilot connected from %s\n", connector.peer().c_str());
                 fflush(stdout);
                 announced_peer = true;
+                window_start = clock::now();
             }
 
             if (frame.kind == FrameKind::Duplicate)
@@ -260,10 +276,15 @@ int main(int argc, char **argv)
 
             if (frame.kind == FrameKind::Reset)
             {
-                printf("ArduPilot restarted, resetting the model\n");
+                printf("last_letter_ardupilot: ArduPilot restarted, resetting the model\n");
                 fflush(stdout);
                 uav.init();
                 sim_time = 0;
+                // The restart gap is not time spent simulating; start a fresh window.
+                window_start = clock::now();
+                window_steps = 0;
+                window_sim = 0;
+                window_busy = clock::duration{0};
             }
             else if (frame.kind == FrameKind::Skipped)
             {
@@ -303,7 +324,7 @@ int main(int argc, char **argv)
             {
                 if (!servos_live)
                 {
-                    printf("ArduPilot servo outputs are live\n");
+                    printf("last_letter_ardupilot: ArduPilot servo outputs are live\n");
                     fflush(stdout);
                     servos_live = true;
                 }
@@ -316,6 +337,38 @@ int main(int argc, char **argv)
             StateFrame state;
             fill_state(uav, sim_time, state);
             connector.send_state(state);
+
+            // Rate stats tracking.
+            // frame_rate is a *simulation-time* rate (ArduPilot's SIM_RATE_HZ); its
+            // SIM_SPEEDUP multiplier is not in the protocol, so the wall-clock rate it
+            // is actually chasing is frame_rate * SIM_SPEEDUP and we cannot know it.
+            // Hence report the speedup we achieve and let the operator compare it with
+            // the SIM_SPEEDUP they set.
+            //
+            // Because the two processes are in lock-step they never overlap: the frame
+            // period is last_letter step plus ArduPilot step plus two socket hops. And
+            // we can measure the last_letter step.
+            const clock::time_point frame_done = clock::now();
+            window_steps++;
+            window_sim += uav.dt;
+            window_busy += frame_done - frame_started;
+            const auto window = frame_done - window_start;
+            if (window >= rate_report_period)
+            {
+                const double seconds = std::chrono::duration<double>(window).count();
+                const double busy = std::chrono::duration<double>(window_busy).count();
+                const double steps = double(window_steps);
+                const double sim_rate = last_frame_rate > 0 ? double(last_frame_rate) : 1.0 / uav.dt;
+                printf("last_letter_ardupilot: %.1f frames/s, %.2fx real time (sim rate %.0f Hz); "
+                       "%.0f us/frame, %.0f us ours (%.0f%% busy)\n",
+                       steps / seconds, window_sim / seconds, sim_rate,
+                       1e6 * seconds / steps, 1e6 * busy / steps, 100.0 * busy / seconds);
+                fflush(stdout);
+                window_start = frame_done;
+                window_steps = 0;
+                window_sim = 0;
+                window_busy = clock::duration{0};
+            }
         }
     }
     catch (const std::exception &e)
