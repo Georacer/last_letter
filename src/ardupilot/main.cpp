@@ -192,6 +192,9 @@ int main(int argc, char **argv)
 
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
+    // Handle Hangup, which is emitted by sim_vehicle.py's daughter terminal,
+    // which was launched to host SITL.
+    signal(SIGHUP, handle_signal);
 
     UavModel uav(opts.model);
     try
