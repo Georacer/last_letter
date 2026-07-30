@@ -52,6 +52,10 @@ void enable(const std::string &path)
     // do_compression=false: more robust to crash/segfault mid-run, which
     // matters for long streaming sims.
     g_sink = std::make_shared<DataTamer::MCAPSink>(out_path, /*do_compression=*/false);
+    // MCAPSink defaults to reopening the *same* file from scratch every 600 s, as a
+    // guard against filling the disk. We would rather run out of disk than lose
+    // data, so disable it: 0 means never reset.
+    g_sink->setMaxTimeBeforeReset(std::chrono::seconds(0));
     DataTamer::ChannelsRegistry::Global().addDefaultSink(g_sink);
 
     g_enabled = true;
