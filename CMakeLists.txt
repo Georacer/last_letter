@@ -4,6 +4,12 @@
 cmake_minimum_required(VERSION 3.28)
 project(last_letter_lib VERSION 2.1.0 LANGUAGES CXX)
 
+# Default to an optimized build.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type." FORCE)
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 # Default to a user-writable prefix instead of /usr/local, which needs root.
 # Only applies when the caller did not pass -DCMAKE_INSTALL_PREFIX; in
 # particular scikit-build-core sets it to the wheel staging directory, and that
