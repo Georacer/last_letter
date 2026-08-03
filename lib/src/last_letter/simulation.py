@@ -20,25 +20,25 @@ import numpy as np
 import yaml
 from pydantic import BaseModel
 
-import last_letter_lib.aerodynamics as aero
-import last_letter_lib.propulsion as prop
-import last_letter_lib.systems as llsys
-from last_letter_lib.environment import EnvironmentModel
-from last_letter_lib.gravity import GravityClassic
-from last_letter_lib.gravity import GravitySimple
-from last_letter_lib.systems import RigidBody6DOF
-from last_letter_lib.utils.math import EulerAngles
-from last_letter_lib.utils.math import Inertial
-from last_letter_lib.utils.math import Pose
-from last_letter_lib.utils.math import UnitQuaternion
-from last_letter_lib.utils.math import Vector3
-from last_letter_lib.utils.math import Wrench
-from last_letter_lib.utils.math import build_vector3_from_array
-from last_letter_lib.utils.programming import _traverse_collect_pydantic
-from last_letter_lib.utils.uav import Airdata
-from last_letter_lib.utils.uav import UavState
+import last_letter.aerodynamics as aero
+import last_letter.propulsion as prop
+import last_letter.systems as llsys
+from last_letter.environment import EnvironmentModel
+from last_letter.gravity import GravityClassic
+from last_letter.gravity import GravitySimple
+from last_letter.systems import RigidBody6DOF
+from last_letter.utils.math import EulerAngles
+from last_letter.utils.math import Inertial
+from last_letter.utils.math import Pose
+from last_letter.utils.math import UnitQuaternion
+from last_letter.utils.math import Vector3
+from last_letter.utils.math import Wrench
+from last_letter.utils.math import build_vector3_from_array
+from last_letter.utils.programming import _traverse_collect_pydantic
+from last_letter.utils.uav import Airdata
+from last_letter.utils.uav import UavState
 
-from .cpp_last_letter_lib.cpp_simulation import Aircraft
+from .cpp_last_letter.cpp_simulation import Aircraft
 
 # class AircraftParameters(BaseModel):
 #     """

@@ -59,7 +59,7 @@ endif()
 # Build options. All three default OFF, so a bare `cmake` build produces only
 # the C++ library and needs neither Python dev headers nor a network fetch of
 # googletest.
-option(LAST_LETTER_BUILD_PYTHON "Build the pybind11 Python extension (cpp_last_letter_lib)" OFF)
+option(LAST_LETTER_BUILD_PYTHON "Build the pybind11 Python extension (cpp_last_letter)" OFF)
 option(LAST_LETTER_BUILD_TESTS "Build the C++ googletest suite (all_tests)" OFF)
 option(LAST_LETTER_BUILD_ARDUPILOT "Build the ArduPilot SITL JSON bridge (last_letter_ardupilot)" OFF)
 
@@ -102,7 +102,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 # Set here rather than in lib/ because frontends/ardupilot needs it too, and a
 # variable set in one subdirectory is not visible in its siblings.
 if(LAST_LETTER_BUILD_PYTHON)
-  set(LAST_LETTER_LIB_DESTINATION last_letter_lib)
+  set(LAST_LETTER_LIB_DESTINATION last_letter)
 else()
   set(LAST_LETTER_LIB_DESTINATION lib)
 endif()
@@ -117,7 +117,7 @@ endif()
 
 # Stage runtime aircraft-model data into the folder the library reads from at
 # runtime. That location is hardcoded as $HOME/last_letter_models in both
-# lib/src/prog_utils.cpp (C++) and lib/src/last_letter_lib/model_creator.py
+# lib/src/prog_utils.cpp (C++) and lib/src/last_letter/model_creator.py
 # (Python), so the DESTINATION is an absolute path mirroring it, not
 # CMAKE_INSTALL_PREFIX. The trailing slash on the source directory means "the
 # contents of", which is what lets models/ install under a different name.

@@ -16,7 +16,7 @@ from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
 
-from last_letter_lib.utils.math import Vector3
+from last_letter.utils.math import Vector3
 
-from .cpp_last_letter_lib.cpp_environment import EnvironmentData
-from .cpp_last_letter_lib.cpp_environment import EnvironmentModel
+from .cpp_last_letter.cpp_environment import EnvironmentData
+from .cpp_last_letter.cpp_environment import EnvironmentModel

@@ -13,5 +13,5 @@ __date__ = "Thu 20 2022"
 __copyright__ = "Copyright 2022, George Zogopoulos"
 
 
-from .cpp_last_letter_lib.cpp_gravity import GravityClassic
-from .cpp_last_letter_lib.cpp_gravity import GravitySimple
+from .cpp_last_letter.cpp_gravity import GravityClassic
+from .cpp_last_letter.cpp_gravity import GravitySimple

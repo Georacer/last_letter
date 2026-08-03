@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Read last_letter_lib data logs (DataTamer MCAP) into Python.
+"""Read last_letter data logs (DataTamer MCAP) into Python.
 
 Logging is written from C++ via DataTamer's ``MCAPSink`` (see
-``last_letter_lib.enable_logging``). This module is the read side: it decodes
+``last_letter.enable_logging``). This module is the read side: it decodes
 those ``.mcap`` files into numpy arrays / pandas DataFrames and can export CSV.
 
 Why a pure-Python decoder: the ``mcap`` package reads the *container* (schemas,

@@ -64,5 +64,5 @@ __pycache__
 
 # Temporary text files
 *.swp
-lib/src/last_letter_lib.egg-info
+lib/src/last_letter.egg-info
 setup.py

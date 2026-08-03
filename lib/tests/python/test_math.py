@@ -13,7 +13,7 @@ __copyright__ = "Copyright 2021, George Zogopoulos"
 import numpy as np
 import pytest
 
-from last_letter_lib.utils import math
+from last_letter.utils import math
 
 
 def test_calc_poly_zero_crossing():

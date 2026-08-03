@@ -13,10 +13,10 @@ __copyright__ = "Copyright 2022, George Zogopoulos"
 import numpy as np
 import pytest
 
-import last_letter_lib.gravity as gravity
-from last_letter_lib.utils.math import Inertial
-from last_letter_lib.utils.math import Vector3
-from last_letter_lib.utils.uav import UavState
+import last_letter.gravity as gravity
+from last_letter.utils.math import Inertial
+from last_letter.utils.math import Vector3
+from last_letter.utils.uav import UavState
 
 
 ###############################################################################

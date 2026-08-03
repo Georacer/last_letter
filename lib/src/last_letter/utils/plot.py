@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Quick plotting helpers for last_letter_lib data logs.
+"""Quick plotting helpers for last_letter data logs.
 
-Thin convenience wrappers over ``last_letter_lib.utils.log`` for manual
+Thin convenience wrappers over ``last_letter.utils.log`` for manual
 inspection of a recorded ``.mcap``. For anything beyond a quick look, load the
 data yourself with ``log.load_log`` / ``log.load_log_merged`` and plot it how
 you like.

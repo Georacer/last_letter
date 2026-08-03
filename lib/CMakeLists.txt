@@ -116,15 +116,15 @@ if(LAST_LETTER_BUILD_PYTHON)
   list(APPEND pybind11_sources
     src/python_api.cpp
   )
-  pybind11_add_module(cpp_last_letter_lib ${pybind11_sources})
-  set_target_properties(cpp_last_letter_lib PROPERTIES
+  pybind11_add_module(cpp_last_letter ${pybind11_sources})
+  set_target_properties(cpp_last_letter PROPERTIES
       INSTALL_RPATH "$ORIGIN"
       BUILD_RPATH "$ORIGIN"
   )
-  target_link_libraries(cpp_last_letter_lib PRIVATE last_letter_lib)
+  target_link_libraries(cpp_last_letter PRIVATE last_letter_lib)
   # Same destination as liblast_letter_lib.so, so the $ORIGIN rpath above always
   # resolves regardless of which install layout is in play.
-  install(TARGETS cpp_last_letter_lib LIBRARY DESTINATION ${LAST_LETTER_LIB_DESTINATION})
+  install(TARGETS cpp_last_letter LIBRARY DESTINATION ${LAST_LETTER_LIB_DESTINATION})
 endif()
 
 # C++ unit tests (googletest).

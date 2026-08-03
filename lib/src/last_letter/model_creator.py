@@ -7,7 +7,7 @@ import pcg_gazebo
 import pcg_gazebo.parsers.sdf as sdf
 import yaml
 
-from last_letter_lib import default_params
+from last_letter import default_params
 
 
 MODELS_FOLDER = os.path.expanduser("~/last_letter_models/")

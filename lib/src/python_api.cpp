@@ -83,7 +83,7 @@ Inertial inertial_simple(const double mass, const double j_xx, const double j_yy
     return Inertial(mass, v);
 }
 
-PYBIND11_MODULE(cpp_last_letter_lib, m)
+PYBIND11_MODULE(cpp_last_letter, m)
 {
     m.doc() = "The last_letter_lib python bindings.";
 

@@ -1,4 +1,4 @@
-"""The last_letter_lib package"""
+"""The last_letter package"""
 
 from . import aerodynamics
 from . import environment
@@ -15,8 +15,8 @@ from .utils import uav
 
 # Data-logging on/off toggle (all logging is driven from C++; Python only
 # turns it on/off). Bound at the top level of the extension module.
-from .cpp_last_letter_lib import enable_logging
-from .cpp_last_letter_lib import disable_logging
+from .cpp_last_letter import enable_logging
+from .cpp_last_letter import disable_logging
 
 
 __all__ = [

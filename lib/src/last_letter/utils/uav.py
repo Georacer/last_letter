@@ -19,14 +19,14 @@ from typing import Union
 
 import numpy as np
 
-from last_letter_lib.environment import EnvironmentData
-from last_letter_lib.utils.math import Pose
-from last_letter_lib.utils.math import UnitQuaternion
-from last_letter_lib.utils.math import Vector3
+from last_letter.environment import EnvironmentData
+from last_letter.utils.math import Pose
+from last_letter.utils.math import UnitQuaternion
+from last_letter.utils.math import Vector3
 
-from ..cpp_last_letter_lib.cpp_uav_utils import Airdata
-from ..cpp_last_letter_lib.cpp_uav_utils import Inputs
-from ..cpp_last_letter_lib.cpp_uav_utils import UavState
+from ..cpp_last_letter.cpp_uav_utils import Airdata
+from ..cpp_last_letter.cpp_uav_utils import Inputs
+from ..cpp_last_letter.cpp_uav_utils import UavState
 
 
 # class UavState:

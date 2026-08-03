@@ -13,13 +13,13 @@ __date__ = "Fri 24 Dec 2022"
 __copyright__ = "Copyright 2022, George Zogopoulos"
 
 
-from .cpp_last_letter_lib.cpp_aerodynamics import calc_dynamic_pressure
-from .cpp_last_letter_lib.cpp_aerodynamics import calc_bank_from_radius
-from .cpp_last_letter_lib.cpp_aerodynamics import Aerodynamics
-from .cpp_last_letter_lib.cpp_aerodynamics import NoAerodynamics
-from .cpp_last_letter_lib.cpp_aerodynamics import StdLinearAero
-from .cpp_last_letter_lib.cpp_aerodynamics import SimpleDrag
-from .cpp_last_letter_lib.cpp_aerodynamics import PolynomialAero
+from .cpp_last_letter.cpp_aerodynamics import calc_dynamic_pressure
+from .cpp_last_letter.cpp_aerodynamics import calc_bank_from_radius
+from .cpp_last_letter.cpp_aerodynamics import Aerodynamics
+from .cpp_last_letter.cpp_aerodynamics import NoAerodynamics
+from .cpp_last_letter.cpp_aerodynamics import StdLinearAero
+from .cpp_last_letter.cpp_aerodynamics import SimpleDrag
+from .cpp_last_letter.cpp_aerodynamics import PolynomialAero
 
 import numpy as np
 

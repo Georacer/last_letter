@@ -13,16 +13,16 @@ __copyright__ = "Copyright 2022, George Zogopoulos"
 import numpy as np
 import pytest
 
-import last_letter_lib.utils.uav as uav
-from last_letter_lib import aerodynamics
-from last_letter_lib.environment import EnvironmentData
-from last_letter_lib.utils.math import EulerAngles
-from last_letter_lib.utils.math import Pose
-from last_letter_lib.utils.math import UnitQuaternion
-from last_letter_lib.utils.math import Vector3
-from last_letter_lib.utils.uav import Airdata
-from last_letter_lib.utils.uav import Inputs
-from last_letter_lib.utils.uav import UavState
+import last_letter.utils.uav as uav
+from last_letter import aerodynamics
+from last_letter.environment import EnvironmentData
+from last_letter.utils.math import EulerAngles
+from last_letter.utils.math import Pose
+from last_letter.utils.math import UnitQuaternion
+from last_letter.utils.math import Vector3
+from last_letter.utils.uav import Airdata
+from last_letter.utils.uav import Inputs
+from last_letter.utils.uav import UavState
 
 
 ###############################################################################

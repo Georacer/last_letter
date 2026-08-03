@@ -23,12 +23,12 @@ from pydantic import BaseModel
 from pydantic import FilePath
 from pydantic import field_validator
 
-import last_letter_lib.utils.math as llmath
-from last_letter_lib.utils.math import UnitQuaternion
-from last_letter_lib.utils.math import Vector3
-from last_letter_lib.utils.math import build_vector3_from_array
+import last_letter.utils.math as llmath
+from last_letter.utils.math import UnitQuaternion
+from last_letter.utils.math import Vector3
+from last_letter.utils.math import build_vector3_from_array
 
-from .cpp_last_letter_lib.cpp_systems import Component
+from .cpp_last_letter.cpp_systems import Component
 
 
 class PoseParameters(BaseModel):
@@ -105,7 +105,7 @@ class MeshParameters(BaseModel):
     filepath: str
     """
     The filepath where the mesh file can be found. Can be absolute or relative
-    to the *last_letter_lib* root directory.
+    to the *last_letter* root directory.
     """
     pose: PoseParameters  # Pose from the component frame to the mesh frame
     """

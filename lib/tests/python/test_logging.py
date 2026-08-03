@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """Tests for the data-logging feature from the Python side.
 
-These verify that the Python on/off toggle (last_letter_lib.enable_logging /
+These verify that the Python on/off toggle (last_letter.enable_logging /
 disable_logging) drives C++ self-logging for a bare Component, with no UavModel
 and no logger object passed around.
 """
 
 __authors__ = ["George Zogopoulos"]
 
-import last_letter_lib
-from last_letter_lib import aerodynamics
-from last_letter_lib.environment import EnvironmentData
-from last_letter_lib.utils.math import UnitQuaternion
-from last_letter_lib.utils.math import Vector3
-from last_letter_lib.utils.uav import UavState
+import last_letter
+from last_letter import aerodynamics
+from last_letter.environment import EnvironmentData
+from last_letter.utils.math import UnitQuaternion
+from last_letter.utils.math import Vector3
+from last_letter.utils.uav import UavState
 
 
 AIRFOIL_DESC = """
@@ -46,13 +46,13 @@ inertial:
 
 def test_enable_disable_logging_are_exposed():
     """The only logging API in Python is the on/off toggle."""
-    assert hasattr(last_letter_lib, "enable_logging")
-    assert hasattr(last_letter_lib, "disable_logging")
+    assert hasattr(last_letter, "enable_logging")
+    assert hasattr(last_letter, "disable_logging")
 
 
 def test_bare_component_logs_to_mcap(tmp_path):
     """A standalone airfoil (no UavModel) self-logs once logging is enabled."""
-    from last_letter_lib.utils import log
+    from last_letter.utils import log
 
     airfoil = aerodynamics.SimpleDrag("test_airfoil")
     airfoil.initialize(AIRFOIL_DESC)
@@ -62,11 +62,11 @@ def test_bare_component_logs_to_mcap(tmp_path):
 
     n_steps = 10
     path = tmp_path / "aero.mcap"
-    last_letter_lib.enable_logging(str(path))
+    last_letter.enable_logging(str(path))
     for _ in range(n_steps):
         airfoil.update_local_state(state, env)
         airfoil.calc_model()
-    last_letter_lib.disable_logging()
+    last_letter.disable_logging()
 
     assert path.exists(), "enable_logging did not create the MCAP file"
     assert path.stat().st_size > 0, "MCAP file is empty; no snapshots were written"
@@ -88,7 +88,7 @@ def test_load_log_merged_and_csv(tmp_path):
     """load_log_merged and to_csv produce a wide, channel-prefixed table."""
     import pandas as pd
 
-    from last_letter_lib.utils import log
+    from last_letter.utils import log
 
     airfoil = aerodynamics.SimpleDrag("test_airfoil")
     airfoil.initialize(AIRFOIL_DESC)
@@ -96,11 +96,11 @@ def test_load_log_merged_and_csv(tmp_path):
     env = EnvironmentData()
 
     path = tmp_path / "aero.mcap"
-    last_letter_lib.enable_logging(str(path))
+    last_letter.enable_logging(str(path))
     for _ in range(5):
         airfoil.update_local_state(state, env)
         airfoil.calc_model()
-    last_letter_lib.disable_logging()
+    last_letter.disable_logging()
 
     merged = log.load_log_merged(str(path))
     assert len(merged) == 5

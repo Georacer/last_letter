@@ -21,13 +21,13 @@ from numba import jit
 # from pytransform3d import rotations as pt3d_rot
 from scipy.optimize import root
 
-# from last_letter_lib import cpp_last_letter_lib
-from ..cpp_last_letter_lib.cpp_math_utils import EulerAngles
-from ..cpp_last_letter_lib.cpp_math_utils import Inertial
-from ..cpp_last_letter_lib.cpp_math_utils import UnitQuaternion
-from ..cpp_last_letter_lib.cpp_math_utils import Vector3
-from ..cpp_last_letter_lib.cpp_uav_utils import Pose as cpp_Pose
-from ..cpp_last_letter_lib.cpp_uav_utils import Wrench
+# from last_letter import cpp_last_letter
+from ..cpp_last_letter.cpp_math_utils import EulerAngles
+from ..cpp_last_letter.cpp_math_utils import Inertial
+from ..cpp_last_letter.cpp_math_utils import UnitQuaternion
+from ..cpp_last_letter.cpp_math_utils import Vector3
+from ..cpp_last_letter.cpp_uav_utils import Pose as cpp_Pose
+from ..cpp_last_letter.cpp_uav_utils import Wrench
 
 
 @jit(nopython=True)

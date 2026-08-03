@@ -46,14 +46,14 @@ def isfloat(string):
 # Probably needs removing
 # def get_artifacts_path():
 #     """Return the path to the artifacts directory. This directory is ignored by git."""
-#     return resource_filename("last_letter_lib", "output_artifacts")
+#     return resource_filename("last_letter", "output_artifacts")
 
 
 # Probably needs removing
 # def get_data_path():
 #     """Return the path to the data directory."""
 #     return resource_filename(
-#         "last_letter_lib", "data"
+#         "last_letter", "data"
 #     )  # Set name of the directory to access data.
 
 

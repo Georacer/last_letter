@@ -13,15 +13,15 @@ __copyright__ = "Copyright 2022, George Zogopoulos"
 import numpy as np
 import pytest
 
-from last_letter_lib import aerodynamics as aero
-from last_letter_lib import propulsion
-from last_letter_lib import simulation as sim
-from last_letter_lib import systems
-from last_letter_lib.utils.math import EulerAngles
-from last_letter_lib.utils.math import Vector3
-from last_letter_lib.utils.math import build_vector3_from_array
-from last_letter_lib.utils.uav import Inputs
-from last_letter_lib.utils.uav import UavState
+from last_letter import aerodynamics as aero
+from last_letter import propulsion
+from last_letter import simulation as sim
+from last_letter import systems
+from last_letter.utils.math import EulerAngles
+from last_letter.utils.math import Vector3
+from last_letter.utils.math import build_vector3_from_array
+from last_letter.utils.uav import Inputs
+from last_letter.utils.uav import UavState
 
 DELTAT = 0.01
 

@@ -4,14 +4,14 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import last_letter_lib
-from last_letter_lib import aerodynamics
-from last_letter_lib import propulsion
-from last_letter_lib import simulation
-from last_letter_lib import systems
+import last_letter
+from last_letter import aerodynamics
+from last_letter import propulsion
+from last_letter import simulation
+from last_letter import systems
 
 
-project = "last_letter_lib"
+project = "last_letter"
 author = "George Zogopoulos"
 copyright = f"{datetime.now().year}, George Zogopoulos"
 extensions = [

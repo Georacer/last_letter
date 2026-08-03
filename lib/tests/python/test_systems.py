@@ -13,9 +13,9 @@ __copyright__ = "Copyright 2022, George Zogopoulos"
 import numpy as np
 import pytest
 
-import last_letter_lib.systems as systems
-from last_letter_lib.utils.math import UnitQuaternion
-from last_letter_lib.utils.math import Vector3
+import last_letter.systems as systems
+from last_letter.utils.math import UnitQuaternion
+from last_letter.utils.math import Vector3
 
 
 ###############################################################################
