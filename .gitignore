@@ -43,6 +43,9 @@ __pycache__
 # Pytest files
 .pytest_cache
 
+# Logs written by the test suites into the working directory
+*.mcap
+
 # Coverage results
 *.coverage*
 

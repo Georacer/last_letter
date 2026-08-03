@@ -4,10 +4,18 @@
 using namespace last_letter_lib::programming_utils;
 using namespace last_letter_lib;
 
+// LAST_LETTER_TEST_DATA_DIR is the absolute path of the tests/cpp source
+// directory, baked in by CMake so the test data does not have to be found
+// relative to the working directory.
+std::string test_data_path(const std::string &relative)
+{
+    return std::string(LAST_LETTER_TEST_DATA_DIR) + "/" + relative;
+}
+
 // Build the parameter tree of a test aircraft.
 ParameterManager load_config_aircraft(std::string uav_name)
 {
-    return loadModelConfig(uav_name, "tests/cpp/test_parameters/");
+    return loadModelConfig(uav_name, test_data_path("test_parameters/"));
 }
 
 SimState_t build_aircraft_state_from_config(ParameterManager config)

@@ -287,6 +287,12 @@ if(LAST_LETTER_BUILD_TESTS)
   target_include_directories(all_tests PUBLIC
     tests/cpp
   )
+  # The tests read YAML fixtures from tests/cpp. Bake in the absolute path of
+  # that directory rather than resolving it against the working directory, so
+  # all_tests can be run from anywhere.
+  target_compile_definitions(all_tests PRIVATE
+    LAST_LETTER_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp"
+  )
   target_link_libraries(all_tests
     GTest::gtest_main
     yaml-cpp

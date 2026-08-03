@@ -16,9 +16,7 @@ using namespace last_letter_lib;
 TEST(ProgUtilsTest, TestYaml1)
 {
 
-    std::string param_path = "tests/cpp/";
-    std::string filename = "test_params.yaml";
-    std::string full_filename = param_path + filename;
+    std::string full_filename = test_data_path("test_params.yaml");
     YAML::Node config = YAML::LoadFile(full_filename);
     EXPECT_EQ(config["world"]["simRate"].as<int>(), 500);
 
@@ -79,7 +77,7 @@ TEST(ProgUtilsTest, GeneralTest)
 
     // Test parameter loading from an aircraft models folder. The repository test
     // parameters are used rather than the default ($HOME/last_letter_models).
-    ParameterManager loadedConfig = loadModelConfig("skywalker_2013", "tests/cpp/test_parameters/");
+    ParameterManager loadedConfig = loadModelConfig("skywalker_2013", test_data_path("test_parameters/"));
 }
 
 class A
@@ -218,7 +216,7 @@ TEST(ParameterManagerTest2, TestLoadFile)
     pm.set("lastLogin", 0, false);
     pm.set("world/simRate", 100, false);
     pm.set("cantfindme", 13, false);
-    pm.load_file("tests/cpp/test_params.yaml");
+    pm.load_file(test_data_path("test_params.yaml"));
 
     EXPECT_EQ(pm.get<double>("lastLogin"), 5);
     EXPECT_EQ(pm.get<double>("world/simRate"), 500);
