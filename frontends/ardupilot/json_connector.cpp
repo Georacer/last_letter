@@ -1,4 +1,4 @@
-#include "last_letter_lib/ardupilot/json_connector.hpp"
+#include "json_connector.hpp"
 
 #include <cerrno>
 #include <cmath>

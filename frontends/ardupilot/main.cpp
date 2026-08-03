@@ -18,7 +18,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "last_letter_lib/ardupilot/json_connector.hpp"
+#include "json_connector.hpp"
 #include "last_letter_lib/uav_model.hpp"
 
 using last_letter_lib::UavModel;

@@ -14,7 +14,7 @@
 #include <cstdint>
 #include <string>
 
-#include "last_letter_lib/ardupilot/udp_socket.hpp"
+#include "udp_socket.hpp"
 
 namespace last_letter_lib {
 namespace ardupilot {

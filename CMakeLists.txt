@@ -2,7 +2,12 @@
 # which keeps the install rules of the fetched dependencies out of this project.
 # Note this is newer than the cmake shipped by Ubuntu 22.04 (3.22).
 cmake_minimum_required(VERSION 3.28)
-project(last_letter_lib VERSION 2.1.0 LANGUAGES CXX)
+project(last_letter VERSION 2.1.0 LANGUAGES CXX)
+
+# This is the top level of a repository holding the simulation library (lib/)
+# and the frontends that drive it (frontends/). Everything global lives here:
+# toolchain settings, the dependencies found from the system, and the build
+# options. The components themselves are added at the bottom of this file.
 
 # Default to an optimized build.
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -21,6 +26,16 @@ endif()
 message(STATUS "Install prefix: ${CMAKE_INSTALL_PREFIX}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # Generate compile_commands.json
+
+# Keep our own binaries and shared libraries at the top of the build tree
+# instead of letting them follow the source layout into build/lib/ and
+# build/frontends/ardupilot/. Two things depend on this: the BUILD_RPATH of
+# $ORIGIN, which is what lets the bridge and the Python extension find
+# liblast_letter_lib.so before installation, and the documented ./build/all_tests
+# invocation. ARCHIVE is deliberately left alone, so the static FetchContent
+# dependencies stay in their own subdirectories.
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 message(STATUS "Building ${PROJECT_NAME}")
 
@@ -41,19 +56,23 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# Find dependences
-# find_package(ament_cmake REQUIRED)
+# Build options. All three default OFF, so a bare `cmake` build produces only
+# the C++ library and needs neither Python dev headers nor a network fetch of
+# googletest.
+option(LAST_LETTER_BUILD_PYTHON "Build the pybind11 Python extension (cpp_last_letter_lib)" OFF)
+option(LAST_LETTER_BUILD_TESTS "Build the C++ googletest suite (all_tests)" OFF)
+option(LAST_LETTER_BUILD_ARDUPILOT "Build the ArduPilot SITL JSON bridge (last_letter_ardupilot)" OFF)
+
+# Find dependencies
 find_package(Eigen3 REQUIRED NO_MODULE)
 
 find_package(Boost REQUIRED)
 
 # find_package(NLopt REQUIRED) # Will enable later with trimmer
 
-# Python extension (pybind11). OFF by default, so a bare `cmake` build produces
-# only the C++ library and needs neither Python dev headers nor pybind11. The
-# scikit-build-core / uv package build turns it ON (see [tool.scikit-build] in
-# pyproject.toml); that build is the one whose extension actually gets imported.
-option(LAST_LETTER_BUILD_PYTHON "Build the pybind11 Python extension (cpp_last_letter_lib)" OFF)
+# The scikit-build-core / uv package build turns LAST_LETTER_BUILD_PYTHON ON
+# (see [tool.scikit-build] in pyproject.toml); that build is the one whose
+# extension actually gets imported.
 if(LAST_LETTER_BUILD_PYTHON)
   find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
   message(STATUS "Current Python site-packages dir: ${Python3_SITELIB}")
@@ -61,306 +80,47 @@ if(LAST_LETTER_BUILD_PYTHON)
   find_package(pybind11 PATHS ${Python3_SITELIB}/pybind11/share/cmake/pybind11 CONFIG REQUIRED)
 endif()
 
-# add_subdirectory(external/pybind11)
-
 # All fetched dependencies (yaml-cpp, DataTamer + its vendored mcap, googletest)
 # are built STATIC and position-independent, so they embed directly into
 # last_letter_lib.so and leave no side-car .so files to ship next to the Python
 # extension. BUILD_SHARED_LIBS is left at its default (OFF); PIC must be enabled
-# before the first FetchContent so every dependency is compiled with -fPIC.
+# here, before lib/ makes the first FetchContent call, so every dependency is
+# compiled with -fPIC.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# Every FetchContent_Declare below passes EXCLUDE_FROM_ALL. Those projects carry
-# their own install() rules targeting <prefix>/include and <prefix>/lib, which
-# `cmake --install` would otherwise execute, scattering third-party headers into
-# our prefix. EXCLUDE_FROM_ALL makes CMake ignore a subdirectory's install rules.
-# The targets themselves are still built, because last_letter_lib links them.
-
-# Import yaml-cpp
-include(FetchContent)
-
-FetchContent_Declare(
-  yaml_cpp
-  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-  GIT_TAG        yaml-cpp-0.9.0
-  EXCLUDE_FROM_ALL
-)
-
-# Set options before the library is added
-set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
-
-FetchContent_MakeAvailable(yaml_cpp)
-
-# Import DataTamer, the data-logging backend (MCAP output, PlotJuggler-native).
-# The buildable CMake project lives in the data_tamer_cpp/ subdirectory, hence
-# SOURCE_SUBDIR (honored by FetchContent_MakeAvailable on CMake >= 3.18).
-# DATA_TAMER_BUILD_ROS must be OFF so it uses its vendored mcap (3rdparty/mcap)
-# instead of requiring a ROS 2 / mcap_vendor environment.
-FetchContent_Declare(
-  data_tamer
-  GIT_REPOSITORY https://github.com/PickNikRobotics/data_tamer.git
-  GIT_TAG        1.0.3
-  SOURCE_SUBDIR  data_tamer_cpp
-  EXCLUDE_FROM_ALL
-)
-set(DATA_TAMER_BUILD_ROS OFF CACHE BOOL "" FORCE)
-set(DATA_TAMER_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(DATA_TAMER_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(data_tamer)
-# DataTamer compiles its own target with -Werror; drop it so a compiler version
-# other than the one upstream tested can't fail our build on a stray warning.
-if(TARGET data_tamer AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-  target_compile_options(data_tamer PRIVATE -Wno-error)
-endif()
-
-
-include_directories(
-  include
-  ${EIGEN3_INCLUDE_DIRS}
-  ${NLOPT_INCLUDE_DIRS}
-  # "/usr/local/include" # Used to include nlopt
-)
-
-# Declare the project library
-add_library(last_letter_lib SHARED
-  src/math_utils.cpp
-  src/uav_utils.cpp
-  src/geo_mag_declination.cpp
-  src/prog_utils.cpp
-  src/systems.cpp
-  src/environment.cpp
-  src/gravity.cpp
-  src/aerodynamics.cpp
-  src/propulsion/propulsion.cpp
-  src/propulsion/no_engine.cpp
-  src/propulsion/thruster_simple.cpp
-  src/propulsion/beard_engine.cpp
-  src/propulsion/piston_engine.cpp
-  src/propulsion/electric_engine.cpp
-  src/propulsion/omega_control_engine.cpp
-  src/ground_reaction/ground_reaction.cpp
-  src/ground_reaction/no_ground_reactions.cpp
-  src/ground_reaction/panos_contact_points.cpp
-  src/ground_reaction/point_friction.cpp
-  src/dynamics.cpp
-  src/kinematics.cpp
-  src/sensors.cpp
-  src/uav_model.cpp
-  src/logging/logging.cpp
-)
-# src/ is on the private include path so the implementation can reach internal
-# headers that must not be installed and depended upon by downstream packages.
-target_include_directories(last_letter_lib PRIVATE src)
-
-# Eigen and Boost are genuine PUBLIC dependencies: the installed headers include
-# <Eigen/Eigen> almost everywhere and <boost/numeric/odeint.hpp> in systems.hpp,
-# so a consumer needs them on its include path too.
+# Where liblast_letter_lib.so and the Python extension are installed. When we
+# are building the Python package they must end up in the Python package
+# directory, since the extension's rpath is $ORIGIN and the two have to stay
+# adjacent. The value is the *Python package* name, which happens to match
+# PROJECT_NAME but is not the same thing - do not substitute one for the other.
 #
-# yaml-cpp and data_tamer are wrapped in $<BUILD_INTERFACE:> instead. They are
-# FetchContent targets declared EXCLUDE_FROM_ALL, so they belong to no export
-# set, and naming them in the link interface unguarded makes the
-# install(EXPORT) below fail to generate. The genex keeps them for our own
-# build - the library sources, all_tests and the bridge all still get their
-# include directories - and drops them from the installed link interface.
-target_link_libraries(last_letter_lib
-  PUBLIC
-    Eigen3::Eigen
-    Boost::boost
-    $<BUILD_INTERFACE:yaml-cpp>
-    $<BUILD_INTERFACE:data_tamer>
-)
-
-# When we are building the Python package the library needs to end up in the
-# Python package directory, next to cpp_last_letter_lib.so, whose path is
-# $ORIGIN.
-# Note: this also relocates the library for a plain `cmake --install`
-# that happens to have LAST_LETTER_BUILD_PYTHON on; enabling the option outside
-# the pyproject.toml-driven build is only meant to check that the bindings
-# still compile, so such an install is not expected.
+# Note: this also relocates the library for a plain `cmake --install` that
+# happens to have LAST_LETTER_BUILD_PYTHON on; enabling the option outside the
+# pyproject.toml-driven build is only meant to check that the bindings still
+# compile, so such an install is not expected.
+#
+# Set here rather than in lib/ because frontends/ardupilot needs it too, and a
+# variable set in one subdirectory is not visible in its siblings.
 if(LAST_LETTER_BUILD_PYTHON)
-  set(LAST_LETTER_LIB_DESTINATION ${PROJECT_NAME})
+  set(LAST_LETTER_LIB_DESTINATION last_letter_lib)
 else()
   set(LAST_LETTER_LIB_DESTINATION lib)
 endif()
 
-# ArduPilot SITL bridge. Launched by ArduPilot's SITL::last_letter backend, it
-# drives a UavModel over the ArduPilot JSON backend protocol (UDP). Needs no
-# dependency beyond POSIX sockets, so it is built by default.
-option(LAST_LETTER_BUILD_ARDUPILOT "Build the ArduPilot SITL JSON bridge (last_letter_ardupilot)" OFF)
+# The simulation library, the Python bindings and the C++ test suite.
+add_subdirectory(lib)
+
+# Frontends that drive the library.
 if(LAST_LETTER_BUILD_ARDUPILOT)
-  add_executable(last_letter_ardupilot
-    src/ardupilot/udp_socket.cpp
-    src/ardupilot/json_connector.cpp
-    src/ardupilot/main.cpp
-  )
-  target_link_libraries(last_letter_ardupilot last_letter_lib)
-  # liblast_letter_lib.so installs to <prefix>/${LAST_LETTER_LIB_DESTINATION}
-  # (see the install rules at the bottom of this file), so the binary in
-  # <prefix>/bin needs to be pointed at it explicitly.
-  set_target_properties(last_letter_ardupilot PROPERTIES
-    INSTALL_RPATH "$ORIGIN/../${LAST_LETTER_LIB_DESTINATION}"
-    BUILD_RPATH "$ORIGIN"
-  )
-  install(TARGETS last_letter_ardupilot RUNTIME DESTINATION bin)
-endif()
-
-# add_library(lib_trimmer src/trimmer.cpp)
-# target_link_libraries(lib_trimmer
-# ${NLOPT_LIBRARIES}
-# lib_uav_model)
-
-if(LAST_LETTER_BUILD_PYTHON)
-  list(APPEND pybind11_sources
-    src/python_api.cpp
-  )
-  pybind11_add_module(cpp_last_letter_lib ${pybind11_sources})
-  set_target_properties(cpp_last_letter_lib PROPERTIES
-      INSTALL_RPATH "$ORIGIN"
-      BUILD_RPATH "$ORIGIN"
-  )
-  target_link_libraries(cpp_last_letter_lib PRIVATE last_letter_lib)
-  # Same destination as liblast_letter_lib.so, so the $ORIGIN rpath above always
-  # resolves regardless of which install layout is in play.
-  install(TARGETS cpp_last_letter_lib LIBRARY DESTINATION ${LAST_LETTER_LIB_DESTINATION})
+  add_subdirectory(frontends/ardupilot)
 endif()
 
 # Stage runtime aircraft-model data into the folder the library reads from at
 # runtime. That location is hardcoded as $HOME/last_letter_models in both
-# src/prog_utils.cpp (C++) and src/last_letter_lib/model_creator.py (Python), so
-# the DESTINATION is an absolute path mirroring it, not CMAKE_INSTALL_PREFIX.
+# lib/src/prog_utils.cpp (C++) and lib/src/last_letter_lib/model_creator.py
+# (Python), so the DESTINATION is an absolute path mirroring it, not
+# CMAKE_INSTALL_PREFIX. The trailing slash on the source directory means "the
+# contents of", which is what lets models/ install under a different name.
 # These are install rules: they run at `cmake --install` time, NOT at configure,
-# so plain `cmake`/`cmake --build` no longer writes to $HOME.
-install(DIRECTORY last_letter_models DESTINATION $ENV{HOME})
-
-# Export the header files for use by consumers of the library
-# ament_export_include_directories(include)  # Unnecessary according to https://index.ros.org/doc/ros2/Tutorials/Ament-CMake-Documentation/#building-a-library
-# Export the library binaries themselves
-# ament_export_libraries(
-# last_letter_lib
-# )  # Unnecessary according to https://index.ros.org/doc/ros2/Tutorials/Ament-CMake-Documentation/#building-a-library
-
-# # Export the libraries
-# ament_export_targets(
-# export_last_letterlib HAS_LIBRARY_TARGET
-# )
-# # Declare dependencies of this library to its consumers
-# ament_export_dependencies(
-# Eigen3
-# )
-
-# C++ unit tests (googletest). OFF by default, so an ordinary library / Python
-# extension build neither fetches googletest nor compiles the test binary.
-# Enable with -DLAST_LETTER_BUILD_TESTS=ON (see build command below).
-option(LAST_LETTER_BUILD_TESTS "Build the C++ googletest suite (all_tests)" OFF)
-if(LAST_LETTER_BUILD_TESTS)
-  include(FetchContent)
-  FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
-    EXCLUDE_FROM_ALL
-  )
-
-  FetchContent_MakeAvailable(googletest)
-
-  enable_testing()
-
-  list(APPEND test_sources
-    tests/cpp/test_utils.cpp
-    tests/cpp/test_prog_utils.cpp
-    tests/cpp/test_uav_utils.cpp
-    tests/cpp/test_math_utils.cpp
-    tests/cpp/test_systems.cpp
-    tests/cpp/test_environment.cpp
-    tests/cpp/test_aerodynamics.cpp
-    tests/cpp/test_propulsion.cpp
-    tests/cpp/test_ground_reaction.cpp
-    tests/cpp/test_gravity.cpp
-    tests/cpp/test_dynamics.cpp
-    tests/cpp/test_kinematics.cpp
-    tests/cpp/test_uav_model.cpp
-    tests/cpp/test_loop_rate.cpp
-
-    # tests/cpp/test_pybind.cpp
-  )
-  add_executable(all_tests ${test_sources})
-  target_include_directories(all_tests PUBLIC
-    tests/cpp
-  )
-  # The tests read YAML fixtures from tests/cpp. Bake in the absolute path of
-  # that directory rather than resolving it against the working directory, so
-  # all_tests can be run from anywhere.
-  target_compile_definitions(all_tests PRIVATE
-    LAST_LETTER_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp"
-  )
-  target_link_libraries(all_tests
-    GTest::gtest_main
-    yaml-cpp
-    last_letter_lib
-  )
-
-  # Perhaps copy over the test data to the build folder?
-  include(GoogleTest)
-  gtest_discover_tests(all_tests)
-endif()
-
-# the following line skips the linter which checks for copyrights
-# uncomment the line when a copyright and license is not present in all source files
-#set(ament_cmake_copyright_FOUND TRUE)
-# the following line skips cpplint (only works in a git repo)
-# uncomment the line when this package is not in a git repo
-#set(ament_cmake_cpplint_FOUND TRUE)
-
-# install(DIRECTORY tests/cpp/test_parameters DESTINATION share/${PROJECT_NAME})
-
-# endif()
-install(
-  DIRECTORY include/ DESTINATION include
-)
-
-list(APPEND exported_libs
-  last_letter_lib
-)
-install(
-  TARGETS ${exported_libs}
-  EXPORT last_letter_lib_targets
-  LIBRARY DESTINATION ${LAST_LETTER_LIB_DESTINATION}
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
-
-# Turn the export set collected above into an installed CMake package.
-# Guarded on the Python build because that layout relocates
-# liblast_letter_lib.so into <prefix>/last_letter_lib/ for the wheel; a targets
-# file generated from it would point consumers at a path that exists only
-# inside a wheel.
-if(NOT LAST_LETTER_BUILD_PYTHON)
-  include(CMakePackageConfigHelpers)
-
-  install(
-    EXPORT last_letter_lib_targets
-    FILE last_letter_libTargets.cmake
-    NAMESPACE last_letter_lib::
-    DESTINATION lib/cmake/last_letter_lib
-  )
-
-  configure_package_config_file(
-    cmake/last_letter_libConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/last_letter_libConfig.cmake
-    INSTALL_DESTINATION lib/cmake/last_letter_lib
-  )
-
-  write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/last_letter_libConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-  )
-
-  install(
-    FILES
-      ${CMAKE_CURRENT_BINARY_DIR}/last_letter_libConfig.cmake
-      ${CMAKE_CURRENT_BINARY_DIR}/last_letter_libConfigVersion.cmake
-    DESTINATION lib/cmake/last_letter_lib
-  )
-endif()
+# so plain `cmake`/`cmake --build` does not write to $HOME.
+install(DIRECTORY models/ DESTINATION $ENV{HOME}/last_letter_models)

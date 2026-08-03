@@ -22,7 +22,7 @@ dependencies = [
 [tool.scikit-build]
 minimum-version = "build-system.requires"
 build-dir = "build/{wheel_tag}"
-wheel.packages = ["src/last_letter_lib"]
+wheel.packages = ["lib/src/last_letter_lib"]
 # Keep in sync with cmake_minimum_required in CMakeLists.txt, so the wheel build
 # fetches a suitable cmake when the system one is older.
 cmake.version = ">=3.28"
