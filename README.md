@@ -1,6 +1,20 @@
-# last_letter_lib
+# last_letter
 
 Software libraries for UAV simulation.
+
+## Repository layout
+
+```
+lib/          the simulation library: C++ core, its Python package and the tests
+frontends/    programs that drive the library, currently the ArduPilot SITL bridge
+models/       aircraft recipes, installed to $HOME/last_letter_models
+docs/         Sphinx documentation
+tools/        standalone analysis scripts
+```
+
+The C++ library is called `last_letter_lib`, which is also the name of its CMake
+target and of `liblast_letter_lib.so`; the suffix separates it from the frontends
+that link it. The Python package is simply `last_letter`.
 
 ## Build instructions
 
@@ -78,7 +92,7 @@ The wheels will be placed under `dist`.
 To build and install the Python package in your current Python environment enter:
 
 ```bash
-uv pip install --editable <path_to_last_letter_lib> [--force-reinstall]
+uv pip install --editable <path_to_last_letter> [--force-reinstall]
 ```
 
 ## Testing instructions
@@ -88,6 +102,9 @@ uv pip install --editable <path_to_last_letter_lib> [--force-reinstall]
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DLAST_LETTER_BUILD_TESTS=ON && cmake --build build && ./build/all_tests
 ```
+
+The test fixtures are found through a path baked in at configure time, so
+`all_tests` can be run from any working directory.
 
 ### Build everything
 
@@ -107,5 +124,5 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
 First build and install the Python package (see above). Then enter:
 
 ```bash
-uv run pytest tests/python
+uv run pytest lib/tests/python
 ```

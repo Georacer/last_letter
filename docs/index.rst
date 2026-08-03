@@ -1,9 +1,9 @@
-.. last_letter_lib documentation master file, created by
+.. last_letter documentation master file, created by
    sphinx-quickstart on Tue Dec  7 19:42:35 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to last_letter_lib's documentation!
+Welcome to last_letter's documentation!
 ===========================================
 
 .. toctree::

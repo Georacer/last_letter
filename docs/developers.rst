@@ -2,13 +2,13 @@
 Developers
 ===============================================================================
 
-This page contains guidelines for *last_letter_lib* developers.
+This page contains guidelines for *last_letter* developers.
 
 
 Package purpose
 ===============================================================================
 
-The *last_letter_lib* package is meant to be a definitive data storage for aircraft recipes.
+The *last_letter* package is meant to be a definitive data storage for aircraft recipes.
 It is not meant to host simulation models.
 
 However, since the model parameters are tightly dependent on the underlying mathematical
@@ -28,7 +28,7 @@ Testing
 Testing the Python library
 --------------------------
 
-Testing scripts are provided in the ``./tests/`` directory.
+Testing scripts are provided in the ``./lib/tests/`` directory.
 The python package "pytest" is used for this purpose.
 
 ``nox`` is used as the testing framework. You can evoke all tests with ``nox``.

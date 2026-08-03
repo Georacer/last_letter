@@ -19,6 +19,10 @@ dependencies = [
     "scipy>=1.15.3",
 ]
 
+[project.urls]
+Homepage = "https://github.com/Georacer/last_letter"
+Repository = "https://github.com/Georacer/last_letter"
+
 [tool.scikit-build]
 minimum-version = "build-system.requires"
 build-dir = "build/{wheel_tag}"

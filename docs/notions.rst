@@ -2,7 +2,7 @@
 Notions
 ===============================================================================
 
-This page presents the core notions behind the *last_letter_lib* package.
+This page presents the core notions behind the *last_letter* package.
 
 Aircraft
 ===============================================================================
@@ -14,7 +14,7 @@ However, note that one can define an aircraft in varying levels of detail.
 
 An Aircraft comprises of multiple *Components*.
 
-.. autoclass:: last_letter_lib.simulation.Aircraft
+.. autoclass:: last_letter.simulation.Aircraft
     :members:
     :noindex:
 
@@ -32,7 +32,7 @@ information is its location in terms of the Aircraft.
 Optionally, it can hold :class:`~systems.Inertial` information and a :class:`~systems.Mesh`
 for the visual appearance.
 
-.. autoclass:: last_letter_lib.systems.Component
+.. autoclass:: last_letter.systems.Component
     :members:
     :noindex:
 
@@ -71,9 +71,9 @@ that they are part of the database and they can be refered to by the Components 
 Schema
 ===============================================================================
 
-*last_letter_lib* enforces a rigid schema on how the Aircraft and other model information
+*last_letter* enforces a rigid schema on how the Aircraft and other model information
 should be entered in the .yaml files.
-Thus, any third party software that depends on *last_letter_lib* can enjoy a unified and
+Thus, any third party software that depends on *last_letter* can enjoy a unified and
 stable API. Accessing information across different Aircraft should be the same.
 
 Still, there is enough room for flexibility. For example, a :class:`~propulsion.Thruster`
@@ -135,5 +135,5 @@ the Component frame.
 
 The **Body Frame**, as typically used in the UAV and robotics literature, is considered
 on top of the Center of Mass of the aircraft. Since the Center of Mass can move depending
-on the component distribution, it is not defined in *last_letter_lib*, but is a derivative of
+on the component distribution, it is not defined in *last_letter*, but is a derivative of
 an Aircraft recipe.
