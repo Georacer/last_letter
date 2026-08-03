@@ -28,20 +28,26 @@ from last_letter.utils.uav import UavState
 ###############################################################################
 # Declare the tests themselves ################################################
 
+# Mirrors num_input_channels in uav_utils.hpp, which is not exposed to Python.
+NUM_INPUT_CHANNELS = 32
+
 
 class TestInputs:
     def test_constructor(self):
         inputs = Inputs()
-        assert len(inputs) == 16
-        assert np.allclose(inputs.to_array(), np.zeros(16))
+        assert len(inputs) == NUM_INPUT_CHANNELS
+        assert np.allclose(inputs.to_array(), np.zeros(NUM_INPUT_CHANNELS))
 
     def test_constructor_from_list(self):
         inputs = Inputs([1, 2, 3, 4, 5])
-        assert np.allclose(inputs.to_array(), np.array([1, 2, 3, 4, 5] + [0] * 11))
+        assert np.allclose(
+            inputs.to_array(),
+            np.array([1, 2, 3, 4, 5] + [0] * (NUM_INPUT_CHANNELS - 5)),
+        )
 
     def test_constructor_too_long(self):
         with pytest.raises(ValueError):
-            Inputs([0] * 17)
+            Inputs([0] * (NUM_INPUT_CHANNELS + 1))
 
     def test_to_array(self):
         inputs = Inputs([1, 2, 3, 4, 5])
@@ -55,7 +61,7 @@ class TestInputs:
         assert inputs[2] == 0.5
         assert inputs.to_array()[2] == 0.5
         with pytest.raises(IndexError):
-            inputs[16]
+            inputs[NUM_INPUT_CHANNELS]
 
 
 class TestUavState:
