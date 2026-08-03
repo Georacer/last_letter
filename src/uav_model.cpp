@@ -5,7 +5,7 @@
 #include "last_letter_lib/prog_utils.hpp"
 
 #include "last_letter_lib/logging.hpp"
-#include "last_letter_lib/log_types.hpp"
+#include "logging/log_types.hpp"
 
 using namespace std;
 using namespace last_letter_lib::programming_utils;
@@ -66,7 +66,7 @@ void UavModel::initialize(ParameterManager config)
 
 void UavModel::initialize(const std::string yaml_str)
 {
-    auto config = ParameterManager("aircraft", YAML::Load(yaml_str));
+    auto config = ParameterManager::from_yaml_string("aircraft", yaml_str);
 
     initialize(config);
 }

@@ -149,11 +149,26 @@ add_library(last_letter_lib SHARED
   src/uav_model.cpp
   src/logging/logging.cpp
 )
+# src/ is on the private include path so the implementation can reach internal
+# headers that must not be installed and depended upon by downstream packages.
+target_include_directories(last_letter_lib PRIVATE src)
+
+# Eigen and Boost are genuine PUBLIC dependencies: the installed headers include
+# <Eigen/Eigen> almost everywhere and <boost/numeric/odeint.hpp> in systems.hpp,
+# so a consumer needs them on its include path too.
+#
+# yaml-cpp and data_tamer are wrapped in $<BUILD_INTERFACE:> instead. They are
+# FetchContent targets declared EXCLUDE_FROM_ALL, so they belong to no export
+# set, and naming them in the link interface unguarded makes the
+# install(EXPORT) below fail to generate. The genex keeps them for our own
+# build - the library sources, all_tests and the bridge all still get their
+# include directories - and drops them from the installed link interface.
 target_link_libraries(last_letter_lib
-  Eigen3::Eigen
-  yaml-cpp
-  Boost::boost
-  data_tamer
+  PUBLIC
+    Eigen3::Eigen
+    Boost::boost
+    $<BUILD_INTERFACE:yaml-cpp>
+    $<BUILD_INTERFACE:data_tamer>
 )
 
 # When we are building the Python package the library needs to end up in the
@@ -302,9 +317,44 @@ list(APPEND exported_libs
 )
 install(
   TARGETS ${exported_libs}
+  EXPORT last_letter_lib_targets
   LIBRARY DESTINATION ${LAST_LETTER_LIB_DESTINATION}
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES DESTINATION include
-  EXPORT last_letter_lib_targets
 )
+
+# Turn the export set collected above into an installed CMake package.
+# Guarded on the Python build because that layout relocates
+# liblast_letter_lib.so into <prefix>/last_letter_lib/ for the wheel; a targets
+# file generated from it would point consumers at a path that exists only
+# inside a wheel.
+if(NOT LAST_LETTER_BUILD_PYTHON)
+  include(CMakePackageConfigHelpers)
+
+  install(
+    EXPORT last_letter_lib_targets
+    FILE last_letter_libTargets.cmake
+    NAMESPACE last_letter_lib::
+    DESTINATION lib/cmake/last_letter_lib
+  )
+
+  configure_package_config_file(
+    cmake/last_letter_libConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/last_letter_libConfig.cmake
+    INSTALL_DESTINATION lib/cmake/last_letter_lib
+  )
+
+  write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/last_letter_libConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+  )
+
+  install(
+    FILES
+      ${CMAKE_CURRENT_BINARY_DIR}/last_letter_libConfig.cmake
+      ${CMAKE_CURRENT_BINARY_DIR}/last_letter_libConfigVersion.cmake
+    DESTINATION lib/cmake/last_letter_lib
+  )
+endif()

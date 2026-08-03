@@ -6,7 +6,6 @@
 #include <iostream>
 
 #include <Eigen/Eigen>
-#include "yaml-cpp/yaml.h"
 
 #include <last_letter_lib/prog_utils.hpp>
 #include <last_letter_lib/uav_utils.hpp>

@@ -5,6 +5,8 @@
 // #include <string>
 // #include <stdexcept>
 
+#include "yaml-cpp/yaml.h"
+
 #include "last_letter_lib/prog_utils.hpp"
 
 namespace last_letter_lib
@@ -60,76 +62,130 @@ namespace last_letter_lib
         ///////////////////
         // ParameterManager
 
-        ParameterManager::ParameterManager(string name_p) : name{name_p}
+        // The YAML tree, hidden from prog_utils.hpp so that yaml-cpp stays out
+        // of the installed headers.
+        struct ParameterManager::Impl
         {
-            parameters_["name"] = name_p;
+            YAML::Node node;
+        };
+
+        namespace
+        {
+            // Returns a null YAML::Node if it doesn't exist.
+            YAML::Node find_parameter(const YAML::Node node, const string param_name_p)
+            {
+                // Split the name into '/'
+                std::vector<std::string> names;
+                split_string(param_name_p, names, '/');
+
+                // Recursively iterate into the tree structure.
+                YAML::Node temp_node;
+                temp_node.reset(node);
+                for (auto name : names)
+                {
+                    if (temp_node[name])
+                    {
+                        temp_node.reset(temp_node[name]);
+                    }
+                    else
+                    {
+                        YAML::Node temp_node;
+                        return temp_node["invalid"];
+                    }
+                }
+                return temp_node;
+            }
+
+            vector<string> get_keys(YAML::Node n)
+            {
+                vector<string> v;
+                for (YAML::const_iterator it = n.begin(); it != n.end(); ++it)
+                {
+                    if (it->second.IsMap())
+                    {
+                        vector<string> child_keys = get_keys(it->second.as<YAML::Node>());
+                        for (auto k : child_keys)
+                        {
+                            v.push_back(it->first.as<string>() + '/' + k);
+                        }
+                    }
+                    else
+                    {
+                        v.push_back(it->first.as<string>());
+                    }
+                }
+                return v;
+            }
+
+            // Only loads a parameter if it already exists in own.
+            void load_parameters_into(YAML::Node own, YAML::Node n)
+            {
+                vector<string> parameter_list = get_keys(own);
+                for (auto param_name : parameter_list)
+                {
+                    YAML::Node param_node = find_parameter(n, param_name);
+                    if (param_node)
+                    {
+                        YAML::Node own_param_node = find_parameter(own, param_name);
+                        own_param_node = YAML::Node(param_node);
+                    }
+                }
+            }
+        } // namespace
+
+        ParameterManager::ParameterManager(string name_p)
+            : name{name_p}, impl_{std::make_shared<Impl>()}
+        {
+            impl_->node["name"] = name_p;
         }
 
-        // This constructor allows loading non-existent parameters.
-        ParameterManager::ParameterManager(string name_p, const YAML::Node parameters_p) : name{name_p}
+        ParameterManager::ParameterManager(string name_p, std::shared_ptr<Impl> impl)
+            : name{name_p}, impl_{impl}
         {
-            parameters_ = parameters_p;
+        }
+
+        // These factories allow loading non-existent parameters: the document
+        // replaces the (empty) tree wholesale instead of being filtered against
+        // it the way load_file / load_stream are.
+        ParameterManager ParameterManager::from_yaml_string(string name_p, const string &yaml_str)
+        {
+            auto impl = std::make_shared<Impl>();
+            impl->node = YAML::Load(yaml_str);
+            return ParameterManager(name_p, impl);
+        }
+
+        ParameterManager ParameterManager::from_yaml_file(string name_p, const string &filepath)
+        {
+            auto impl = std::make_shared<Impl>();
+            impl->node = YAML::LoadFile(filepath);
+            return ParameterManager(name_p, impl);
         }
 
         void ParameterManager::load_file(string filepath)
         {
             auto n = YAML::LoadFile(filepath);
-            load_parameters_(n);
+            load_parameters_into(impl_->node, n);
         }
 
         void ParameterManager::load_stream(const std::string yaml_str)
         {
             auto n = YAML::Load(yaml_str);
-            load_parameters_(n);
+            load_parameters_into(impl_->node, n);
         }
 
-        void ParameterManager::load_parameters_(YAML::Node n)
+        void ParameterManager::load_parameters(ParameterManager params_p)
         {
-            vector<string> parameter_list = get_keys_(parameters_);
-            for (auto param_name : parameter_list)
-            {
-                YAML::Node param_node = find_parameter_(n, param_name); // Only load a parameter if it already exists.
-                if (param_node)
-                {
-                    YAML::Node own_param_node = find_parameter_(parameters_, param_name);
-                    own_param_node = YAML::Node(param_node);
-                }
-            }
+            load_parameters_into(impl_->node, params_p.impl_->node);
         }
 
         void ParameterManager::register_child_mngr(ParameterManager child_mngr)
         {
-            parameters_[child_mngr.name] = child_mngr.parameters_;
-        }
-
-        YAML::Node ParameterManager::find_parameter_(const YAML::Node node, const string param_name_p)
-        // Returns a null YAML::Node if it doesn't exist.
-        {
-            // Split the name into '/'
-            std::vector<std::string> names;
-            split_string(param_name_p, names, '/');
-
-            // Recursively iterate into the tree structure.
-            YAML::Node temp_node;
-            temp_node.reset(node);
-            for (auto name : names)
-            {
-                if (temp_node[name])
-                {
-                    temp_node.reset(temp_node[name]);
-                }
-                else
-                {
-                    YAML::Node temp_node;
-                    return temp_node["invalid"];
-                }
-            }
-            return temp_node;
+            impl_->node[child_mngr.name] = child_mngr.impl_->node;
         }
 
         bool ParameterManager::exists(const string param_name_p)
         {
-            return (bool)find_parameter_(parameters_, param_name_p);
+            return (bool)find_parameter(impl_->node, param_name_p);
         }
 
         ParameterManager ParameterManager::filter(const string prefix)
@@ -145,7 +201,9 @@ namespace last_letter_lib
                 std::vector<std::string> names;
                 split_string(prefix, names, '/');
                 string name{names.back()};
-                return ParameterManager(name, find_parameter_(parameters_, prefix));
+                auto impl = std::make_shared<Impl>();
+                impl->node = find_parameter(impl_->node, prefix);
+                return ParameterManager(name, impl);
             }
             else
             {
@@ -153,33 +211,79 @@ namespace last_letter_lib
             }
         }
 
-        vector<string> ParameterManager::get_keys_(YAML::Node n) const
+        vector<string> ParameterManager::keys()
         {
-            vector<string> v;
-            for (YAML::const_iterator it = n.begin(); it != n.end(); ++it)
-            {
-                if (it->second.IsMap())
-                {
-                    vector<string> child_keys = get_keys_(it->second.as<YAML::Node>());
-                    for (auto k : child_keys)
-                    {
-                        v.push_back(it->first.as<string>() + '/' + k);
-                    }
-                }
-                else
-                {
-                    v.push_back(it->first.as<string>());
-                }
-            }
-            return v;
+            return get_keys(impl_->node);
         }
 
         string ParameterManager::str()
         {
             std::stringstream buffer;
-            buffer << parameters_;
+            buffer << impl_->node;
             return buffer.str();
         }
+
+        template <typename T>
+        T ParameterManager::get(const string &param_name)
+        {
+            if (exists(param_name))
+            {
+                YAML::Node temp_node{find_parameter(impl_->node, param_name)};
+                return temp_node.as<T>();
+            }
+            else
+            {
+                throw std::invalid_argument(string("Parameter ") + param_name + string(" does not exist."));
+            }
+        }
+
+        template <typename T>
+        bool ParameterManager::set(const string param_name, const T value, bool safe)
+        {
+            // std::cout << "Setting parameter " << param_name << std::endl;
+            bool param_exists = exists(param_name);
+            if (param_exists || !safe)
+            {
+                std::vector<std::string> names;
+                split_string(param_name, names, '/');
+                YAML::Node current_node;
+                current_node.reset(impl_->node);
+                for (auto name : names)
+                {
+                    if (current_node[name])
+                    {
+                    }
+                    else
+                    {
+                        current_node[name] = YAML::Node();
+                    }
+                    current_node.reset(current_node[name]);
+                }
+                current_node = value;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        // Explicit instantiations, to keep yaml-cpp a hidden implementation.
+        template bool ParameterManager::get<bool>(const string &);
+        template int ParameterManager::get<int>(const string &);
+        template uint ParameterManager::get<uint>(const string &);
+        template double ParameterManager::get<double>(const string &);
+        template std::string ParameterManager::get<std::string>(const string &);
+        template std::vector<int> ParameterManager::get<std::vector<int>>(const string &);
+        template std::vector<double> ParameterManager::get<std::vector<double>>(const string &);
+
+        template bool ParameterManager::set<bool>(const string, const bool, bool);
+        template bool ParameterManager::set<int>(const string, const int, bool);
+        template bool ParameterManager::set<uint>(const string, const uint, bool);
+        template bool ParameterManager::set<double>(const string, const double, bool);
+        template bool ParameterManager::set<std::string>(const string, const std::string, bool);
+        template bool ParameterManager::set<std::vector<int>>(const string, const std::vector<int>, bool);
+        template bool ParameterManager::set<std::vector<double>>(const string, const std::vector<double>, bool);
 
         // Filter a YAML::Node file to keep only a sub-parameter set
         // Example: for start string /world, keep /world/timeControls but not /environment/rho
@@ -300,24 +404,24 @@ namespace last_letter_lib
             string fullInitFilename = modelPath + aircraftDir + modelName + "/" + init_filename;
             string fullRandomizerFilename = modelPath + aircraftDir + modelName + "/" + randomizer_filename;
 
-            ParameterManager world("world", YAML::LoadFile(fullWorldFilename));
+            ParameterManager world = ParameterManager::from_yaml_file("world", fullWorldFilename);
             configs.register_child_mngr(world);
-            ParameterManager env("env", YAML::LoadFile(fullEnvironmentFilename));
+            ParameterManager env = ParameterManager::from_yaml_file("env", fullEnvironmentFilename);
             configs.register_child_mngr(env);
 
             ParameterManager dynamics_config("dynamics");
-            ParameterManager prop("prop", YAML::LoadFile(fullPropFilename));
+            ParameterManager prop = ParameterManager::from_yaml_file("prop", fullPropFilename);
             dynamics_config.register_child_mngr(prop);
-            ParameterManager aero("aero", YAML::LoadFile(fullAeroFilename));
+            ParameterManager aero = ParameterManager::from_yaml_file("aero", fullAeroFilename);
             dynamics_config.register_child_mngr(aero);
-            ParameterManager ground("ground", YAML::LoadFile(fullGroundFilename));
+            ParameterManager ground = ParameterManager::from_yaml_file("ground", fullGroundFilename);
             dynamics_config.register_child_mngr(ground);
             configs.register_child_mngr(dynamics_config);
 
             ParameterManager kinematics_config("kinematics");
             configs.register_child_mngr(kinematics_config);
 
-            ParameterManager init("init", YAML::LoadFile(fullInitFilename));
+            ParameterManager init = ParameterManager::from_yaml_file("init", fullInitFilename);
             configs.register_child_mngr(init);
 
             return configs;

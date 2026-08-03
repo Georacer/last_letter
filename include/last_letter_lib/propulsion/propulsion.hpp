@@ -8,7 +8,6 @@
 
 #include <Eigen/Eigen>
 #include <string>
-#include "yaml-cpp/yaml.h"
 
 #include "last_letter_lib/environment.hpp"
 #include "last_letter_lib/math_utils.hpp"

@@ -66,7 +66,7 @@ public:
 	Vector3d uavpos, we;
 	double len, frictForw[4], frictSide[4];
 	bool contact, safe;
-	int contactPtsNo;
+	int contactPtsNo{0};
 	Vector3d getForce(const SimState_t states, const WrenchSum_t wrenchSum) override;
 	Vector3d getTorque(const SimState_t states, const WrenchSum_t wrenchSum) override;
 };
@@ -90,7 +90,7 @@ public:
 	Vector3d uavpos, we;
 	double len, frict[4];
 	bool contact, safe;
-	int contactPtsNo;
+	int contactPtsNo{0};
 	Vector3d extForce, extTorque;
 	Vector3d getForce(const SimState_t states, const WrenchSum_t wrenchSum) override;
 	Vector3d getTorque(const SimState_t states, const WrenchSum_t wrenchSum) override;

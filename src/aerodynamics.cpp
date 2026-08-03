@@ -4,7 +4,7 @@
 #include "last_letter_lib/math_utils.hpp"
 
 #include "last_letter_lib/logging.hpp"
-#include "last_letter_lib/log_types.hpp"
+#include "logging/log_types.hpp"
 
 using namespace std;
 using namespace last_letter_lib;

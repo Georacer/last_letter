@@ -1,11 +1,11 @@
 #pragma once
+#include <memory>
 #include <random>
 #include <iostream>
 #include <stdexcept>
 
 #include <Eigen/Eigen>
 
-#include "yaml-cpp/yaml.h"
 #include "last_letter_lib/math_utils.hpp"
 
 using namespace std;
@@ -171,78 +171,40 @@ void split_string(const std::string &c_name, Container &cont, char delim)
     }
 }
 
+// A YAML parameter tree addressed by slash-delimited nested paths.
 class ParameterManager
 {
 public:
-    // Variables
-    // Methods
     ParameterManager(string name);
-    ParameterManager(string name, const YAML::Node);
+    static ParameterManager from_yaml_string(string name, const string &yaml_str);
+    static ParameterManager from_yaml_file(string name, const string &filepath);
     // Get a parameter. Can accept nested names.
     template <typename T>
-    T get(const string &param_name)
-    {
-        if (exists(param_name))
-        {
-            YAML::Node temp_node{find_parameter_(parameters_, param_name)};
-            return temp_node.as<T>();
-        }
-        else
-        {
-            throw std::invalid_argument(string("Parameter ") + param_name + string(" does not exist."));
-        }
-    }
+    T get(const string &param_name);
     // Set a parameter. Can accept nested names.
     template <typename T>
-    bool set(const string param_name, const T value, bool safe = true)
-    {
-        // std::cout << "Setting parameter " << param_name << std::endl;
-        bool param_exists = exists(param_name);
-        if (param_exists || !safe)
-        {
-            std::vector<std::string> names;
-            split_string(param_name, names, '/');
-            YAML::Node current_node;
-            current_node.reset(parameters_);
-            for (auto name : names)
-            {
-                if (current_node[name])
-                {
-                }
-                else
-                {
-                    current_node[name] = YAML::Node();
-                }
-                current_node.reset(current_node[name]);
-            }
-            current_node = value;
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    bool set(const string param_name, const T value, bool safe = true);
     // Load parameters from a .yaml file
     void load_file(string filepath);
-    // void load_stream(std::istream &yaml_str);
     void load_stream(const std::string yaml_str);
-    void load_parameters(ParameterManager params_p) {load_parameters_(params_p.parameters_);} // Load from a ParameterManager.
+    void load_parameters(ParameterManager params_p); // Load from a ParameterManager.
     void register_child_mngr(ParameterManager);
     bool exists(const string param_name);
     ParameterManager filter(const string prefix);
     // Return a vector of all included keys
-    vector<string> keys() { return get_keys_(parameters_); }
+    vector<string> keys();
     string str();
     string name;
-    YAML::Node parameters_{YAML::Node()}; // TODO: This needs to be private, but first we need an API to list all nested keys so that we can load them to another ParameterManager.
 
 private:
-    // Methods
-    YAML::Node find_parameter_(const YAML::Node node, const string param_name);
-    void load_parameters_(YAML::Node); // Load from a YAML node.
-    vector<string> get_keys_(YAML::Node) const; // It's also a classmethod
-    // Variables
+    // Holds the YAML::Node, whose implementation is hidden. Copying a
+    // ParameterManager shares the node rather than deep-copying it, which is
+    // what yaml-cpp's own copy constructor does and what add_child() depends
+    // on: a child manager registered into a parent must keep referring to the
+    // same tree.
+    struct Impl;
+    std::shared_ptr<Impl> impl_;
+    ParameterManager(string name, std::shared_ptr<Impl> impl);
 };
 
 // Build the parameter tree of an aircraft model from a models directory.

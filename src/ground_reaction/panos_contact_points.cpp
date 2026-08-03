@@ -18,17 +18,7 @@ PanosContactPoints::PanosContactPoints(string name) : GroundReaction(name)
 	frictForw[2] = 0.1; frictSide[2] = 1.0;
 	frictForw[3] = 0.4; frictSide[3] = 0.4; //To update composite to ground firction coefficients!
 
-	// Create and initialize spring contraction container
-	spp.setZero(contactPtsNo, 1);
-	// Create and initialize previous spring contraction container
-	sppprev.setZero(contactPtsNo, 1);
-
 	contact = false;
-
-	// Create other matrices needed for calculations
-	cpi_up.setZero(3, contactPtsNo); // upper spring end matrix
-	cpi_down.setZero(3, contactPtsNo); // lower spring end matrix
-	spd.setZero(contactPtsNo, 1); // spring contraction speed
 }
 
 void PanosContactPoints::initialize_parameters()
@@ -67,6 +57,14 @@ void PanosContactPoints::update_parameters()
 
 	// Read contact points number.
 	contactPtsNo = get_param<double>("contactPtsNo");
+
+	// Every contactPtsNo-sized container must be allocated here, where the
+    // number of rows is known.
+	spp.setZero(contactPtsNo, 1); // spring contraction
+	sppprev.setZero(contactPtsNo, 1); // previous spring contraction
+	cpi_up.setZero(3, contactPtsNo); // upper spring end matrix
+	cpi_down.setZero(3, contactPtsNo); // lower spring end matrix
+	spd.setZero(contactPtsNo, 1); // spring contraction speed
 
 	// Create an appropriately sized matrix to contain contact point information
 	pointCoords.setZero(3, contactPtsNo); // contact points coordinates in the body frame

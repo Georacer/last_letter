@@ -51,6 +51,20 @@ cmake -S . -B build -DLAST_LETTER_BUILD_ARDUPILOT=ON && cmake --build build && c
 
 The executable will be installed in `$HOME/.local/bin`. Ensure it is on your path.
 
+### To use the C++ library from another CMake project
+
+The install exports a CMake package, so a downstream project only needs
+
+```cmake
+find_package(last_letter_lib REQUIRED)
+target_link_libraries(myapp PRIVATE last_letter_lib::last_letter_lib)
+```
+
+That imported target carries the include directory and the Eigen and Boost
+requirements, so no paths need hardcoding. If the library was installed to a
+prefix CMake does not search by default, point at it with
+`-DCMAKE_PREFIX_PATH=<prefix>`.
+
 ### To build the Python code
 
 To build the Python wheels enter:
