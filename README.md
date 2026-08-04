@@ -6,10 +6,10 @@ Software libraries for UAV simulation.
 
 ```
 lib/          the simulation library: C++ core, its Python package and the tests
+lib/tools/    standalone analysis scripts and the packaging test container
 frontends/    programs that drive the library, currently the ArduPilot SITL bridge
 models/       aircraft recipes, installed to $HOME/last_letter_models
 docs/         Sphinx documentation
-tools/        standalone analysis scripts
 ```
 
 The C++ library is called `last_letter_lib`, which is also the name of its CMake
@@ -27,7 +27,7 @@ CMake 3.28 or newer is required. This is newer than the 3.22 shipped by Ubuntu
 The following system packages are also expected. On Debian/Ubuntu:
 
 ```bash
-sudo apt install build-essential git libeigen3-dev libboost-dev
+sudo apt install build-essential git libeigen3-dev libboost-dev liblz4-dev libzstd-dev
 ```
 
 - `build-essential` — a C++17 compiler.
@@ -38,6 +38,9 @@ sudo apt install build-essential git libeigen3-dev libboost-dev
   `find_package(Eigen3)`.
 - `libboost-dev` — only the header-only parts of Boost are used (`boost/array.hpp`
   and Boost.Odeint), so the compiled Boost libraries are not needed.
+- `liblz4-dev`, `libzstd-dev` — the compression libraries used by mcap, which is
+  vendored inside DataTamer. Without them the configure step fails in mcap's
+  `FindZSTD.cmake`.
 
 Building the Python bindings additionally needs the Python development headers,
 `python3-dev`. `pybind11` itself is provided by the build environment and does
@@ -80,13 +83,12 @@ prefix CMake does not search by default, point at it with
 
 ### To build the Python code
 
-To build the Python wheels enter:
-
-```bash
-uv build
-```
-
-The wheels will be placed under `dist`.
+`last_letter` is distributed as a **source distribution** only — there is no
+prebuilt wheel to download. Installing it compiles the C++ library on your own
+machine, so the prerequisites above must be in place first, and the install
+needs network access because CMake clones yaml-cpp and DataTamer while it
+configures. CMake itself does not have to be installed: the build fetches a
+suitable version if the system one is too old.
 
 To build and install the Python package in your current Python environment enter:
 
@@ -114,34 +116,7 @@ to copy them out to `$HOME/last_letter_models`. The copy overlays the
 destination instead of replacing it, so aircraft of your own kept there are left
 alone.
 
-## Testing instructions
+## Developers
 
-### Build and run C++ tests
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DLAST_LETTER_BUILD_TESTS=ON && cmake --build build && ./build/all_tests
-```
-
-The test fixtures are found through a path baked in at configure time, so
-`all_tests` can be run from any working directory.
-
-### Build everything
-
-To compile everything, including the Python bindings, and run the GoogleTests for the C++ codebase:
-
-```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
-    -DLAST_LETTER_BUILD_TESTS=ON \
-    -DLAST_LETTER_BUILD_PYTHON=ON \
-    -DLAST_LETTER_BUILD_ARDUPILOT=ON \
-    && cmake --build build \
-    && ./build/all_tests
-```
-
-### Run the Python tests
-
-First build and install the Python package (see above). Then enter:
-
-```bash
-uv run pytest lib/tests/python
-```
+If you wish to modify and hopefully contribute to last_letter, please read
+DEVELOPERS.md.
