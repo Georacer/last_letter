@@ -2,7 +2,7 @@
 # which keeps the install rules of the fetched dependencies out of this project.
 # Note this is newer than the cmake shipped by Ubuntu 22.04 (3.22).
 cmake_minimum_required(VERSION 3.28)
-project(last_letter VERSION 2.1.0 LANGUAGES CXX)
+project(last_letter VERSION 2.99.0 LANGUAGES CXX)
 
 # This is the top level of a repository holding the simulation library (lib/)
 # and the frontends that drive it (frontends/). Everything global lives here:
@@ -115,12 +115,16 @@ if(LAST_LETTER_BUILD_ARDUPILOT)
   add_subdirectory(frontends/ardupilot)
 endif()
 
-# Stage runtime aircraft-model data into the folder the library reads from at
-# runtime. That location is hardcoded as $HOME/last_letter_models in both
-# lib/src/prog_utils.cpp (C++) and lib/src/last_letter/model_creator.py
-# (Python), so the DESTINATION is an absolute path mirroring it, not
-# CMAKE_INSTALL_PREFIX. The trailing slash on the source directory means "the
-# contents of", which is what lets models/ install under a different name.
-# These are install rules: they run at `cmake --install` time, NOT at configure,
-# so plain `cmake`/`cmake --build` does not write to $HOME.
-install(DIRECTORY models/ DESTINATION $ENV{HOME}/last_letter_models)
+# Stage runtime aircraft-model data where the consumer of this build looks for
+# it. For a plain build the destination is the absolute
+# $HOME/last_letter_models, deliberately ignoring CMAKE_INSTALL_PREFIX.
+#
+# The wheel build cannot use that path. An absolute DESTINATION escapes
+# scikit-build-core's staging directory. They go inside the Python package
+# instead, next to the extension, where last_letter.paths.models_path() finds
+# them.
+if(LAST_LETTER_BUILD_PYTHON)
+  install(DIRECTORY models/ DESTINATION ${LAST_LETTER_LIB_DESTINATION}/models)
+else()
+  install(DIRECTORY models/ DESTINATION $ENV{HOME}/last_letter_models)
+endif()

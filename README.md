@@ -52,8 +52,7 @@ cmake -S . -B build && cmake --build build && cmake --install build
 Installation defaults to the `$HOME/.local` prefix, so no `sudo` is needed.
 The library will be installed in `$HOME/.local/lib`.
 Override it with `-DCMAKE_INSTALL_PREFIX=<path>`. Note that the aircraft models
-are always installed to `$HOME/last_letter_models`, independently of the prefix,
-because that path is hardcoded in the library.
+are always installed to `$HOME/last_letter_models`, independently of the prefix.
 
 A nix-shell pure configuration has been provided which can be optionally used.
 
@@ -92,8 +91,28 @@ The wheels will be placed under `dist`.
 To build and install the Python package in your current Python environment enter:
 
 ```bash
-uv pip install --editable <path_to_last_letter> [--force-reinstall]
+uv pip install <path_to_last_letter> [--force-reinstall]
 ```
+
+### The aircraft models and the Python package
+
+A wheel carries the aircraft models inside the package, and
+
+```python
+from last_letter.paths import models_path
+```
+
+returns wherever they can be found — `$HOME/last_letter_models` if it exists,
+the packaged copy otherwise. The C++ library only knows the first of those, so
+after installing from a wheel, run
+
+```bash
+last-letter-install-models [--force]
+```
+
+to copy them out to `$HOME/last_letter_models`. The copy overlays the
+destination instead of replacing it, so aircraft of your own kept there are left
+alone.
 
 ## Testing instructions
 

@@ -178,10 +178,14 @@ if(LAST_LETTER_BUILD_TESTS)
   gtest_discover_tests(all_tests)
 endif()
 
-# Export the header files for use by consumers of the library
-install(
-  DIRECTORY include/ DESTINATION include
-)
+# Export the header files for use by consumers of the library.
+#
+# Skipped for the Python build, as they are not useful to a Python project.
+if(NOT LAST_LETTER_BUILD_PYTHON)
+  install(
+    DIRECTORY include/ DESTINATION include
+  )
+endif()
 
 list(APPEND exported_libs
   last_letter_lib

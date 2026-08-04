@@ -5,6 +5,7 @@ from . import environment
 from . import gravity
 
 # from . import model_creator
+from . import paths
 from . import propulsion
 
 from . import simulation
@@ -24,6 +25,7 @@ __all__ = [
     "environment",
     "systems",
     "aerodynamics",
+    "paths",
     "propulsion",
     "simulation",
     # "model_creator",

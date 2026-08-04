@@ -1,6 +1,6 @@
 [project]
 name = "last-letter"
-version = "2.1.0"
+version = "2.99.0"
 description = "Software libraries for UAV simulation"
 readme = "README.md"
 authors = [
@@ -18,6 +18,11 @@ dependencies = [
     "pyyaml>=6.0.2",
     "scipy>=1.15.3",
 ]
+
+[project.scripts]
+# Script to install the aircraft models to the user home, where they can be
+# modified.
+last-letter-install-models = "last_letter.paths:main"
 
 [project.urls]
 Homepage = "https://github.com/Georacer/last_letter"
