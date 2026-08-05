@@ -2,7 +2,7 @@
 # which keeps the install rules of the fetched dependencies out of this project.
 # Note this is newer than the cmake shipped by Ubuntu 22.04 (3.22).
 cmake_minimum_required(VERSION 3.28)
-project(last_letter VERSION 2.99.0 LANGUAGES CXX)
+project(last_letter VERSION 2.100.0 LANGUAGES CXX)
 
 # This is the top level of a repository holding the simulation library (lib/)
 # and the frontends that drive it (frontends/). Everything global lives here:

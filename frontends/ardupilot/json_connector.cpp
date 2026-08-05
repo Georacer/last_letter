@@ -52,8 +52,8 @@ bool JsonConnector::open(const char *bind_address, uint16_t port)
                 bind_address, unsigned(port), strerror(errno));
         if (errno == EADDRINUSE)
         {
-            fprintf(stderr, "  something else is already listening there; find it with:"
-                            " ss -lunp | grep %u\n",
+            fprintf(stderr,
+                    "  Another simulator is already listening there; find it with: ss -lunp | grep %u\n",
                     unsigned(port));
         }
         return false;

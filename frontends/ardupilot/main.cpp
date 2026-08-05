@@ -209,9 +209,16 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    JsonConnector connector;
+    if (!connector.open(opts.address.c_str(), opts.port))
+    {
+        // open() reports which step failed and why; errno would be stale by now.
+        return 1;
+    }
+
     if (opts.want_log)
     {
-        // Must precede the first step() so the channels register with the sink.
+        // After open(), so that a failed connection does not produce a log file.
         uav.enable_logging(opts.log_path);
         if (opts.log_path.empty())
         {
@@ -222,13 +229,6 @@ int main(int argc, char **argv)
         {
             printf("last_letter_ardupilot: Recording to %s\n", opts.log_path.c_str());
         }
-    }
-
-    JsonConnector connector;
-    if (!connector.open(opts.address.c_str(), opts.port))
-    {
-        // open() reports which step failed and why; errno would be stale by now.
-        return 1;
     }
     printf("last_letter_ardupilot: Simulating '%s', listening for ArduPilot on %s:%u\n",
            opts.model.c_str(), opts.address.c_str(), unsigned(opts.port));
