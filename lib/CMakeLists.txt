@@ -43,9 +43,22 @@ set(DATA_TAMER_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(data_tamer)
 # DataTamer compiles its own target with -Werror; drop it so a compiler version
 # other than the one upstream tested can't fail our build on a stray warning.
-if(TARGET data_tamer AND (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+if(TARGET data_tamer)
   target_compile_options(data_tamer PRIVATE -Wno-error)
 endif()
+
+# Force-depend against cstdint, since recent versions of data_tamer forgot to
+# pass the dependency transitively.
+#
+# TODO: send a PR to https://github.com/facontidavide/data_tamer adding the
+# missing #include <cstdint> to the vendored mcap headers, and delete this block
+# once a release carries it. The fix belongs upstream -- every project that
+# vendors this mcap snapshot breaks the same way on GCC 15.
+foreach(mcap_consumer data_tamer mcap_lib)
+  if(TARGET ${mcap_consumer})
+    target_compile_options(${mcap_consumer} PUBLIC -include cstdint)
+  endif()
+endforeach()
 
 # Declare the project library
 add_library(last_letter_lib SHARED
@@ -132,7 +145,7 @@ if(LAST_LETTER_BUILD_TESTS)
   include(FetchContent)
   FetchContent_Declare(
     googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.13.0.zip
+    URL https://github.com/google/googletest/archive/refs/tags/v1.17.0.zip
     EXCLUDE_FROM_ALL
   )
 

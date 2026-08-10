@@ -14,20 +14,40 @@ uv build --sdist
 
 ### To check that the source distribution installs
 
-`lib/tools/Dockerfile` installs the archive from `dist` onto a clean system and
-exercises the result, so that a missing prerequisite shows up here rather than
-in a user's terminal:
+`lib/tools/Dockerfile` builds a source distribution from the working tree,
+installs it onto a clean system and exercises the result, so that a missing
+prerequisite shows up here rather than in a user's terminal:
 
 ```bash
-uv build --sdist
 docker build -f lib/tools/Dockerfile -t last-letter-sdist .
 ```
 
 A successful build is the pass condition; there is nothing to run afterwards.
 The base image defaults to Ubuntu 22.04 and can be changed with
 `--build-arg BASE_IMAGE=<image>`, subject to the `requires-python` bound in
-`pyproject.toml` — Ubuntu 24.04 and later ship Python 3.12, which the current
-bound of `<3.12` excludes.
+`pyproject.toml`.
+
+### To run the Ubuntu test matrix
+
+The same Dockerfile carries the rest of the matrix. Choose the release with
+`BASE_IMAGE` and the cell with `--target`:
+
+```bash
+docker build -f lib/tools/Dockerfile --target cpp        --build-arg BASE_IMAGE=ubuntu:24.04 .
+docker build -f lib/tools/Dockerfile --target consumer   --build-arg BASE_IMAGE=ubuntu:24.04 .
+docker build -f lib/tools/Dockerfile --target python-pip --build-arg BASE_IMAGE=ubuntu:24.04 .
+docker build -f lib/tools/Dockerfile --target python-uv  --build-arg BASE_IMAGE=ubuntu:24.04 .
+```
+
+`cpp` builds the library, the ArduPilot bridge and the googletest suite from apt
+packages alone, the way a C++ consumer does. `consumer` compiles a throwaway
+downstream project against the installed CMake package. The two `python-*` cells
+install the package editable and run pytest, through the distribution's own
+`python3` and `pip` or through `uv`. Every cell, `sdist` included, provisions
+with `tools/install-prereqs-ubuntu.sh`, so a green cell means the install path
+the README documents actually works on that release.
+
+Supported releases are `ubuntu:22.04`, `ubuntu:24.04` and `ubuntu:26.04`.
 
 ## Testing instructions
 

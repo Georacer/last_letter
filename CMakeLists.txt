@@ -2,7 +2,7 @@
 # which keeps the install rules of the fetched dependencies out of this project.
 # Note this is newer than the cmake shipped by Ubuntu 22.04 (3.22).
 cmake_minimum_required(VERSION 3.28)
-project(last_letter VERSION 2.100.0 LANGUAGES CXX)
+project(last_letter VERSION 2.101.0 LANGUAGES CXX)
 
 # This is the top level of a repository holding the simulation library (lib/)
 # and the frontends that drive it (frontends/). Everything global lives here:
@@ -51,10 +51,8 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Configure compile options
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+# Configure compile options.
+add_compile_options(-Wall -Wextra -Wpedantic)
 
 # Build options. All three default OFF, so a bare `cmake` build produces only
 # the C++ library and needs neither Python dev headers nor a network fetch of
@@ -65,6 +63,14 @@ option(LAST_LETTER_BUILD_ARDUPILOT "Build the ArduPilot SITL JSON bridge (last_l
 
 # Find dependencies
 find_package(Eigen3 REQUIRED NO_MODULE)
+
+# Boost has shipped its own BoostConfig.cmake since 1.70, and CMake 3.30 removed
+# its bundled FindBoost module behind this policy. Without the opt-in, every
+# configure on CMake 3.30+ warns; with it, find_package() goes straight to config
+# mode.
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
 
 find_package(Boost REQUIRED)
 

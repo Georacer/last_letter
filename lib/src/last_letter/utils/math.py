@@ -16,7 +16,6 @@ from dataclasses import dataclass
 from typing import Optional
 
 import numpy as np
-from numba import jit
 
 # from pytransform3d import rotations as pt3d_rot
 from scipy.optimize import root
@@ -30,27 +29,23 @@ from ..cpp_last_letter.cpp_uav_utils import Pose as cpp_Pose
 from ..cpp_last_letter.cpp_uav_utils import Wrench
 
 
-@jit(nopython=True)
 def hat(v: np.ndarray = np.zeros(3)):
     """Skew-symmetric matrix in SO(3) from 3D vector."""
     return np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
 
 
-@jit(nopython=True)
 def vex(m: np.ndarray = np.eye(3)):
     """3D vector from skew-symmetric matrix in SO(3)."""
 
     return np.array([m[2, 1], m[0, 2], m[1, 0]])
 
 
-@jit(nopython=True)
 def symproj(H: np.ndarray = np.eye(3)):
     """Symmetric projection of a square matrix."""
 
     return (H + H.T) / 2
 
 
-@jit(nopython=True)
 def asymproj(H: np.ndarray = np.eye(3)):
     """Anti-symmetric projection of a square matrix."""
 
@@ -278,7 +273,6 @@ def build_vector3_from_array(arr):
 #         return self._static_norm(self._q)
 
 #     @staticmethod
-#     @jit(nopython=True)
 #     def _static_norm(q):
 #         return np.sqrt(q[0] ** 2 + q[1] ** 2 + q[2] ** 2 + q[3] ** 2)
 
@@ -297,7 +291,6 @@ def build_vector3_from_array(arr):
 #         return self._static_imag(self._q)
 
 #     @staticmethod
-#     @jit(nopython=True)
 #     def _static_imag(q: np.array):
 #         return np.array([q[1], q[2], q[3]])
 
@@ -334,7 +327,6 @@ def build_vector3_from_array(arr):
 #         return self._static_to_prodmat(self._q)
 
 #     @staticmethod
-#     @jit(nopython=True)
 #     def _static_to_prodmat(q):
 #         return np.array(
 #             [

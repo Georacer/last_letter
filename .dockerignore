@@ -1,0 +1,15 @@
+# Keeps the build context small clean from the host state.
+build/
+dist/
+.venv/
+venv/
+.git/
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+__pycache__/
+*.egg-info/
+*.pyc
+.coverage
+compile_commands.json

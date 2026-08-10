@@ -20,31 +20,25 @@ that link it. The Python package is simply `last_letter`.
 
 ### Prerequisites
 
-CMake 3.28 or newer is required. This is newer than the 3.22 shipped by Ubuntu
-22.04; install a current one with `uv tool install cmake` or from the
-[Kitware APT repository](https://apt.kitware.com/).
+Supported OS: Ubuntu 22.04, 24.04, 26.04.
 
-The following system packages are also expected. On Debian/Ubuntu:
+A script is provided that installs all the prerequisites you need before
+building and using last_letter:
 
 ```bash
-sudo apt install build-essential git libeigen3-dev libboost-dev liblz4-dev libzstd-dev
+./tools/install-prereqs-ubuntu.sh                  # C++ library and frontends
+./tools/install-prereqs-ubuntu.sh --python         # ... plus the Python package
+./tools/install-prereqs-ubuntu.sh --python --dev   # ... plus pytest and pre-commit
+./tools/install-prereqs-ubuntu.sh --python-only    # Python package, no C++ toolchain
 ```
 
-- `build-essential` — a C++17 compiler.
-- `git` — the remaining dependencies (yaml-cpp, DataTamer and, for the tests,
-  GoogleTest) are cloned at configure time by CMake's `FetchContent`, so the
-  first configuration of a build directory needs network access.
-- `libeigen3-dev` — Eigen 3, the linear algebra library. Located with
-  `find_package(Eigen3)`.
-- `libboost-dev` — only the header-only parts of Boost are used (`boost/array.hpp`
-  and Boost.Odeint), so the compiled Boost libraries are not needed.
-- `liblz4-dev`, `libzstd-dev` — the compression libraries used by mcap, which is
-  vendored inside DataTamer. Without them the configure step fails in mcap's
-  `FindZSTD.cmake`.
+Add `--uv` to fill the virtualenv with `uv` instead of `pip`. The script never
+installs into the system Python interpreter and never edits your shell profile. It
+prints the activation line for any virtualenv it creates, and reuses one that is
+already active rather than making a second.
 
-Building the Python bindings additionally needs the Python development headers,
-`python3-dev`. `pybind11` itself is provided by the build environment and does
-not have to be installed system-wide.
+You will get recommendations on how to build and install last_letter, depending
+on your options.
 
 ### To build and install the C++ code
 
@@ -56,8 +50,6 @@ Installation defaults to the `$HOME/.local` prefix, so no `sudo` is needed.
 The library will be installed in `$HOME/.local/lib`.
 Override it with `-DCMAKE_INSTALL_PREFIX=<path>`. Note that the aircraft models
 are always installed to `$HOME/last_letter_models`, independently of the prefix.
-
-A nix-shell pure configuration has been provided which can be optionally used.
 
 To build the ArduPilot bridge binary run
 
@@ -76,19 +68,14 @@ find_package(last_letter_lib REQUIRED)
 target_link_libraries(myapp PRIVATE last_letter_lib::last_letter_lib)
 ```
 
-That imported target carries the include directory and the Eigen and Boost
-requirements, so no paths need hardcoding. If the library was installed to a
-prefix CMake does not search by default, point at it with
-`-DCMAKE_PREFIX_PATH=<prefix>`.
+If the library was installed to a prefix CMake does not search by default,
+point at it with `-DCMAKE_PREFIX_PATH=<prefix>`.
 
 ### To build the Python code
 
 `last_letter` is distributed as a **source distribution** only — there is no
 prebuilt wheel to download. Installing it compiles the C++ library on your own
-machine, so the prerequisites above must be in place first, and the install
-needs network access because CMake clones yaml-cpp and DataTamer while it
-configures. CMake itself does not have to be installed: the build fetches a
-suitable version if the system one is too old.
+machine, so the prerequisites above must be in place first.
 
 To build and install the Python package in your current Python environment enter:
 
@@ -96,23 +83,21 @@ To build and install the Python package in your current Python environment enter
 uv pip install <path_to_last_letter> [--force-reinstall]
 ```
 
-### The aircraft models and the Python package
+or, without `uv`, from inside an activated virtualenv:
 
-A wheel carries the aircraft models inside the package, and
-
-```python
-from last_letter.paths import models_path
+```bash
+pip install <path_to_last_letter> [--force-reinstall]
 ```
 
-returns wherever they can be found — `$HOME/last_letter_models` if it exists,
-the packaged copy otherwise. The C++ library only knows the first of those, so
-after installing from a wheel, run
+### The aircraft models and the Python package
+
+After installing the Python package, run
 
 ```bash
 last-letter-install-models [--force]
 ```
 
-to copy them out to `$HOME/last_letter_models`. The copy overlays the
+to copy the models out to `$HOME/last_letter_models`. The copy overlays the
 destination instead of replacing it, so aircraft of your own kept there are left
 alone.
 
