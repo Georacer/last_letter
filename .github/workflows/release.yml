@@ -1,0 +1,148 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  # Builds and smoke-tests the tarball without publishing anything, so the
+  # workflow itself can be exercised without cutting a tag.
+  workflow_dispatch:
+
+jobs:
+  tarball:
+    # Publishes the ArduPilot SITL bridge as a self-contained release tarball.
+    #
+    # The consumer is ArduPilot's own CI which runs integrations tests. The binary
+    # is built under Ubuntu 22.04 because newer glibc versions are backwards
+    # compatible and 22.04 is the oldest release we want to support.
+    #
+    # The build runs inside a ubuntu:22.04 container to match the local Docker
+    # workflow and defend against Github deprecating the 22.04 runner.
+    name: Build the linux-x86_64 tarball
+    runs-on: ubuntu-latest
+    container: ubuntu:22.04
+    permissions:
+      contents: write
+
+    steps:
+      # actions/checkout falls back to a tarball download when git is missing,
+      # which loses the tag. The image is bare, so install it first.
+      - name: Install git for the checkout
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates git
+
+      - uses: actions/checkout@v7
+
+      - name: Install build prerequisites
+        # Mirror the local workflow.
+        run: ./tools/install-prereqs-ubuntu.sh --cmake=kitware -y
+
+      - name: Determine the version
+        id: version
+        # Ensure tag and version numbers are consistent.
+        run: |
+          set -eu
+          version="$(grep -m1 '^project(last_letter VERSION' CMakeLists.txt \
+                     | cut -d' ' -f3)"
+          pyproject_version="$(grep -m1 '^version = ' pyproject.toml | cut -d'"' -f2)"
+          if [ -z "$version" ]; then
+            echo "Could not parse the version out of CMakeLists.txt" >&2
+            exit 1
+          fi
+          if [ "$version" != "$pyproject_version" ]; then
+            echo "CMakeLists.txt says $version, pyproject.toml says $pyproject_version" >&2
+            exit 1
+          fi
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "v$version" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match project version $version" >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "package=last_letter_ardupilot-$version-linux-x86_64" >> "$GITHUB_OUTPUT"
+
+      - name: Build and install
+        # An install rather than a copy out of build/: the tarball's bin/ + lib/
+        # layout only works because of the INSTALL_RPATH of $ORIGIN/../lib that
+        # frontends/ardupilot sets. The build tree's binary has $ORIGIN instead
+        # and would not find the library once unpacked.
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLAST_LETTER_BUILD_ARDUPILOT=ON \
+            -DCMAKE_INSTALL_PREFIX="$PWD/stage"
+          cmake --build build -j"$(nproc)"
+          cmake --install build
+
+      - name: Assemble the tarball
+        # Copied file by file rather than tarring stage/ wholesale, so the
+        # headers and the CMake package stay out: this is a runtime artifact for
+        # a container that will never compile against it.
+        #
+        # The models come from the tree, not from the install. Their install
+        # rule has an absolute DESTINATION of $HOME/last_letter_models, so it
+        # ignores CMAKE_INSTALL_PREFIX and never lands in stage/ at all.
+        run: |
+          set -eu
+          pkg="${{ steps.version.outputs.package }}"
+          mkdir -p "dist/$pkg/bin" "dist/$pkg/lib"
+          cp stage/bin/last_letter_ardupilot "dist/$pkg/bin/"
+          cp stage/lib/liblast_letter_lib.so "dist/$pkg/lib/"
+          cp -r models "dist/$pkg/models"
+          cp LICENSE README.md "dist/$pkg/"
+          tar -C dist -czf "$pkg.tar.gz" "$pkg"
+          sha256sum "$pkg.tar.gz" > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Smoke-test the tarball
+        # Runs the artifact the way a consumer will: unpacked to a prefix of its
+        # own, with the build tree deleted so nothing can resolve through a path
+        # that will not exist on the other side.
+        run: |
+          set -eu
+          pkg="${{ steps.version.outputs.package }}"
+          # `cmake --install` above put a copy of the models in $HOME as well,
+          # and that copy would mask a tarball that shipped none.
+          rm -rf "$HOME/last_letter_models"
+          mkdir -p /opt/last_letter
+          tar -xzf "$pkg.tar.gz" -C /opt/last_letter --strip-components=1
+          rm -rf build stage dist
+          export LAST_LETTER_MODELS_DIR=/opt/last_letter/models
+          # Ensure the bridge is up and blocks the UDP socket, leading to a
+          # timeout (code 124).
+          rc=0
+          timeout -k 5 20 /opt/last_letter/bin/last_letter_ardupilot \
+            --model ardupilot_plane || rc=$?
+          if [ "$rc" -ne 124 ]; then
+            echo "Bridge exited with $rc; expected it to still be running." >&2
+            exit 1
+          fi
+
+      - name: Upload the tarball as a workflow artifact
+        # Also runs for workflow_dispatch, which is the point of that trigger.
+        uses: actions/upload-artifact@v7
+        with:
+          name: ${{ steps.version.outputs.package }}
+          path: |
+            *.tar.gz
+            SHA256SUMS
+          if-no-files-found: error
+
+      - name: Draft the release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v3
+        with:
+          # Publish as draft, release manually.
+          draft: true
+          files: |
+            *.tar.gz
+            SHA256SUMS
+          fail_on_unmatched_files: true
+          body: |
+            ## New features
+
+            < FILLME >
+
+            ## Bugfixes
+
+            < FILLME >

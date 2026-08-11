@@ -40,7 +40,7 @@ already active rather than making a second.
 You will get recommendations on how to build and install last_letter, depending
 on your options.
 
-### To build and install the C++ code
+### To build and install the C++ library
 
 ```bash
 cmake -S . -B build && cmake --build build && cmake --install build
@@ -51,13 +51,19 @@ The library will be installed in `$HOME/.local/lib`.
 Override it with `-DCMAKE_INSTALL_PREFIX=<path>`. Note that the aircraft models
 are always installed to `$HOME/last_letter_models`, independently of the prefix.
 
-To build the ArduPilot bridge binary run
+### To build and install the ArduPilot bridge
 
 ```bash
 cmake -S . -B build -DLAST_LETTER_BUILD_ARDUPILOT=ON && cmake --build build && cmake --install build
 ```
 
 The executable will be installed in `$HOME/.local/bin`. Ensure it is on your path.
+
+The models root it reads defaults to `$HOME/last_letter_models`, and is overridden
+either with `--models-dir <path>` or with the `LAST_LETTER_MODELS_DIR` environment
+variable.
+
+Prebuilt binaries are provided in the [Githug releases](https://github.com/Georacer/last_letter/releases) tarballs.
 
 ### To use the C++ library from another CMake project
 

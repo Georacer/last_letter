@@ -49,7 +49,9 @@ void usage(const char *argv0)
            "  --model <name>       aircraft model to simulate (default: ardupilot_plane)\n"
            "  --port <n>           UDP port to listen on (default: 9002)\n"
            "  --address <ip>       address to bind to (default: 0.0.0.0)\n"
-           "  --models-dir <path>  models root (default: $HOME/last_letter_models)\n"
+           "  --models-dir <path>  models root; also settable through the\n"
+           "                       LAST_LETTER_MODELS_DIR environment variable\n"
+           "                       (default: $HOME/last_letter_models)\n"
            "  --log [file.mcap]    record the run to an MCAP log; with no filename,\n"
            "                       a timestamped one in the working directory\n"
            "  --help\n",
@@ -124,6 +126,23 @@ bool parse_args(int argc, char **argv, Options &opts, bool &want_help)
     return true;
 }
 
+// Let the environment stand in for --models-dir when it was not given.
+//
+// An explicit --models-dir still wins, and an empty value is treated as unset
+// so that exporting it blank does not defeat the $HOME default.
+void apply_models_dir_env(Options &opts)
+{
+    if (!opts.models_dir.empty())
+    {
+        return;
+    }
+    const char *env_dir = getenv("LAST_LETTER_MODELS_DIR");
+    if (env_dir != nullptr && env_dir[0] != '\0')
+    {
+        opts.models_dir = env_dir;
+    }
+}
+
 // Fill the JSON payload from the model, right after a step().
 //
 // Frame conventions (see ardupilot/libraries/SITL/examples/JSON/readme.md):
@@ -189,6 +208,7 @@ int main(int argc, char **argv)
         usage(argv[0]);
         return 0;
     }
+    apply_models_dir_env(opts);
 
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);

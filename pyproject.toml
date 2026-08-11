@@ -1,6 +1,6 @@
 [project]
 name = "last-letter"
-version = "2.101.0"
+version = "2.102.0"
 description = "Software libraries for UAV simulation"
 readme = "README.md"
 authors = [
