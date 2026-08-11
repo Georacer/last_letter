@@ -271,6 +271,7 @@ PYBIND11_MODULE(cpp_last_letter, m)
     auto m_programming_utils = m.def_submodule("cpp_programming_utils", "last_letter_lib programming_utils submodule");
     py::class_<Parametrized, PyParametrized>(m_programming_utils, "Parametrized")
         .def(py::init<string>(), py::arg("name"))
+        .def("initialize", [](Parametrized &self) { self.initialize(); })
         .def("initialize", static_cast<void (Parametrized::*)(const std::string)>(&Parametrized::initialize), py::arg("parameters"))
         .def("get_param_double", &Parametrized::get_param<double>, py::arg("param_name"))
         .def("get_param_vector", &Parametrized::get_param<vector<double>>, py::arg("param_name"))
