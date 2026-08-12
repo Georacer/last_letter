@@ -26,7 +26,7 @@ namespace last_letter_lib
 
 	struct Environment_t
 	{
-		Vector3d wind{Vector3d()}; // Wind velocity vector in in m/s, typically world frame
+		Vector3d wind{Vector3d::Zero()}; // Wind velocity vector in in m/s, typically world frame
 		double density{1.225};	   // in kg/m^3
 		double pressure{1013};	   // in mBar
 		double temperature{273};   // in Kelvin

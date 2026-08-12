@@ -37,7 +37,6 @@ public:
     ////////////
     // Variables
     Airdata airdata;
-    Vector3d relativeWind, relativeRates;      // rotated angular rate container vector
     double p, q, r;                            // rotated angular rates
     double deltaa_max, deltae_max, deltar_max; // Control inputs and maximum surface deflections
     double inputAileron{0}, inputElevator{0}, inputRudder{0};

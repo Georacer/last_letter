@@ -208,7 +208,8 @@ Vector3d PointFriction::getForce(const SimState_t states, const WrenchSum_t wren
 				// Calculate the force arm in the Earth coordinates
 				Vector3d dx_inertial = orientation.conjugate() * dx.col(i);
 
-				Vector3d reaction2Force, reaction2Torque;
+				Vector3d reaction2Force = Vector3d::Zero();
+				Vector3d reaction2Torque;
 				if (std::fabs(totalN) > 1e-6)
 				{
 					reaction2Force(0) = -extForce.x()*(normalF(i)/totalN); // Calculate the load share of the point
@@ -216,7 +217,7 @@ Vector3d PointFriction::getForce(const SimState_t states, const WrenchSum_t wren
 				}
 				else
 				{
-					// No action required
+					// No normal load to share, so the reaction stays zero.
 				}
 
 				Vector3d dx_inertial_planar;
