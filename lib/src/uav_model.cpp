@@ -287,7 +287,7 @@ void UavModel::ensure_log_channels()
 
 /////////////////////////////////////////////////
 // Pass control inputs to sub-models
-void UavModel::setInput(const Input p_input)
+void UavModel::setInput(const Input &p_input)
 {
     input.value = p_input.value;
     dynamics.setInput(input);
@@ -303,7 +303,7 @@ void UavModel::setInput(const Input p_input)
 
 /////////////////////////////////////////////////
 // convert uS PWM values to control surface inputs
-void UavModel::setInputPwm(const InputPwm_t p_input)
+void UavModel::setInputPwm(const InputPwm_t &p_input)
 {
     // Take only the channels carrying a plausible servo command.
     const size_t channels = std::min(p_input.value.size(), PwmInput.value.size());

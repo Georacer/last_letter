@@ -5,12 +5,6 @@ Logging is written from C++ via DataTamer's ``MCAPSink`` (see
 ``last_letter.enable_logging``). This module is the read side: it decodes
 those ``.mcap`` files into numpy arrays / pandas DataFrames and can export CSV.
 
-Why a pure-Python decoder: the ``mcap`` package reads the *container* (schemas,
-channels, messages), but the message payload uses DataTamer's own compact
-snapshot encoding. This module ports DataTamer's ``BuilSchemaFromText`` and
-``ParseSnapshot`` (schema version 4, matching the pinned data_tamer 1.0.3), so
-no C++ reader / mcap headers are needed.
-
 Public API
 ----------
 load_log(path)         -> dict[channel_name, pandas.DataFrame]  (index = time [s])

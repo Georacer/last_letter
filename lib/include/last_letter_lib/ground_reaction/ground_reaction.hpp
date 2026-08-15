@@ -32,10 +32,15 @@ public:
     double inputSteer, inputBrake;
     double steerAngle_max;
     int chanSteer, chanBrake;
-    void setInput(Input input);
-    void setInputPwm(InputPwm_t input);
+    void setInput(const Input &input);
+    void setInputPwm(const InputPwm_t &input);
     virtual Vector3d getForce(const SimState_t states, const WrenchSum_t wrenchSum) = 0;
     virtual Vector3d getTorque(const SimState_t states, const WrenchSum_t wrenchSum) = 0;
+
+private:
+    // Store one normalized input, scaled where the model needs it.
+    void set_steer(double steer) { inputSteer = steerAngle_max * steer; }
+    void set_brake(double brake) { inputBrake = brake; }
 };
 
 /// No ground reactions, dummy class

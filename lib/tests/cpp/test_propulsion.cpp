@@ -36,6 +36,44 @@ TEST(TestPropulsion, TestThrusterSimple)
     EXPECT_EQ(thruster.wrench_sum.wrenchProp.torque.x(), -thruster.get_param<double>("torqueMax"));
 }
 
+// The PWM path is what the ArduPilot bridge drives the model with, and it is
+// the only input path with no other coverage. 1500 us is mid-stick, which
+// PwmToHalfRange maps to half throttle.
+TEST(TestPropulsion, TestThrusterSetInputPwm)
+{
+    auto thruster = ThrusterSimple("pwm_thruster");
+    auto pm = ParameterManager("pm");
+    pm.set("chanMotor", 2, false);
+    thruster.initialize(pm);
+
+    SimState_t states;
+    Environment_t environment;
+    thruster.update_local_state(states, environment);
+
+    InputPwm_t input; // All channels at 1000 us, i.e. zero throttle.
+    input.value[2] = 1500;
+    thruster.setInputPwm(input);
+    thruster.calc_model();
+
+    const double thrust_max = thruster.get_param<double>("thrustMax");
+    const double thrust_min = thruster.get_param<double>("thrustMin");
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.x(),
+                     0.5 * (thrust_max - thrust_min) + thrust_min);
+
+    // A full-scale PWM must match what the normalized setter does with 1.0.
+    input.value[2] = 2000;
+    thruster.setInputPwm(input);
+    thruster.calc_model();
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.x(), thrust_max);
+
+    // An unwired channel leaves the throttle where it was.
+    thruster.chanMotor = -1;
+    input.value[2] = 1000;
+    thruster.setInputPwm(input);
+    thruster.calc_model();
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.x(), thrust_max);
+}
+
 TEST(TestPropulsion, TestOmegaControlledEngine)
 {
     auto thruster = EngOmegaControl("omega_controlled_engine");

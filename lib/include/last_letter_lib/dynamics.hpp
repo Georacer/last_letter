@@ -31,8 +31,8 @@ public:
     void readParametersProp(ParameterManager config);
     void readParametersGround(ParameterManager config);
     void readParametersWorld(ParameterManager config);
-    void setInput(Input input);																	   // store and convert new input values
-    void setInputPwm(InputPwm_t input);																   // store and convert new PWM input values
+    void setInput(const Input &input);															   // store and convert new input values
+    void setInputPwm(const InputPwm_t &input);														   // store and convert new PWM input values
     void set_dt(double dt_p); // Propagate a new timestep to every component and the ground reaction model.
     void update_local_state(SimState_t states, Environment_t environment);
     void calc_model(SimState_t states); // Calculate the forces and torques for each component.

@@ -73,8 +73,8 @@ public:
     double get_time() const { return sim_time_; }  // Elapsed simulation time in s.
 
     SimState_t getState() { return state; } // Return the state of the Body Frame.
-    void setInput(Input inputMsg);
-    void setInputPwm(InputPwm_t inputMsg);
+    void setInput(const Input &inputMsg);
+    void setInputPwm(const InputPwm_t &inputMsg);
 };
 
 } // namespace last_letter_lib

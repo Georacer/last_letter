@@ -57,8 +57,11 @@ public:
     void initialize_parameters() override;
     virtual void update_parameters() override;
 
-    void setInput(Input input);                                                                     // store control input
-    void setInputPwm(InputPwm_t input);                                                             // store PWM control input
+    // Store the throttle directly, bypassing the channel lookup. Both setters
+    // below funnel through this.
+    void set_throttle(double throttle) { inputMotor = throttle; }
+    void setInput(const Input &input);                                                              // store control input
+    void setInputPwm(const InputPwm_t &input);                                                      // store PWM control input
     virtual stateType dynamics(const stateType x, const stateType u, const double t) override;
     virtual stateType outputs(const stateType x, const stateType u, const double t) override;
     void calc_model_impl() override;          // engine physics step, container for the generic class

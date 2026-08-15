@@ -358,6 +358,8 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def("update_parameters", &Thruster::update_parameters)
         .def("set_input", &Thruster::setInput)
         .def("set_input_pwm", &Thruster::setInputPwm)
+        .def("set_throttle", &Thruster::set_throttle, py::arg("throttle"),
+             "Set the 0-1 throttle directly, skipping the chanMotor lookup.")
         .def("calc_model", &Thruster::calc_model)
         .def_readonly("omega", &Thruster::omega);
     py::class_<NoEngine, Thruster>(m_propulsion, "NoEngine")

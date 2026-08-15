@@ -70,24 +70,20 @@ void Aerodynamics::update_parameters()
     deltar_max = get_param<double>("deltar_max");
 }
 
-void Aerodynamics::setInput(Input input)
+void Aerodynamics::setInput(const Input &input)
 {
-    // Convert -1 - 1 input range to radians
-    if (chanAileron > -1) { inputAileron = deltaa_max * input.value[chanAileron]; }
-    if (chanElevator > -1) { inputElevator = deltae_max * input.value[chanElevator]; }
-    if (chanRudder > -1) { inputRudder = deltar_max * input.value[chanRudder]; }
+    // The setters convert the -1 - 1 input range to radians.
+    if (chanAileron > -1) { set_aileron(input.value[chanAileron]); }
+    if (chanElevator > -1) { set_elevator(input.value[chanElevator]); }
+    if (chanRudder > -1) { set_rudder(input.value[chanRudder]); }
 }
 
-void Aerodynamics::setInputPwm(InputPwm_t p_input)
+void Aerodynamics::setInputPwm(const InputPwm_t &p_input)
 {
-    // Convert PPM to -1 - 1 range
-    Input input;
-    if (chanAileron > -1) { input.value[chanAileron] = PwmToFullRange(p_input.value[chanAileron]); }
-    if (chanElevator > -1) { input.value[chanElevator] = PwmToFullRange(p_input.value[chanElevator]); }
-    if (chanRudder > -1) { input.value[chanRudder] = PwmToFullRange(p_input.value[chanRudder]); }
-
-    // Call normalized input setter
-    setInput(input);
+    // Convert PPM to the -1 - 1 range the setters expect.
+    if (chanAileron > -1) { set_aileron(PwmToFullRange(p_input.value[chanAileron])); }
+    if (chanElevator > -1) { set_elevator(PwmToFullRange(p_input.value[chanElevator])); }
+    if (chanRudder > -1) { set_rudder(PwmToFullRange(p_input.value[chanRudder])); }
 }
 
 // One step in the physics engine

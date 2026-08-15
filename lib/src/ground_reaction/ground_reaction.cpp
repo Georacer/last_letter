@@ -37,20 +37,18 @@ void GroundReaction::set_dt(double dt_p)
 }
 
 // Store the steering and brake control inputs
-void GroundReaction::setInput(Input input)
+void GroundReaction::setInput(const Input &input)
 {
-    if (chanSteer > -1) { inputSteer = steerAngle_max * input.value[chanSteer]; }
-    if (chanBrake > -1) { inputBrake = input.value[chanBrake]; }
+    if (chanSteer > -1) { set_steer(input.value[chanSteer]); }
+    if (chanBrake > -1) { set_brake(input.value[chanBrake]); }
 }
 
 // Store the steering and brake control inputs
-void GroundReaction::setInputPwm(InputPwm_t p_input)
+void GroundReaction::setInputPwm(const InputPwm_t &p_input)
 {
-    Input input;
-    if (chanSteer > -1) { input.value[chanSteer] = PwmToFullRange(p_input.value[chanSteer]); }
-    if (chanBrake > -1) { input.value[chanBrake] = PwmToHalfRange(p_input.value[chanBrake]); }
-
-    setInput(input);
+    // Steering is a two-sided deflection, braking a one-sided fraction.
+    if (chanSteer > -1) { set_steer(PwmToFullRange(p_input.value[chanSteer])); }
+    if (chanBrake > -1) { set_brake(PwmToHalfRange(p_input.value[chanBrake])); }
 }
 
 // Build ground reactions model

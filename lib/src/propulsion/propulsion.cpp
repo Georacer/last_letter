@@ -64,24 +64,21 @@ void Thruster::update_parameters()
     }
 }
 
-void Thruster::setInput(Input input)
+void Thruster::setInput(const Input &input)
 {
-    // TODO: I shouldn't check this all the time, since it is an optional parameter
+    // chanMotor is optional; -1 means this thruster is not wired to a channel.
     if (chanMotor > -1)
     {
-        inputMotor = input.value[chanMotor];
+        set_throttle(input.value[chanMotor]);
     }
 }
 
-void Thruster::setInputPwm(InputPwm_t p_input)
+void Thruster::setInputPwm(const InputPwm_t &p_input)
 {
-    Input input;
     if (chanMotor > -1)
     {
-        input.value[chanMotor] = PwmToHalfRange(p_input.value[chanMotor]);
+        set_throttle(PwmToHalfRange(p_input.value[chanMotor]));
     }
-
-    setInput(input);
 }
 
 stateType Thruster::dynamics(const stateType /*x*/, const stateType /*u*/, const double /*t*/)

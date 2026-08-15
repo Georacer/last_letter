@@ -49,12 +49,18 @@ public:
     virtual ~Aerodynamics() {};
     void initialize_parameters() override;
     void update_parameters() override;
-    void setInput(Input input);
-    void setInputPwm(InputPwm_t input);
+    void setInput(const Input &input);
+    void setInputPwm(const InputPwm_t &input);
     void calc_model_impl() override; // perform one step in the aerodynamics
 
 protected:
     void register_log_channels() override; // adds airdata to the base wrench_sum
+
+private:
+    // Store one -1 to 1 ranged deflection, scaled to radians.
+    void set_aileron(double deflection) { inputAileron = deltaa_max * deflection; }
+    void set_elevator(double deflection) { inputElevator = deltae_max * deflection; }
+    void set_rudder(double deflection) { inputRudder = deltar_max * deflection; }
 };
 
 ///////////////////////////////////////////

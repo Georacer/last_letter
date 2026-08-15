@@ -76,7 +76,7 @@ void Dynamics::update_parameters()
 }
 
 // Order subsystems to store control input
-void Dynamics::setInput(Input input)
+void Dynamics::setInput(const Input &input)
 {
     for (auto &thruster : thrusters) {
         thruster->setInput(input);
@@ -88,7 +88,7 @@ void Dynamics::setInput(Input input)
 }
 
 // Order subsystems to store control input, passed as PWM micorseconds
-void Dynamics::setInputPwm(InputPwm_t input)
+void Dynamics::setInputPwm(const InputPwm_t &input)
 {
     for (auto &thruster : thrusters) {
         thruster->setInputPwm(input);
