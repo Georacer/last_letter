@@ -7,10 +7,14 @@
 // code is confined to src/logging/logging.cpp. This keeps the header safe to
 // include from a C++11 translation unit (e.g. an ArduPilot-facing facade).
 //
-// Logging is a process-global concern, off by default. Enabling attaches an
-// MCAP sink to DataTamer's global channel registry; every Component / UavModel
-// then self-logs into that sink from inside its calc_model()/step(). When
-// logging is disabled, the self-log is a cheap no-op.
+// Logging is a process-global concern, off by default. Enabling opens an MCAP
+// sink; every Component / UavModel then registers its members into a named
+// channel from inside its calc_model()/step(). Registering does not write
+// anything: one call to log_frame() snapshots *every* registered channel at
+// *one* timestamp, which is what keeps the channels of a log aligned on a
+// common time axis. UavModel::step() calls log_frame() itself; a driver
+// stepping bare Components must call it once per frame. When logging is
+// disabled, all of this is a cheap no-op.
 
 #include <memory>
 #include <string>
@@ -35,36 +39,36 @@ void disable();
 // True while a recording is active.
 bool is_enabled();
 
-// Set the timestamp (in seconds) applied to every subsequent snapshot until
-// changed. The full model calls this once per step(); standalone drivers may
-// call it too. If never called, snapshots use an auto-incrementing sample
-// index instead (sufficient for a single-component recording).
-void set_time(double t_seconds);
+// Write one snapshot of EVERY registered channel, all stamped `t_seconds`.
+// No-op when logging is off.
+void log_frame(double t_seconds);
 
-// Current snapshot timestamp in nanoseconds. Used internally by the loggers.
-// Returns the value set by set_time(), or an auto-incrementing counter.
-long long now_ns();
+// As above, but stamped with a frame index instead of a simulation time. The
+// index starts at 0 for each recording and advances only when a frame is
+// actually written. Use it when there is no meaningful clock to report.
+void log_frame();
 
 // Monotonically increasing recording id, bumped by each enable(). Loggers use
 // it to know when to (re)register their channels for a fresh recording.
 unsigned epoch();
 
 // Opaque handle to one named log channel. It hides the logging backend from
-// callers: obtain it with get_channel(), register the entity's members on it,
-// then take_snapshot(). Copying a handle refers to the same underlying channel.
+// callers: obtain it with get_channel() and register the entity's members on
+// it. The values are then read out of the entity by every log_frame(), so the
+// handle itself takes no snapshots. Copying a handle refers to the same
+// underlying channel.
 class LogChannel
 {
   public:
     LogChannel() = default;
 
     // Register a loggable member by address; the pointee must outlive the
-    // recording. Defined in log_types.hpp (the backend-aware header), so this
-    // header stays free of the backend and safe to include from C++11 code.
+    // channel, since every log_frame() reads through this pointer. An entity
+    // that dies first must drop_channel() from its destructor. Defined in
+    // log_types.hpp (the backend-aware header), so this header stays free of
+    // the backend and safe to include from C++11 code.
     template <typename T>
     void register_value(const std::string &name, const T *value);
-
-    // Capture all registered values into one snapshot, timestamped with now_ns().
-    void take_snapshot();
 
     // False for a default-constructed / empty handle.
     explicit operator bool() const { return static_cast<bool>(impl_); }
@@ -79,8 +83,16 @@ class LogChannel
     std::shared_ptr<void> impl_;
 };
 
-// Get (creating on first use) the named channel from the global registry.
+// Get (creating on first use) the named channel. Channel names must be unique
+// among simultaneously live entities: two of them registering the same field
+// name on one channel is an error the backend throws on.
 LogChannel get_channel(const std::string &name);
+
+// Destroy the named channel and take it out of the set log_frame() writes.
+// Any entity that registered members of itself MUST call this from its
+// destructor, or the next log_frame() reads freed memory through the pointers
+// it registered. A no-op for an unknown name.
+void drop_channel(const std::string &name);
 
 } // namespace logging
 } // namespace last_letter_lib

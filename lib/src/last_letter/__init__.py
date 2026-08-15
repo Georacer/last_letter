@@ -14,10 +14,9 @@ from .utils import math
 from .utils import programming
 from .utils import uav
 
-# Data-logging on/off toggle (all logging is driven from C++; Python only
-# turns it on/off). Bound at the top level of the extension module.
 from .cpp_last_letter import enable_logging
 from .cpp_last_letter import disable_logging
+from .cpp_last_letter import log_frame
 
 
 __all__ = [
@@ -34,4 +33,5 @@ __all__ = [
     "uav",
     "enable_logging",
     "disable_logging",
+    "log_frame",
 ]

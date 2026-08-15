@@ -24,6 +24,7 @@ class Component : public Parametrized
 {
 public:
     Component(string name) : Parametrized(name) {};
+    ~Component() override;
 
     void initialize_parameters() override
     {
@@ -69,12 +70,12 @@ protected:
     // directly from outside; call calc_model().
     virtual void calc_model_impl();
     // Register this component's log channel and fields. Virtual so subclasses
-    // add their own fields by overriding and calling the base first. Called
-    // once per recording, lazily, from log().
+    // add their own fields by overriding and calling the base first.
     virtual void register_log_channels();
 
 private:
-    void log(); // Log all registered quantities.
+    // Make sure our channel is registered for the current recording.
+    void ensure_log_channels();
     unsigned log_epoch_{0}; // Recording id we last registered channels for.
     GravityModel *gravity{nullptr};
 };

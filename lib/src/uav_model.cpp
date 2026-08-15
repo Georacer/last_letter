@@ -26,6 +26,15 @@ UavModel::UavModel(string name) :
 {
 }
 
+UavModel::~UavModel()
+{
+    // Our registered values are pointers into this object, so the channel must
+    // not outlive us. Unguarded, unlike Component::~Component(): dropping a name
+    // we do not own is a no-op, and the epoch guard there only matters because
+    // component names repeat across aircraft. Aircraft names do not.
+    logging::drop_channel(get_name());
+}
+
 void UavModel::initialize(ParameterManager config)
 {
     Parametrized::initialize(config);
@@ -159,10 +168,9 @@ void UavModel::step()
 {
     // Perform step actions serially
 
-    // Stamp this step's samples with the current sim-time and log the state at
-    // the top of the step, so UavModel::state and the component wrenches (which
-    // are computed from this same state, mid-step) all share the timestamp.
-    log_state();
+    // Make sure our own channel exists before anything below can write a frame
+    // into it.
+    ensure_log_channels();
 
     // Update the environment and propagate the current state and environment
     // into every component before evaluating their forces and torques.
@@ -178,6 +186,12 @@ void UavModel::step()
     // and the CoM-referenced inertia tensor. This compensates for moments
     // created by gravity.
     inpWrench.torque -= dynamics.cog.cross(inpWrench.force);
+
+    // Write this step's frame: UavModel::state plus every component's registered
+    // members, all stamped sim_time_.
+    // Put this before the propagation, to have the state and the resulting
+    // wrenches in the same frame.
+    logging::log_frame(sim_time_);
 
     SimState_t newState;
     newState = kinematics.propagateState(state, dynamics.inertial, inpWrench);
@@ -256,23 +270,19 @@ void UavModel::disable_logging()
     logging::disable();
 }
 
-void UavModel::log_state()
+void UavModel::ensure_log_channels()
 {
-    if (!logging::is_enabled())
+    if (!logging::is_enabled() || log_epoch_ == logging::epoch())
     {
         return;
     }
-    logging::set_time(sim_time_);
-    // (Re)register our channel for this recording the first time we log into
-    // it; enable() clears the registry and bumps the epoch.
+    // Register our channel for this recording the first time we are stepped
+    // in it; enable() drops the previous channels and bumps the epoch. The
+    // values themselves are written by logging::log_frame().
     auto channel = logging::get_channel(get_name());
-    if (log_epoch_ != logging::epoch())
-    {
-        channel.register_value("pose", &state.pose);
-        channel.register_value("velocity", &state.velocity);
-        log_epoch_ = logging::epoch();
-    }
-    channel.take_snapshot();
+    channel.register_value("pose", &state.pose);
+    channel.register_value("velocity", &state.velocity);
+    log_epoch_ = logging::epoch();
 }
 
 /////////////////////////////////////////////////

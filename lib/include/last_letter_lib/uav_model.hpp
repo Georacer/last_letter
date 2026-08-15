@@ -45,16 +45,16 @@ private:
     Input initCtrlInput_;
 
     // Logging
-    void log_state();       // Snapshot UavModel::state into its log channel.
-    unsigned log_epoch_{0}; // Recording id we last registered channels for
+    void ensure_log_channels(); // Register UavModel::state for the current recording.
+    unsigned log_epoch_{0};     // Recording id we last registered channels for
 
     ///////////
     // Methods
 public:
     // Constructor
     UavModel(string name);
-    // Destructor
-    ~UavModel() = default;
+    // Destructor.
+    ~UavModel() override;
     void initialize(ParameterManager config) override;
     void initialize(const std::string yaml_str) override;
     void initialize_parameters() override;

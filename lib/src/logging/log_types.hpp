@@ -1,7 +1,7 @@
 #pragma once
 
 // Backend-aware logging header. It provides two things for the .cpp files that
-// self-log (systems, aerodynamics, propulsion, uav_model):
+// register log channels (systems, aerodynamics, propulsion, uav_model):
 //
 //  1. DataTamer TypeDefinition specializations for the last_letter_lib data
 //     types we log. Each must live in the SAME namespace as the type it
@@ -37,6 +37,10 @@ namespace logging
 template <typename T>
 void LogChannel::register_value(const std::string &name, const T *value)
 {
+    if (!impl_)
+    {
+        return;
+    }
     std::static_pointer_cast<DataTamer::LogChannel>(impl_)->registerValue(name, value);
 }
 } // namespace logging

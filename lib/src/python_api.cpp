@@ -87,14 +87,22 @@ PYBIND11_MODULE(cpp_last_letter, m)
 {
     m.doc() = "The last_letter_lib python bindings.";
 
-    // Data-logging on/off toggle. All logging is driven from C++; Python only
-    // turns it on/off. After enable_logging(path), any stepped Component /
-    // UavModel self-logs into the MCAP file until disable_logging().
+    // Data-logging controls. The data itself is gathered in C++; Python turns
+    // recording on and off and decides when a frame is written. log_frame() is
+    // what puts a row in the file, and it writes every channel at one
+    // timestamp. Aircraft.step() calls it for you.
     m.def("enable_logging", &last_letter_lib::logging::enable, py::arg("path") = "",
           "Start recording simulation data to an MCAP file at `path`. With no "
           "path, a file named after the current date/time is created in the cwd.");
     m.def("disable_logging", &last_letter_lib::logging::disable,
           "Stop recording and close the MCAP file.");
+    m.def("log_frame", py::overload_cast<double>(&last_letter_lib::logging::log_frame),
+          py::arg("t"),
+          "Write one row for every registered channel, stamped with simulation "
+          "time `t` in seconds. Does nothing while logging is off.");
+    m.def("log_frame", py::overload_cast<>(&last_letter_lib::logging::log_frame),
+          "Write one row for every registered channel, stamped with a frame "
+          "index counting from 0. Does nothing while logging is off.");
 
     auto m_math_utils = m.def_submodule("cpp_math_utils", "last_letter_lib math_utils submodule");
     py::class_<Vector3_ll>(m_math_utils, "Vector3")

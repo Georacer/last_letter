@@ -65,7 +65,20 @@ void Component::update_local_state(const SimState_t body_state, const Environmen
 void Component::calc_model()
 {
     calc_model_impl();
-    log();
+    ensure_log_channels();
+}
+
+Component::~Component()
+{
+    // Our registered values are pointers into this object, so the channel must
+    // not outlive us: the next logging::log_frame() would read freed memory.
+    // The epoch check means we only drop a channel we ourselves registered into
+    // the current recording -- without it, an object left over from an earlier
+    // recording would tear down the fresh channel of a live namesake.
+    if (logging::is_enabled() && log_epoch_ == logging::epoch())
+    {
+        logging::drop_channel(get_name());
+    }
 }
 
 void Component::calc_model_impl()
@@ -80,21 +93,21 @@ void Component::register_log_channels()
     logging::get_channel(get_name()).register_value("wrench_sum", &wrench_sum);
 }
 
-void Component::log()
+void Component::ensure_log_channels()
 {
     if (!logging::is_enabled())
     {
         return;
     }
-    // (Re)register our channel for this recording the first time we log into
-    // it. enable() clears the registry and bumps the epoch, so a fresh
-    // recording re-registers against the current member addresses.
+    // Register our channel for this recording the first time we are stepped
+    // in it. enable() drops the previous channels and bumps the epoch, so a
+    // fresh recording re-registers against the current member addresses.
+    // Registering is all we do: logging::log_frame() is what writes the values.
     if (log_epoch_ != logging::epoch())
     {
         register_log_channels();
         log_epoch_ = logging::epoch();
     }
-    logging::get_channel(get_name()).take_snapshot();
 }
 
 WrenchSum_t Component::rotate_wrenches() const
