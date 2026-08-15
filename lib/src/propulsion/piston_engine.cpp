@@ -113,7 +113,7 @@ void PistonEng::calc_wrench(SimState_t /* states */, Environment_t environment)
 	torqueY = 0.0;
 	torqueZ = 0.0;
 
-	wrench_sum.wrenchProp.torque = Vector3d(forceX, forceY, forceZ);
+	wrench_sum.wrenchProp.force = Vector3d(forceX, forceY, forceZ);
 	wrench_sum.wrenchProp.torque = Vector3d(torqueX, torqueY, torqueZ);
 	if (!wrench_sum.wrenchProp.force.allFinite()) {throw runtime_error("propulsion.cpp: State NaN in wrenchProp.force");}
 	if (!wrench_sum.wrenchProp.torque.allFinite()) {throw runtime_error("propulsion.cpp: State NaN in wrenchProp.torque");}
