@@ -39,7 +39,7 @@ public:
     // dt is inherited from Component.
     double inputMotor;  // control input (0-1)
     int chanMotor;
-    double omega;       // motor angular speed in rad/s
+    double omega{0};       // motor angular speed in rad/s
     double rotationDir; // motor direction of rotation
     double theta;       // propeller angle in rads
     double normalWind;  // scalar wind normal to propeller disc
@@ -178,7 +178,7 @@ public:
 
         set_param<double>("propPowerPoly/polyType", 0, false);
         set_param<double>("propPowerPoly/polyNo", 1, false);
-        std::vector<double> propPowerPolyCoeffs = {-0.00405, 0.00289};
+        std::vector<double> propPowerPolyCoeffs = {0.00289, -0.00405};
         set_param<vector<double>>("propPowerPoly/coeffs", propPowerPolyCoeffs, false);
     }
     void update_parameters() override;

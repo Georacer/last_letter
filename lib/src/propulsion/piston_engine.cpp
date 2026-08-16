@@ -15,8 +15,6 @@ using namespace std;
 PistonEng::PistonEng(string name)
     :Thruster(name)
 {
-	omega = omegaMin; // Initialize engine rotational speed
-
     stateType x_0 = {0};
     stateType u_0 = {0};
     reset(x_0, u_0);
@@ -57,15 +55,18 @@ void PistonEng::pre_propagation(SimState_t, Environment_t environment)
 {
 	rho = environment.density; // Read current air density
 
+    // Ensure we're running within ang. vel limits.
+    omega = std::copysign(constrain(std::fabs(omega), omegaMin, omegaMax), rotationDir);
+
 	// Calculate current engine power
-	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
+	double powerHP = engPowerPoly->evaluate(std::fabs(omega)/2.0/M_PI*60);
 	double engPower = inputMotor * powerHP * 745.7;
 
-	double advRatio = normalWind/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double advRatio = normalWind/ (std::fabs(omega)/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
-	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
+	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega)/2.0/M_PI,3) * pow(propDiam,5);
 
-	double deltaT = (engPower - propPower)/omega;
+	double deltaT = (engPower - propPower)/std::fabs(omega);
 	double omegaDot = 1/engInertia*deltaT;
 
     stateType temp_u = {omegaDot};
@@ -88,15 +89,15 @@ void PistonEng::calc_wrench(SimState_t /* states */, Environment_t environment)
 	rho = environment.density; // Read current air density
 
 	// Calculate current engine power
-	double powerHP = engPowerPoly->evaluate(omega/2.0/M_PI*60);
+	double powerHP = engPowerPoly->evaluate(std::fabs(omega)/2.0/M_PI*60);
 	double engPower = inputMotor * powerHP * 745.7;
 
 	double forceX, forceY, forceZ;
 	double torqueX, torqueY, torqueZ;
 
-	double advRatio = normalWind/ (omega/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double advRatio = normalWind/ (std::fabs(omega)/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
-	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(omega/2.0/M_PI,3) * pow(propDiam,5);
+	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega)/2.0/M_PI,3) * pow(propDiam,5);
 	double npCoeff = npPoly->evaluate(advRatio);
 	forceX = propPower*std::fabs(npCoeff/(normalWind+1.0e-10)); // Added epsilon for numerical stability
 
@@ -105,7 +106,7 @@ void PistonEng::calc_wrench(SimState_t /* states */, Environment_t environment)
 	forceX += staticThrust;
 
 	forceX = constrain(forceX, thrustMin, thrustMax);
-	torqueX = propPower / omega;
+	torqueX = - torque_sign() * propPower / std::fabs(omega);
 	if (inputMotor < 0.01) {
 		forceX = 0;
 		torqueX = 0;

@@ -14,12 +14,6 @@ using namespace std;
 // Constructor
 ElectricEng::ElectricEng(string name) : Thruster(name)
 {
-	// TODO: Make sure to add this to the ROS wrapper
-	// sprintf(paramMsg, "propulsion%i", id);
-	// ros::NodeHandle n;
-	// pub = n.advertise<last_letter_msgs::ElectricEng>(paramMsg, 1000); //propulsion data publisher
-	omega = omegaMin; // Initialize engine rotational speed
-
     stateType x_0 = {0};
     stateType u_0 = {0};
     reset(x_0, u_0);
@@ -59,6 +53,9 @@ void ElectricEng::update_parameters()
 void ElectricEng::pre_propagation(SimState_t states, Environment_t environment)
 {
 	rho = environment.density;
+
+    // Ensure we're running within ang. vel limits.
+    omega = std::copysign(constrain(std::fabs(omega), omegaMin, omegaMax), rotationDir);
 
 	double Ei = std::fabs(omega) / 2 / M_PI / Kv;
 	double Im = (Cells * 4.0 * inputMotor - Ei) / (Rs * inputMotor + Rm);
@@ -109,7 +106,7 @@ void ElectricEng::calc_wrench(SimState_t /* states */, Environment_t /* environm
 	forceX += staticThrust;
 
 	forceX = constrain(forceX, thrustMin, thrustMax);
-	torqueX = - torque_sign() * propPower / omega;
+	torqueX = - torque_sign() * propPower / std::fabs(omega);
 	torqueY = 0.0;
 	torqueZ = 0.0;
 
@@ -134,12 +131,6 @@ void ElectricEng::calc_wrench(SimState_t /* states */, Environment_t /* environm
 // Constructor
 ElectricEng2::ElectricEng2(string name) : Thruster(name)
 {
-	// TODO: Make sure to add this to the ROS wrapper
-	// sprintf(paramMsg, "propulsion%i", id);
-	// ros::NodeHandle n;
-	// pub = n.advertise<last_letter_msgs::ElectricEng2>(paramMsg, 1000); //propulsion data publisher
-	omega = omegaMin; // Initialize engine rotational speed
-
     stateType x_0 = {0};
     stateType u_0 = {0};
     reset(x_0, u_0);
@@ -182,6 +173,9 @@ void ElectricEng2::update_parameters()
 void ElectricEng2::pre_propagation(SimState_t states, Environment_t environment)
 {
 	rho = environment.density;
+
+    // Ensure we're running within ang. vel limits.
+    omega = std::copysign(constrain(std::fabs(omega), omegaMin, omegaMax), rotationDir);
 
 	double Ei = std::fabs(omega) / 2 / M_PI / Kv;
 	double Im = (Cells * 4.0 * inputMotor - Ei) / (Rs * inputMotor + Rm);
@@ -233,7 +227,7 @@ void ElectricEng2::calc_wrench(SimState_t /* states */, Environment_t /* environ
 	forceY += momentumDrag.y();
 	forceZ = momentumDrag.z();
 
-	torqueX = - torque_sign() * propPower / omega;
+	torqueX = - torque_sign() * propPower / std::fabs(omega);
 	torqueY = 0.0;
 	torqueZ = 0.0;
 
