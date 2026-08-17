@@ -32,7 +32,7 @@ void PistonEng::update_parameters()
 {
 	Thruster::update_parameters();
 
-	propDiam = get_param<double>("propDiam");
+	prop_diam = get_param<double>("prop_diam");
 	engInertia = get_param<double>("engInertia");
 	vector<double> doubleVect;
 	doubleVect = get_param<vector<double>>("RadPSLimits");
@@ -62,9 +62,9 @@ void PistonEng::pre_propagation(SimState_t, Environment_t environment)
 	double powerHP = engPowerPoly->evaluate(std::fabs(omega)/2.0/M_PI*60);
 	double engPower = inputMotor * powerHP * 745.7;
 
-	double advRatio = normalWind/ (std::fabs(omega)/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double advRatio = normalWind/ (std::fabs(omega)/2.0/M_PI) /prop_diam; // Convert advance ratio to dimensionless units, not 1/rad
 	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
-	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega)/2.0/M_PI,3) * pow(propDiam,5);
+	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega)/2.0/M_PI,3) * pow(prop_diam,5);
 
 	double deltaT = (engPower - propPower)/std::fabs(omega);
 	double omegaDot = 1/engInertia*deltaT;
@@ -95,14 +95,14 @@ void PistonEng::calc_wrench(SimState_t /* states */, Environment_t environment)
 	double forceX, forceY, forceZ;
 	double torqueX, torqueY, torqueZ;
 
-	double advRatio = normalWind/ (std::fabs(omega)/2.0/M_PI) / propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double advRatio = normalWind/ (std::fabs(omega)/2.0/M_PI) / prop_diam; // Convert advance ratio to dimensionless units, not 1/rad
 	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
-	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega)/2.0/M_PI,3) * pow(propDiam,5);
+	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega)/2.0/M_PI,3) * pow(prop_diam,5);
 	double npCoeff = std::max(npPoly->evaluate(advRatio), 0.0);
 	forceX = propPower*std::fabs(npCoeff/(normalWind+1.0e-10)); // Added epsilon for numerical stability
 
 	double fadeFactor = (exp(-normalWind*3/12));
-	double staticThrust = 0.9*fadeFactor*pow(M_PI/2.0*propDiam*propDiam*rho*engPower*engPower,1.0/3); //static thrust fades at 5% at 12m/s
+	double staticThrust = 0.9*fadeFactor*pow(M_PI/2.0*prop_diam*prop_diam*rho*engPower*engPower,1.0/3); //static thrust fades at 5% at 12m/s
 	forceX += staticThrust;
 
 	forceX = constrain(forceX, thrustMin, thrustMax);

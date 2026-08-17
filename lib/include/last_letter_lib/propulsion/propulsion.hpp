@@ -137,7 +137,7 @@ public:
     // Variables //
     ////////////////
     double omegaMin, omegaMax;
-    double propDiam, engInertia, rho;
+    double prop_diam, engInertia, rho;
     double Kv, Rm, I0;
     // Battery specification
     int Cells; // Number of LiPo cells
@@ -160,7 +160,7 @@ public:
     {
         Thruster::initialize_parameters();
 
-        set_param<double>("propDiam", 0.4064, false);
+        set_param<double>("prop_diam", 0.4064, false);
         set_param<double>("engInertia", 200e-6, false);
         set_param<double>("Kv", 8.17, false);
         set_param<double>("Rm", 0.1, false);
@@ -196,7 +196,7 @@ public:
     // Variables //
     ////////////////
     double omegaMin, omegaMax;
-    double propDiam, engInertia, rho;
+    double prop_diam, engInertia, rho;
     double Kv, Rm, I0;
     // Battery specification
     int Cells; // Number of LiPo cells
@@ -221,7 +221,7 @@ public:
     {
         Thruster::initialize_parameters();
 
-        set_param<double>("propDiam", 0.4064, false);
+        set_param<double>("prop_diam", 0.4064, false);
         set_param<double>("engInertia", 200e-6, false);
         set_param<double>("Kv", 8.17, false);
         set_param<double>("Rm", 0.1, false);
@@ -297,7 +297,7 @@ public:
 	////////////
 	// Variables
 	double omegaMin, omegaMax;
-	double propDiam, engInertia, rho;
+	double prop_diam, engInertia, rho;
 
 	//////////
 	// Members
@@ -314,7 +314,7 @@ public:
         Thruster::initialize_parameters();
 
         // TODO: These defaults have to be replaced with realistic numbers.
-        set_param<double>("propDiam", 0.5588, false);
+        set_param<double>("prop_diam", 0.5588, false);
         set_param<double>("engInertia", 0.01, false);
         std::vector<double> radpslimits = {100, 700};
         set_param<vector<double>>("RadPSLimits", radpslimits, false);

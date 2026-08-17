@@ -78,7 +78,7 @@ def build_desc_thruster_electric_2():
     motorType: 5
     dt: 0.01
     chanMotor: 2
-    propDiam: 0.4064
+    prop_diam: 0.4064
     engInertia: 200e-6
     Kv: 6.5
     Rm: 0.1

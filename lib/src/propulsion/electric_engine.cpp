@@ -31,7 +31,7 @@ void ElectricEng::update_parameters()
 	Thruster::update_parameters();
 
 	vector<double> doubleVect;
-	propDiam = get_param<double>("propDiam");
+	prop_diam = get_param<double>("prop_diam");
 	engInertia = get_param<double>("engInertia");
 	Kv = get_param<double>("Kv");
 	Rm = get_param<double>("Rm");
@@ -61,8 +61,8 @@ void ElectricEng::pre_propagation(SimState_t states, Environment_t environment)
 	double Im = (Cells * 4.0 * inputMotor - Ei) / (Rs * inputMotor + Rm);
 	double engPower = Ei * (Im - I0);
 
-	double advRatio = normalWind / (std::fabs(omega) / 2.0 / M_PI + 0.001) / propDiam; // Convert advance ratio to dimensionless units, not 1/rad
-	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 3) * pow(propDiam, 5);
+	double advRatio = normalWind / (std::fabs(omega) / 2.0 / M_PI + 0.001) / prop_diam; // Convert advance ratio to dimensionless units, not 1/rad
+	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 3) * pow(prop_diam, 5);
 	double deltaT = (engPower - propPower) / (std::fabs(omega) + 0.001);
 	double omegaDot = 1 / engInertia * deltaT;
     stateType temp_u = {omegaDot};
@@ -91,8 +91,8 @@ void ElectricEng::calc_wrench(SimState_t /* states */, Environment_t /* environm
 	double Im = (Cells * 4.0 * inputMotor - Ei) / (Rs * inputMotor + Rm);
 	double engPower = Ei * (Im - I0);
 
-	double advRatio = normalWind / (std::fabs(omega) / 2.0 / M_PI + 0.001) / propDiam; // Convert advance ratio to dimensionless units, not 1/rad
-	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 3) * pow(propDiam, 5);
+	double advRatio = normalWind / (std::fabs(omega) / 2.0 / M_PI + 0.001) / prop_diam; // Convert advance ratio to dimensionless units, not 1/rad
+	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 3) * pow(prop_diam, 5);
 	double npCoeff = npPoly->evaluate(advRatio);
 
 	double forceX, forceY, forceZ;
@@ -102,7 +102,7 @@ void ElectricEng::calc_wrench(SimState_t /* states */, Environment_t /* environm
 	forceY = 0.0;
 	forceZ = 0.0;
 	double fadeFactor = (exp(-normalWind * 3 / 12));
-	double staticThrust = 0.9 * fadeFactor * pow(M_PI / 2.0 * propDiam * propDiam * rho * engPower * engPower, 1.0 / 3); // static thrust fades at 5% at 12m/s
+	double staticThrust = 0.9 * fadeFactor * pow(M_PI / 2.0 * prop_diam * prop_diam * rho * engPower * engPower, 1.0 / 3); // static thrust fades at 5% at 12m/s
 	forceX += staticThrust;
 
 	forceX = constrain(forceX, thrustMin, thrustMax);
@@ -148,7 +148,7 @@ void ElectricEng2::update_parameters()
 	Thruster::update_parameters();
 
 	vector<double> doubleVect;
-	propDiam = get_param<double>("propDiam");
+	prop_diam = get_param<double>("prop_diam");
 	engInertia = get_param<double>("engInertia");
 	Kv = get_param<double>("Kv");
 	Rm = get_param<double>("Rm");
@@ -181,8 +181,8 @@ void ElectricEng2::pre_propagation(SimState_t states, Environment_t environment)
 	double Im = (Cells * 4.0 * inputMotor - Ei) / (Rs * inputMotor + Rm);
 	double engPower = Ei * (Im - I0);
 
-	double advRatio = normalWind / (std::fabs(omega) / 2.0 / M_PI + 0.001) / propDiam; // Convert advance ratio to dimensionless units, not 1/rad
-	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 3) * pow(propDiam, 5);
+	double advRatio = normalWind / (std::fabs(omega) / 2.0 / M_PI + 0.001) / prop_diam; // Convert advance ratio to dimensionless units, not 1/rad
+	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 3) * pow(prop_diam, 5);
 
 	double deltaT = (engPower - propPower) / (std::fabs(omega) + 0.001);
 	double omegaDot = 1 / engInertia * deltaT;
@@ -208,10 +208,10 @@ void ElectricEng2::post_propagation()
 
 void ElectricEng2::calc_wrench(SimState_t /* states */, Environment_t /* environment */)
 {
-	double advRatio = normalWind / (std::fabs(omega) / 2.0 / M_PI + 0.001) / propDiam; // Convert advance ratio to dimensionless units, not 1/rad
-	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 3) * pow(propDiam, 5);
+	double advRatio = normalWind / (std::fabs(omega) / 2.0 / M_PI + 0.001) / prop_diam; // Convert advance ratio to dimensionless units, not 1/rad
+	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 3) * pow(prop_diam, 5);
 
-	double propThrust = propThrustPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 2) * pow(propDiam, 4);
+	double propThrust = propThrustPoly->evaluate(advRatio) * rho * pow(std::fabs(omega) / 2.0 / M_PI, 2) * pow(prop_diam, 4);
 	// Constrain propeller force to [0,+5] times the aircraft weight
 	propThrust = constrain(propThrust, thrustMin, thrustMax);
 

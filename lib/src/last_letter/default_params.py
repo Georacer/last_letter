@@ -78,7 +78,7 @@ default_thruster_params = {
     "chanMotor": -1,
     "rotationDir": 1.0,
     "motorType": 5,
-    "propDiam": 16 * 2.54 / 100,  # 16 inch props
+    "prop_diam": 16 * 2.54 / 100,  # 16 inch props
     "engInertia": 200e-6,
     "Kv": 8.17,
     "Rm": 0.1,
