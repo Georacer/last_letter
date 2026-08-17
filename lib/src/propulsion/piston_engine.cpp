@@ -44,8 +44,8 @@ void PistonEng::update_parameters()
 	ParameterManager engPowerPolyConfig = params_.filter("engPowerPoly");
 	engPowerPoly = buildPolynomial(engPowerPolyConfig);
 	// Create propeller efficiency polynomial
-	ParameterManager engCoeffPolyConfig = params_.filter("engCoeffPoly");
-	npPoly = buildPolynomial(engCoeffPolyConfig);
+	ParameterManager propCoeffPolyConfig = params_.filter("propCoeffPoly");
+	npPoly = buildPolynomial(propCoeffPolyConfig);
 	// Create propeller power polynomial
 	ParameterManager propPowerPolyConfig = params_.filter("propPowerPoly");
 	propPowerPoly = buildPolynomial(propPowerPolyConfig);
@@ -95,10 +95,10 @@ void PistonEng::calc_wrench(SimState_t /* states */, Environment_t environment)
 	double forceX, forceY, forceZ;
 	double torqueX, torqueY, torqueZ;
 
-	double advRatio = normalWind/ (std::fabs(omega)/2.0/M_PI) /propDiam; // Convert advance ratio to dimensionless units, not 1/rad
+	double advRatio = normalWind/ (std::fabs(omega)/2.0/M_PI) / propDiam; // Convert advance ratio to dimensionless units, not 1/rad
 	advRatio = std::max(advRatio, 0.0); // Force advance ratio above zero, in lack of a better propeller model
 	double propPower = propPowerPoly->evaluate(advRatio) * rho * pow(std::fabs(omega)/2.0/M_PI,3) * pow(propDiam,5);
-	double npCoeff = npPoly->evaluate(advRatio);
+	double npCoeff = std::max(npPoly->evaluate(advRatio), 0.0);
 	forceX = propPower*std::fabs(npCoeff/(normalWind+1.0e-10)); // Added epsilon for numerical stability
 
 	double fadeFactor = (exp(-normalWind*3/12));

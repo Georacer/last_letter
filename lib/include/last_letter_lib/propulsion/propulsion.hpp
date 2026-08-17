@@ -177,8 +177,8 @@ public:
         set_param<vector<double>>("nCoeffPoly/coeffs", nCoeffPolyCoeffs, false);
 
         set_param<double>("propPowerPoly/polyType", 0, false);
-        set_param<double>("propPowerPoly/polyNo", 1, false);
-        std::vector<double> propPowerPolyCoeffs = {0.00289, -0.00405};
+        set_param<double>("propPowerPoly/polyNo", 3, false);
+        std::vector<double> propPowerPolyCoeffs = {0.0738, -0.1329, 0.2872, -0.2853};
         set_param<vector<double>>("propPowerPoly/coeffs", propPowerPolyCoeffs, false);
     }
     void update_parameters() override;
@@ -236,10 +236,10 @@ public:
         std::vector<double> propThrustPolyCoeffs = {0.0737, -0.4778, 2.2161, -5.5296, 6.2749, -2.6331};
         set_param<vector<double>>("propThrustPoly/coeffs", propThrustPolyCoeffs, false);
 
-        set_param<double>("propThrustMultiplier", 1.1, false);
+        set_param<double>("propThrustMultiplier", 1.0, false);
         set_param<double>("propPowerPoly/polyType", 0, false);
-        set_param<double>("propPowerPoly/polyNo", 1, false);
-        std::vector<double> propPowerPolyCoeffs = {0.00289, -0.00405};
+        set_param<double>("propPowerPoly/polyNo", 3, false);
+        std::vector<double> propPowerPolyCoeffs = {0.0738, -0.1329, 0.2872, -0.2853};
         set_param<vector<double>>("propPowerPoly/coeffs", propPowerPolyCoeffs, false);
 
         set_param<double>("momentumDragCoeff", 0.0047, false);
@@ -316,23 +316,22 @@ public:
         // TODO: These defaults have to be replaced with realistic numbers.
         set_param<double>("propDiam", 0.5588, false);
         set_param<double>("engInertia", 0.01, false);
-        std::vector<double> radpslimits = {80, 630};
+        std::vector<double> radpslimits = {100, 700};
         set_param<vector<double>>("RadPSLimits", radpslimits, false);
 
-        // TODO: Replace this with a YAML string?
         set_param<double>("engPowerPoly/polyType", 0, false);
-        set_param<double>("engPowerPoly/polyNo", 2, false);
-        std::vector<double> engPowerPolyCoeffs = {0, 0.5, -0.005};
+        set_param<double>("engPowerPoly/polyNo", 3, false);
+        std::vector<double> engPowerPolyCoeffs = {-0.329, 2.68e-4, 3.784e-7, -5.278e-11};
         set_param<vector<double>>("engPowerPoly/coeffs", engPowerPolyCoeffs, false);
 
-        set_param<double>("engCoeffPoly/polyType", 0, false);
-        set_param<double>("engCoeffPoly/polyNo", 2, false);
-        std::vector<double> engCoeffPolyCoeffs = {0, 0.03, -0.0003};
-        set_param<vector<double>>("engCoeffPoly/coeffs", engCoeffPolyCoeffs, false);
+        set_param<double>("propCoeffPoly/polyType", 0, false);
+        set_param<double>("propCoeffPoly/polyNo", 2, false);
+        std::vector<double> propCoeffPolyCoeffs = {0, 0.03, -0.0003};
+        set_param<vector<double>>("propCoeffPoly/coeffs", propCoeffPolyCoeffs, false);
 
         set_param<double>("propPowerPoly/polyType", 0, false);
         set_param<double>("propPowerPoly/polyNo", 1, false);
-        std::vector<double> propPowerPolyCoeffs = {-0.0405, 0.0289};
+        std::vector<double> propPowerPolyCoeffs = {0.0289, -0.0405};
         set_param<vector<double>>("propPowerPoly/coeffs", propPowerPolyCoeffs, false);
     }
     void update_parameters() override;
