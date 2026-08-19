@@ -37,7 +37,7 @@ public:
     ///////////
     // Variables
     // dt is inherited from Component.
-    double inputMotor;  // control input (0-1)
+    double inputMotor;  // control input, constrained to (-1 to 1)
     int chanMotor;
     double omega{0};       // motor angular speed in rad/s
     double rotationDir; // motor direction of rotation
@@ -59,7 +59,7 @@ public:
 
     // Store the throttle directly, bypassing the channel lookup. Both setters
     // below funnel through this.
-    void set_throttle(double throttle) { inputMotor = throttle; }
+    void set_throttle(double throttle) { inputMotor = math_utils::constrain(throttle, -1.0, 1.0); }
     void setInput(const Input &input);                                                              // store control input
     void setInputPwm(const InputPwm_t &input);                                                      // store PWM control input
     virtual stateType dynamics(const stateType x, const stateType u, const double t) override;

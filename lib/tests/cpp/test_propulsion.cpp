@@ -74,6 +74,40 @@ TEST(TestPropulsion, TestThrusterSetInputPwm)
     EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.x(), thrust_max);
 }
 
+// Nothing downstream of set_throttle range-checks the command: PistonEng and the
+// electric engines scale engine power by inputMotor linearly, so an out-of-range
+// throttle just pins the propeller at its RadPSLimits ceiling and looks plausible.
+// Both setters funnel through set_throttle, so clamping there covers every path.
+TEST(TestPropulsion, TestThrottleIsConstrained)
+{
+    auto thruster = ThrusterSimple("clamped_thruster");
+    auto pm = ParameterManager("pm");
+    pm.set("chanMotor", 0, false);
+    thruster.initialize(pm);
+
+    thruster.set_throttle(10.0);
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 1.0);
+
+    thruster.set_throttle(-10.0);
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, -1.0);
+
+    // In-range commands, including reverse thrust, pass through untouched.
+    thruster.set_throttle(0.25);
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 0.25);
+    thruster.set_throttle(-0.5);
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, -0.5);
+
+    // The channel setter funnels through it too.
+    thruster.setInput(Input({7.0, 0, 0, 0}));
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 1.0);
+
+    // As does the PWM one: 3000 us is well outside the 1000-2000 us band.
+    InputPwm_t input;
+    input.value[0] = 3000;
+    thruster.setInputPwm(input);
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 1.0);
+}
+
 TEST(TestPropulsion, TestOmegaControlledEngine)
 {
     auto thruster = EngOmegaControl("omega_controlled_engine");
