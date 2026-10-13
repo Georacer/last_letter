@@ -78,6 +78,7 @@ TEST(TestPropulsion, TestThrusterSetInputPwm)
 // electric engines scale engine power by inputMotor linearly, so an out-of-range
 // throttle just pins the propeller at its RadPSLimits ceiling and looks plausible.
 // Both setters funnel through set_throttle, so clamping there covers every path.
+// The command reaches inputMotor at the next step, so each check steps once.
 TEST(TestPropulsion, TestThrottleIsConstrained)
 {
     auto thruster = ThrusterSimple("clamped_thruster");
@@ -85,27 +86,117 @@ TEST(TestPropulsion, TestThrottleIsConstrained)
     pm.set("chanMotor", 0, false);
     thruster.initialize(pm);
 
+    SimState_t states;
+    Environment_t environment;
+    thruster.update_local_state(states, environment);
+
     thruster.set_throttle(10.0);
+    thruster.calc_model();
     EXPECT_DOUBLE_EQ(thruster.inputMotor, 1.0);
 
     thruster.set_throttle(-10.0);
+    thruster.calc_model();
     EXPECT_DOUBLE_EQ(thruster.inputMotor, -1.0);
 
     // In-range commands, including reverse thrust, pass through untouched.
     thruster.set_throttle(0.25);
+    thruster.calc_model();
     EXPECT_DOUBLE_EQ(thruster.inputMotor, 0.25);
     thruster.set_throttle(-0.5);
+    thruster.calc_model();
     EXPECT_DOUBLE_EQ(thruster.inputMotor, -0.5);
 
     // The channel setter funnels through it too.
     thruster.setInput(Input({7.0, 0, 0, 0}));
+    thruster.calc_model();
     EXPECT_DOUBLE_EQ(thruster.inputMotor, 1.0);
 
     // As does the PWM one: 3000 us is well outside the 1000-2000 us band.
     InputPwm_t input;
     input.value[0] = 3000;
     thruster.setInputPwm(input);
+    thruster.calc_model();
     EXPECT_DOUBLE_EQ(thruster.inputMotor, 1.0);
+}
+
+// ArduPilot limits how fast a motor command may change, and has no motor lag
+// besides. At 150 per second and 1200 Hz a full step takes eight frames.
+TEST(TestPropulsion, TestThrusterSlewLimit)
+{
+    auto thruster = ThrusterSimple("slew_thruster");
+    auto pm = ParameterManager("pm");
+    pm.set("chanMotor", 0, false);
+    pm.set("slew_max", 150.0, false);
+    thruster.initialize(pm);
+    thruster.set_dt(1.0 / 1200);
+
+    SimState_t states;
+    Environment_t environment;
+    thruster.update_local_state(states, environment);
+
+    thruster.set_throttle(1.0);
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 0.0); // The setter alone does not move it.
+    thruster.calc_model();
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 0.125);
+    for (int i = 1; i < 8; i++)
+    {
+        thruster.calc_model();
+    }
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 1.0);
+}
+
+// The PWM endpoints stand in for the ArduPilot MOT_PWM_MIN, MOT_PWM_MAX,
+// spin_min and spin_max chain, which is one line clipped to 0 to 1.
+TEST(TestPropulsion, TestThrusterPwmEndpoints)
+{
+    auto thruster = ThrusterSimple("pwm_endpoint_thruster");
+    auto pm = ParameterManager("pm");
+    pm.set("chanMotor", 0, false);
+    pm.set("pwm_min", 1150.0, false);
+    pm.set("pwm_max", 1950.0, false);
+    thruster.initialize(pm);
+
+    SimState_t states;
+    Environment_t environment;
+    thruster.update_local_state(states, environment);
+
+    InputPwm_t input;
+    input.value[0] = 1150;
+    thruster.setInputPwm(input);
+    thruster.calc_model();
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 0.0);
+    input.value[0] = 1950;
+    thruster.setInputPwm(input);
+    thruster.calc_model();
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 1.0);
+    input.value[0] = 1550;
+    thruster.setInputPwm(input);
+    thruster.calc_model();
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 0.5);
+    input.value[0] = 1000;
+    thruster.setInputPwm(input);
+    thruster.calc_model();
+    EXPECT_DOUBLE_EQ(thruster.inputMotor, 0.0);
+
+    // The defaults keep the old 1000 to 2000 us mapping.
+    auto default_thruster = ThrusterSimple("pwm_default_thruster");
+    auto default_pm = ParameterManager("pm");
+    default_pm.set("chanMotor", 0, false);
+    default_thruster.initialize(default_pm);
+    default_thruster.update_local_state(states, environment);
+    input.value[0] = 1500;
+    default_thruster.setInputPwm(input);
+    default_thruster.calc_model();
+    EXPECT_DOUBLE_EQ(default_thruster.inputMotor, 0.5);
+}
+
+TEST(TestPropulsion, TestThrusterPwmEndpointsMustBeOrdered)
+{
+    auto thruster = ThrusterSimple("pwm_bad_thruster");
+    auto pm = ParameterManager("pm");
+    pm.set("pwm_min", 1500.0, false);
+    pm.set("pwm_max", 1500.0, false);
+    EXPECT_THROW(thruster.initialize(pm), std::runtime_error);
 }
 
 TEST(TestPropulsion, TestOmegaControlledEngine)

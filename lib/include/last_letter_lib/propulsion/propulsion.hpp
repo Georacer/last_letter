@@ -45,6 +45,8 @@ public:
     double normalWind;  // scalar wind normal to propeller disc
     double thrustMax, thrustMin;
     double torqueMax, torqueMin;
+    double pwm_min{1000}, pwm_max{2000}; // PWM in us at zero and at full command
+    double slew_max{0.0};                // Command slew limit in 1/s, 0 disables it
     Vector3d relativeWind;
     // stateType u holds the system input.
     // stateType x holds the system state.
@@ -58,8 +60,9 @@ public:
     virtual void update_parameters() override;
 
     // Store the throttle directly, bypassing the channel lookup. Both setters
-    // below funnel through this.
-    void set_throttle(double throttle) { inputMotor = math_utils::constrain(throttle, -1.0, 1.0); }
+    // below funnel through this. Only calc_model_impl() writes inputMotor, once
+    // per step, so a new command takes effect at the next step.
+    void set_throttle(double throttle) { input_commanded_ = math_utils::constrain(throttle, -1.0, 1.0); }
     void setInput(const Input &input);                                                              // store control input
     void setInputPwm(const InputPwm_t &input);                                                      // store PWM control input
     virtual stateType dynamics(const stateType x, const stateType u, const double t) override;
@@ -74,6 +77,9 @@ public:
 protected:
     void register_log_channels() override; // adds omega/theta/input to base wrench_sum
     bool initialized{false};
+
+private:
+    double input_commanded_{0.0}; // Command before the slew limit, in -1 to 1
 };
 
 class NoEngine : public Thruster

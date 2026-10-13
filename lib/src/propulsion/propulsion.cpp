@@ -2,6 +2,7 @@
 #include "last_letter_lib/prog_utils.hpp"
 #include "last_letter_lib/math_utils.hpp"
 #include "last_letter_lib/uav_utils.hpp"
+#include <limits>
 
 #include "last_letter_lib/logging.hpp"
 #include "logging/log_types.hpp"
@@ -40,6 +41,9 @@ void Thruster::initialize_parameters()
     set_param<double>("thrustMin", 0, false);
     set_param<double>("torqueMax", 1, false);
     set_param<double>("torqueMin", 0, false);
+    set_param<double>("pwm_min", 1000, false);
+    set_param<double>("pwm_max", 2000, false);
+    set_param<double>("slew_max", 0.0, false);
 
     set_param<vector<double>>("sys_x_0", x_0, false);
     set_param<vector<double>>("sys_u_0", u_0 , false);
@@ -55,6 +59,13 @@ void Thruster::update_parameters()
     thrustMin = get_param<double>("thrustMin");
     torqueMax = get_param<double>("torqueMax");
     torqueMin = get_param<double>("torqueMin");
+    pwm_min = get_param<double>("pwm_min");
+    pwm_max = get_param<double>("pwm_max");
+    slew_max = get_param<double>("slew_max");
+    if (!(pwm_max > pwm_min))
+    {
+        throw runtime_error("propulsion.cpp: pwm_max must be above pwm_min");
+    }
 
     x_0 = get_param<vector<double>>("sys_x_0");
     u_0 = get_param<vector<double>>("sys_u_0");
@@ -77,7 +88,8 @@ void Thruster::setInputPwm(const InputPwm_t &p_input)
 {
     if (chanMotor > -1)
     {
-        set_throttle(PwmToHalfRange(p_input.value[chanMotor]));
+        const double pwm = p_input.value[chanMotor];
+        set_throttle(math_utils::constrain((pwm - pwm_min) / (pwm_max - pwm_min), 0.0, 1.0));
     }
 }
 
@@ -103,6 +115,12 @@ void Thruster::calc_model_impl()
     {
         throw runtime_error("propulsion.cpp: airspeed is not finite");
     }
+    // This is the only write of inputMotor. The slew limit is per step, so it
+    // lives here and not in set_throttle(). Without a limit the command passes.
+    const double step_max = slew_max > 0.0 ? slew_max * dt : std::numeric_limits<double>::infinity();
+    const double input_low = inputMotor - step_max;
+    const double input_high = inputMotor + step_max;
+    inputMotor = math_utils::constrain(input_commanded_, input_low, input_high);
     pre_propagation(local_state, local_environment);
     step_dynamics(u, dt);
     post_propagation();
@@ -118,6 +136,7 @@ void Thruster::register_log_channels()
     channel.register_value("omega", &omega);            // motor speed [rad/s]
     channel.register_value("theta", &theta);            // propeller angle [rad]
     channel.register_value("input_motor", &inputMotor); // control input [0-1]
+    channel.register_value("input_commanded", &input_commanded_); // command before the slew limit
 }
 
 void Thruster::rotateProp() // Update propeller angle
