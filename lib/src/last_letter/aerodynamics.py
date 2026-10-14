@@ -19,6 +19,7 @@ from .cpp_last_letter.cpp_aerodynamics import Aerodynamics
 from .cpp_last_letter.cpp_aerodynamics import NoAerodynamics
 from .cpp_last_letter.cpp_aerodynamics import StdLinearAero
 from .cpp_last_letter.cpp_aerodynamics import SimpleDrag
+from .cpp_last_letter.cpp_aerodynamics import BluffBody
 from .cpp_last_letter.cpp_aerodynamics import PolynomialAero
 
 import numpy as np

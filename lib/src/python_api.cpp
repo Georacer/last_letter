@@ -336,6 +336,8 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def("drag_coeff", &StdLinearAero::dragCoeff);
     py::class_<SimpleDrag, StdLinearAero>(m_aerodynamics, "SimpleDrag")
         .def(py::init<string>(), py::arg("name"));
+    py::class_<BluffBody, Aerodynamics>(m_aerodynamics, "BluffBody")
+        .def(py::init<string>(), py::arg("name"));
     py::class_<PolynomialAero, StdLinearAero>(m_aerodynamics, "PolynomialAero")
         .def(py::init<string>(), py::arg("name"));
 

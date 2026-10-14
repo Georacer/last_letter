@@ -877,3 +877,14 @@ class TestStdLinearAero:
         airfoil.calc_model()
         moments = airfoil.wrench_sum.wrench_aero.torque
         assert moments[1] > 0  # Pitch moment is positive
+
+
+def test_bluff_body_drag(build_environment_data):
+    """Test that the bluff body drag opposes the velocity on its axis."""
+    body = aerodynamics.BluffBody("bluff_body")
+    body.initialize("area_cd: [0.1743, 0.1743, 0.1743]")
+    state = UavState(Vector3(), UnitQuaternion(), Vector3(1, 0, 0), Vector3())
+    body.update_local_state(state, build_environment_data)
+    body.calc_model()
+    expected = -0.5 * build_environment_data.rho * 0.1743
+    assert body.wrench_sum.wrench_aero.force[0] == pytest.approx(expected)
