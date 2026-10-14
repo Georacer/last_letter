@@ -116,6 +116,15 @@ sim_vehicle.py -v ArduPlane --model last_letter:ardupilot_plane
 sim_vehicle.py -v ArduCopter --model last_letter:ardupilot_copter
 ```
 
+`ardupilot_copter_linear` flies the same quad as four linear models, one per axis, that SystemID
+flights of the SITL quad identified. It has no wings and no motors. The models sit in the optional
+`body.yaml` of the recipe, which holds the components that are neither a wing nor a motor. The
+recipe comments name the fits, the inverse mixer settings and the limits of the model. Fly it with
+
+```bash
+sim_vehicle.py -v ArduCopter --model last_letter:ardupilot_copter_linear
+```
+
 ## Developers
 
 If you wish to modify and hopefully contribute to last_letter, please read
