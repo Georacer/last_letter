@@ -111,7 +111,7 @@ namespace programming_utils {
 // }
 
 // Filter a YAML::Node file to keep only a sub-parameter set
-// Example: for start string /world, keep /world/timeControls but not /environment/rho
+// Example: for start string /world, keep /world/simRate but not /environment/rho
 // YAML::Node filterConfig(YAML::Node config, std::string prefix);
 
 // YAML::Node randomizeConfig(YAML::Node config, vector<string> stringVec, double std_dev);

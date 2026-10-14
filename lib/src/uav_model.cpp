@@ -86,14 +86,7 @@ void UavModel::initialize_parameters()
 
     // Hold these parameters for others to use.
     set_param("world/simRate", 400, false);
-    // Simulation time controls
-    //  0 : default real-time simulation clock
-    //  1 : controls-triggered simulation clock
-    //  2 : free-spinning simulation clock
-    // 3 : manual step trigger by pause button
-    set_param("world/timeControls", 0, false);
     set_param("world/integratorType", 0, false);
-    set_param("world/kinematics_engine", 1, false);
 
     vector<double> position_init = {0, 0, -0.2};
     set_param("init/position", position_init, false); // Initial NED coordinates.
