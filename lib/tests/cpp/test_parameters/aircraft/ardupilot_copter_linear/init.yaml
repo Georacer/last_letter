@@ -1,0 +1,17 @@
+#Parameters for the linear model of the ArduPilot SITL default quad frame
+#All units are in S.I. unless otherwise stated
+
+#Initial State
+# ArduPilot SITL defaults its home to CMAC at 584 m and Copter compensates thrust
+# for the barometric air density, so the model must sit at the same altitude or
+# the hover throttle differs.
+coordinates: [-35.363261, 149.165230, 584.0] #latitude, longitude, altitude coordinates. Altitude for now should be ground elevation
+position: [0.0, 0.0, -0.17] #NED frame
+orientation: [0.0, 0.0, 0.0, 1.0] #NED frame Northwards, quaternion written as [x, y, z, w]
+velLin: [0.0, 0.0, 0.0] #body frame
+velAng: [0.000, 0.000, 0.000] #body frame
+
+ctrlInput: [0.0, 0.0, 0.0, 0.0] # Starting control input, normalized range
+
+chanReset: -1
+chanPause: -1

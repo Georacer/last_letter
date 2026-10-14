@@ -1,0 +1,8 @@
+# Randomize the UAV parameters
+
+std_dev: 0.0
+aerodynamics: []
+ground: []
+inertial: []
+propulsion: []
+init: []

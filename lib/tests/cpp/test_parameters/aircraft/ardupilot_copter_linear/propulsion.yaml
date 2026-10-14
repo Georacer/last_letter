@@ -1,0 +1,3 @@
+# The linear model in body.yaml lumps the propulsion of the airframe.
+
+nMotors: 0

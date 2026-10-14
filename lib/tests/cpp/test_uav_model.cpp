@@ -205,3 +205,26 @@ TEST(TestUavModel, TestCopterTorqueSigns)
     std::cout << "copter torques: roll " << torque_x << ", pitch " << torque_y << ", yaw " << torque_z
               << " N m" << std::endl;
 }
+
+// The linear copter recipe loads and steps. At the hover throttle it stays put.
+TEST(TestUavModel, TestLinearCopterRecipe)
+{
+    auto config = load_config_aircraft("ardupilot_copter_linear");
+    last_letter_lib::UavModel aircraft("ardupilot_copter_linear");
+    aircraft.initialize(config);
+    ASSERT_EQ(aircraft.dynamics.nBodies, 1);
+    ASSERT_TRUE(aircraft.dynamics.thrusters.empty());
+
+    const double z_init = aircraft.state.pose.position.z();
+    aircraft.setInput(Input({0.0, 0.0, 0.0, 0.37}));
+    for (int i = 0; i < 100; i++)
+    {
+        aircraft.step();
+    }
+
+    EXPECT_TRUE(aircraft.state.pose.position.allFinite());
+    EXPECT_TRUE(aircraft.state.velocity.linear.allFinite());
+    EXPECT_TRUE(aircraft.state.velocity.angular.allFinite());
+    EXPECT_NEAR(aircraft.state.pose.position.z(), z_init, 0.05);
+    EXPECT_LT(aircraft.state.velocity.angular.norm(), 1e-6);
+}

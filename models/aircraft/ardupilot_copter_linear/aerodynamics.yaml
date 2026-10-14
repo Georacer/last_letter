@@ -1,0 +1,3 @@
+# The linear model in body.yaml lumps the aerodynamics of the airframe.
+
+nWings: 0
