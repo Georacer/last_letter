@@ -76,7 +76,9 @@ public:
     virtual void pre_propagation(SimState_t states, Environment_t environment) = 0; // Build the input u of the dynamic system.
     virtual void post_propagation() override = 0; // Distribute the propagated state into other local variables.
     void rotateProp();                                                                              // Update the propeller angle
-    virtual void calc_wrench(SimState_t states, Environment_t environment) = 0;     // Calculate Forces
+    // Each override assigns every component of wrenchProp and never accumulates.
+    // After it, Thruster adds the momentum drag through apply_momentum_drag().
+    virtual void calc_wrench(SimState_t states, Environment_t environment) = 0;
     double torque_sign() {return rotationDir;}
 
 protected:
@@ -100,7 +102,11 @@ public:
 
     void pre_propagation(SimState_t, Environment_t) override {};
     void post_propagation() override {};
-	void calc_wrench(SimState_t, Environment_t) override {};
+	void calc_wrench(SimState_t, Environment_t) override
+	{
+		wrench_sum.wrenchProp.force = Vector3d::Zero();
+		wrench_sum.wrenchProp.torque = Vector3d::Zero();
+	}
 };
 
 class ThrusterSimple : public Thruster

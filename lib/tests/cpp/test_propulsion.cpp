@@ -292,7 +292,7 @@ TEST(TestPropulsion, TestMomentumDragDoesNotAccumulate)
     states.velocity.linear = Vector3d(0, 2, 0);
     Environment_t environment;
     thruster.set_throttle(1.0);
-   thruster.update_local_state(states, environment);
+    thruster.update_local_state(states, environment);
 
     thruster.calc_model();
     const double first_force_y = thruster.wrench_sum.wrenchProp.force.y();
