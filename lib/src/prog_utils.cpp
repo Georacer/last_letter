@@ -286,7 +286,7 @@ namespace last_letter_lib
         template bool ParameterManager::set<std::vector<double>>(const string, const std::vector<double>, bool);
 
         // Filter a YAML::Node file to keep only a sub-parameter set
-        // Example: for start string /world, keep /world/timeControls but not /environment/rho
+        // Example: for start string /world, keep /world/simRate but not /environment/rho
         // YAML::Node filterConfig(YAML::Node config, std::string prefix)
         // {
         //     YAML::Node filteredNode;
@@ -390,7 +390,6 @@ namespace last_letter_lib
             string prop_filename = "propulsion.yaml";
             string aero_filename = "aerodynamics.yaml";
             string ground_filename = "ground.yaml";
-            string inertial_filename = "inertial.yaml";
             string init_filename = "init.yaml";
             string world_filename = "world.yaml";
             string environment_filename = "environment.yaml";

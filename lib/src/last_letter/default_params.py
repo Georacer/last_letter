@@ -19,10 +19,6 @@ default_environment_params = {
     },
 }
 
-default_simulation_params = {
-    "kinematics_engine": 0,  # 0 for internal kinematics, 1 for external
-}
-
 default_aerodynamics_params = {
     "name": "airfoil_1_link",
     "aerodynamicsType": 3,
@@ -105,15 +101,6 @@ default_ground_reaction_params = {
     "groundReactionType": 0,
 }
 
-# TODO deprecate this, it's not used
-default_inertial_params = {
-    "m": 2,
-    "j_x": 0.8,
-    "j_y": 1.1,
-    "j_z": 1.76,
-    "j_xz": 0.1,
-}
-
 # TODO deprecate this
 default_randomizer_params = {
     "std_dev": 0,
@@ -128,7 +115,6 @@ default_randomizer_params = {
 default_world_params = {
     "simRate": 400,
     "deltaT": 0.0025,
-    "timeControls": 0,
     "integratorType": 0,
 }
 

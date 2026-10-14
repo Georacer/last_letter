@@ -21,7 +21,6 @@ TEST(ProgUtilsTest, TestYaml1)
     EXPECT_EQ(config["world"]["simRate"].as<int>(), 500);
 
     // Test basic parameter access
-    std::string timeControls = config["world"]["timeControls"].as<std::string>();
     std::string integratorTypeStr =
         config["world"]["integratorType"].as<std::string>();
     EXPECT_EQ(integratorTypeStr, "0");

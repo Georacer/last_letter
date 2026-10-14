@@ -408,10 +408,6 @@ class Aircraft:
         full_filename = os.path.join(model_folder, "world.yaml")
         self.dump_yaml(default_params.default_world_params, full_filename)
 
-    def create_simulation_params(self, model_folder):
-        full_filename = os.path.join(model_folder, "simulation.yaml")
-        self.dump_yaml(default_params.default_simulation_params, full_filename)
-
     def create_aerodynamics_params(self, model_folder):
         full_filename = os.path.join(model_folder, "aerodynamics.yaml")
         params = dict()
@@ -448,21 +444,15 @@ class Aircraft:
         full_filename = os.path.join(model_folder, "randomizer.yaml")
         self.dump_yaml(default_params.default_randomizer_params, full_filename)
 
-    def create_inertial_params(self, model_folder):
-        full_filename = os.path.join(model_folder, "inertial.yaml")
-        self.dump_yaml(default_params.default_inertial_params, full_filename)
-
     def create_last_letter_model(self):
         configs_directory = os.path.expanduser(MODELS_FOLDER)
         model_directory = self.create_model_folder(configs_directory)
         self.create_world_params(configs_directory)
-        self.create_simulation_params(configs_directory)
         self.create_environment_params(configs_directory)
         self.create_aerodynamics_params(model_directory)
         self.create_propulsion_params(model_directory)
         self.create_initialization_params(model_directory)
         self.create_ground_reaction_params(model_directory)
-        self.create_inertial_params(model_directory)
         self.create_randomizer_params(model_directory)
 
 

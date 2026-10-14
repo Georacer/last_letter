@@ -1,7 +1,6 @@
 lastLogin: 5
 world:
   simRate: 500
-  timeControls: 1
   integratorType: 0
 anIntSequence: [0, 1, 2]
 scalarParameter: 1.0
