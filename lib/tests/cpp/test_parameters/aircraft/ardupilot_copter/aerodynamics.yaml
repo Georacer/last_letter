@@ -1,0 +1,17 @@
+# Body aerodynamics of the ArduPilot SITL default quad frame
+# Aerodynamics type 4 is BluffBody: quadratic drag and rate damping per body axis
+
+nWings: 1
+
+airfoil1:
+  name: body_frd
+  aerodynamicsType: 4
+  inertial:
+    mass: 3.0
+    tensor:
+      j_xx: 0.02297
+      j_yy: 0.02297
+      j_zz: 0.04594
+      j_xz: 0.0
+  area_cd: [0.1743, 0.1743, 0.1743]
+  rate_damping: [0.001337, 0.001337, 0.002674]

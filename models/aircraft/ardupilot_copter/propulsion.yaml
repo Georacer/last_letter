@@ -1,0 +1,114 @@
+# Propulsion of the ArduPilot SITL default quad frame, a plus frame
+# Motor types: 0 No motor, 1 Beard Engine, 2 Piston engine, 3 Electric Engine
+# The thruster x axis points along the thrust. The quaternion pitches it up by 90 degrees.
+# rotationDir is the ArduPilot yaw_factor: +1 for CCW, -1 for CW.
+
+nMotors: 4
+
+motor1:
+  name: thruster_0
+  chanMotor: 0
+  rotationDir: 1.0
+  pose:
+    position: { x: 0.0, y: 0.35, z: 0.0 }
+    orientation: { w: 0.7071068, x: 0.0, y: 0.7071068, z: 0.0 }
+  inertial:
+    mass: 0.0
+  motorType: 1
+  s_prop: 0.02193
+  c_prop: 1.0
+  k_motor: 38.56
+  expo: 0.65
+  # MOT_PWM_MIN + spin * (MOT_PWM_MAX - MOT_PWM_MIN), spin_min 0.15, spin_max 0.95
+  pwm_min: 1150
+  pwm_max: 1950
+  slew_max: 150.0
+  k_omega: 1000.0
+  k_t_p: 2.34e-7
+  momentum_drag:
+    type: 2
+    coeff: 0.2
+    disc_area: 0.09625
+    axial: true
+    lateral: true
+
+motor2:
+  name: thruster_1
+  chanMotor: 1
+  rotationDir: 1.0
+  pose:
+    position: { x: 0.0, y: -0.35, z: 0.0 }
+    orientation: { w: 0.7071068, x: 0.0, y: 0.7071068, z: 0.0 }
+  inertial:
+    mass: 0.0
+  motorType: 1
+  s_prop: 0.02193
+  c_prop: 1.0
+  k_motor: 38.56
+  expo: 0.65
+  # MOT_PWM_MIN + spin * (MOT_PWM_MAX - MOT_PWM_MIN), spin_min 0.15, spin_max 0.95
+  pwm_min: 1150
+  pwm_max: 1950
+  slew_max: 150.0
+  k_omega: 1000.0
+  k_t_p: 2.34e-7
+  momentum_drag:
+    type: 2
+    coeff: 0.2
+    disc_area: 0.09625
+    axial: true
+    lateral: true
+
+motor3:
+  name: thruster_2
+  chanMotor: 2
+  rotationDir: -1.0
+  pose:
+    position: { x: 0.35, y: 0.0, z: 0.0 }
+    orientation: { w: 0.7071068, x: 0.0, y: 0.7071068, z: 0.0 }
+  inertial:
+    mass: 0.0
+  motorType: 1
+  s_prop: 0.02193
+  c_prop: 1.0
+  k_motor: 38.56
+  expo: 0.65
+  # MOT_PWM_MIN + spin * (MOT_PWM_MAX - MOT_PWM_MIN), spin_min 0.15, spin_max 0.95
+  pwm_min: 1150
+  pwm_max: 1950
+  slew_max: 150.0
+  k_omega: 1000.0
+  k_t_p: 2.34e-7
+  momentum_drag:
+    type: 2
+    coeff: 0.2
+    disc_area: 0.09625
+    axial: true
+    lateral: true
+
+motor4:
+  name: thruster_3
+  chanMotor: 3
+  rotationDir: -1.0
+  pose:
+    position: { x: -0.35, y: 0.0, z: 0.0 }
+    orientation: { w: 0.7071068, x: 0.0, y: 0.7071068, z: 0.0 }
+  inertial:
+    mass: 0.0
+  motorType: 1
+  s_prop: 0.02193
+  c_prop: 1.0
+  k_motor: 38.56
+  expo: 0.65
+  # MOT_PWM_MIN + spin * (MOT_PWM_MAX - MOT_PWM_MIN), spin_min 0.15, spin_max 0.95
+  pwm_min: 1150
+  pwm_max: 1950
+  slew_max: 150.0
+  k_omega: 1000.0
+  k_t_p: 2.34e-7
+  momentum_drag:
+    type: 2
+    coeff: 0.2
+    disc_area: 0.09625
+    axial: true
+    lateral: true

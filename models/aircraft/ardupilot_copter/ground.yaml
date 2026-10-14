@@ -1,0 +1,15 @@
+#Contact points array
+#Ground reaction model types: 0 no ground reactions, 1 PanosGroundReaction, 2 PointFriction
+#Material types: 0 foam, 1 metal, 2 rubber wheel, 3 composites
+#One leg under each motor arm, in the motor order
+groundReactionType: 1
+name: "contact_points"
+contactPtsNo: 4
+contactPoint1: [0.0, 0.35, 0.15, 0.0, 500.0, 25.0]
+contactPoint2: [0.0, -0.35, 0.15, 0.0, 500.0, 25.0]
+contactPoint3: [0.35, 0.0, 0.15, 0.0, 500.0, 25.0]
+contactPoint4: [-0.35, 0.0, 0.15, 0.0, 500.0, 25.0]
+
+chanSteer: -1
+steerAngle_max: 0.0
+chanBrake: -1
