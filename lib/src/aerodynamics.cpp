@@ -363,6 +363,57 @@ double SimpleDrag::_dragCoeff(double alpha, double /*beta*/)
     return c_drag_p + c_drag_a * fabs(alpha);
 }
 
+/////////////////////////////
+// Define BluffBody class
+/////////////////////////////
+
+void BluffBody::initialize_parameters()
+{
+    Aerodynamics::initialize_parameters();
+
+    set_param<vector<double>>("area_cd", {0.0, 0.0, 0.0}, false);
+    set_param<vector<double>>("rate_damping", {0.0, 0.0, 0.0}, false);
+}
+
+void BluffBody::update_parameters()
+{
+    Aerodynamics::update_parameters();
+
+    area_cd = get_param<vector<double>>("area_cd");
+    rate_damping = get_param<vector<double>>("rate_damping");
+    if (area_cd.size() != 3)
+    {
+        throw runtime_error("aerodynamics.cpp: BluffBody area_cd must have 3 elements");
+    }
+    if (rate_damping.size() != 3)
+    {
+        throw runtime_error("aerodynamics.cpp: BluffBody rate_damping must have 3 elements");
+    }
+}
+
+void BluffBody::calc_model_impl()
+{
+    // Gravity and airdata first.
+    Aerodynamics::calc_model_impl();
+
+    const double rho = local_environment.density;
+    const Vector3d v = local_state.velocity.linear - local_environment.wind;
+    const Vector3d w = local_state.velocity.angular;
+    Vector3d force;
+    Vector3d torque;
+    for (int i = 0; i < 3; i++)
+    {
+        force(i) = -0.5 * rho * area_cd[i] * std::fabs(v(i)) * v(i);
+        torque(i) = -rate_damping[i] * w(i);
+    }
+    wrench_sum.wrenchAero.force = force;
+    wrench_sum.wrenchAero.torque = torque;
+    if (!wrench_sum.wrenchAero.force.allFinite() || !wrench_sum.wrenchAero.torque.allFinite())
+    {
+        throw runtime_error("aerodynamics.cpp: BluffBody wrench is not finite");
+    }
+}
+
 // Build aerodynamics model
 std::unique_ptr<Aerodynamics> buildAerodynamics(ParameterManager config)
 {
@@ -388,6 +439,10 @@ std::unique_ptr<Aerodynamics> buildAerodynamics(ParameterManager config)
     case 3:
         std::cout << "selecting simplified drag aerodynamics" << std::endl;
         aerodynamics = std::make_unique<SimpleDrag>(aerodynamics_name);
+        break;
+    case 4:
+        std::cout << "selecting bluff body aerodynamics" << std::endl;
+        aerodynamics = std::make_unique<BluffBody>(aerodynamics_name);
         break;
     default:
         stringstream ss;

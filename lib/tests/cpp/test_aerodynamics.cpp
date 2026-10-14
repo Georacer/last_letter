@@ -55,3 +55,52 @@ TEST(TestAerodynamics, TestAerodynamics1)
     // cout << "Aerodynamic torque:\n"
     //      << airfoil1->wrenchAero.torque << endl;
 }
+
+// Build an BluffBody with the ArduPilot quad values and step it once in
+// the given body velocity, with no wind.
+static void step_bluff_body(BluffBody &body, const Vector3d &linear, const Vector3d &angular)
+{
+    auto pm = ParameterManager("pm");
+    pm.set<vector<double>>("area_cd", {0.1743, 0.1743, 0.1743}, false);
+    pm.set<vector<double>>("rate_damping", {0.001337, 0.001337, 0.002674}, false);
+    body.initialize(pm);
+
+    SimState_t state;
+    state.velocity.linear = linear;
+    state.velocity.angular = angular;
+    Environment_t environment;
+    environment.density = 1.225;
+    body.update_local_state(state, environment);
+    body.calc_model();
+}
+
+TEST(TestAerodynamics, TestBluffBodyDrag)
+{
+    auto body = BluffBody("bluff_body");
+    step_bluff_body(body, Vector3d(1, 0, 0), Vector3d::Zero());
+    const Vector3d force = body.wrench_sum.wrenchAero.force;
+    EXPECT_NEAR(force.x(), -0.1068, 0.01 * 0.1068);
+    EXPECT_DOUBLE_EQ(force.y(), 0.0);
+    EXPECT_DOUBLE_EQ(force.z(), 0.0);
+
+    step_bluff_body(body, Vector3d(0, -2, 0), Vector3d::Zero());
+    EXPECT_NEAR(body.wrench_sum.wrenchAero.force.y(), 0.427, 0.01 * 0.427);
+}
+
+TEST(TestAerodynamics, TestBluffBodyRateDamping)
+{
+    auto body = BluffBody("bluff_body");
+    step_bluff_body(body, Vector3d::Zero(), Vector3d(0, 0, 1));
+    const Vector3d torque = body.wrench_sum.wrenchAero.torque;
+    EXPECT_DOUBLE_EQ(torque.x(), 0.0);
+    EXPECT_DOUBLE_EQ(torque.y(), 0.0);
+    EXPECT_DOUBLE_EQ(torque.z(), -0.002674);
+}
+
+TEST(TestAerodynamics, TestBluffBodyAtRest)
+{
+    auto body = BluffBody("bluff_body");
+    step_bluff_body(body, Vector3d::Zero(), Vector3d::Zero());
+    EXPECT_TRUE(body.wrench_sum.wrenchAero.force.isZero());
+    EXPECT_TRUE(body.wrench_sum.wrenchAero.torque.isZero());
+}

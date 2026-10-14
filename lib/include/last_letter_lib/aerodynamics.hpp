@@ -119,6 +119,25 @@ private:
     virtual double _dragCoeff(double, double) override;
 };
 
+////////////////////////////////////////////////////////////////////
+// A body with the same drag law on each axis, as in ArduPilot SITL //
+////////////////////////////////////////////////////////////////////
+// Quadratic drag and linear rate damping, each separate per body axis. It
+// stands in for the body drag and the rate damping of the ArduPilot multicopter
+// frame model.
+class BluffBody : public Aerodynamics
+{
+public:
+    BluffBody(string name) : Aerodynamics(name) {};
+    ~BluffBody() {};
+    void initialize_parameters() override;
+    void update_parameters() override;
+    void calc_model_impl() override;
+
+    std::vector<double> area_cd;      // Drag area per axis, m2
+    std::vector<double> rate_damping; // Rate damping per axis, N m s per rad
+};
+
 ////////////////////////////////////////////////////////
 // Extension for fine specification of the drag polar //
 ////////////////////////////////////////////////////////
