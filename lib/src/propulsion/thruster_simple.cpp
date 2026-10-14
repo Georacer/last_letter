@@ -16,8 +16,10 @@ ThrusterSimple::ThrusterSimple(string name_p)
 
 void ThrusterSimple::calc_wrench(SimState_t /*states*/, Environment_t /*environment*/)
 {
-    wrench_sum.wrenchProp.force.x() = (thrustMax - thrustMin)*inputMotor + thrustMin;
-    wrench_sum.wrenchProp.torque.x() = -torque_sign()*((torqueMax - torqueMin)*inputMotor + torqueMin);
+    const double thrust = (thrustMax - thrustMin)*inputMotor + thrustMin;
+    const double torque = -torque_sign()*((torqueMax - torqueMin)*inputMotor + torqueMin);
+    wrench_sum.wrenchProp.force = Vector3d(thrust, 0, 0);
+    wrench_sum.wrenchProp.torque = Vector3d(torque, 0, 0);
 }
 
 } // namespace propulsion
