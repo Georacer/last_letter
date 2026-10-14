@@ -71,6 +71,7 @@ add_library(last_letter_lib SHARED
   src/gravity.cpp
   src/aerodynamics.cpp
   src/body/body.cpp
+  src/body/linear_copter.cpp
   src/propulsion/propulsion.cpp
   src/propulsion/no_engine.cpp
   src/propulsion/thruster_simple.cpp

@@ -14,6 +14,7 @@
 #include "last_letter_lib/systems.hpp"
 #include "last_letter_lib/aerodynamics.hpp"
 #include "last_letter_lib/body/body.hpp"
+#include "last_letter_lib/body/linear_copter.hpp"
 #include "last_letter_lib/propulsion/propulsion.hpp"
 #include "last_letter_lib/uav_model.hpp"
 #include "last_letter_lib/logging.hpp"
@@ -347,6 +348,14 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def(py::init<string>(), py::arg("name"))
         .def("set_input", &last_letter_lib::body::Body::setInput)
         .def("calc_model", &last_letter_lib::body::Body::calc_model);
+    py::class_<last_letter_lib::body::LinearCopter, last_letter_lib::body::Body>(m_body, "LinearCopter")
+        .def(py::init<string>(), py::arg("name"))
+        .def("set_input", &last_letter_lib::body::LinearCopter::setInput)
+        .def("calc_model", &last_letter_lib::body::LinearCopter::calc_model)
+        .def_readonly("d_rol", &last_letter_lib::body::LinearCopter::d_rol)
+        .def_readonly("d_pit", &last_letter_lib::body::LinearCopter::d_pit)
+        .def_readonly("d_yaw", &last_letter_lib::body::LinearCopter::d_yaw)
+        .def_readonly("d_thr", &last_letter_lib::body::LinearCopter::d_thr);
 
     auto m_propulsion = m.def_submodule("cpp_propulsion", "last_letter_lib propulsion submodule");
     py::class_<Propeller, Parametrized>(m_propulsion, "Propeller")
