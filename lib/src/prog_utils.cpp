@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <iostream>
 #include <unistd.h>
 #include <sys/types.h>
@@ -389,6 +390,7 @@ namespace last_letter_lib
 
             string prop_filename = "propulsion.yaml";
             string aero_filename = "aerodynamics.yaml";
+            string body_filename = "body.yaml";
             string ground_filename = "ground.yaml";
             string init_filename = "init.yaml";
             string world_filename = "world.yaml";
@@ -399,6 +401,7 @@ namespace last_letter_lib
             string fullEnvironmentFilename = modelPath + environment_filename;
             string fullPropFilename = modelPath + aircraftDir + modelName + "/" + prop_filename;
             string fullAeroFilename = modelPath + aircraftDir + modelName + "/" + aero_filename;
+            string fullBodyFilename = modelPath + aircraftDir + modelName + "/" + body_filename;
             string fullGroundFilename = modelPath + aircraftDir + modelName + "/" + ground_filename;
             string fullInitFilename = modelPath + aircraftDir + modelName + "/" + init_filename;
             string fullRandomizerFilename = modelPath + aircraftDir + modelName + "/" + randomizer_filename;
@@ -413,6 +416,11 @@ namespace last_letter_lib
             dynamics_config.register_child_mngr(prop);
             ParameterManager aero = ParameterManager::from_yaml_file("aero", fullAeroFilename);
             dynamics_config.register_child_mngr(aero);
+            // body.yaml is optional. Without it, register an empty body section.
+            ParameterManager body = std::filesystem::exists(fullBodyFilename)
+                                        ? ParameterManager::from_yaml_file("body", fullBodyFilename)
+                                        : ParameterManager::from_yaml_string("body", "nBodies: 0");
+            dynamics_config.register_child_mngr(body);
             ParameterManager ground = ParameterManager::from_yaml_file("ground", fullGroundFilename);
             dynamics_config.register_child_mngr(ground);
             configs.register_child_mngr(dynamics_config);
