@@ -107,6 +107,15 @@ to copy the models out to `$HOME/last_letter_models`. The copy overlays the
 destination instead of replacing it, so aircraft of your own kept there are left
 alone.
 
+Two recipes are made to fly with the ArduPilot bridge. `ardupilot_plane` is the
+default aircraft for ArduPlane, and `ardupilot_copter` is a copy of the default
+ArduCopter SITL quad frame and the default aircraft for ArduCopter. Fly them with
+
+```bash
+sim_vehicle.py -v ArduPlane --model last_letter:ardupilot_plane
+sim_vehicle.py -v ArduCopter --model last_letter:ardupilot_copter
+```
+
 ## Developers
 
 If you wish to modify and hopefully contribute to last_letter, please read
