@@ -1,0 +1,113 @@
+# A linear model of the ArduPilot SITL default quad, a plus frame.
+# Four linear models, one per axis, come from SystemID flights of the stock
+# SITL quad. The input is the ideal command into the ArduPilot mixer.
+# Body type 1 is LinearCopter.
+#
+# Known limits:
+# The model holds near hover only. It has no Coriolis term and no large angles.
+# At zero throttle the thrust is m (g + Zcoll u_hover), not zero. It is near
+# zero only when Zcoll is close to -g / u_hover, about -25.9 for the SITL quad.
+# A fit away from that value leaves a residual thrust on the ground. This is a
+# property of the linear law.
+
+nBodies: 1
+
+body1:
+  name: linear_copter
+  bodyType: 1
+  # Optional. Without it the mass is 3 kg and the tensor a 0.25 m disc.
+  # The values of m and J cancel. Only the gyroscopic term depends on them.
+  inertial:
+    mass: 3.0
+    tensor:
+      j_xx: 0.02297
+      j_yy: 0.02297
+      j_zz: 0.04594
+      j_xz: 0.0
+  chanRoll: 0
+  chanPitch: 1
+  chanYaw: 2
+  chanThrottle: 3
+  # The axis parameters come from the fits of the stock SITL quad on the
+  # mixer banks of the modelling project, 0.2 to 50 Hz chirps. The roll,
+  # pitch and yaw fits split the band. Llat, Mlon, Nped and Npedp come from
+  # the high piece. The other parameters come from the 0.2 to 5 Hz piece.
+  #
+  # Every wlg is 0, which means no lag state. The stock fit puts wlg at 220
+  # to 360 rad/s, but that lag is the ArduPilot loop delay, because the SITL
+  # motors have no lag. Through the bridge the same loop delay acts again,
+  # so a lag in the recipe counts it twice.
+
+  # The fit roll_mixer_abd92e39.
+  roll:
+    Yv: -0.2216
+    Ylat: -0.0971
+    Lv: 0.0
+    Lp: -2.324
+    Llat: 308.2
+    wlg: 0.0
+  # The fit pitch_mixer_934b1417.
+  pitch:
+    Xu: -0.2404
+    Xlon: 0.1233
+    Mu: 0.0003
+    Mq: -2.226
+    Mlon: 305.1
+    wlg: 0.0
+  # The fit yaw_mixer_4353da43.
+  yaw:
+    Nr: -1.963
+    Nped: 10.55
+    Npedp: 4.747
+    wlg: 0.0
+  # The fit thrust_mixer_3483ce46. This fit does not split the band.
+  vertical:
+    Zw: -0.2425
+    Zcoll: -26.54
+    wlg: 0.0
+    # u_hover is the ArduPilot MOT_THST_HOVER. That is the 10 s hover average
+    # of get_throttle(), which RATE.AOut logs. Read it from CTUN.ThH at the
+    # end of the SystemID flight, or from the saved parameter when
+    # MOT_HOVER_LEARN is 2. The stock and the linear vertical flights both
+    # learned 0.379.
+    u_hover: 0.379
+  # Optional. The defaults mirror the stock SITL quad. For another aircraft
+  # copy its MOT_PWM_MIN, MOT_PWM_MAX, MOT_SPIN_MIN, MOT_SPIN_MAX,
+  # MOT_THST_EXPO, MOT_BAT_VOLT_MIN, MOT_BAT_VOLT_MAX, SIM_BATT_VOLTAGE and
+  # its frame table from AP_MotorsMatrix.cpp.
+  mixer:
+    pwm_min: 1000
+    pwm_max: 2000
+    spin_min: 0.15
+    spin_max: 0.95
+    thst_expo: 0.65
+    # The mixer block mirrors the ArduPilot configuration of the simulated
+    # flight, not of the identification flight.
+    # BARO.Press in Pa at the SITL flight altitude. 101325 means no density
+    # compensation. 94105 is the SITL default home, CMAC, 35 m up.
+    baro_pressure: 94105.0
+    # Mirror the SITL parameters of the same name. Through the bridge the
+    # battery is constant, so these three give the exact ArduPilot gain.
+    batt_voltage: 12.6 # SIM_BATT_VOLTAGE
+    bat_volt_max: 12.8 # MOT_BAT_VOLT_MAX. 0 disables the battery compensation.
+    bat_volt_min: 9.6 # MOT_BAT_VOLT_MIN
+    # Up to 12 motors.
+    nMotors: 4
+    # ArduPilot plus frame, from the frame table in AP_MotorsMatrix.cpp.
+    # chanMotor is the SERVOn output, zero based.
+    motor1:
+      chanMotor: 0
+      angle_deg: 90.0
+      yaw_factor: 1.0
+    motor2:
+      chanMotor: 1
+      angle_deg: -90.0
+      yaw_factor: 1.0
+    motor3:
+      chanMotor: 2
+      angle_deg: 0.0
+      yaw_factor: -1.0
+    motor4:
+      chanMotor: 3
+      angle_deg: 180.0
+      yaw_factor: -1.0
