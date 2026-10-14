@@ -10,6 +10,7 @@
 
 #include <Eigen/Eigen>
 
+#include "last_letter_lib/body/ardupilot_mixer.hpp"
 #include "last_letter_lib/body/body.hpp"
 
 namespace last_letter_lib {
@@ -26,6 +27,7 @@ public:
     void set_dt(double dt_p) override;
     // Store the four ideal inputs. They take effect at the next step.
     void setInput(const Input &input) override;
+    // Recover the four ideal inputs from the motor PWM with the inverse mixer.
     void setInputPwm(const InputPwm_t &input) override;
 
     // Roll axis derivatives.
@@ -46,6 +48,9 @@ public:
     double u_rol{0}, u_pit{0}, u_yaw{0}, u_thr{0};
     // Actuator lag states.
     double d_rol{0}, d_pit{0}, d_yaw{0}, d_thr{0};
+
+    // The inverse ArduPilot mixer, under the child parameters mixer/.
+    ArduPilotMixerInverse mixer;
 
 protected:
     void calc_model_impl() override;

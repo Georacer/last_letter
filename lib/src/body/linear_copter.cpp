@@ -73,6 +73,9 @@ void LinearCopter::initialize_parameters()
     set_param("vertical/Zcoll", 0.0, false);
     set_param("vertical/wlg", 0.0, false);
     set_param("vertical/u_hover", 0.37, false);
+
+    mixer.initialize_parameters();
+    add_child(mixer);
 }
 
 void LinearCopter::update_parameters()
@@ -155,7 +158,12 @@ void LinearCopter::setInput(const Input &input)
 
 void LinearCopter::setInputPwm(const InputPwm_t &input)
 {
-    (void)input;
+    const std::vector<double> pwm(input.value.begin(), input.value.end());
+    const Eigen::Vector4d u = mixer.invert(pwm);
+    u_rol = u(0);
+    u_pit = u(1);
+    u_yaw = u(2);
+    u_thr = u(3);
 }
 
 void LinearCopter::calc_model_impl()
