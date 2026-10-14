@@ -70,6 +70,7 @@ add_library(last_letter_lib SHARED
   src/environment.cpp
   src/gravity.cpp
   src/aerodynamics.cpp
+  src/body/ardupilot_mixer.cpp
   src/body/body.cpp
   src/body/linear_copter.cpp
   src/propulsion/propulsion.cpp

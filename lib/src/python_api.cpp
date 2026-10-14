@@ -355,7 +355,18 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def_readonly("d_rol", &last_letter_lib::body::LinearCopter::d_rol)
         .def_readonly("d_pit", &last_letter_lib::body::LinearCopter::d_pit)
         .def_readonly("d_yaw", &last_letter_lib::body::LinearCopter::d_yaw)
-        .def_readonly("d_thr", &last_letter_lib::body::LinearCopter::d_thr);
+        .def_readonly("d_thr", &last_letter_lib::body::LinearCopter::d_thr)
+        .def("set_input_pwm", [](last_letter_lib::body::LinearCopter &self, const std::vector<uint16_t> &pwm)
+             {
+                 last_letter_lib::uav_utils::InputPwm_t input;
+                 std::copy_n(pwm.begin(), std::min(pwm.size(), input.value.size()), input.value.begin());
+                 self.setInputPwm(input);
+             },
+             py::arg("pwm"), "Store the inputs that the inverse mixer recovers from the PWM of each channel.")
+        .def_readonly("u_rol", &last_letter_lib::body::LinearCopter::u_rol)
+        .def_readonly("u_pit", &last_letter_lib::body::LinearCopter::u_pit)
+        .def_readonly("u_yaw", &last_letter_lib::body::LinearCopter::u_yaw)
+        .def_readonly("u_thr", &last_letter_lib::body::LinearCopter::u_thr);
 
     auto m_propulsion = m.def_submodule("cpp_propulsion", "last_letter_lib propulsion submodule");
     py::class_<Propeller, Parametrized>(m_propulsion, "Propeller")
