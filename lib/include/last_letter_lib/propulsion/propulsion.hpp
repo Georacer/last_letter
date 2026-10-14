@@ -128,6 +128,7 @@ public:
     ///////////
     //Variables
     double s_prop, c_prop, k_motor, k_t_p, k_omega;
+    double expo; // Thrust curve expo as in ArduPilot, 1 keeps the outflow linear in the input
     double rho;
 
     ///////////
@@ -143,6 +144,7 @@ public:
         set_param<double>("k_motor", 30, false);
         set_param<double>("k_t_p", 1e-6, false);
         set_param<double>("k_omega", 800, false);
+        set_param<double>("expo", 1.0, false);
     }
 
     void update_parameters() override;

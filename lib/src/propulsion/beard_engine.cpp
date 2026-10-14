@@ -31,6 +31,7 @@ void EngBeard::update_parameters()
 	k_motor = get_param<double>("k_motor");
 	k_t_p = get_param<double>("k_t_p");
 	k_omega = get_param<double>("k_omega");
+	expo = get_param<double>("expo");
 }
 
 void EngBeard::post_propagation()
@@ -43,7 +44,10 @@ void EngBeard::calc_wrench(SimState_t /* states */, Environment_t environment)
 {
 	rho = environment.density;
 	double x, y, z;
-	x = 1.0 / 2.0 * rho * s_prop * c_prop * (pow(inputMotor * k_motor, 2) - pow(normalWind, 2));
+	// With expo at 1 the outflow velocity is k_motor * |inputMotor|.
+	const double d = inputMotor;
+	const double v_out = k_motor * std::sqrt(std::max(0.0, (1 - expo) * d + expo * d * d));
+	x = 1.0 / 2.0 * rho * s_prop * c_prop * (pow(v_out, 2) - pow(normalWind, 2));
 	// cap x above zero
 	x = std::max(0.0, x);
 	y = 0;

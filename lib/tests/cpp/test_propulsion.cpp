@@ -329,6 +329,29 @@ TEST(TestPropulsion, TestElectricEngine2MomentumDrag)
     EXPECT_NEAR(force.y(), expected, 0.01 * std::fabs(expected));
 }
 
+// One motor of the ArduPilot default quad at hover: the linearised command 0.39
+// is the input 0.5508 after the expo, and four motors carry 3 kg.
+TEST(TestPropulsion, TestEngBeardExpoHover)
+{
+    auto thruster = EngBeard("beard_hover");
+    auto pm = ParameterManager("pm");
+    pm.set("chanMotor", 0, false);
+    pm.set("s_prop", 0.02193, false);
+    pm.set("c_prop", 1.0, false);
+    pm.set("k_motor", 38.56, false);
+    pm.set("expo", 0.65, false);
+    thruster.initialize(pm);
+
+    SimState_t states;
+    Environment_t environment;
+    environment.density = 1.1568;
+    thruster.set_throttle(0.5508);
+    thruster.update_local_state(states, environment);
+    thruster.calc_model();
+
+    EXPECT_NEAR(thruster.wrench_sum.wrenchProp.force.x(), 7.355, 0.01 * 7.355);
+}
+
 TEST(TestPropulsion, TestOmegaControlledEngine)
 {
     auto thruster = EngOmegaControl("omega_controlled_engine");
