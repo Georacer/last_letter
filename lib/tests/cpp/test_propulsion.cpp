@@ -199,6 +199,136 @@ TEST(TestPropulsion, TestThrusterPwmEndpointsMustBeOrdered)
     EXPECT_THROW(thruster.initialize(pm), std::runtime_error);
 }
 
+// Build a full-throttle ThrusterSimple with the given momentum drag settings
+// and step it once in the given relative wind, which enters as the body velocity.
+static ThrusterSimple step_thruster_with_momentum_drag(ParameterManager pm, const Vector3d &relative_wind,
+                                                       double density = 1.225)
+{
+    auto thruster = ThrusterSimple("momentum_drag_thruster");
+    pm.set("chanMotor", 0, false);
+    thruster.initialize(pm);
+
+    SimState_t states;
+    states.velocity.linear = relative_wind;
+    Environment_t environment;
+    environment.density = density;
+    thruster.set_throttle(1.0);
+    thruster.update_local_state(states, environment);
+    thruster.calc_model();
+    return thruster;
+}
+
+// The linear law gives -0.01 * 20 N * 2 m/s of lateral wind, which is -0.4 N on y.
+// The axial switch is off by default, so the thrust on x stays at 20 N.
+TEST(TestPropulsion, TestMomentumDragLinear)
+{
+    auto pm = ParameterManager("pm");
+    pm.set("thrustMax", 20.0, false);
+    pm.set("momentum_drag/type", 1, false);
+    pm.set("momentum_drag/coeff", 0.01, false);
+    auto thruster = step_thruster_with_momentum_drag(pm, Vector3d(0, 2, 0));
+
+    EXPECT_NEAR(thruster.wrench_sum.wrenchProp.force.y(), -0.4, 1e-12);
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.x(), 20.0);
+}
+
+// The ArduPilot disc law at the copter hover point: sqrt(1.1568 * 0.09625 * 7.355)
+// is 0.905, times mdrag 0.2 per m/s of relative wind.
+TEST(TestPropulsion, TestMomentumDragDisc)
+{
+    auto pm = ParameterManager("pm");
+    pm.set("thrustMax", 7.355, false);
+    pm.set("momentum_drag/type", 2, false);
+    pm.set("momentum_drag/coeff", 0.2, false);
+    pm.set("momentum_drag/disc_area", 0.09625, false);
+    pm.set("momentum_drag/axial", true, false);
+    auto thruster = step_thruster_with_momentum_drag(pm, Vector3d(1, 1, 0), 1.1568);
+
+    EXPECT_NEAR(thruster.wrench_sum.wrenchProp.force.x(), 7.355 - 0.181, 0.02 * (7.355 - 0.181));
+    EXPECT_NEAR(thruster.wrench_sum.wrenchProp.force.y(), -0.181, 0.02 * 0.181);
+}
+
+// This is the disc case above with the axial switch off. The axial wind then
+// adds no drag, so the thrust on x stays at exactly 7.355 N.
+TEST(TestPropulsion, TestMomentumDragDiscNotAxial)
+{
+    auto pm = ParameterManager("pm");
+    pm.set("thrustMax", 7.355, false);
+    pm.set("momentum_drag/type", 2, false);
+    pm.set("momentum_drag/coeff", 0.2, false);
+    pm.set("momentum_drag/disc_area", 0.09625, false);
+    pm.set("momentum_drag/axial", false, false);
+    auto thruster = step_thruster_with_momentum_drag(pm, Vector3d(1, 1, 0), 1.1568);
+
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.x(), 7.355);
+}
+
+// Type 0 is the default and applies no drag. A nonzero coeff and the axial
+// switch do not change that, so the force is the pure thrust.
+TEST(TestPropulsion, TestMomentumDragNone)
+{
+    auto pm = ParameterManager("pm");
+    pm.set("thrustMax", 20.0, false);
+    pm.set("momentum_drag/coeff", 0.01, false);
+    pm.set("momentum_drag/axial", true, false);
+    auto thruster = step_thruster_with_momentum_drag(pm, Vector3d(3, -2, 1));
+
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.x(), 20.0);
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.y(), 0.0);
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.z(), 0.0);
+}
+
+// The drag is added to the wrench of the step, so it must not pile up across steps.
+TEST(TestPropulsion, TestMomentumDragDoesNotAccumulate)
+{
+    auto thruster = ThrusterSimple("steady_drag_thruster");
+    auto pm = ParameterManager("pm");
+    pm.set("chanMotor", 0, false);
+    pm.set("momentum_drag/type", 1, false);
+    pm.set("momentum_drag/coeff", 0.01, false);
+    thruster.initialize(pm);
+
+    SimState_t states;
+    states.velocity.linear = Vector3d(0, 2, 0);
+    Environment_t environment;
+    thruster.set_throttle(1.0);
+   thruster.update_local_state(states, environment);
+
+    thruster.calc_model();
+    const double first_force_y = thruster.wrench_sum.wrenchProp.force.y();
+    for (int i = 1; i < 10; i++)
+    {
+        thruster.calc_model();
+    }
+    EXPECT_NE(first_force_y, 0.0);
+    EXPECT_DOUBLE_EQ(thruster.wrench_sum.wrenchProp.force.y(), first_force_y);
+}
+
+// ElectricEng2 selects the linear law by default, with the coefficient it
+// used to carry as momentumDragCoeff.
+TEST(TestPropulsion, TestElectricEngine2MomentumDrag)
+{
+    auto thruster = ElectricEng2("electric_engine_2_drag");
+    auto pm = ParameterManager("pm");
+    pm.set("chanMotor", 2, false);
+    thruster.initialize(pm);
+
+    SimState_t states;
+    states.velocity.linear = Vector3d(0, 2, 0);
+    Environment_t environment;
+    thruster.setInput(Input({0, 0, 1, 0}));
+    thruster.update_local_state(states, environment);
+    for (int idx = 0; idx < 1000; idx++)
+    {
+        thruster.calc_model();
+    }
+
+    const Vector3d force = thruster.wrench_sum.wrenchProp.force;
+    const double expected = -0.0047 * force.x() * 2;
+    EXPECT_GT(force.x(), 0);
+    EXPECT_NEAR(force.y(), expected, 0.01 * std::fabs(expected));
+}
+
 TEST(TestPropulsion, TestOmegaControlledEngine)
 {
     auto thruster = EngOmegaControl("omega_controlled_engine");
