@@ -1,6 +1,7 @@
 """The last_letter package"""
 
 from . import aerodynamics
+from . import body
 from . import environment
 from . import gravity
 
@@ -24,6 +25,7 @@ __all__ = [
     "environment",
     "systems",
     "aerodynamics",
+    "body",
     "paths",
     "propulsion",
     "simulation",

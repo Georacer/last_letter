@@ -3,6 +3,7 @@
 #include "last_letter_lib/uav_utils.hpp"
 #include "last_letter_lib/prog_utils.hpp"
 #include "last_letter_lib/aerodynamics.hpp"
+#include "last_letter_lib/body/body.hpp"
 #include "last_letter_lib/gravity.hpp"
 #include "last_letter_lib/propulsion/propulsion.hpp"
 #include "last_letter_lib/ground_reaction/ground_reaction.hpp"
@@ -45,6 +46,8 @@ public:
     vector<aerodynamics::Aerodynamics*> aerodynamics;
     int nMotors; // number of motors mounted on the aircraft
     vector<propulsion::Thruster*> thrusters;
+    int nBodies{0}; // number of bodies, components that are neither wings nor motors
+    vector<body::Body*> bodies;
     std::unique_ptr<ground_reaction::GroundReaction> ground_reaction;
 };
 

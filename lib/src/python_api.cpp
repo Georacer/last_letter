@@ -13,6 +13,7 @@
 #include "last_letter_lib/environment.hpp"
 #include "last_letter_lib/systems.hpp"
 #include "last_letter_lib/aerodynamics.hpp"
+#include "last_letter_lib/body/body.hpp"
 #include "last_letter_lib/propulsion/propulsion.hpp"
 #include "last_letter_lib/uav_model.hpp"
 #include "last_letter_lib/logging.hpp"
@@ -340,6 +341,12 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def(py::init<string>(), py::arg("name"));
     py::class_<PolynomialAero, StdLinearAero>(m_aerodynamics, "PolynomialAero")
         .def(py::init<string>(), py::arg("name"));
+
+    auto m_body = m.def_submodule("cpp_body", "last_letter_lib body submodule");
+    py::class_<last_letter_lib::body::Body, Component>(m_body, "Body")
+        .def(py::init<string>(), py::arg("name"))
+        .def("set_input", &last_letter_lib::body::Body::setInput)
+        .def("calc_model", &last_letter_lib::body::Body::calc_model);
 
     auto m_propulsion = m.def_submodule("cpp_propulsion", "last_letter_lib propulsion submodule");
     py::class_<Propeller, Parametrized>(m_propulsion, "Propeller")

@@ -70,6 +70,7 @@ add_library(last_letter_lib SHARED
   src/environment.cpp
   src/gravity.cpp
   src/aerodynamics.cpp
+  src/body/body.cpp
   src/propulsion/propulsion.cpp
   src/propulsion/no_engine.cpp
   src/propulsion/thruster_simple.cpp
@@ -161,6 +162,7 @@ if(LAST_LETTER_BUILD_TESTS)
     tests/cpp/test_systems.cpp
     tests/cpp/test_environment.cpp
     tests/cpp/test_aerodynamics.cpp
+    tests/cpp/test_body.cpp
     tests/cpp/test_propulsion.cpp
     tests/cpp/test_ground_reaction.cpp
     tests/cpp/test_gravity.cpp

@@ -44,6 +44,20 @@ void Dynamics::initialize(ParameterManager config)
         components.push_back(std::move(new_thruster));
     }
 
+    // Create and initialize body objects array. A tree assembled without
+    // loadModelConfig can lack the body section, which means no bodies.
+    nBodies = config.exists("body/nBodies") ? config.get<int>("body/nBodies") : 0;
+    bodies.clear();
+    for (int i = 0; i < nBodies; i++)
+    {
+        ParameterManager bodyConfig = config.filter("body/body" + std::to_string(i + 1) + "/");
+        bodyConfig.register_child_mngr(p_worldConfig);
+        auto new_body = body::buildBody(bodyConfig);
+        bodies.push_back(new_body.get());
+        add_child(*new_body);
+        components.push_back(std::move(new_body));
+    }
+
     // Create and initialize ground reactions object
     p_groundConfig.register_child_mngr(p_worldConfig); // GroundReaction reads world/deltaT.
     ground_reaction = ground_reaction::buildGroundReaction(p_groundConfig);
@@ -59,6 +73,9 @@ void Dynamics::load_parameters(ParameterManager config)
     }
     for (int i = 0; i < (int)aerodynamics.size(); i++) {
         aerodynamics.at(i)->load_parameters(config.filter("aero/airfoil" + std::to_string(i + 1) + "/"));
+    }
+    for (int i = 0; i < (int)bodies.size(); i++) {
+        bodies.at(i)->load_parameters(config.filter("body/body" + std::to_string(i + 1) + "/"));
     }
     if (ground_reaction) {
         ground_reaction->load_parameters(config.filter("ground/"));
@@ -84,6 +101,9 @@ void Dynamics::setInput(const Input &input)
     for (auto &airfoil : aerodynamics) {
         airfoil->setInput(input);
     }
+    for (auto &body : bodies) {
+        body->setInput(input);
+    }
     ground_reaction->setInput(input);
 }
 
@@ -95,6 +115,9 @@ void Dynamics::setInputPwm(const InputPwm_t &input)
     }
     for (auto &airfoil : aerodynamics) {
         airfoil->setInputPwm(input);
+    }
+    for (auto &body : bodies) {
+        body->setInputPwm(input);
     }
     ground_reaction->setInputPwm(input);
 }
