@@ -97,7 +97,7 @@ default_thruster_params = {
         "polyNo": 1,
         "coeffs": [0.0289, -0.0405],
     },
-    "momentumDragCoeff": 0.0047,
+    "momentum_drag": {"type": 1, "coeff": 0.0047, "axial": False, "lateral": True},
 }
 
 # TODO deprecate this

@@ -44,6 +44,11 @@ void Thruster::initialize_parameters()
     set_param<double>("pwm_min", 1000, false);
     set_param<double>("pwm_max", 2000, false);
     set_param<double>("slew_max", 0.0, false);
+    set_param<int>("momentum_drag/type", 0, false);
+    set_param<double>("momentum_drag/coeff", 0.0, false);
+    set_param<double>("momentum_drag/disc_area", 0.0, false);
+    set_param<bool>("momentum_drag/axial", false, false);
+    set_param<bool>("momentum_drag/lateral", true, false);
 
     set_param<vector<double>>("sys_x_0", x_0, false);
     set_param<vector<double>>("sys_u_0", u_0 , false);
@@ -65,6 +70,15 @@ void Thruster::update_parameters()
     if (!(pwm_max > pwm_min))
     {
         throw runtime_error("propulsion.cpp: pwm_max must be above pwm_min");
+    }
+    momentum_drag_type = get_param<int>("momentum_drag/type");
+    momentum_drag_coeff = get_param<double>("momentum_drag/coeff");
+    momentum_drag_disc_area = get_param<double>("momentum_drag/disc_area");
+    momentum_drag_axial = get_param<bool>("momentum_drag/axial");
+    momentum_drag_lateral = get_param<bool>("momentum_drag/lateral");
+    if (momentum_drag_type < 0 || momentum_drag_type > 2)
+    {
+        throw runtime_error("propulsion.cpp: momentum_drag/type must be 0, 1 or 2");
     }
 
     x_0 = get_param<vector<double>>("sys_x_0");
@@ -126,6 +140,31 @@ void Thruster::calc_model_impl()
     post_propagation();
     rotateProp();
     calc_wrench(local_state, local_environment);
+    apply_momentum_drag();
+}
+
+void Thruster::apply_momentum_drag()
+{
+    const double thrust = std::fabs(wrench_sum.wrenchProp.force.x());
+    const double lateral = momentum_drag_lateral ? 1.0 : 0.0;
+    const Vector3d mask(momentum_drag_axial ? 1.0 : 0.0, lateral, lateral);
+    // Gate the axial/lateral drag components by nullifying the equivalent wind components.
+    const Vector3d wind = relativeWind.cwiseProduct(mask);
+
+    double scale = 0.0;
+    switch (momentum_drag_type)
+    {
+    case 1:
+        scale = momentum_drag_coeff * thrust;
+        break;
+    case 2:
+        scale = momentum_drag_coeff * std::sqrt(local_environment.density * momentum_drag_disc_area * thrust);
+        break;
+    default:
+        break;
+    }
+    momentum_drag_ = -scale * wind;
+    wrench_sum.wrenchProp.force += momentum_drag_;
 }
 
 void Thruster::register_log_channels()
@@ -137,6 +176,7 @@ void Thruster::register_log_channels()
     channel.register_value("theta", &theta);            // propeller angle [rad]
     channel.register_value("input_motor", &inputMotor); // control input [0-1]
     channel.register_value("input_commanded", &input_commanded_); // command before the slew limit
+    channel.register_value("momentum_drag", &momentum_drag_);     // momentum drag force [N]
 }
 
 void Thruster::rotateProp() // Update propeller angle

@@ -47,6 +47,11 @@ public:
     double torqueMax, torqueMin;
     double pwm_min{1000}, pwm_max{2000}; // PWM in us at zero and at full command
     double slew_max{0.0};                // Command slew limit in 1/s, 0 disables it
+    int momentum_drag_type{0};           // 0 none, 1 linear, 2 disc
+    double momentum_drag_coeff{0.0};     // s/m for type 1, the ArduPilot mdrag for type 2
+    double momentum_drag_disc_area{0.0}; // m2, type 2 only
+    bool momentum_drag_axial{false};     // Apply to the x component of relativeWind
+    bool momentum_drag_lateral{true};    // Apply to the y and z components
     Vector3d relativeWind;
     // stateType u holds the system input.
     // stateType x holds the system state.
@@ -79,7 +84,12 @@ protected:
     bool initialized{false};
 
 private:
+    // Add the momentum drag to wrenchProp.force, scaled by the thrust that
+    // calc_wrench() produced.
+    void apply_momentum_drag();
+
     double input_commanded_{0.0}; // Command before the slew limit, in -1 to 1
+    Vector3d momentum_drag_{Vector3d::Zero()}; // Last momentum drag force, in the thruster frame
 };
 
 class NoEngine : public Thruster
@@ -207,7 +217,6 @@ public:
     // Battery specification
     int Cells; // Number of LiPo cells
     double Rs; // Battery internal resistance
-    double momentumDragCoeff;
     // TODO: Find where the message needs to be introduced in the ROS wrapper
     // last_letter_msgs::ElectricEng message;
     // ros::Publisher pub;
@@ -248,7 +257,12 @@ public:
         std::vector<double> propPowerPolyCoeffs = {0.0738, -0.1329, 0.2872, -0.2853};
         set_param<vector<double>>("propPowerPoly/coeffs", propPowerPolyCoeffs, false);
 
-        set_param<double>("momentumDragCoeff", 0.0047, false);
+        // The linear law with these values is the momentum drag this class
+        // always had.
+        set_param<int>("momentum_drag/type", 1, false);
+        set_param<double>("momentum_drag/coeff", 0.0047, false);
+        set_param<bool>("momentum_drag/axial", false, false);
+        set_param<bool>("momentum_drag/lateral", true, false);
     }
     void update_parameters() override;
 

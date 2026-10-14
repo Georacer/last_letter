@@ -156,7 +156,6 @@ void ElectricEng2::update_parameters()
 	Cells = get_param<double>("Cells");
 	I0 = get_param<double>("I0");
 	doubleVect = get_param<vector<double>>("RadPSLimits");
-	momentumDragCoeff = get_param<double>("momentumDragCoeff");
 	propThrustMultiplier = get_param<double>("propThrustMultiplier");
 
 	omegaMin = doubleVect[0];
@@ -220,12 +219,7 @@ void ElectricEng2::calc_wrench(SimState_t /* states */, Environment_t /* environ
 
 	forceX = propThrust * propThrustMultiplier;
 	forceY = 0.0;
-	// Generate momentum drag along the wind direction
-	Vector3d sidewind = relativeWind;
-	sidewind.x() = 0; // Null out the axial component
-	Vector3d momentumDrag = -forceX * sidewind * momentumDragCoeff;
-	forceY += momentumDrag.y();
-	forceZ = momentumDrag.z();
+	forceZ = 0.0;
 
 	torqueX = - torque_sign() * propPower / std::fabs(omega);
 	torqueY = 0.0;
