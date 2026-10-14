@@ -2,6 +2,7 @@
 #include <stdexcept>
 
 #include "last_letter_lib/body/body.hpp"
+#include "last_letter_lib/body/linear_copter.hpp"
 
 namespace last_letter_lib {
 namespace body {
@@ -18,6 +19,10 @@ std::unique_ptr<Body> buildBody(ParameterManager config)
     case 0:
         std::cout << "selecting the gravity-only body" << std::endl;
         body = std::make_unique<Body>(body_name);
+        break;
+    case 1:
+        std::cout << "selecting the linear copter body" << std::endl;
+        body = std::make_unique<LinearCopter>(body_name);
         break;
     default:
         std::stringstream ss;
