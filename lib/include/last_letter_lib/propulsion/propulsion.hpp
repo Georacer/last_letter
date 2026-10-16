@@ -70,6 +70,9 @@ public:
     void set_throttle(double throttle) { input_commanded_ = math_utils::constrain(throttle, -1.0, 1.0); }
     void setInput(const Input &input);                                                              // store control input
     void setInputPwm(const InputPwm_t &input);                                                      // store PWM control input
+    // The command that a PWM in microseconds maps to, through pwm_min and
+    // pwm_max, clamped to 0 to 1. setInputPwm() uses it.
+    double pwm_to_throttle(double pwm_us) const;
     virtual stateType dynamics(const stateType x, const stateType u, const double t) override;
     virtual stateType outputs(const stateType x, const stateType u, const double t) override;
     void calc_model_impl() override;          // engine physics step, container for the generic class

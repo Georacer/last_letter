@@ -8,6 +8,8 @@
 #include "Eigen/Eigen"
 
 #include "last_letter_lib/body/linear_copter.hpp"
+#include "last_letter_lib/body/ardupilot_mixer.hpp"
+#include "last_letter_lib/control/control_map.hpp"
 #include "last_letter_lib/control/evaluate.hpp"
 #include "last_letter_lib/prog_utils.hpp"
 #include "last_letter_lib/systems.hpp"
@@ -163,4 +165,69 @@ TEST(TestControl, RequireNoGroundReaction)
     UavModel without_ground("ardupilot_copter");
     initialize_aircraft(without_ground, "ardupilot_copter");
     EXPECT_NO_THROW(require_no_ground_reaction(without_ground));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// The copter control map
+
+static std::shared_ptr<body::MatrixMixer> make_mixer(const std::string &yaml)
+{
+    return std::shared_ptr<body::MatrixMixer>(body::buildMixer(ParameterManager::from_yaml_string("mixer", yaml)));
+}
+
+TEST(TestControl, CopterMapBounds)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const CopterControlMap map(make_mixer("mixerType: 0"), aircraft);
+    EXPECT_EQ(map.size(), 4);
+    EXPECT_TRUE(map.lower_bounds().isApprox(Vector4d(-1.0, -1.0, -1.0, 0.0)));
+    EXPECT_TRUE(map.upper_bounds().isApprox(Vector4d(1.0, 1.0, 1.0, 1.0)));
+    EXPECT_THROW(map.to_input(VectorXd::Zero(3)), std::invalid_argument);
+}
+
+// With the base mixer the thrust fraction of each motor is its command.
+TEST(TestControl, CopterMapMatrix)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const auto mixer = make_mixer("mixerType: 0");
+    const CopterControlMap map(mixer, aircraft);
+
+    const Vector4d controls(0.1, -0.05, 0.02, 0.4);
+    const Input input = map.to_input(controls);
+    const VectorXd thrust = mixer->mix(controls);
+    for (int i = 0; i < mixer->n_motors(); i++)
+    {
+        EXPECT_DOUBLE_EQ(input.value[mixer->channels()[i]], thrust(i));
+    }
+    for (size_t channel = mixer->n_motors(); channel < input.value.size(); channel++)
+    {
+        EXPECT_EQ(input.value[channel], 0.0);
+    }
+}
+
+// With the ArduPilot mixer each thruster converts the PWM of its channel. The
+// thruster band of the stock recipe equals the spin band, so the command is
+// the linearized throttle of thrust_to_actuator.
+TEST(TestControl, CopterMapArduPilot)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const auto mixer = make_mixer("mixerType: 1");
+    const CopterControlMap map(mixer, aircraft);
+
+    const Vector4d controls(0.1, -0.05, 0.02, 0.4);
+    const Input input = map.to_input(controls);
+    const std::vector<double> pwm = mixer->mix_to_pwm(controls);
+    ASSERT_EQ(aircraft.dynamics.thrusters.size(), 4u);
+    for (const auto *thruster : aircraft.dynamics.thrusters)
+    {
+        const int channel = thruster->chanMotor;
+        EXPECT_DOUBLE_EQ(input.value[channel], thruster->pwm_to_throttle(pwm[channel]));
+        const double actuator = (pwm[channel] - 1000.0) / 1000.0;
+        EXPECT_NEAR(input.value[channel], (actuator - 0.15) / 0.8, 1e-12);
+    }
+    // The inverse mixer recovers the controls from the same PWM.
+    EXPECT_TRUE(mixer->invert_pwm(pwm).isApprox(controls, 1e-9));
 }

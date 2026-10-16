@@ -8,6 +8,9 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
+
 #include <Eigen/Eigen>
 
 #include "last_letter_lib/body/ardupilot_mixer.hpp"
@@ -22,12 +25,14 @@ class LinearCopter : public Body
 public:
     LinearCopter(string name) : Body(name) {};
     ~LinearCopter() override {};
+    void initialize(ParameterManager config) override;
+    void initialize(const std::string yaml_str) override;
     void initialize_parameters() override;
     void update_parameters() override;
     void set_dt(double dt_p) override;
     // Store the four ideal inputs. They take effect at the next step.
     void setInput(const Input &input) override;
-    // Recover the four ideal inputs from the motor PWM with the inverse mixer.
+    // Recover the four ideal inputs from the motor PWM with the mixer.
     void setInputPwm(const InputPwm_t &input) override;
 
     // Roll axis derivatives.
@@ -49,8 +54,9 @@ public:
     // Actuator lag states.
     double d_rol{0}, d_pit{0}, d_yaw{0}, d_thr{0};
 
-    // The inverse ArduPilot mixer, under the child parameters mixer/.
-    ArduPilotMixerInverse mixer;
+    // The mixer of the setInputPwm path, under the child parameters mixer/.
+    // initialize() builds it.
+    std::unique_ptr<MatrixMixer> mixer;
 
 protected:
     void calc_model_impl() override;

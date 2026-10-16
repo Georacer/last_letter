@@ -73,6 +73,7 @@ add_library(last_letter_lib SHARED
   src/body/ardupilot_mixer.cpp
   src/body/body.cpp
   src/body/linear_copter.cpp
+  src/control/control_map.cpp
   src/control/evaluate.cpp
   src/propulsion/propulsion.cpp
   src/propulsion/no_engine.cpp

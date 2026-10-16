@@ -76,6 +76,8 @@ body1:
   # MOT_THST_EXPO, MOT_BAT_VOLT_MIN, MOT_BAT_VOLT_MAX, SIM_BATT_VOLTAGE and
   # its frame table from AP_MotorsMatrix.cpp.
   mixer:
+    # 1 selects the ArduPilot mixer. 0, the default, is the frame matrix alone.
+    mixerType: 1
     pwm_min: 1000
     pwm_max: 2000
     spin_min: 0.15
