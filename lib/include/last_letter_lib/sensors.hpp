@@ -1,3 +1,4 @@
+#pragma once
 
 ///////////////////////////////////////
 // Sensor class related declarations //
