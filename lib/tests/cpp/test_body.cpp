@@ -204,7 +204,7 @@ ground:
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// The inverse mixer
+// The mixers
 
 // The ArduPilot plus frame: angle in degrees and yaw factor per motor.
 static const vector<pair<double, double>> PLUS_FRAME = {
@@ -279,9 +279,9 @@ struct MixerCase
 TEST(TestBody, TestInverseMixerRoundTrip)
 {
     const vector<MixerCase> cases = {
-        {"", "", 94105.0, 12.8},
-        {"mixer:\n  bat_volt_max: 0.0\n", "bat_volt_max: 0.0\n", 94105.0, 0.0},
-        {"mixer:\n  baro_pressure: 101325.0\n", "baro_pressure: 101325.0\n", 101325.0, 12.8},
+        {"mixer:\n  mixerType: 1\n", "", 94105.0, 12.8},
+        {"mixer:\n  mixerType: 1\n  bat_volt_max: 0.0\n", "bat_volt_max: 0.0\n", 94105.0, 0.0},
+        {"mixer:\n  mixerType: 1\n  baro_pressure: 101325.0\n", "baro_pressure: 101325.0\n", 101325.0, 12.8},
     };
     const vector<double> throttles = {0.3, 0.37, 0.45};
     const vector<double> rolls = {-0.1, 0.0, 0.1};
@@ -293,7 +293,7 @@ TEST(TestBody, TestInverseMixerRoundTrip)
         SCOPED_TRACE(c.copter_recipe);
         LinearCopter copter("linear_copter");
         copter.initialize(c.copter_recipe);
-        ArduPilotMixerInverse mixer;
+        ArduPilotMixer mixer;
         mixer.initialize(c.mixer_recipe);
 
         for (const double throttle : throttles)
@@ -304,7 +304,7 @@ TEST(TestBody, TestInverseMixerRoundTrip)
             const Vector4d cmd(throttle, roll, pitch, yaw);
             const vector<double> pwms = ardupilot_mixer(cmd, c.pressure, c.bat_volt_max);
             // The inverse on its own, with the exact PWM.
-            const Vector4d rpyt = mixer.invert(pwms);
+            const Vector4d rpyt = mixer.invert_pwm(pwms);
             EXPECT_NEAR(rpyt(0), roll, 1e-9);
             EXPECT_NEAR(rpyt(1), pitch, 1e-9);
             EXPECT_NEAR(rpyt(2), yaw, 1e-9);
@@ -319,7 +319,7 @@ TEST(TestBody, TestInverseMixerRoundTrip)
                 rounded[i] = input.value[i];
             }
             copter.setInputPwm(input);
-            const Vector4d expected = mixer.invert(rounded);
+            const Vector4d expected = mixer.invert_pwm(rounded);
             EXPECT_NEAR(copter.u_rol, expected(0), 1e-12);
             EXPECT_NEAR(copter.u_pit, expected(1), 1e-12);
             EXPECT_NEAR(copter.u_yaw, expected(2), 1e-12);
@@ -332,26 +332,179 @@ TEST(TestBody, TestInverseMixerRoundTrip)
     }
 }
 
-// At pwm_min every input comes out zero.
+// At pwm_min every input comes out zero, for both mixers.
 TEST(TestBody, TestInverseMixerDisarmed)
 {
-    LinearCopter copter("linear_copter");
-    copter.initialize("");
-    uav_utils::InputPwm_t input; // Every channel at 1000 us.
-    copter.setInputPwm(input);
-    EXPECT_EQ(copter.u_rol, 0.0);
-    EXPECT_EQ(copter.u_pit, 0.0);
-    EXPECT_EQ(copter.u_yaw, 0.0);
-    EXPECT_EQ(copter.u_thr, 0.0);
+    for (const string recipe : {"", "mixer:\n  mixerType: 1\n"})
+    {
+        SCOPED_TRACE(recipe);
+        LinearCopter copter("linear_copter");
+        copter.initialize(recipe);
+        uav_utils::InputPwm_t input; // Every channel at 1000 us.
+        copter.setInputPwm(input);
+        EXPECT_EQ(copter.u_rol, 0.0);
+        EXPECT_EQ(copter.u_pit, 0.0);
+        EXPECT_EQ(copter.u_yaw, 0.0);
+        EXPECT_EQ(copter.u_thr, 0.0);
+    }
 }
 
 // The defaults give the gain of a default SITL flight at CMAC.
 TEST(TestBody, TestInverseMixerGain)
 {
-    ArduPilotMixerInverse mixer;
+    ArduPilotMixer mixer;
     mixer.initialize("");
     EXPECT_NEAR(mixer.get_battery_ratio(), 0.984, 1e-3);
     EXPECT_NEAR(mixer.get_lift_max(), 0.974, 1e-3);
     EXPECT_NEAR(mixer.get_air_density_ratio(), 0.942, 1e-3);
     EXPECT_NEAR(mixer.get_compensation_gain(), 1.09, 1e-2);
+}
+
+// Inputs near hover for the round trips: [roll, pitch, yaw, throttle].
+static vector<Vector4d> hover_inputs()
+{
+    vector<Vector4d> inputs;
+    for (const double throttle : {0.3, 0.37, 0.45})
+    for (const double roll : {-0.1, 0.0, 0.1})
+    for (const double pitch : {-0.1, 0.05})
+    for (const double yaw : {-0.1, 0.1})
+    {
+        inputs.emplace_back(roll, pitch, yaw, throttle);
+    }
+    return inputs;
+}
+
+// The base mixer: mix and invert round trip, directly and through PWM.
+TEST(TestBody, TestMatrixMixerRoundTrip)
+{
+    MatrixMixer mixer;
+    mixer.initialize("");
+    ASSERT_EQ(mixer.mixer_type(), 0);
+    ASSERT_EQ(mixer.n_motors(), 4);
+    for (const Vector4d &rpyt : hover_inputs())
+    {
+        const VectorXd thrust = mixer.mix(rpyt);
+        EXPECT_TRUE(mixer.invert(thrust).isApprox(rpyt, 1e-12));
+        const vector<double> pwm = mixer.mix_to_pwm(rpyt);
+        EXPECT_TRUE(mixer.invert_pwm(pwm).isApprox(rpyt, 1e-12));
+        // The base band is 1000 to 2000 us and nothing else.
+        for (int i = 0; i < mixer.n_motors(); i++)
+        {
+            EXPECT_NEAR(pwm[mixer.channels()[i]], 1000.0 + 1000.0 * thrust(i), 1e-9);
+        }
+    }
+}
+
+// The plus frame of the base mixer. Motor 1 is on the right, so a roll input
+// lowers its thrust. rpy_factor_max scales every roll, pitch and yaw factor.
+TEST(TestBody, TestMatrixMixerFrame)
+{
+    MatrixMixer half;
+    half.initialize("");
+    MatrixMixer unit;
+    unit.initialize("rpy_factor_max: 1.0\n");
+
+    const VectorXd roll = half.mix(Vector4d(1.0, 0.0, 0.0, 0.0));
+    EXPECT_NEAR(roll(0), -0.5, 1e-12);
+    EXPECT_NEAR(roll(1), 0.5, 1e-12);
+    EXPECT_NEAR(roll(2), 0.0, 1e-12);
+    EXPECT_NEAR(roll(3), 0.0, 1e-12);
+    const VectorXd throttle = half.mix(Vector4d(0.0, 0.0, 0.0, 1.0));
+    EXPECT_TRUE(throttle.isApprox(VectorXd::Ones(4), 1e-12));
+
+    for (int axis = 0; axis < 3; axis++)
+    {
+        Vector4d rpyt = Vector4d::Zero();
+        rpyt(axis) = 0.2;
+        EXPECT_TRUE(unit.mix(rpyt).isApprox(2.0 * half.mix(rpyt), 1e-12));
+    }
+}
+
+// The ArduPilot forward path matches the independent copy of the ArduPilot
+// mixer above, and the inverse recovers its input.
+TEST(TestBody, TestArduPilotMixerRoundTrip)
+{
+    const vector<MixerCase> cases = {
+        {"", "", 94105.0, 12.8},
+        {"", "bat_volt_max: 0.0\n", 94105.0, 0.0},
+        {"", "baro_pressure: 101325.0\n", 101325.0, 12.8},
+    };
+    for (const auto &c : cases)
+    {
+        SCOPED_TRACE(c.mixer_recipe);
+        ArduPilotMixer mixer;
+        mixer.initialize(c.mixer_recipe);
+        ASSERT_EQ(mixer.mixer_type(), 1);
+        for (const Vector4d &rpyt : hover_inputs())
+        {
+            const Vector4d tRPY(rpyt(3), rpyt(0), rpyt(1), rpyt(2));
+            const vector<double> expected = ardupilot_mixer(tRPY, c.pressure, c.bat_volt_max);
+            const vector<double> pwm = mixer.mix_to_pwm(rpyt);
+            for (size_t i = 0; i < expected.size(); i++)
+            {
+                EXPECT_NEAR(pwm[i], expected[i], 1e-9);
+            }
+            EXPECT_TRUE(mixer.invert_pwm(pwm).isApprox(rpyt, 1e-9));
+            // The frame alone still round trips.
+            EXPECT_TRUE(mixer.invert(mixer.mix(rpyt)).isApprox(rpyt, 1e-12));
+        }
+    }
+}
+
+// Five values turn the ArduPilot mixer into its base.
+TEST(TestBody, TestArduPilotMixerAsBase)
+{
+    MatrixMixer base;
+    base.initialize("");
+    ArduPilotMixer ardupilot;
+    ardupilot.initialize(R"(
+bat_volt_max: 0.0
+baro_pressure: 101325.0
+thst_expo: 0.0
+spin_min: 0.0
+spin_max: 1.0
+pwm_min: 1000.0
+pwm_max: 2000.0
+)");
+    EXPECT_DOUBLE_EQ(ardupilot.get_compensation_gain(), 1.0);
+    for (const Vector4d &rpyt : hover_inputs())
+    {
+        const vector<double> pwm_base = base.mix_to_pwm(rpyt);
+        const vector<double> pwm_ardupilot = ardupilot.mix_to_pwm(rpyt);
+        ASSERT_EQ(pwm_base.size(), pwm_ardupilot.size());
+        for (size_t i = 0; i < pwm_base.size(); i++)
+        {
+            EXPECT_NEAR(pwm_ardupilot[i], pwm_base[i], 1e-9);
+        }
+        EXPECT_TRUE(ardupilot.invert_pwm(pwm_base).isApprox(base.invert_pwm(pwm_base), 1e-12));
+    }
+}
+
+// mixerType selects the class. A missing key selects the base.
+TEST(TestBody, TestBuildMixer)
+{
+    EXPECT_EQ(buildMixer(ParameterManager::from_yaml_string("mixer", "nMotors: 4"))->mixer_type(), 0);
+    EXPECT_EQ(buildMixer(ParameterManager::from_yaml_string("mixer", "mixerType: 0"))->mixer_type(), 0);
+    EXPECT_EQ(buildMixer(ParameterManager::from_yaml_string("mixer", "mixerType: 1"))->mixer_type(), 1);
+    EXPECT_THROW(buildMixer(ParameterManager::from_yaml_string("mixer", "mixerType: 2")), std::runtime_error);
+
+    // The factory loads the declared keys of the class it chose.
+    auto mixer = buildMixer(ParameterManager::from_yaml_string("mixer", "mixerType: 1\nbaro_pressure: 101325.0"));
+    const auto &ardupilot = dynamic_cast<const ArduPilotMixer &>(*mixer);
+    EXPECT_NEAR(ardupilot.get_air_density_ratio(), 1.0, 1e-12);
+}
+
+// The linear copter builds the mixer that its recipe names.
+TEST(TestBody, TestLinearCopterMixerType)
+{
+    LinearCopter plain("linear_copter");
+    plain.initialize("");
+    ASSERT_TRUE(plain.mixer);
+    EXPECT_EQ(plain.mixer->mixer_type(), 0);
+
+    auto config = load_config_aircraft("ardupilot_copter_linear");
+    auto body = buildBody(config.filter("dynamics/body/body1/"));
+    auto &copter = dynamic_cast<LinearCopter &>(*body);
+    ASSERT_TRUE(copter.mixer);
+    EXPECT_EQ(copter.mixer->mixer_type(), 1);
 }

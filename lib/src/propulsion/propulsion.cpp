@@ -102,9 +102,13 @@ void Thruster::setInputPwm(const InputPwm_t &p_input)
 {
     if (chanMotor > -1)
     {
-        const double pwm = p_input.value[chanMotor];
-        set_throttle(math_utils::constrain((pwm - pwm_min) / (pwm_max - pwm_min), 0.0, 1.0));
+        set_throttle(pwm_to_throttle(p_input.value[chanMotor]));
     }
+}
+
+double Thruster::pwm_to_throttle(double pwm_us) const
+{
+    return math_utils::constrain((pwm_us - pwm_min) / (pwm_max - pwm_min), 0.0, 1.0);
 }
 
 stateType Thruster::dynamics(const stateType /*x*/, const stateType /*u*/, const double /*t*/)

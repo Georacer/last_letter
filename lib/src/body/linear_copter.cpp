@@ -37,6 +37,20 @@ static void check_lag_bandwidth(const std::string &axis, double wlg)
     }
 }
 
+void LinearCopter::initialize(ParameterManager config)
+{
+    // A tree without a mixer/ block gets the default mixer.
+    const ParameterManager mixer_config = config.exists("mixer") ? config.filter("mixer/") : ParameterManager("mixer");
+    mixer = buildMixer(mixer_config);
+    add_child(*mixer);
+    Body::initialize(config);
+}
+
+void LinearCopter::initialize(const std::string yaml_str)
+{
+    initialize(ParameterManager::from_yaml_string(get_name(), yaml_str));
+}
+
 void LinearCopter::initialize_parameters()
 {
     Body::initialize_parameters();
@@ -73,9 +87,6 @@ void LinearCopter::initialize_parameters()
     set_param("vertical/Zcoll", 0.0, false);
     set_param("vertical/wlg", 0.0, false);
     set_param("vertical/u_hover", 0.37, false);
-
-    mixer.initialize_parameters();
-    add_child(mixer);
 }
 
 void LinearCopter::update_parameters()
@@ -130,7 +141,10 @@ void LinearCopter::update_parameters()
     check_lag_bandwidth("yaw", wlg_yaw);
     check_lag_bandwidth("vertical", wlg_thr);
 
-    mixer.update_parameters();
+    if (mixer)
+    {
+        mixer->update_parameters();
+    }
     update_lag_factors();
 }
 
@@ -158,8 +172,12 @@ void LinearCopter::setInput(const Input &input)
 
 void LinearCopter::setInputPwm(const InputPwm_t &input)
 {
+    if (!mixer)
+    {
+        throw std::runtime_error("LinearCopter: initialize() must run before setInputPwm()");
+    }
     const std::vector<double> pwm(input.value.begin(), input.value.end());
-    const Eigen::Vector4d u = mixer.invert(pwm);
+    const Eigen::Vector4d u = mixer->invert_pwm(pwm);
     u_rol = u(0);
     u_pit = u(1);
     u_yaw = u(2);
