@@ -1,3 +1,5 @@
+#pragma once
+
 /// Ground reactions interface class
 
 #include <iostream>
