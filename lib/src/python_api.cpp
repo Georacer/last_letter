@@ -289,6 +289,13 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def("set_param", &Parametrized::set_param<double>, py::arg("param_name"), py::arg("param_value"), py::arg("safe") = true)
         .def("set_param", &Parametrized::set_param<std::string>, py::arg("param_name"), py::arg("param_value"), py::arg("safe") = true)
         .def("set_param", &Parametrized::set_param<vector<double>>, py::arg("param_name"), py::arg("param_value"), py::arg("safe") = true);
+    m_programming_utils.def(
+        "load_model_config",
+        [](const std::string &name, const std::string &root)
+        { return last_letter_lib::programming_utils::loadModelConfig(name, root).str(); },
+        py::arg("name"), py::arg("root") = "",
+        "Assemble the recipe `name` from the models directory `root` and return it "
+        "as one YAML string. An empty root selects $HOME/last_letter_models.");
 
     auto m_systems = m.def_submodule("cpp_systems", "last_letter_lib systems submodule");
     py::class_<Component, Parametrized>(m_systems, "Component", py::multiple_inheritance()) // Declaring as multiple_inheritance, because Parametrized is a virtual base of Component.
@@ -443,6 +450,8 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def("set_input_pwm", &UavModel::setInputPwm)
         .def("step", &UavModel::step)
         .def("init", &UavModel::init)
+        .def("set_state", &UavModel::set_state, py::arg("state"),
+             "Replace the rigid body state. The internal states of the components stay as they are.")
         .def("enable_logging", &UavModel::enable_logging, py::arg("path") = "")
         .def("disable_logging", &UavModel::disable_logging)
         .def_property_readonly("time", &UavModel::get_time)

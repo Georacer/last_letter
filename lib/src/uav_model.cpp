@@ -159,26 +159,11 @@ void UavModel::init()
 // Make one step of the plane simulation
 void UavModel::step()
 {
-    // Perform step actions serially
-
     // Make sure our own channel exists before anything below can write a frame
     // into it.
     ensure_log_channels();
 
-    // Update the environment and propagate the current state and environment
-    // into every component before evaluating their forces and torques.
-    environmentModel.calcEnvironment(state);
-    dynamics.update_local_state(state, environmentModel.environment);
-
-    // Calculate dynamics
-    dynamics.calc_model(state);
-    auto inpWrench = dynamics.wrench_sum.sum();
-
-    // Transfer the total moment from the body-frame origin to the Center of
-    // Mass, so it is consistent with the CoM-referenced equations of motion
-    // and the CoM-referenced inertia tensor. This compensates for moments
-    // created by gravity.
-    inpWrench.torque -= dynamics.cog.cross(inpWrench.force);
+    const Wrench_t inpWrench = calc_wrench();
 
     // Write this step's frame: UavModel::state plus every component's registered
     // members, all stamped sim_time_.
@@ -186,6 +171,30 @@ void UavModel::step()
     // wrenches in the same frame.
     logging::log_frame(sim_time_);
 
+    propagate(inpWrench);
+}
+
+Wrench_t UavModel::calc_wrench()
+{
+    // Update the environment and propagate the current state and environment
+    // into every component before evaluating their forces and torques.
+    environmentModel.calcEnvironment(state);
+    dynamics.update_local_state(state, environmentModel.environment);
+
+    // Calculate dynamics
+    dynamics.calc_model(state);
+    Wrench_t inpWrench = dynamics.wrench_sum.sum();
+
+    // Transfer the total moment from the body-frame origin to the Center of
+    // Mass, so it is consistent with the CoM-referenced equations of motion
+    // and the CoM-referenced inertia tensor. This compensates for moments
+    // created by gravity.
+    inpWrench.torque -= dynamics.cog.cross(inpWrench.force);
+    return inpWrench;
+}
+
+void UavModel::propagate(const Wrench_t &inpWrench)
+{
     SimState_t newState;
     newState = kinematics.propagateState(state, dynamics.inertial, inpWrench);
 

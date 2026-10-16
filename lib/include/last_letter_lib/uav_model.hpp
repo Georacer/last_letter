@@ -61,7 +61,19 @@ public:
     void update_parameters() override;
 
     void init(); // Initialize UavModel object
-    void step(); // Perform simulation step
+    // Perform one simulation step.
+    void step();
+    // Fill dynamics.wrench_sum for the current state and input and return the
+    // body wrench about the center of gravity. This advances the internal
+    // state of the components, for example the thruster slew, but not the
+    // rigid body state.
+    Wrench_t calc_wrench();
+    // Propagate the rigid body state by one step under the given wrench, and
+    // advance the simulation clock.
+    void propagate(const Wrench_t &wrench);
+    // Replace the rigid body state. The internal states of the components stay
+    // as they are.
+    void set_state(const SimState_t &new_state) { state = new_state; }
 
     // Change the integration timestep without re-running initialize().
     void set_dt(double dt_new);
