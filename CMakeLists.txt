@@ -74,8 +74,6 @@ endif()
 
 find_package(Boost REQUIRED)
 
-# find_package(NLopt REQUIRED) # Will enable later with trimmer
-
 # The scikit-build-core / uv package build turns LAST_LETTER_BUILD_PYTHON ON
 # (see [tool.scikit-build] in pyproject.toml); that build is the one whose
 # extension actually gets imported.
@@ -86,7 +84,7 @@ if(LAST_LETTER_BUILD_PYTHON)
   find_package(pybind11 PATHS ${Python3_SITELIB}/pybind11/share/cmake/pybind11 CONFIG REQUIRED)
 endif()
 
-# All fetched dependencies (yaml-cpp, DataTamer + its vendored mcap, googletest)
+# All fetched dependencies (yaml-cpp, DataTamer + its vendored mcap, NLopt, googletest)
 # are built STATIC and position-independent, so they embed directly into
 # last_letter_lib.so and leave no side-car .so files to ship next to the Python
 # extension. BUILD_SHARED_LIBS is left at its default (OFF); PIC must be enabled

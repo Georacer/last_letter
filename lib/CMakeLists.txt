@@ -60,6 +60,43 @@ foreach(mcap_consumer data_tamer mcap_lib)
   endif()
 endforeach()
 
+# Import NLopt, the optimizer behind the trimmer. It builds static and PIC and
+# embeds into last_letter_lib.so like yaml-cpp, so a pip user needs no system
+# package and the installed CMake package needs no find_dependency.
+FetchContent_Declare(
+  nlopt
+  GIT_REPOSITORY https://github.com/stevengj/nlopt.git
+  GIT_TAG        v2.11.0
+  EXCLUDE_FROM_ALL
+)
+# NLOPT_LUKSAN drops the LGPL code, so the embedded rest stays MIT. The
+# bindings default ON and would look for SWIG, NumPy, Octave, Guile and Java.
+set(NLOPT_LUKSAN OFF CACHE BOOL "" FORCE)
+set(NLOPT_CXX ON CACHE BOOL "" FORCE)
+set(NLOPT_PYTHON OFF CACHE BOOL "" FORCE)
+set(NLOPT_OCTAVE OFF CACHE BOOL "" FORCE)
+set(NLOPT_GUILE OFF CACHE BOOL "" FORCE)
+set(NLOPT_JAVA OFF CACHE BOOL "" FORCE)
+set(NLOPT_SWIG OFF CACHE BOOL "" FORCE)
+set(NLOPT_MATLAB OFF CACHE BOOL "" FORCE)
+set(NLOPT_FORTRAN OFF CACHE BOOL "" FORCE)
+set(NLOPT_TESTS OFF CACHE BOOL "" FORCE)
+# NLopt declares option(BUILD_SHARED_LIBS ... ON), so the unset variable that
+# keeps yaml-cpp and DataTamer static reads as ON there. A normal variable wins
+# over the option under policy CMP0077, which the cmake_minimum_required of
+# NLopt sets to NEW. Restore the caller's value after the fetch.
+if(DEFINED BUILD_SHARED_LIBS)
+  set(LAST_LETTER_SAVED_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+endif()
+set(BUILD_SHARED_LIBS OFF)
+FetchContent_MakeAvailable(nlopt)
+if(DEFINED LAST_LETTER_SAVED_BUILD_SHARED_LIBS)
+  set(BUILD_SHARED_LIBS ${LAST_LETTER_SAVED_BUILD_SHARED_LIBS})
+  unset(LAST_LETTER_SAVED_BUILD_SHARED_LIBS)
+else()
+  unset(BUILD_SHARED_LIBS)
+endif()
+
 # Declare the project library
 add_library(last_letter_lib SHARED
   src/math_utils.cpp
@@ -75,6 +112,7 @@ add_library(last_letter_lib SHARED
   src/body/linear_copter.cpp
   src/control/control_map.cpp
   src/control/evaluate.cpp
+  src/control/trim.cpp
   src/propulsion/propulsion.cpp
   src/propulsion/no_engine.cpp
   src/propulsion/thruster_simple.cpp
@@ -111,7 +149,7 @@ target_include_directories(last_letter_lib
 # <Eigen/Eigen> almost everywhere and <boost/numeric/odeint.hpp> in systems.hpp,
 # so a consumer needs them on its include path too.
 #
-# yaml-cpp and data_tamer are wrapped in $<BUILD_INTERFACE:> instead. They are
+# yaml-cpp, data_tamer and nlopt are wrapped in $<BUILD_INTERFACE:> instead. They are
 # FetchContent targets declared EXCLUDE_FROM_ALL, so they belong to no export
 # set, and naming them in the link interface unguarded makes the
 # install(EXPORT) below fail to generate. The genex keeps them for our own
@@ -123,12 +161,8 @@ target_link_libraries(last_letter_lib
     Boost::boost
     $<BUILD_INTERFACE:yaml-cpp>
     $<BUILD_INTERFACE:data_tamer>
+    $<BUILD_INTERFACE:nlopt>
 )
-
-# add_library(lib_trimmer src/trimmer.cpp)
-# target_link_libraries(lib_trimmer
-# ${NLOPT_LIBRARIES}
-# lib_uav_model)
 
 if(LAST_LETTER_BUILD_PYTHON)
   list(APPEND pybind11_sources
