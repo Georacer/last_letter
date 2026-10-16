@@ -10,6 +10,8 @@ __credits__ = []
 __date__ = "Fri 21 Jan 2022"
 __copyright__ = "Copyright 2022, George Zogopoulos"
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -420,3 +422,20 @@ class TestAircraft:
         tests = []
         tests.append(state_1.velocity_linear[0] < state_2.velocity_linear[0])
         assert np.all(tests)
+
+
+TEST_MODELS_ROOT = str(Path(__file__).resolve().parents[1] / "cpp" / "test_parameters")
+
+
+def test_load_model_config_builds_aircraft():
+    """A recipe loaded by name initializes an Aircraft that steps."""
+    from last_letter.cpp_last_letter.cpp_programming_utils import load_model_config
+
+    config = load_model_config("ardupilot_copter_linear", TEST_MODELS_ROOT)
+    assert "linear_copter" in config
+    ac = sim.Aircraft("ardupilot_copter_linear")
+    ac.initialize(config)
+    ac.set_input(Inputs([0.0, 0.0, 0.0, 0.379]))
+    for _ in range(10):
+        ac.step()
+    assert np.all(np.isfinite(ac.state.position))
