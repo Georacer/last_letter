@@ -82,6 +82,7 @@ RUN printf '%s\n' \
         '#include <cmath>' \
         '#include <last_letter_lib/geo_mag_declination.hpp>' \
         '#include <last_letter_lib/uav_model.hpp>' \
+        '#include <last_letter_lib/control/linearize.hpp>' \
         'int main(int argc, char **)' \
         '{' \
         '    // Call an out-of-line symbol, so the link has to resolve against' \
