@@ -48,5 +48,22 @@ private:
     std::vector<const propulsion::Thruster *> thrusters_;
 };
 
+// Each control goes straight to one channel of the Input. For a LinearCopter
+// recipe, whose setInput reads the ideal inputs from its channels, and for a
+// conventional plane later.
+class IdentityControlMap : public ControlMap {
+public:
+    IdentityControlMap(std::vector<int> channels, Eigen::VectorXd lower, Eigen::VectorXd upper);
+    int size() const override;
+    uav_utils::Input to_input(const Eigen::VectorXd &controls) const override;
+    Eigen::VectorXd lower_bounds() const override;
+    Eigen::VectorXd upper_bounds() const override;
+
+private:
+    std::vector<int> channels_;
+    Eigen::VectorXd lower_;
+    Eigen::VectorXd upper_;
+};
+
 } // namespace control
 } // namespace last_letter_lib

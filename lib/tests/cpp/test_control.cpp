@@ -231,3 +231,59 @@ TEST(TestControl, CopterMapArduPilot)
     // The inverse mixer recovers the controls from the same PWM.
     EXPECT_TRUE(mixer->invert_pwm(pwm).isApprox(controls, 1e-9));
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// The identity control map
+
+// Each control goes to its own channel and every other channel stays at zero.
+TEST(TestControl, IdentityMap)
+{
+    const IdentityControlMap map({0, 1, 2, 3}, Vector4d(-1.0, -1.0, -1.0, 0.0), Vector4d(1.0, 1.0, 1.0, 1.0));
+    EXPECT_EQ(map.size(), 4);
+    EXPECT_TRUE(map.lower_bounds().isApprox(Vector4d(-1.0, -1.0, -1.0, 0.0)));
+    EXPECT_TRUE(map.upper_bounds().isApprox(Vector4d(1.0, 1.0, 1.0, 1.0)));
+
+    const Input input = map.to_input(Vector4d(0.1, -0.2, 0.3, 0.4));
+    EXPECT_EQ(input.value[0], 0.1);
+    EXPECT_EQ(input.value[1], -0.2);
+    EXPECT_EQ(input.value[2], 0.3);
+    EXPECT_EQ(input.value[3], 0.4);
+    for (size_t channel = 4; channel < input.value.size(); channel++)
+    {
+        EXPECT_EQ(input.value[channel], 0.0);
+    }
+    EXPECT_THROW(map.to_input(VectorXd::Zero(3)), std::invalid_argument);
+
+    // The channels need not be in order or adjacent.
+    const IdentityControlMap sparse({5, 2}, Vector2d(0.0, 0.0), Vector2d(1.0, 1.0));
+    const Input sparse_input = sparse.to_input(Vector2d(0.7, 0.8));
+    EXPECT_EQ(sparse_input.value[5], 0.7);
+    EXPECT_EQ(sparse_input.value[2], 0.8);
+}
+
+// The map rejects a bad channel list or bad bounds.
+TEST(TestControl, IdentityMapRejects)
+{
+    const Vector2d lower(0.0, 0.0);
+    const Vector2d upper(1.0, 1.0);
+    EXPECT_THROW(IdentityControlMap({0, 1, 2}, lower, upper), std::invalid_argument);
+    EXPECT_THROW(IdentityControlMap({0, -1}, lower, upper), std::out_of_range);
+    EXPECT_THROW(IdentityControlMap({0, 32}, lower, upper), std::out_of_range);
+    EXPECT_THROW(IdentityControlMap({1, 1}, lower, upper), std::invalid_argument);
+    EXPECT_THROW(IdentityControlMap({0, 1}, upper, lower), std::invalid_argument);
+}
+
+// The linear copter recipe reads the ideal inputs from channels 0 to 3, so
+// the identity map drives it at its hover throttle with zero acceleration.
+TEST(TestControl, IdentityMapLinearCopter)
+{
+    UavModel aircraft("ardupilot_copter_linear");
+    initialize_aircraft(aircraft, "ardupilot_copter_linear");
+    const auto &copter = dynamic_cast<const body::LinearCopter &>(*aircraft.dynamics.bodies.at(0));
+    const IdentityControlMap map({0, 1, 2, 3}, Vector4d(-1.0, -1.0, -1.0, 0.0), Vector4d(1.0, 1.0, 1.0, 1.0));
+
+    const Evaluation result = evaluate(aircraft, hover_state(aircraft), map.to_input(Vector4d(0.0, 0.0, 0.0, copter.u_hover)));
+    EXPECT_LT(result.state_dot.speedDot.norm(), 1e-9);
+    EXPECT_LT(result.state_dot.rateDot.norm(), 1e-9);
+    EXPECT_EQ(copter.u_thr, copter.u_hover);
+}
