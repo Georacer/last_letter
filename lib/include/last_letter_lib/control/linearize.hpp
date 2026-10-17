@@ -49,6 +49,10 @@ public:
     LinearModel linearize(UavModel &uav, const ControlMap &map, const TrimPoint &trim);
     // Throws when any of the three term switches of model.options is on.
     static LinearCopterCoefficients to_linear_copter(const LinearModel &model);
+    const LinearizerOptions &options() const { return options_; }
+
+private:
+    LinearizerOptions options_;
 };
 
 } // namespace control

@@ -182,6 +182,7 @@ public:
     // but is implemented for pickling the Python bound object.
     SimState_t(const VectorXd);
     SimState_t(const SimState_t &) = default;
+    SimState_t &operator=(const SimState_t &) = default;
     // Inverse of the constructor from VectorXd.
     VectorXd to_array();
     SimState_t strip_thrusters();
