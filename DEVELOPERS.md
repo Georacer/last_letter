@@ -80,3 +80,20 @@ First build and install the Python package (see above). Then enter:
 ```bash
 uv run pytest lib/tests/python
 ```
+
+### Fly a copter recipe in ArduPilot SITL
+
+`lib/tools/sitl_hover_check.py` flies a recipe in ArduCopter SITL through the bridge. It takes
+off in GUIDED to 10 m, holds for 20 s, lands and disarms. It exits 0 when the altitude stays within
+1 m and the roll and pitch within 5 degrees during the hold. Install the bridge and the models from
+a Release tree first, then run the check on the stock quad before your own recipe, so that a
+failure points at the recipe and not at the harness:
+
+```bash
+cmake --build build-release && cmake --install build-release
+uv run --with pymavlink lib/tools/sitl_hover_check.py ardupilot_copter
+uv run --with pymavlink lib/tools/sitl_hover_check.py <recipe>
+```
+
+It expects an ArduPilot checkout with a built `arducopter`, which `--ardupilot` points at. On a
+fail it prints the last `STATUSTEXT` lines and the paths of the ArduPilot logs.
