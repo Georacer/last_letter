@@ -1,0 +1,45 @@
+# The mixer of the ArduPilot SITL default quad, a plus frame. This is the
+# default mixer file of last-letter-linearize. The tool builds its mixer from
+# this block and copies the block into the mixer/ section of the recipe it
+# writes. The values match the mixer/ block of ardupilot_copter_linear.
+#
+# To linearize another aircraft, copy this file and set the values of its
+# ArduPilot configuration: MOT_PWM_MIN, MOT_PWM_MAX, MOT_SPIN_MIN,
+# MOT_SPIN_MAX, MOT_THST_EXPO, MOT_BAT_VOLT_MIN, MOT_BAT_VOLT_MAX,
+# SIM_BATT_VOLTAGE and the frame table from AP_MotorsMatrix.cpp.
+
+# 1 selects the ArduPilot mixer. 0 is the frame matrix alone, and then only
+# the frame keys and rpy_factor_max apply.
+mixerType: 1
+# ArduPilot scales each roll, pitch and yaw column to a largest magnitude of
+# 0.5. A plain allocation matrix uses 1.
+rpy_factor_max: 0.5
+pwm_min: 1000
+pwm_max: 2000
+spin_min: 0.15
+spin_max: 0.95
+thst_expo: 0.65
+# BARO.Press in Pa at the SITL flight altitude. 94105 is the SITL default
+# home, CMAC, 35 m up. 101325 means no density compensation.
+baro_pressure: 94105.0
+batt_voltage: 12.6 # SIM_BATT_VOLTAGE
+bat_volt_max: 12.8 # MOT_BAT_VOLT_MAX. 0 disables the battery compensation.
+bat_volt_min: 9.6 # MOT_BAT_VOLT_MIN
+# Up to 12 motors. chanMotor is the SERVOn output, zero based.
+nMotors: 4
+motor1:
+  chanMotor: 0
+  angle_deg: 90.0
+  yaw_factor: 1.0
+motor2:
+  chanMotor: 1
+  angle_deg: -90.0
+  yaw_factor: 1.0
+motor3:
+  chanMotor: 2
+  angle_deg: 0.0
+  yaw_factor: -1.0
+motor4:
+  chanMotor: 3
+  angle_deg: 180.0
+  yaw_factor: -1.0

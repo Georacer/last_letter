@@ -468,6 +468,11 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def("calc_model", &PistonEng::calc_model);
 
     auto m_simulation = m.def_submodule("cpp_simulation", "last_letter_lib simulation submodule");
+    // Read only. The aircraft owns its dynamics, and Python only reads the lumped
+    // values, for example the inertial block that last-letter-linearize writes.
+    py::class_<last_letter_lib::Dynamics>(m_simulation, "Dynamics")
+        .def_readonly("inertial", &last_letter_lib::Dynamics::inertial)
+        .def_readonly("wrench_sum", &last_letter_lib::Dynamics::wrench_sum);
     py::class_<UavModel, Parametrized>(m_simulation, "Aircraft")
         .def(py::init<string>(), py::arg("name"))
         .def("initialize", static_cast<void (Parametrized::*)(const std::string)>(&Parametrized::initialize), py::arg("parameters"))
@@ -481,7 +486,8 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def("enable_logging", &UavModel::enable_logging, py::arg("path") = "")
         .def("disable_logging", &UavModel::disable_logging)
         .def_property_readonly("time", &UavModel::get_time)
-        .def_readonly("state", &UavModel::state);
+        .def_readonly("state", &UavModel::state)
+        .def_readonly("dynamics", &UavModel::dynamics);
 
     auto m_control = m.def_submodule("cpp_control", "last_letter_lib control submodule");
     namespace ctl = last_letter_lib::control;
