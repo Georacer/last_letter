@@ -14,7 +14,12 @@
 #include "last_letter_lib/systems.hpp"
 #include "last_letter_lib/aerodynamics.hpp"
 #include "last_letter_lib/body/body.hpp"
+#include "last_letter_lib/body/ardupilot_mixer.hpp"
 #include "last_letter_lib/body/linear_copter.hpp"
+#include "last_letter_lib/control/control_map.hpp"
+#include "last_letter_lib/control/evaluate.hpp"
+#include "last_letter_lib/control/linearize.hpp"
+#include "last_letter_lib/control/trim.hpp"
 #include "last_letter_lib/propulsion/propulsion.hpp"
 #include "last_letter_lib/uav_model.hpp"
 #include "last_letter_lib/logging.hpp"
@@ -375,6 +380,27 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def_readonly("u_yaw", &last_letter_lib::body::LinearCopter::u_yaw)
         .def_readonly("u_thr", &last_letter_lib::body::LinearCopter::u_thr);
 
+    // The mixers hold a shared_ptr, since a CopterControlMap shares its mixer
+    // with Python. pybind11 refuses a holder that differs from the holder of
+    // the base, so Parametrized is not named as the base here.
+    py::class_<last_letter_lib::body::MatrixMixer, std::shared_ptr<last_letter_lib::body::MatrixMixer>>(m_body, "MatrixMixer")
+        .def("mixer_type", &last_letter_lib::body::MatrixMixer::mixer_type)
+        .def("n_motors", &last_letter_lib::body::MatrixMixer::n_motors)
+        .def("channels", &last_letter_lib::body::MatrixMixer::channels)
+        .def("mix", &last_letter_lib::body::MatrixMixer::mix, py::arg("rpyt"),
+             "Ideal [roll, pitch, yaw, throttle] to the thrust fraction of each motor.")
+        .def("invert", &last_letter_lib::body::MatrixMixer::invert, py::arg("thrust"),
+             "The least squares inverse of mix().")
+        .def("mix_to_pwm", &last_letter_lib::body::MatrixMixer::mix_to_pwm, py::arg("rpyt"),
+             "Ideal [roll, pitch, yaw, throttle] to the PWM of each channel in microseconds, unrounded.")
+        .def("invert_pwm", &last_letter_lib::body::MatrixMixer::invert_pwm, py::arg("pwm"),
+             "Recover [roll, pitch, yaw, throttle] from the PWM of each channel.");
+    py::class_<last_letter_lib::body::ArduPilotMixer, last_letter_lib::body::MatrixMixer,
+               std::shared_ptr<last_letter_lib::body::ArduPilotMixer>>(m_body, "ArduPilotMixer")
+        .def("get_compensation_gain", &last_letter_lib::body::ArduPilotMixer::get_compensation_gain)
+        .def("get_air_density_ratio", &last_letter_lib::body::ArduPilotMixer::get_air_density_ratio)
+        .def("get_battery_ratio", &last_letter_lib::body::ArduPilotMixer::get_battery_ratio);
+
     auto m_propulsion = m.def_submodule("cpp_propulsion", "last_letter_lib propulsion submodule");
     py::class_<Propeller, Parametrized>(m_propulsion, "Propeller")
         .def("update_parameters", &Propeller::update_parameters)
@@ -456,4 +482,100 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def("disable_logging", &UavModel::disable_logging)
         .def_property_readonly("time", &UavModel::get_time)
         .def_readonly("state", &UavModel::state);
+
+    auto m_control = m.def_submodule("cpp_control", "last_letter_lib control submodule");
+    namespace ctl = last_letter_lib::control;
+    py::class_<ctl::SettleOptions>(m_control, "SettleOptions")
+        .def(py::init())
+        .def_readwrite("tolerance", &ctl::SettleOptions::tolerance)
+        .def_readwrite("max_iterations", &ctl::SettleOptions::max_iterations);
+    py::class_<ctl::TrimTarget>(m_control, "TrimTarget")
+        .def(py::init())
+        .def_readwrite("position", &ctl::TrimTarget::position)
+        .def_readwrite("velocity_ned", &ctl::TrimTarget::velocity_ned)
+        .def_readwrite("heading", &ctl::TrimTarget::heading)
+        .def_readwrite("yaw_rate", &ctl::TrimTarget::yaw_rate);
+    py::class_<ctl::TrimOptions>(m_control, "TrimOptions")
+        .def(py::init())
+        .def_readwrite("ftol_abs", &ctl::TrimOptions::ftol_abs)
+        .def_readwrite("max_evaluations", &ctl::TrimOptions::max_evaluations)
+        .def_readwrite("weights", &ctl::TrimOptions::weights)
+        .def_readwrite("initial_controls", &ctl::TrimOptions::initial_controls)
+        .def_readwrite("settle", &ctl::TrimOptions::settle);
+    py::class_<ctl::TrimPoint>(m_control, "TrimPoint")
+        .def(py::init())
+        .def_readwrite("state", &ctl::TrimPoint::state)
+        .def_readwrite("controls", &ctl::TrimPoint::controls)
+        .def_readwrite("input", &ctl::TrimPoint::input)
+        .def_readwrite("residual", &ctl::TrimPoint::residual)
+        .def_readwrite("evaluations", &ctl::TrimPoint::evaluations)
+        .def_readwrite("return_code", &ctl::TrimPoint::return_code)
+        .def_readwrite("converged", &ctl::TrimPoint::converged);
+    py::class_<ctl::LinearizerOptions>(m_control, "LinearizerOptions")
+        .def(py::init())
+        .def_readwrite("step_velocity", &ctl::LinearizerOptions::step_velocity)
+        .def_readwrite("step_rate", &ctl::LinearizerOptions::step_rate)
+        .def_readwrite("step_attitude", &ctl::LinearizerOptions::step_attitude)
+        .def_readwrite("step_control", &ctl::LinearizerOptions::step_control)
+        .def_readwrite("include_gravity", &ctl::LinearizerOptions::include_gravity)
+        .def_readwrite("include_coriolis", &ctl::LinearizerOptions::include_coriolis)
+        .def_readwrite("include_gyroscopic", &ctl::LinearizerOptions::include_gyroscopic)
+        .def_readwrite("settle", &ctl::LinearizerOptions::settle);
+    py::class_<ctl::LinearModel>(m_control, "LinearModel")
+        .def(py::init())
+        .def_readwrite("A_v", &ctl::LinearModel::A_v)
+        .def_readwrite("A_w", &ctl::LinearModel::A_w)
+        .def_readwrite("A_att", &ctl::LinearModel::A_att)
+        .def_readwrite("B", &ctl::LinearModel::B)
+        .def_readwrite("options", &ctl::LinearModel::options)
+        .def_readwrite("trim", &ctl::LinearModel::trim);
+    py::class_<ctl::LinearCopterCoefficients>(m_control, "LinearCopterCoefficients")
+        .def(py::init())
+        .def_readwrite("Yv", &ctl::LinearCopterCoefficients::Yv)
+        .def_readwrite("Ylat", &ctl::LinearCopterCoefficients::Ylat)
+        .def_readwrite("Lv", &ctl::LinearCopterCoefficients::Lv)
+        .def_readwrite("Lp", &ctl::LinearCopterCoefficients::Lp)
+        .def_readwrite("Llat", &ctl::LinearCopterCoefficients::Llat)
+        .def_readwrite("Xu", &ctl::LinearCopterCoefficients::Xu)
+        .def_readwrite("Xlon", &ctl::LinearCopterCoefficients::Xlon)
+        .def_readwrite("Mu", &ctl::LinearCopterCoefficients::Mu)
+        .def_readwrite("Mq", &ctl::LinearCopterCoefficients::Mq)
+        .def_readwrite("Mlon", &ctl::LinearCopterCoefficients::Mlon)
+        .def_readwrite("Nr", &ctl::LinearCopterCoefficients::Nr)
+        .def_readwrite("Nped", &ctl::LinearCopterCoefficients::Nped)
+        .def_readwrite("Zw", &ctl::LinearCopterCoefficients::Zw)
+        .def_readwrite("Zcoll", &ctl::LinearCopterCoefficients::Zcoll)
+        .def_readwrite("u_hover", &ctl::LinearCopterCoefficients::u_hover);
+    m_control.def(
+        "build_mixer",
+        [](const std::string &yaml_str)
+        {
+            return std::shared_ptr<last_letter_lib::body::MatrixMixer>(last_letter_lib::body::buildMixer(
+                last_letter_lib::programming_utils::ParameterManager::from_yaml_string("mixer", yaml_str)));
+        },
+        py::arg("parameters"),
+        "Build the mixer that the mixerType key of a mixer/ YAML block selects.");
+    py::class_<ctl::ControlMap>(m_control, "ControlMap")
+        .def("size", &ctl::ControlMap::size)
+        .def("to_input", &ctl::ControlMap::to_input, py::arg("controls"))
+        .def("lower_bounds", &ctl::ControlMap::lower_bounds)
+        .def("upper_bounds", &ctl::ControlMap::upper_bounds);
+    // The map keeps pointers to the thrusters of the aircraft, so the aircraft
+    // must live as long as the map.
+    py::class_<ctl::CopterControlMap, ctl::ControlMap>(m_control, "CopterControlMap")
+        .def(py::init<std::shared_ptr<last_letter_lib::body::MatrixMixer>, const UavModel &>(),
+             py::arg("mixer"), py::arg("aircraft"), py::keep_alive<1, 3>());
+    py::class_<ctl::IdentityControlMap, ctl::ControlMap>(m_control, "IdentityControlMap")
+        .def(py::init<std::vector<int>, Eigen::VectorXd, Eigen::VectorXd>(),
+             py::arg("channels"), py::arg("lower"), py::arg("upper"));
+    py::class_<ctl::Trimmer>(m_control, "Trimmer")
+        .def(py::init<ctl::TrimOptions>(), py::arg("options") = ctl::TrimOptions())
+        .def("trim", &ctl::Trimmer::trim, py::arg("aircraft"), py::arg("control_map"),
+             py::arg("target") = ctl::TrimTarget(),
+             "Find the trim point and leave the aircraft there, state set and components settled.");
+    py::class_<ctl::Linearizer>(m_control, "Linearizer")
+        .def(py::init<ctl::LinearizerOptions>(), py::arg("options") = ctl::LinearizerOptions())
+        .def("linearize", &ctl::Linearizer::linearize, py::arg("aircraft"), py::arg("control_map"),
+             py::arg("trim_point"))
+        .def_static("to_linear_copter", &ctl::Linearizer::to_linear_copter, py::arg("model"));
 }

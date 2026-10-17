@@ -2,6 +2,7 @@
 
 from . import aerodynamics
 from . import body
+from . import control
 from . import environment
 from . import gravity
 
@@ -26,6 +27,7 @@ __all__ = [
     "systems",
     "aerodynamics",
     "body",
+    "control",
     "paths",
     "propulsion",
     "simulation",

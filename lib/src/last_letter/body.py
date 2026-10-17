@@ -13,3 +13,5 @@ __copyright__ = "Copyright 2026, George Zogopoulos"
 
 from .cpp_last_letter.cpp_body import Body
 from .cpp_last_letter.cpp_body import LinearCopter
+from .cpp_last_letter.cpp_body import MatrixMixer
+from .cpp_last_letter.cpp_body import ArduPilotMixer
