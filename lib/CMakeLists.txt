@@ -112,6 +112,7 @@ add_library(last_letter_lib SHARED
   src/body/linear_copter.cpp
   src/control/control_map.cpp
   src/control/evaluate.cpp
+  src/control/linearize.cpp
   src/control/trim.cpp
   src/propulsion/propulsion.cpp
   src/propulsion/no_engine.cpp

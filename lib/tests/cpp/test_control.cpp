@@ -12,6 +12,7 @@
 #include "last_letter_lib/body/ardupilot_mixer.hpp"
 #include "last_letter_lib/control/control_map.hpp"
 #include "last_letter_lib/control/evaluate.hpp"
+#include "last_letter_lib/control/linearize.hpp"
 #include "last_letter_lib/control/trim.hpp"
 #include "last_letter_lib/prog_utils.hpp"
 #include "last_letter_lib/systems.hpp"
@@ -413,5 +414,191 @@ TEST(TestControl, TrimPassesErrors)
     catch (const std::invalid_argument &error)
     {
         EXPECT_NE(std::string(error.what()).find("max_iterations"), std::string::npos);
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// The linearizer
+
+// The options a LinearCopter needs, the three term switches off.
+static LinearizerOptions linear_copter_options()
+{
+    LinearizerOptions options;
+    options.include_gravity = false;
+    options.include_coriolis = false;
+    options.include_gyroscopic = false;
+    return options;
+}
+
+// Every coefficient of a LinearCopter, by name, for comparison and print.
+static std::vector<std::pair<std::string, double>> named(const LinearCopterCoefficients &c)
+{
+    return {{"Yv", c.Yv},     {"Ylat", c.Ylat}, {"Lv", c.Lv},   {"Lp", c.Lp},     {"Llat", c.Llat},
+            {"Xu", c.Xu},     {"Xlon", c.Xlon}, {"Mu", c.Mu},   {"Mq", c.Mq},     {"Mlon", c.Mlon},
+            {"Nr", c.Nr},     {"Nped", c.Nped}, {"Zw", c.Zw},   {"Zcoll", c.Zcoll}, {"u_hover", c.u_hover}};
+}
+
+static void expect_coefficients_near(const LinearCopterCoefficients &actual, const LinearCopterCoefficients &expected,
+                                     double tolerance)
+{
+    const auto a = named(actual);
+    const auto e = named(expected);
+    for (size_t i = 0; i < a.size(); i++)
+    {
+        EXPECT_NEAR(a[i].second, e[i].second, tolerance) << a[i].first;
+    }
+}
+
+static void print_coefficients(const std::string &title, const LinearCopterCoefficients &c)
+{
+    std::cout << title << std::setprecision(8);
+    for (const auto &entry : named(c))
+    {
+        std::cout << " " << entry.first << " " << entry.second;
+    }
+    std::cout << std::endl;
+}
+
+// The coefficients a LinearCopter holds, with Nped as the sum Nped + Npedp.
+static LinearCopterCoefficients coefficients_of(const body::LinearCopter &copter)
+{
+    LinearCopterCoefficients c;
+    c.Yv = copter.Yv;
+    c.Ylat = copter.Ylat;
+    c.Lv = copter.Lv;
+    c.Lp = copter.Lp;
+    c.Llat = copter.Llat;
+    c.Xu = copter.Xu;
+    c.Xlon = copter.Xlon;
+    c.Mu = copter.Mu;
+    c.Mq = copter.Mq;
+    c.Mlon = copter.Mlon;
+    c.Nr = copter.Nr;
+    c.Nped = copter.Nped + copter.Npedp;
+    c.Zw = copter.Zw;
+    c.Zcoll = copter.Zcoll;
+    c.u_hover = copter.u_hover;
+    return c;
+}
+
+// Trim the linear copter recipe in the aircraft and linearize it.
+static LinearCopterCoefficients linearize_linear_copter(UavModel &aircraft)
+{
+    const IdentityControlMap map = linear_copter_map();
+    Trimmer trimmer;
+    const TrimPoint point = trimmer.trim(aircraft, map, TrimTarget());
+    EXPECT_TRUE(point.converged);
+    Linearizer linearizer(linear_copter_options());
+    return Linearizer::to_linear_copter(linearizer.linearize(aircraft, map, point));
+}
+
+// Trim and linearize the stock quad through the stock ArduPilot mixer.
+static LinearModel linearize_ardupilot_copter(UavModel &aircraft, const LinearizerOptions &options)
+{
+    const CopterControlMap map(stock_mixer(), aircraft);
+    Trimmer trimmer;
+    const TrimPoint point = trimmer.trim(aircraft, map, TrimTarget());
+    EXPECT_TRUE(point.converged);
+    Linearizer linearizer(options);
+    return linearizer.linearize(aircraft, map, point);
+}
+
+// The linear copter recipe comes back as its own parameters.
+TEST(TestControl, LinearizeRoundTripLinearCopter)
+{
+    UavModel aircraft("ardupilot_copter_linear");
+    initialize_aircraft(aircraft, "ardupilot_copter_linear");
+    const auto &copter = dynamic_cast<const body::LinearCopter &>(*aircraft.dynamics.bodies.at(0));
+
+    const LinearCopterCoefficients actual = linearize_linear_copter(aircraft);
+    const LinearCopterCoefficients expected = coefficients_of(copter);
+    print_coefficients("ardupilot_copter_linear:", actual);
+    expect_coefficients_near(actual, expected, 1e-6);
+}
+
+// The stock quad through the mixer, a LinearCopter built from the result, and
+// that LinearCopter linearized again give the same coefficients.
+TEST(TestControl, LinearizeRoundTripMixer)
+{
+    UavModel source("ardupilot_copter");
+    initialize_aircraft(source, "ardupilot_copter");
+    const LinearCopterCoefficients first = Linearizer::to_linear_copter(linearize_ardupilot_copter(source, linear_copter_options()));
+
+    auto config = load_config_aircraft("ardupilot_copter_linear");
+    config.set("env/windRef", 0.0);
+    config.set("dynamics/ground/groundReactionType", 0);
+    const std::string prefix = "dynamics/body/body1/";
+    config.set(prefix + "roll/Yv", first.Yv);
+    config.set(prefix + "roll/Ylat", first.Ylat);
+    config.set(prefix + "roll/Lv", first.Lv);
+    config.set(prefix + "roll/Lp", first.Lp);
+    config.set(prefix + "roll/Llat", first.Llat);
+    config.set(prefix + "pitch/Xu", first.Xu);
+    config.set(prefix + "pitch/Xlon", first.Xlon);
+    config.set(prefix + "pitch/Mu", first.Mu);
+    config.set(prefix + "pitch/Mq", first.Mq);
+    config.set(prefix + "pitch/Mlon", first.Mlon);
+    config.set(prefix + "yaw/Nr", first.Nr);
+    config.set(prefix + "yaw/Nped", first.Nped);
+    config.set(prefix + "yaw/Npedp", 0.0);
+    config.set(prefix + "vertical/Zw", first.Zw);
+    config.set(prefix + "vertical/Zcoll", first.Zcoll);
+    config.set(prefix + "vertical/u_hover", first.u_hover);
+    UavModel built("built_linear_copter");
+    built.initialize(config);
+    const auto &copter = dynamic_cast<const body::LinearCopter &>(*built.dynamics.bodies.at(0));
+    ASSERT_EQ(copter.Llat, first.Llat);
+
+    const LinearCopterCoefficients second = linearize_linear_copter(built);
+    print_coefficients("ardupilot_copter:", first);
+    print_coefficients("built from it:   ", second);
+    expect_coefficients_near(second, first, 1e-6);
+}
+
+// At a hover trim the three term switches change nothing but A_att, where
+// gravity gives g on roll and -g on pitch.
+TEST(TestControl, LinearizeSwitchesAtHover)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const LinearModel off = linearize_ardupilot_copter(aircraft, linear_copter_options());
+    const LinearModel on = linearize_ardupilot_copter(aircraft, LinearizerOptions());
+
+    EXPECT_TRUE(on.options.include_gravity && on.options.include_coriolis && on.options.include_gyroscopic);
+    EXPECT_LT((on.A_v - off.A_v).cwiseAbs().maxCoeff(), 1e-9);
+    EXPECT_LT((on.A_w - off.A_w).cwiseAbs().maxCoeff(), 1e-9);
+    EXPECT_LT((on.B - off.B).cwiseAbs().maxCoeff(), 1e-9);
+    EXPECT_LT(off.A_att.cwiseAbs().maxCoeff(), 1e-9);
+
+    const double g = aircraft.dynamics.wrench_sum.wrenchGrav.force.norm() / aircraft.dynamics.inertial.mass;
+    EXPECT_NEAR(on.A_att(1, 0), g, 1e-3 * g);
+    EXPECT_NEAR(on.A_att(0, 1), -g, 1e-3 * g);
+    EXPECT_THROW(Linearizer::to_linear_copter(on), std::invalid_argument);
+}
+
+// The linearizer leaves the model at the trim point and refuses a model with
+// a ground reaction.
+TEST(TestControl, LinearizeGuards)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const LinearModel model = linearize_ardupilot_copter(aircraft, linear_copter_options());
+    EXPECT_EQ(aircraft.state.velocity.linear, model.trim.state.velocity.linear);
+    EXPECT_EQ(aircraft.state.velocity.angular, model.trim.state.velocity.angular);
+    EXPECT_EQ(aircraft.state.pose.orientation.coeffs(), model.trim.state.pose.orientation.coeffs());
+    EXPECT_EQ(aircraft.input.value, model.trim.input.value);
+
+    UavModel with_ground("ardupilot_copter");
+    initialize_aircraft(with_ground, "ardupilot_copter", true);
+    const CopterControlMap map(stock_mixer(), with_ground);
+    Linearizer linearizer(linear_copter_options());
+    try
+    {
+        linearizer.linearize(with_ground, map, model.trim);
+        FAIL() << "The linearizer accepted a model with a ground reaction.";
+    }
+    catch (const std::runtime_error &error)
+    {
+        EXPECT_NE(std::string(error.what()).find("dynamics/ground/groundReactionType"), std::string::npos);
     }
 }
