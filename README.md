@@ -125,6 +125,34 @@ recipe comments name the fits, the inverse mixer settings and the limits of the 
 sim_vehicle.py -v ArduCopter --model last_letter:ardupilot_copter_linear
 ```
 
+### To write a linear copter recipe from a multicopter recipe
+
+`last-letter-linearize` trims a multicopter recipe at hover and writes a recipe of the same
+shape as `ardupilot_copter_linear`, with derivatives from the nonlinear model:
+
+```bash
+last-letter-linearize ardupilot_copter --name ardupilot_copter_from_trim
+```
+
+It reads the source recipe from `$HOME/last_letter_models`, or from the packaged models when that
+directory does not exist. `--models-root` reads it from another models root. The trim holds the
+initial position of the recipe, level and still. For the trim only, the tool sets
+`dynamics/ground/groundReactionType` to 0 and the wind to zero.
+
+It writes `aircraft/<name>/` under the same models root, or under the root that `--out` names.
+`body.yaml` holds one `LinearCopter` with the derivatives, the trim throttle as `u_hover`, the
+lumped mass and inertia of the source and the mixer block. `aerodynamics.yaml` and
+`propulsion.yaml` are empty. `ground.yaml`, `init.yaml` and `randomizer.yaml` are copies of the
+source files, so the linear aircraft keeps its legs. A comment at the top of `body.yaml` names the
+source, the trim point and the step sizes. The tool also prints the coupling terms that the four
+axis models drop.
+
+The derivatives of the control inputs only have a meaning next to the mixer that defines those
+inputs. The tool takes that mixer as a YAML file with a `mixer/` block and its `mixerType`, and
+copies the block into the output. The default is the stock ArduPilot SITL quad,
+`lib/src/last_letter/data/stock_sitl_mixer.yaml`. For another aircraft, copy that file, set the
+values of its ArduPilot configuration and pass it with `--mixer`.
+
 ## Developers
 
 If you wish to modify and hopefully contribute to last_letter, please read
