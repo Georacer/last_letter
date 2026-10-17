@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -11,6 +12,7 @@
 #include "last_letter_lib/body/ardupilot_mixer.hpp"
 #include "last_letter_lib/control/control_map.hpp"
 #include "last_letter_lib/control/evaluate.hpp"
+#include "last_letter_lib/control/trim.hpp"
 #include "last_letter_lib/prog_utils.hpp"
 #include "last_letter_lib/systems.hpp"
 #include "last_letter_lib/uav_model.hpp"
@@ -286,4 +288,130 @@ TEST(TestControl, IdentityMapLinearCopter)
     EXPECT_LT(result.state_dot.speedDot.norm(), 1e-9);
     EXPECT_LT(result.state_dot.rateDot.norm(), 1e-9);
     EXPECT_EQ(copter.u_thr, copter.u_hover);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// The trimmer
+
+// The mixer/ block of the linear copter recipe, the stock SITL block.
+static std::shared_ptr<body::MatrixMixer> stock_mixer()
+{
+    auto config = load_config_aircraft("ardupilot_copter_linear");
+    return std::shared_ptr<body::MatrixMixer>(body::buildMixer(config.filter("dynamics/body/body1/mixer/")));
+}
+
+// The map of a LinearCopter recipe, the ideal inputs on channels 0 to 3.
+static IdentityControlMap linear_copter_map()
+{
+    return IdentityControlMap({0, 1, 2, 3}, Vector4d(-1.0, -1.0, -1.0, 0.0), Vector4d(1.0, 1.0, 1.0, 1.0));
+}
+
+// The hover trim of the stock quad through the ArduPilot mixer.
+TEST(TestControl, TrimHoverArduPilotCopter)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const auto mixer = stock_mixer();
+    ASSERT_EQ(mixer->mixer_type(), 1);
+    const CopterControlMap map(mixer, aircraft);
+
+    Trimmer trimmer;
+    const TrimPoint point = trimmer.trim(aircraft, map, TrimTarget());
+    const EulerAngles euler(point.state.pose.orientation);
+    std::cout << std::setprecision(10) << "trim of ardupilot_copter: phi " << euler.roll << ", theta "
+              << euler.pitch << ", controls " << point.controls.transpose() << ", residual " << point.residual
+              << ", evaluations " << point.evaluations << ", return code " << point.return_code << std::endl;
+
+    EXPECT_TRUE(point.converged);
+    EXPECT_LT(point.residual, 1e-5);
+    EXPECT_NEAR(euler.roll, 0.0, 1e-6);
+    EXPECT_NEAR(euler.pitch, 0.0, 1e-6);
+    EXPECT_NEAR(euler.yaw, 0.0, 1e-12);
+    EXPECT_NEAR(point.controls(0), 0.0, 1e-6);
+    EXPECT_NEAR(point.controls(1), 0.0, 1e-6);
+    EXPECT_NEAR(point.controls(2), 0.0, 1e-6);
+    EXPECT_NEAR(point.controls(3), 0.37, 0.02);
+
+    // The trim sits at the initial position of the recipe, at rest.
+    EXPECT_TRUE(point.state.pose.position.isApprox(Vector3d(0.0, 0.0, -0.17)));
+    EXPECT_EQ(point.state.velocity.linear, Vector3d::Zero());
+    EXPECT_EQ(point.state.velocity.angular, Vector3d::Zero());
+}
+
+// The model stays at the trim point, so the next evaluation there needs no
+// settling and gives zero accelerations.
+TEST(TestControl, TrimLeavesModelAtTrim)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const CopterControlMap map(stock_mixer(), aircraft);
+
+    Trimmer trimmer;
+    const TrimPoint point = trimmer.trim(aircraft, map, TrimTarget());
+    EXPECT_EQ(aircraft.state.pose.position, point.state.pose.position);
+    EXPECT_EQ(aircraft.state.pose.orientation.coeffs(), point.state.pose.orientation.coeffs());
+    EXPECT_EQ(aircraft.input.value, point.input.value);
+
+    const Evaluation result = evaluate(aircraft, point.state, point.input);
+    EXPECT_EQ(result.iterations, 2);
+    EXPECT_LT(result.state_dot.speedDot.norm(), 1e-5);
+    EXPECT_LT(result.state_dot.rateDot.norm(), 1e-5);
+}
+
+// The linear copter trims at its own hover throttle.
+TEST(TestControl, TrimHoverLinearCopter)
+{
+    UavModel aircraft("ardupilot_copter_linear");
+    initialize_aircraft(aircraft, "ardupilot_copter_linear");
+    const auto &copter = dynamic_cast<const body::LinearCopter &>(*aircraft.dynamics.bodies.at(0));
+    const IdentityControlMap map = linear_copter_map();
+
+    Trimmer trimmer;
+    const TrimPoint point = trimmer.trim(aircraft, map, TrimTarget());
+    const EulerAngles euler(point.state.pose.orientation);
+    EXPECT_TRUE(point.converged);
+    EXPECT_NEAR(euler.roll, 0.0, 1e-6);
+    EXPECT_NEAR(euler.pitch, 0.0, 1e-6);
+    EXPECT_NEAR(point.controls(0), 0.0, 1e-6);
+    EXPECT_NEAR(point.controls(1), 0.0, 1e-6);
+    EXPECT_NEAR(point.controls(2), 0.0, 1e-6);
+    EXPECT_NEAR(point.controls(3), copter.u_hover, 1e-6);
+}
+
+// The trimmer refuses a model with a ground reaction and names the key.
+TEST(TestControl, TrimRefusesGroundReaction)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter", true);
+    const CopterControlMap map(stock_mixer(), aircraft);
+    Trimmer trimmer;
+    try
+    {
+        trimmer.trim(aircraft, map, TrimTarget());
+        FAIL() << "The trimmer accepted a model with a ground reaction.";
+    }
+    catch (const std::runtime_error &error)
+    {
+        EXPECT_NE(std::string(error.what()).find("dynamics/ground/groundReactionType"), std::string::npos);
+    }
+}
+
+// An error inside an evaluation reaches the caller with its own message.
+TEST(TestControl, TrimPassesErrors)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const CopterControlMap map(stock_mixer(), aircraft);
+    TrimOptions options;
+    options.settle.max_iterations = 1;
+    Trimmer trimmer(options);
+    try
+    {
+        trimmer.trim(aircraft, map, TrimTarget());
+        FAIL() << "The trimmer hid an error of the settle loop.";
+    }
+    catch (const std::invalid_argument &error)
+    {
+        EXPECT_NE(std::string(error.what()).find("max_iterations"), std::string::npos);
+    }
 }
