@@ -19,12 +19,14 @@ from .cpp_last_letter.cpp_control import LinearCopterCoefficients
 from .cpp_last_letter.cpp_control import LinearModel
 from .cpp_last_letter.cpp_control import Linearizer
 from .cpp_last_letter.cpp_control import LinearizerOptions
+from .cpp_last_letter.cpp_control import RecipeTrim
 from .cpp_last_letter.cpp_control import SettleOptions
 from .cpp_last_letter.cpp_control import TrimOptions
 from .cpp_last_letter.cpp_control import TrimPoint
 from .cpp_last_letter.cpp_control import TrimTarget
 from .cpp_last_letter.cpp_control import Trimmer
 from .cpp_last_letter.cpp_control import build_mixer
+from .cpp_last_letter.cpp_control import trim_recipe
 from .cpp_last_letter.cpp_programming_utils import load_model_config
 
 __all__ = [
@@ -35,6 +37,7 @@ __all__ = [
     "LinearModel",
     "Linearizer",
     "LinearizerOptions",
+    "RecipeTrim",
     "SettleOptions",
     "TrimOptions",
     "TrimPoint",
@@ -42,4 +45,5 @@ __all__ = [
     "Trimmer",
     "build_mixer",
     "load_model_config",
+    "trim_recipe",
 ]

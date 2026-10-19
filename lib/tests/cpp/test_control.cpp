@@ -341,6 +341,35 @@ TEST(TestControl, TrimHoverArduPilotCopter)
     EXPECT_EQ(point.state.velocity.angular, Vector3d::Zero());
 }
 
+// trim_recipe does the loading, the overrides and the trim in one call, and
+// lands on the same point as the hand setup above.
+TEST(TestControl, TrimRecipeMatchesHandTrim)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const CopterControlMap map(stock_mixer(), aircraft);
+    const TrimPoint expected = Trimmer().trim(aircraft, map, TrimTarget());
+    ASSERT_TRUE(expected.converged);
+
+    const auto mixer_config = load_config_aircraft("ardupilot_copter_linear").filter("dynamics/body/body1/mixer/");
+    const RecipeTrim result = trim_recipe("ardupilot_copter", mixer_config, test_data_path("test_parameters/"));
+
+    EXPECT_TRUE(result.trim.converged);
+    EXPECT_EQ(result.trim.evaluations, expected.evaluations);
+    EXPECT_EQ(result.trim.residual, expected.residual);
+    EXPECT_EQ(result.trim.controls, expected.controls);
+    EXPECT_EQ(result.trim.state.pose.position, expected.state.pose.position);
+    EXPECT_EQ(result.trim.state.pose.orientation.coeffs(), expected.state.pose.orientation.coeffs());
+    EXPECT_EQ(result.mixer->mixer_type(), 1);
+    // The aircraft sits at the trim point and has no ground reaction.
+    EXPECT_EQ(result.aircraft->state.pose.position, result.trim.state.pose.position);
+    EXPECT_NO_THROW(require_no_ground_reaction(*result.aircraft));
+    // The map is the one of this aircraft, so an evaluation there is settled.
+    const Evaluation check = evaluate(*result.aircraft, result.trim.state, result.map->to_input(result.trim.controls), {});
+    EXPECT_LT(check.state_dot.speedDot.norm(), 1e-5);
+    EXPECT_LT(check.state_dot.rateDot.norm(), 1e-5);
+}
+
 // The model stays at the trim point, so the next evaluation there needs no
 // settling and gives zero accelerations.
 TEST(TestControl, TrimLeavesModelAtTrim)

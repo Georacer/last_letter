@@ -579,6 +579,28 @@ PYBIND11_MODULE(cpp_last_letter, m)
         .def("trim", &ctl::Trimmer::trim, py::arg("aircraft"), py::arg("control_map"),
              py::arg("target") = ctl::TrimTarget(),
              "Find the trim point and leave the aircraft there, state set and components settled.");
+    py::class_<ctl::RecipeTrim>(m_control, "RecipeTrim")
+        .def_property_readonly(
+            "aircraft", [](ctl::RecipeTrim &result) -> UavModel & { return *result.aircraft; },
+            py::return_value_policy::reference_internal)
+        .def_property_readonly("mixer", [](const ctl::RecipeTrim &result) { return result.mixer; })
+        .def_property_readonly(
+            "control_map", [](ctl::RecipeTrim &result) -> ctl::CopterControlMap & { return *result.map; },
+            py::return_value_policy::reference_internal)
+        .def_readonly("trim", &ctl::RecipeTrim::trim);
+    m_control.def(
+        "trim_recipe",
+        [](const std::string &recipe, const std::string &mixer_yaml, const std::string &models_root,
+           const ctl::TrimTarget &target, const ctl::TrimOptions &options)
+        {
+            return ctl::trim_recipe(
+                recipe, last_letter_lib::programming_utils::ParameterManager::from_yaml_string("mixer", mixer_yaml),
+                models_root, target, options);
+        },
+        py::arg("recipe"), py::arg("mixer_yaml"), py::arg("models_root") = "",
+        py::arg("target") = ctl::TrimTarget(), py::arg("options") = ctl::TrimOptions(),
+        "Trim a multicopter recipe at the target with no ground reaction and no wind, through the mixer of "
+        "a mixer/ YAML block. An empty models root means the default models directory.");
     py::class_<ctl::Linearizer>(m_control, "Linearizer")
         .def(py::init<ctl::LinearizerOptions>(), py::arg("options") = ctl::LinearizerOptions())
         .def("linearize", &ctl::Linearizer::linearize, py::arg("aircraft"), py::arg("control_map"),

@@ -10,8 +10,10 @@
 
 #include <nlopt.hpp>
 
+#include "last_letter_lib/body/ardupilot_mixer.hpp"
 #include "last_letter_lib/control/trim.hpp"
 #include "last_letter_lib/math_utils.hpp"
+#include "last_letter_lib/prog_utils.hpp"
 
 namespace last_letter_lib {
 namespace control {
@@ -239,6 +241,31 @@ TrimPoint Trimmer::trim(UavModel &uav, const ControlMap &map, const TrimTarget &
     point.return_code = static_cast<int>(code);
     point.converged = is_converged(code);
     return point;
+}
+
+RecipeTrim trim_recipe(const std::string &recipe, const ParameterManager &mixer, const std::string &models_root,
+                       const TrimTarget &target, const TrimOptions &options)
+{
+    // The ground reaction gives the trimmer a second solution, where the legs
+    // carry the weight at zero throttle, so it goes. The trim is for still air.
+    ParameterManager config = loadModelConfig(recipe, models_root);
+    config.set("dynamics/ground/groundReactionType", 0);
+    config.set("env/windRef", 0.0);
+
+    RecipeTrim result;
+    result.aircraft = std::make_unique<UavModel>(recipe);
+    result.aircraft->initialize(config);
+    result.mixer = std::shared_ptr<body::MatrixMixer>(body::buildMixer(mixer));
+    result.map = std::make_unique<CopterControlMap>(result.mixer, *result.aircraft);
+    result.trim = Trimmer(options).trim(*result.aircraft, *result.map, target);
+    if (!result.trim.converged)
+    {
+        std::ostringstream message;
+        message << "The trim of " << recipe << " did not converge. The residual is " << result.trim.residual
+                << " and the NLopt code is " << result.trim.return_code << ".";
+        throw std::runtime_error(message.str());
+    }
+    return result;
 }
 
 } // namespace control

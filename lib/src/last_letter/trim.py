@@ -21,12 +21,8 @@ import yaml
 
 from . import paths
 from .control import ControlMap
-from .control import CopterControlMap
 from .control import TrimPoint
-from .control import TrimTarget
-from .control import Trimmer
-from .control import build_mixer
-from .control import load_model_config
+from .control import trim_recipe as cpp_trim_recipe
 from .simulation import Aircraft
 
 # The mixer of the ArduPilot SITL default quad, the default mixer file.
@@ -80,28 +76,16 @@ def trim_recipe(
     mixer_path = Path(mixer_file) if mixer_file else STOCK_SITL_MIXER
     mixer_block = yaml.safe_load(mixer_path.read_text())
 
-    # The ground reaction gives the trimmer a second solution, where the legs
-    # carry the weight at zero throttle, so it goes. The trim is for still air.
-    config = yaml.safe_load(load_model_config(recipe, str(source_root)))
-    config["dynamics"]["ground"]["groundReactionType"] = 0
-    config["env"]["windRef"] = 0.0
-    aircraft = Aircraft(recipe)
-    aircraft.initialize(yaml.safe_dump(config))
-
-    mixer = build_mixer(yaml.safe_dump(mixer_block))
-    control_map = CopterControlMap(mixer, aircraft)
-    trim = Trimmer().trim(aircraft, control_map, TrimTarget())
-    if not trim.converged:
-        raise RuntimeError(
-            f"The trim of {recipe} did not converge. The residual is "
-            f"{trim.residual:.3e} and the NLopt code is {trim.return_code}."
-        )
+    # The C++ trim_recipe loads the recipe, removes the ground reaction and the
+    # wind, and trims at hover. It raises RuntimeError when the trim does not
+    # converge.
+    result = cpp_trim_recipe(recipe, yaml.safe_dump(mixer_block), str(source_root))
     return TrimResult(
         recipe=recipe,
-        aircraft=aircraft,
-        control_map=control_map,
+        aircraft=result.aircraft,
+        control_map=result.control_map,
         mixer_block=mixer_block,
-        trim=trim,
+        trim=result.trim,
     )
 
 
