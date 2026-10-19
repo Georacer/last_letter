@@ -10,6 +10,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include <Eigen/Eigen>
 
@@ -55,6 +56,27 @@ private:
     struct Impl;                  // holds nlopt::opt, defined in trim.cpp
     std::unique_ptr<Impl> impl_;
 };
+
+// The objects of one recipe trim. The aircraft sits at the trim point with
+// its components settled, and the map is the one that trimmed it. The map
+// keeps pointers into the aircraft, so the struct holds both and they go out
+// of scope together.
+struct RecipeTrim {
+    std::unique_ptr<UavModel> aircraft;
+    std::shared_ptr<body::MatrixMixer> mixer;
+    std::unique_ptr<CopterControlMap> map;
+    TrimPoint trim;
+};
+
+// Trim a multicopter recipe through a mixer. The function loads the recipe,
+// sets dynamics/ground/groundReactionType to 0 and env/windRef to 0, builds
+// the aircraft and a CopterControlMap through the mixer, and trims at the
+// target. The mixer tree is a mixer/ block with its mixerType. An empty models
+// root means $HOME/last_letter_models. Throws std::runtime_error when the trim
+// does not converge.
+RecipeTrim trim_recipe(const std::string &recipe, const programming_utils::ParameterManager &mixer,
+                       const std::string &models_root = "", const TrimTarget &target = {},
+                       const TrimOptions &options = {});
 
 } // namespace control
 } // namespace last_letter_lib
