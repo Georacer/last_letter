@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <iomanip>
+#include <cmath>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -15,6 +16,7 @@
 #include "last_letter_lib/control/linearize.hpp"
 #include "last_letter_lib/control/trim.hpp"
 #include "last_letter_lib/prog_utils.hpp"
+#include "last_letter_lib/propulsion/propulsion.hpp"
 #include "last_letter_lib/systems.hpp"
 #include "last_letter_lib/uav_model.hpp"
 
@@ -553,6 +555,46 @@ TEST(TestControl, LinearizeRoundTripMixer)
     print_coefficients("ardupilot_copter:", first);
     print_coefficients("built from it:   ", second);
     expect_coefficients_near(second, first, 1e-6);
+}
+
+// The derivatives of the stock quad against the values the modelling project
+// computed by hand from the SITL code.
+TEST(TestControl, LinearizeArduPilotCopter)
+{
+    UavModel aircraft("ardupilot_copter");
+    initialize_aircraft(aircraft, "ardupilot_copter");
+    const LinearModel model = linearize_ardupilot_copter(aircraft, linear_copter_options());
+    const LinearCopterCoefficients c = Linearizer::to_linear_copter(model);
+    std::cout << std::setprecision(6) << "A_v\n" << model.A_v << "\nA_w\n" << model.A_w << "\nA_att\n"
+              << model.A_att << "\nB\n" << model.B << std::endl;
+    print_coefficients("ardupilot_copter:", c);
+
+    EXPECT_NEAR(c.Yv, -0.241, 0.05 * 0.241);
+    EXPECT_NEAR(c.Lp, -1.98, 0.05 * 1.98);
+    EXPECT_NEAR(c.Llat, 301.0, 0.05 * 301.0);
+    EXPECT_NEAR(c.Nr, -1.98, 0.05 * 1.98);
+
+    // SITL scales the rotor torque with the thrust and the command, so its
+    // slope at hover is T + d T'. The EngBeard of this recipe uses k_t_p omega^2
+    // with omega = k_omega d, and its slope is about 20 percent lower. The SITL
+    // value of 14.3 therefore does not apply, and the test checks Nped against
+    // the law of the recipe. Yaw and roll share the chain from the ideal input
+    // to the thrust of each motor, so the ratio Nped / Llat holds no gain.
+    const auto *thruster = dynamic_cast<const propulsion::EngBeard *>(aircraft.dynamics.thrusters.at(0));
+    ASSERT_NE(thruster, nullptr);
+    const double d = thruster->inputMotor;
+    const double dtau_dd = 2.0 * thruster->k_t_p * thruster->k_omega * thruster->k_omega * d;
+    const double dT_dd = 0.5 * thruster->rho * thruster->s_prop * thruster->c_prop * thruster->k_motor
+                         * thruster->k_motor * ((1.0 - thruster->expo) + 2.0 * thruster->expo * d);
+    const double j_xx = aircraft.dynamics.inertial.tensor(0, 0);
+    const double j_zz = aircraft.dynamics.inertial.tensor(2, 2);
+    const double arm = 0.35;
+    const double ratio = (4.0 * 0.5 / j_zz) / (2.0 * 0.5 * arm / j_xx) * (dtau_dd / dT_dd);
+    const double nped_expected = c.Llat * ratio;
+    std::cout << "Nped from the recipe law: " << nped_expected << ", measured " << c.Nped << std::endl;
+    EXPECT_NEAR(c.Nped, nped_expected, 0.02 * std::abs(nped_expected));
+    EXPECT_GE(c.Zcoll, -26.4 * 1.05);
+    EXPECT_LE(c.Zcoll, -25.2 * 0.95);
 }
 
 // At a hover trim the three term switches change nothing but A_att, where
