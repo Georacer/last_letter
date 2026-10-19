@@ -22,20 +22,26 @@ import numpy as np
 import yaml
 
 from . import paths
-from .control import CopterControlMap
 from .control import LinearCopterCoefficients
 from .control import LinearModel
 from .control import Linearizer
 from .control import LinearizerOptions
 from .control import TrimPoint
-from .control import TrimTarget
-from .control import Trimmer
-from .control import build_mixer
-from .control import load_model_config
-from .simulation import Aircraft
+from .trim import STOCK_SITL_MIXER
+from .trim import euler as _euler
+from .trim import print_trim
+from .trim import stock_mixer_block
+from .trim import trim_recipe
 
-# The mixer of the ArduPilot SITL default quad, the default mixer file.
-STOCK_SITL_MIXER = Path(__file__).parent / "data" / "stock_sitl_mixer.yaml"
+__all__ = [
+    "STOCK_SITL_MIXER",
+    "DroppedTerm",
+    "LinearizeResult",
+    "dropped_terms",
+    "linearize_recipe",
+    "print_result",
+    "stock_mixer_block",
+]
 
 # The files the output recipe copies from the source recipe as they are.
 _COPIED_FILES = ("ground.yaml", "init.yaml", "randomizer.yaml")
@@ -82,17 +88,6 @@ class LinearizeResult:
     model: LinearModel
     coefficients: LinearCopterCoefficients
     dropped: list = field(default_factory=list)
-
-
-def _euler(trim: TrimPoint) -> tuple:
-    """Return the roll, pitch and yaw of the trim attitude in rad."""
-    euler = trim.state.get_euler()
-    return float(euler.roll), float(euler.pitch), float(euler.yaw)
-
-
-def stock_mixer_block() -> dict:
-    """Return the mixer/ block of the stock SITL quad as a dictionary."""
-    return yaml.safe_load(STOCK_SITL_MIXER.read_text())
 
 
 def dropped_terms(model: LinearModel, threshold: float = 1e-9) -> list:
@@ -229,26 +224,14 @@ def linearize_recipe(
     source_root = Path(models_root) if models_root else paths.models_path()
     out_root = Path(out) if out else paths.models_path()
     name = name or f"{recipe}_linear"
-    mixer_path = Path(mixer_file) if mixer_file else STOCK_SITL_MIXER
-    mixer_block = yaml.safe_load(mixer_path.read_text())
 
-    # The ground reaction gives the trimmer a second solution, where the legs
-    # carry the weight at zero throttle, so it goes. The trim and the
-    # derivatives are for still air.
-    config = yaml.safe_load(load_model_config(recipe, str(source_root)))
-    config["dynamics"]["ground"]["groundReactionType"] = 0
-    config["env"]["windRef"] = 0.0
-    aircraft = Aircraft(recipe)
-    aircraft.initialize(yaml.safe_dump(config))
-
-    mixer = build_mixer(yaml.safe_dump(mixer_block))
-    control_map = CopterControlMap(mixer, aircraft)
-    trim = Trimmer().trim(aircraft, control_map, TrimTarget())
-    if not trim.converged:
-        raise RuntimeError(
-            f"The trim of {recipe} did not converge. The residual is "
-            f"{trim.residual:.3e} and the NLopt code is {trim.return_code}."
-        )
+    # The trim is the one of last-letter-trim. It removes the ground reaction
+    # and the wind, so the derivatives are for still air too.
+    trimmed = trim_recipe(recipe, source_root, mixer_file)
+    aircraft = trimmed.aircraft
+    control_map = trimmed.control_map
+    mixer_block = trimmed.mixer_block
+    trim = trimmed.trim
 
     options = LinearizerOptions()
     options.include_gravity = False
@@ -292,29 +275,8 @@ def linearize_recipe(
 
 def print_result(result: LinearizeResult, file=sys.stdout) -> None:
     """Print the trim point, the coefficients and the dropped coupling terms."""
-    trim = result.trim
-    phi, theta, psi = _euler(trim)
-    print(f"Wrote {result.recipe_dir}", file=file)
-    print("\nTrim point", file=file)
-    print(
-        f"  position NED  {np.array2string(np.asarray(trim.state.position), precision=3)} m",
-        file=file,
-    )
-    print(
-        f"  attitude      roll {phi:.3e}, pitch {theta:.3e}, yaw {psi:.3e} rad",
-        file=file,
-    )
-    print(
-        "  controls      "
-        + ", ".join(
-            f"{label} {float(u):.6f}" for label, u in zip(_COLUMNS["B"], trim.controls)
-        ),
-        file=file,
-    )
-    print(
-        f"  residual      {trim.residual:.3e} after {trim.evaluations} evaluations",
-        file=file,
-    )
+    print(f"Wrote {result.recipe_dir}\n", file=file)
+    print_trim(result.trim, file)
     print("\nCoefficients", file=file)
     c = result.coefficients
     groups = (

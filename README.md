@@ -125,6 +125,22 @@ recipe comments name the fits, the inverse mixer settings and the limits of the 
 sim_vehicle.py -v ArduCopter --model last_letter:ardupilot_copter_linear
 ```
 
+### To trim a multicopter recipe
+
+`last-letter-trim` trims a multicopter recipe at hover and prints the trim point, with the
+position, the attitude, the four controls and the residual:
+
+```bash
+last-letter-trim ardupilot_copter
+```
+
+It reads the recipe from `$HOME/last_letter_models`, or from the packaged models when that
+directory does not exist. `--models-root` reads it from another models root. The trim holds the
+initial position of the recipe, level and still. For the trim, the tool sets
+`dynamics/ground/groundReactionType` to 0 and the wind to zero. The controls are the ideal
+inputs into a mixer, which `--mixer` selects as for `last-letter-linearize` below. The default is
+the stock ArduPilot SITL quad.
+
 ### To write a linear copter recipe from a multicopter recipe
 
 `last-letter-linearize` trims a multicopter recipe at hover and writes a recipe of the same
@@ -134,10 +150,7 @@ shape as `ardupilot_copter_linear`, with derivatives from the nonlinear model:
 last-letter-linearize ardupilot_copter --name ardupilot_copter_from_trim
 ```
 
-It reads the source recipe from `$HOME/last_letter_models`, or from the packaged models when that
-directory does not exist. `--models-root` reads it from another models root. The trim holds the
-initial position of the recipe, level and still. For the trim only, the tool sets
-`dynamics/ground/groundReactionType` to 0 and the wind to zero.
+It reads the source recipe as `last-letter-trim` does, and its trim point is the same one.
 
 It writes `aircraft/<name>/` under the same models root, or under the root that `--out` names.
 `body.yaml` holds one `LinearCopter` with the derivatives, the trim throttle as `u_hover`, the

@@ -22,6 +22,8 @@ dependencies = [
 # Script to install the aircraft models to the user home, where they can be
 # modified.
 last-letter-install-models = "last_letter.paths:main"
+# Script to trim a multicopter recipe at hover and print the trim point.
+last-letter-trim = "last_letter.trim:main"
 # Script to write a LinearCopter recipe from the trim of a multicopter recipe.
 last-letter-linearize = "last_letter.linearize:main"
 
