@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # Keep uv.lock current. Dependabot opens a PR when a locked package gets a
+  # security advisory or a new release.
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 3
